@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* Enable dark mode via class selector (not media query) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Global styles can go here if needed */
+body {
+  @apply bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100;
+}
