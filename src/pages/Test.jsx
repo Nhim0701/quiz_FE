@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { questionAPI, responseAPI } from '../utils/api';
@@ -16,6 +16,9 @@ export default function Test({ theme, onToggleTheme }) {
   const [flags, setFlags] = useState({}); // questionId -> true/false
   const [revealed, setRevealed] = useState({}); // questionId -> true/false (tracks which questions have been revealed)
   const [submitting, setSubmitting] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(30 * 60); // 30 minutes in seconds
+  const [timeStarted, setTimeStarted] = useState(false);
+  const handleFinishRef = useRef(null);
 
   useEffect(() => {
     // Support both old (testType) and new (category + questionSet) navigation
@@ -46,6 +49,39 @@ export default function Test({ theme, onToggleTheme }) {
 
     fetchQuestions();
   }, [category, questionSet, testType, navigate]);
+
+  // Store handleFinish in ref to avoid dependency issues
+  useEffect(() => {
+    handleFinishRef.current = handleFinish;
+  }, [answers, questions, category, testType, timeRemaining]);
+
+  // Timer effect
+  useEffect(() => {
+    if (!timeStarted || loading || questions.length === 0) return;
+
+    const interval = setInterval(() => {
+      setTimeRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          // Auto submit when time runs out
+          if (handleFinishRef.current) {
+            handleFinishRef.current();
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timeStarted, loading, questions.length]);
+
+  // Start timer when questions are loaded
+  useEffect(() => {
+    if (!loading && questions.length > 0 && !timeStarted) {
+      setTimeStarted(true);
+    }
+  }, [loading, questions.length, timeStarted]);
 
   if (loading) {
     return (
@@ -118,8 +154,12 @@ export default function Test({ theme, onToggleTheme }) {
   };
 
   const handleFinish = async () => {
+    // Stop timer
+    setTimeStarted(false);
+    
     const total = questions.length;
     const answered = Object.keys(answers).length;
+    const timeSpent = 30 * 60 - timeRemaining; // Calculate time spent in seconds
 
     // Build responses array for backend submission
     const responses = [];
@@ -161,6 +201,8 @@ export default function Test({ theme, onToggleTheme }) {
           answered,
           testType: category || testType,
           date: new Date().toISOString(),
+          timeSpent,
+          timeRemaining,
         },
       },
     });
@@ -188,6 +230,15 @@ export default function Test({ theme, onToggleTheme }) {
   const progress = ((currentIndex + 1) / questions.length) * 100;
   const answeredCount = Object.keys(answers).length;
 
+  // Format time remaining
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const isTimeLow = timeRemaining <= 5 * 60; // Less than 5 minutes
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-6 sm:py-8 px-4">
       {/* Theme Toggle - Fixed Position */}
@@ -208,14 +259,30 @@ export default function Test({ theme, onToggleTheme }) {
                   </h1>
                   <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Question {currentIndex + 1} of {questions.length}</p>
                 </div>
-                <button
-                  onClick={() => navigate('/profile')}
-                  className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors flex-shrink-0"
-                >
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+                <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                  {/* Timer - Always show when questions are loaded */}
+                  {!loading && questions.length > 0 && (
+                    <div className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg font-mono text-xs sm:text-sm font-semibold whitespace-nowrap ${
+                      isTimeLow 
+                        ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 animate-pulse' 
+                        : 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
+                    }`}>
+                      <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span>{formatTime(timeRemaining)}</span>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => navigate('/profile')}
+                    className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors flex-shrink-0"
+                    aria-label="Close"
+                  >
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
               </div>
 
               {/* Progress Bar */}
@@ -256,7 +323,7 @@ export default function Test({ theme, onToggleTheme }) {
 
               {/* Answer Options */}
               <div className="space-y-2.5 sm:space-y-3 mb-5 sm:mb-6">
-                {currentQuestion.answers.map((answer, idx) => {
+                {[...currentQuestion.answers].sort((a, b) => a.id - b.id).map((answer, idx) => {
                   const isSelected = selectedForCurrent.includes(answer.id);
                   const isCorrect = answer.is_correct;
 
@@ -321,13 +388,15 @@ export default function Test({ theme, onToggleTheme }) {
                     <div className="flex-1">
                       <h4 className="font-semibold text-blue-900 dark:text-blue-200 mb-1 text-sm sm:text-base">Explanation</h4>
                       <div className="text-xs sm:text-sm text-blue-800 dark:text-blue-300 space-y-2 sm:space-y-3">
-                        {currentQuestion.answers
-                          .filter(a => a.is_correct && a.explanation)
-                          .map((answer) => (
-                            <div key={answer.id} className="prose prose-sm dark:prose-invert max-w-none">
-                              {currentQuestion.answers.filter(a => a.is_correct && a.explanation).length > 1 && (
-                                <strong className="block mb-1 text-blue-900 dark:text-blue-200">Answer {String.fromCharCode(65 + currentQuestion.answers.indexOf(answer))}:</strong>
-                              )}
+                        {(() => {
+                          const sortedAnswers = [...currentQuestion.answers].sort((a, b) => a.id - b.id);
+                          return sortedAnswers
+                            .filter(a => a.is_correct && a.explanation)
+                            .map((answer) => (
+                              <div key={answer.id} className="prose prose-sm dark:prose-invert max-w-none">
+                                {sortedAnswers.filter(a => a.is_correct && a.explanation).length > 1 && (
+                                  <strong className="block mb-1 text-blue-900 dark:text-blue-200">Answer {String.fromCharCode(65 + sortedAnswers.indexOf(answer))}:</strong>
+                                )}
                               <ReactMarkdown
                                 components={{
                                   p: ({node, ...props}) => <p className="mb-2 leading-relaxed text-blue-800 dark:text-blue-300" {...props} />,
@@ -350,7 +419,8 @@ export default function Test({ theme, onToggleTheme }) {
                                 {answer.explanation}
                               </ReactMarkdown>
                             </div>
-                          ))}
+                          ));
+                        })()}
                       </div>
                     </div>
                   </div>

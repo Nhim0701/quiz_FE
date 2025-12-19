@@ -155,7 +155,7 @@ export default function Result({ onAddResult, theme, onToggleTheme }) {
 
                     {/* All Options */}
                     <div className="ml-9 sm:ml-11 space-y-2 mb-3">
-                      {question.answers.map((answer, ansIdx) => {
+                      {[...question.answers].sort((a, b) => a.id - b.id).map((answer, ansIdx) => {
                         const isSelected = userAnswerIds.includes(answer.id);
                         return (
                           <div
@@ -208,15 +208,17 @@ export default function Result({ onAddResult, theme, onToggleTheme }) {
                               <div className="flex-1">
                                 <h4 className="font-semibold text-blue-900 dark:text-blue-200 mb-1 text-sm sm:text-base">Explanation</h4>
                                 <div className="text-xs sm:text-sm text-blue-800 dark:text-blue-300 space-y-2 sm:space-y-3">
-                                  {question.answers
-                                    .filter(a => a.is_correct && a.explanation)
-                                    .map((answer) => (
-                                      <div key={answer.id} className="prose prose-sm dark:prose-invert max-w-none">
-                                        {question.answers.filter(a => a.is_correct && a.explanation).length > 1 && (
-                                          <strong className="block mb-1 text-blue-900 dark:text-blue-200">
-                                            Answer {String.fromCharCode(65 + question.answers.indexOf(answer))}:
-                                          </strong>
-                                        )}
+                                  {(() => {
+                                    const sortedAnswers = [...question.answers].sort((a, b) => a.id - b.id);
+                                    return sortedAnswers
+                                      .filter(a => a.is_correct && a.explanation)
+                                      .map((answer) => (
+                                        <div key={answer.id} className="prose prose-sm dark:prose-invert max-w-none">
+                                          {sortedAnswers.filter(a => a.is_correct && a.explanation).length > 1 && (
+                                            <strong className="block mb-1 text-blue-900 dark:text-blue-200">
+                                              Answer {String.fromCharCode(65 + sortedAnswers.indexOf(answer))}:
+                                            </strong>
+                                          )}
                                         <ReactMarkdown
                                           components={{
                                             p: ({node, ...props}) => <p className="mb-2 leading-relaxed text-blue-800 dark:text-blue-300" {...props} />,
@@ -239,7 +241,8 @@ export default function Result({ onAddResult, theme, onToggleTheme }) {
                                           {answer.explanation}
                                         </ReactMarkdown>
                                       </div>
-                                    ))}
+                                    ));
+                                  })()}
                                 </div>
                               </div>
                             </div>
