@@ -1,27 +1,11 @@
-import { useState, useEffect, ReactNode } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { tokenManager, userAPI } from '../utils/api';
-import { useTheme } from '../hooks/useTheme';
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
-import Login from '../pages/Login';
-import Register from '../pages/Register';
-import Profile from '../pages/Profile';
-import Test from '../pages/Test';
-import Result from '../pages/Result';
-
-interface User {
-  name: string;
-  email: string;
-}
-
-interface UserData {
-  name?: string;
-  email: string;
-}
-
-interface ProtectedRouteProps {
-  children: ReactNode;
-}
+import Login from "../pages/Login";
+import Register from "../pages/Register";
+import Profile from "../pages/Profile";
+import Test from "../pages/Test";
+import Result from "../pages/Result";
 
 /**
  * Central app routing + top-level state wiring with JWT authentication.
@@ -34,108 +18,31 @@ interface ProtectedRouteProps {
  *   /result  -> summary screen (protected)
  */
 export default function AppRoutes() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { theme, toggleTheme } = useTheme();
-
-  // On mount, check if user has valid token
-  useEffect(() => {
-    const initAuth = async () => {
-      if (tokenManager.hasToken()) {
-        try {
-          const userData = await userAPI.getCurrentUser();
-          setUser({
-            name: userData.account_name,
-            email: userData.user_email,
-          });
-        } catch (error) {
-          console.error('Failed to fetch user:', error);
-          tokenManager.removeToken();
-        }
-      }
-      setLoading(false);
-    };
-
-    initAuth();
-  }, []);
-
-  const handleLogin = (userData: UserData) => {
-    setUser({
-      name: userData.name || userData.email?.split('@')[0] || 'User',
-      email: userData.email,
-    });
-  };
-
-  const handleRegister = (userData: UserData) => {
-    // After successful registration, user is automatically logged in
-    setUser({
-      name: userData.name || 'User',
-      email: userData.email,
-    });
-  };
-
-  const handleLogout = () => {
-    tokenManager.removeToken();
-    setUser(null);
-  };
-
-  const handleAddResult = (result: unknown) => {
-    // Results are now tracked in the backend via responses table
-    console.log('Test result:', result);
-  };
-
-  // Protected route wrapper
-  const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-    if (loading) {
-      return (
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-lg text-slate-600">Loading...</div>
-        </div>
-      );
-    }
-    return user ? <>{children}</> : <Navigate to="/login" replace />;
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-slate-600">Loading...</div>
-      </div>
-    );
-  }
+  const { user } = useAuth();
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to={user ? "/profile" : "/login"} replace />} />
-      <Route path="/login" element={<Login user={user} onLogin={handleLogin} theme={theme} onToggleTheme={toggleTheme} />} />
-      <Route path="/register" element={<Register onRegister={handleRegister} theme={theme} onToggleTheme={toggleTheme} />} />
       <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <Profile user={user} onLogout={handleLogout} theme={theme} onToggleTheme={toggleTheme} />
-          </ProtectedRoute>
-        }
+        path="/"
+        element={<Navigate to={user ? "/profile" : "/login"} replace />}
       />
-      <Route
-        path="/test"
-        element={
-          <ProtectedRoute>
-            <Test theme={theme} onToggleTheme={toggleTheme} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/result"
-        element={
-          <ProtectedRoute>
-            <Result onAddResult={handleAddResult} theme={theme} onToggleTheme={toggleTheme} />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      {user ? (
+        <>
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/test" element={<Test />} />
+          <Route path="/result" element={<Result />} />
+        </>
+      ) : (
+        <Navigate to="/login" replace />
+      )}
+
       {/* Fallback for unknown routes */}
-      <Route path="*" element={<Navigate to={user ? "/profile" : "/login"} replace />} />
+      <Route
+        path="*"
+        element={<Navigate to={user ? "/profile" : "/login"} replace />}
+      />
     </Routes>
   );
 }
-

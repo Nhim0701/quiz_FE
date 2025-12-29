@@ -1,30 +1,20 @@
-import { useEffect, useState, FormEvent } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { authAPI } from '../utils/api';
-import ThemeToggle from '../components/ThemeToggle';
+import { useEffect, useState, FormEvent } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import useApp from "../hooks/useApp";
+import ThemeToggle from "../components/ThemeToggle";
 
-interface User {
-  name?: string;
-  email: string;
-}
-
-interface LoginProps {
-  onLogin?: (userData: { email: string; token?: string }) => void;
-  user: User | null;
-  theme: 'light' | 'dark';
-  onToggleTheme: () => void;
-}
-
-export default function Login({ onLogin, user, theme, onToggleTheme }: LoginProps) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+export default function Login() {
+  const { user, login } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { loading, setLoading } = useApp();
 
   useEffect(() => {
     if (user) {
-      navigate('/profile', { replace: true });
+      navigate("/profile", { replace: true });
     }
   }, [user, navigate]);
 
@@ -32,22 +22,15 @@ export default function Login({ onLogin, user, theme, onToggleTheme }: LoginProp
     e.preventDefault();
     if (!email || !password) return;
 
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
-      const response = await authAPI.login({ email, password });
-
-      // Call parent callback with user data
-      onLogin?.({
-        email,
-        token: response.access_token
-      });
-
-      navigate('/profile');
+      await login({ email, password });
+      navigate("/profile");
     } catch (err) {
       const error = err as Error;
-      setError(error.message || 'Login failed. Please check your credentials.');
+      setError(error.message || "Login failed. Please check your credentials.");
     } finally {
       setLoading(false);
     }
@@ -57,19 +40,33 @@ export default function Login({ onLogin, user, theme, onToggleTheme }: LoginProp
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4">
       {/* Theme Toggle - Fixed Position */}
       <div className="fixed top-4 right-4 z-50">
-        <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+        <ThemeToggle />
       </div>
 
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 rounded-full mb-3 sm:mb-4 shadow-lg">
-            <svg className="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <svg
+              className="w-7 h-7 sm:w-8 sm:h-8 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
             </svg>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">Welcome Back</h1>
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">Sign in to continue your quiz journey</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+            Welcome Back
+          </h1>
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">
+            Sign in to continue your quiz journey
+          </p>
         </div>
 
         {/* Login Card */}
@@ -82,7 +79,10 @@ export default function Login({ onLogin, user, theme, onToggleTheme }: LoginProp
             )}
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2" htmlFor="email">
+              <label
+                className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+                htmlFor="email"
+              >
                 Email Address
               </label>
               <input
@@ -97,7 +97,10 @@ export default function Login({ onLogin, user, theme, onToggleTheme }: LoginProp
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2" htmlFor="password">
+              <label
+                className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+                htmlFor="password"
+              >
                 Password
               </label>
               <input
@@ -117,7 +120,7 @@ export default function Login({ onLogin, user, theme, onToggleTheme }: LoginProp
               disabled={loading}
               className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white py-2.5 sm:py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 dark:hover:from-blue-600 dark:hover:to-indigo-600 transition-all duration-200 text-sm font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              {loading ? 'Signing In...' : 'Sign In'}
+              {loading ? "Signing In..." : "Sign In"}
             </button>
           </form>
 
@@ -127,7 +130,9 @@ export default function Login({ onLogin, user, theme, onToggleTheme }: LoginProp
               <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400">New to Quiz?</span>
+              <span className="px-4 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                New to Quiz?
+              </span>
             </div>
           </div>
 
@@ -148,4 +153,3 @@ export default function Login({ onLogin, user, theme, onToggleTheme }: LoginProp
     </div>
   );
 }
-
