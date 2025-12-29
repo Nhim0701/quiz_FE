@@ -1,9 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../utils/api';
 import ThemeToggle from '../components/ThemeToggle';
 
-export default function Login({ onLogin, user, theme, onToggleTheme }) {
+interface User {
+  name?: string;
+  email: string;
+}
+
+interface LoginProps {
+  onLogin?: (userData: { email: string; token?: string }) => void;
+  user: User | null;
+  theme: 'light' | 'dark';
+  onToggleTheme: () => void;
+}
+
+export default function Login({ onLogin, user, theme, onToggleTheme }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -16,7 +28,7 @@ export default function Login({ onLogin, user, theme, onToggleTheme }) {
     }
   }, [user, navigate]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!email || !password) return;
 
@@ -34,7 +46,8 @@ export default function Login({ onLogin, user, theme, onToggleTheme }) {
 
       navigate('/profile');
     } catch (err) {
-      setError(err.message || 'Login failed. Please check your credentials.');
+      const error = err as Error;
+      setError(error.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
@@ -135,3 +148,4 @@ export default function Login({ onLogin, user, theme, onToggleTheme }) {
     </div>
   );
 }
+

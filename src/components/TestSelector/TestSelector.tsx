@@ -1,6 +1,11 @@
 import React from 'react';
 
-export default function TestSelector({ topics, onSelectTopic }) {
+interface TestSelectorProps {
+  topics: string[];
+  onSelectTopic: (topic: string) => void;
+}
+
+export default function TestSelector({ topics, onSelectTopic }: TestSelectorProps) {
   return (
     <div className="flex gap-4">
       {topics.map(topic => (
@@ -15,3 +20,4 @@ export default function TestSelector({ topics, onSelectTopic }) {
     </div>
   );
 }
+

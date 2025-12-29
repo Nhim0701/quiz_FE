@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { tokenManager, userAPI } from '../utils/api';
 import { useTheme } from '../hooks/useTheme';
@@ -8,6 +8,20 @@ import Register from '../pages/Register';
 import Profile from '../pages/Profile';
 import Test from '../pages/Test';
 import Result from '../pages/Result';
+
+interface User {
+  name: string;
+  email: string;
+}
+
+interface UserData {
+  name?: string;
+  email: string;
+}
+
+interface ProtectedRouteProps {
+  children: ReactNode;
+}
 
 /**
  * Central app routing + top-level state wiring with JWT authentication.
@@ -20,7 +34,7 @@ import Result from '../pages/Result';
  *   /result  -> summary screen (protected)
  */
 export default function AppRoutes() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const { theme, toggleTheme } = useTheme();
 
@@ -45,17 +59,17 @@ export default function AppRoutes() {
     initAuth();
   }, []);
 
-  const handleLogin = (userData) => {
+  const handleLogin = (userData: UserData) => {
     setUser({
       name: userData.name || userData.email?.split('@')[0] || 'User',
       email: userData.email,
     });
   };
 
-  const handleRegister = (userData) => {
+  const handleRegister = (userData: UserData) => {
     // After successful registration, user is automatically logged in
     setUser({
-      name: userData.name,
+      name: userData.name || 'User',
       email: userData.email,
     });
   };
@@ -65,13 +79,13 @@ export default function AppRoutes() {
     setUser(null);
   };
 
-  const handleAddResult = (result) => {
+  const handleAddResult = (result: unknown) => {
     // Results are now tracked in the backend via responses table
     console.log('Test result:', result);
   };
 
   // Protected route wrapper
-  const ProtectedRoute = ({ children }) => {
+  const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     if (loading) {
       return (
         <div className="min-h-screen flex items-center justify-center">
@@ -79,7 +93,7 @@ export default function AppRoutes() {
         </div>
       );
     }
-    return user ? children : <Navigate to="/login" replace />;
+    return user ? <>{children}</> : <Navigate to="/login" replace />;
   };
 
   if (loading) {
@@ -124,3 +138,4 @@ export default function AppRoutes() {
     </Routes>
   );
 }
+

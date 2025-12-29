@@ -2,11 +2,17 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { questionAPI, responseAPI } from '../utils/api';
 import ThemeToggle from '../components/ThemeToggle';
+import { User, ThemeProps } from '../types';
 
-export default function Profile({ user, onLogout, theme, onToggleTheme }) {
+interface ProfileProps extends ThemeProps {
+  user: User | null;
+  onLogout?: () => void;
+}
+
+export default function Profile({ user, onLogout, theme, onToggleTheme }: ProfileProps) {
   const navigate = useNavigate();
-  const [categoriesWithSets, setCategoriesWithSets] = useState([]);
-  const [dashboardData, setDashboardData] = useState(null);
+  const [categoriesWithSets, setCategoriesWithSets] = useState<unknown[]>([]);
+  const [dashboardData, setDashboardData] = useState<unknown>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,7 +41,7 @@ export default function Profile({ user, onLogout, theme, onToggleTheme }) {
     fetchData();
   }, []);
 
-  const handleStartTest = (category, questionSet) => {
+  const handleStartTest = (category: string, questionSet: string) => {
     navigate('/test', {
       state: {
         category,

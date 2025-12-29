@@ -3,22 +3,29 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { questionAPI, responseAPI } from '../utils/api';
 import ThemeToggle from '../components/ThemeToggle';
+import { ThemeProps } from '../types';
 
-export default function Test({ theme, onToggleTheme }) {
+interface LocationState {
+  category?: string;
+  questionSet?: string;
+  testType?: string;
+}
+
+export default function Test({ theme, onToggleTheme }: ThemeProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { category, questionSet, testType } = location.state || {};
+  const { category, questionSet, testType } = (location.state as LocationState) || {};
 
-  const [questions, setQuestions] = useState([]);
+  const [questions, setQuestions] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState({}); // questionId -> array of answer ids
-  const [flags, setFlags] = useState({}); // questionId -> true/false
-  const [revealed, setRevealed] = useState({}); // questionId -> true/false (tracks which questions have been revealed)
+  const [answers, setAnswers] = useState<Record<number, number[]>>({}); // questionId -> array of answer ids
+  const [flags, setFlags] = useState<Record<number, boolean>>({}); // questionId -> true/false
+  const [revealed, setRevealed] = useState<Record<number, boolean>>({}); // questionId -> true/false (tracks which questions have been revealed)
   const [submitting, setSubmitting] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(30 * 60); // 30 minutes in seconds
   const [timeStarted, setTimeStarted] = useState(false);
-  const handleFinishRef = useRef(null);
+  const handleFinishRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     // Support both old (testType) and new (category + questionSet) navigation
@@ -123,7 +130,7 @@ export default function Test({ theme, onToggleTheme }) {
   const correctAnswersCount = currentQuestion.answers.filter(a => a.is_correct).length;
   const hasMultipleCorrect = correctAnswersCount > 1;
 
-  const toggleAnswer = (answerId) => {
+  const toggleAnswer = (answerId: number) => {
     setAnswers((prev) => {
       const existing = prev[currentQuestion.id] || [];
       let next;
@@ -223,7 +230,7 @@ export default function Test({ theme, onToggleTheme }) {
     setCurrentIndex((idx) => Math.min(questions.length - 1, idx + 1));
   };
 
-  const goToQuestion = (index) => {
+  const goToQuestion = (index: number) => {
     setCurrentIndex(index);
   };
 
@@ -231,7 +238,7 @@ export default function Test({ theme, onToggleTheme }) {
   const answeredCount = Object.keys(answers).length;
 
   // Format time remaining
-  const formatTime = (seconds) => {
+  const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;

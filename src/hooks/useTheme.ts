@@ -2,6 +2,14 @@ import { useState, useEffect } from 'react';
 
 const THEME_STORAGE_KEY = 'quiz-app-theme';
 
+type Theme = 'light' | 'dark';
+
+interface UseThemeReturn {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+  toggleTheme: () => void;
+}
+
 /**
  * Custom hook to manage theme preference (light/dark mode)
  * Persists theme selection to localStorage
@@ -11,11 +19,11 @@ const THEME_STORAGE_KEY = 'quiz-app-theme';
  *   - setTheme: (theme) => void - Set theme explicitly
  *   - toggleTheme: () => void - Toggle between light and dark
  */
-export const useTheme = () => {
-  const [theme, setThemeState] = useState(() => {
+export const useTheme = (): UseThemeReturn => {
+  const [theme, setThemeState] = useState<Theme>(() => {
     // Check localStorage first
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    if (stored) return stored;
+    if (stored === 'light' || stored === 'dark') return stored;
 
     // Otherwise, detect system preference
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -38,7 +46,7 @@ export const useTheme = () => {
     }
   }, [theme]);
 
-  const setTheme = (newTheme) => {
+  const setTheme = (newTheme: Theme) => {
     if (newTheme === 'light' || newTheme === 'dark') {
       setThemeState(newTheme);
     }
@@ -50,3 +58,4 @@ export const useTheme = () => {
 
   return { theme, setTheme, toggleTheme };
 };
+

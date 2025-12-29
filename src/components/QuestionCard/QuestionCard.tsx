@@ -1,6 +1,15 @@
 import React from 'react';
 
-export default function QuestionCard({ question, selected, onSelect }) {
+interface QuestionCardProps {
+  question: {
+    question: string;
+    options: string[];
+  };
+  selected: number | null;
+  onSelect: (index: number) => void;
+}
+
+export default function QuestionCard({ question, selected, onSelect }: QuestionCardProps) {
   return (
     <div className="border p-4 rounded shadow-md">
       <p className="font-semibold mb-2">{question.question}</p>
@@ -19,3 +28,4 @@ export default function QuestionCard({ question, selected, onSelect }) {
     </div>
   );
 }
+

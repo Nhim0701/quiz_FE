@@ -1,27 +1,48 @@
-import { useState } from 'react';
+import { useState, FormEvent, ChangeEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../utils/api';
 import ThemeToggle from '../components/ThemeToggle';
 
-export default function Register({ onRegister, theme, onToggleTheme }) {
-  const [formData, setFormData] = useState({
+interface RegisterProps {
+  onRegister?: (userData: { name: string; email: string; token?: string }) => void;
+  theme: 'light' | 'dark';
+  onToggleTheme: () => void;
+}
+
+interface FormData {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  submit?: string;
+}
+
+export default function Register({ onRegister, theme, onToggleTheme }: RegisterProps) {
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
   });
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
     // Clear error when user starts typing
-    if (errors[name]) {
+    if (errors[name as keyof FormErrors]) {
       setErrors((prev) => ({
         ...prev,
         [name]: '',
@@ -29,8 +50,8 @@ export default function Register({ onRegister, theme, onToggleTheme }) {
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
+  const validateForm = (): FormErrors => {
+    const newErrors: FormErrors = {};
 
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
@@ -57,7 +78,7 @@ export default function Register({ onRegister, theme, onToggleTheme }) {
     return newErrors;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newErrors = validateForm();
 
@@ -85,8 +106,9 @@ export default function Register({ onRegister, theme, onToggleTheme }) {
       // Navigate to profile page after successful registration (user is already logged in with token)
       navigate('/profile');
     } catch (err) {
+      const error = err as Error;
       setErrors({
-        submit: err.message || 'Registration failed. Please try again.'
+        submit: error.message || 'Registration failed. Please try again.'
       });
     } finally {
       setLoading(false);
@@ -235,3 +257,4 @@ export default function Register({ onRegister, theme, onToggleTheme }) {
     </div>
   );
 }
+

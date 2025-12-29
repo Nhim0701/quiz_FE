@@ -2,14 +2,32 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import ThemeToggle from '../components/ThemeToggle';
+import { ThemeProps } from '../types';
 
-export default function Result({ onAddResult, theme, onToggleTheme }) {
+interface ResultProps extends ThemeProps {
+  onAddResult?: (result: unknown) => void;
+}
+
+interface LocationState {
+  summary?: {
+    total: number;
+    answered: number;
+    testType?: string;
+    date: string;
+    timeSpent: number;
+    timeRemaining: number;
+  };
+  answers?: Record<number, number[]>;
+  questions?: unknown[];
+}
+
+export default function Result({ onAddResult, theme, onToggleTheme }: ResultProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { summary, answers, questions } = location.state || {};
-  const [visibleExplanations, setVisibleExplanations] = useState({}); // questionId -> true/false
+  const { summary, answers, questions } = (location.state as LocationState) || {};
+  const [visibleExplanations, setVisibleExplanations] = useState<Record<number, boolean>>({}); // questionId -> true/false
 
-  const toggleExplanation = (questionId) => {
+  const toggleExplanation = (questionId: number) => {
     setVisibleExplanations((prev) => ({
       ...prev,
       [questionId]: !prev[questionId],

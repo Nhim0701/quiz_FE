@@ -1,7 +1,19 @@
-// QuizApp.jsx
+// QuizApp.tsx
 import { useState } from "react";
 
-const sampleData = [
+interface Option {
+  text: string;
+  correct: boolean;
+}
+
+interface Question {
+  category: string;
+  question: string;
+  options: Option[];
+  explanation: string;
+}
+
+const sampleData: Question[] = [
   {
     category: "Sales",
     question: "Up to this point, two sales reps have had separate accounts and opportunities...",
@@ -18,12 +30,12 @@ const sampleData = [
 
 export default function QuizApp() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selected, setSelected] = useState([]);
+  const [selected, setSelected] = useState<number[]>([]);
   const [readLater, setReadLater] = useState(false);
 
   const question = sampleData[currentIndex];
 
-  const handleSelect = (idx) => {
+  const handleSelect = (idx: number) => {
     setSelected((prev) =>
       prev.includes(idx) ? prev.filter((i) => i !== idx) : [...prev, idx]
     );
@@ -121,3 +133,4 @@ export default function QuizApp() {
     </div>
   );
 }
+

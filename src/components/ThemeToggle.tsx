@@ -1,4 +1,10 @@
-export default function ThemeToggle({ theme, onToggle, className = '' }) {
+interface ThemeToggleProps {
+  theme: 'light' | 'dark';
+  onToggle: () => void;
+  className?: string;
+}
+
+export default function ThemeToggle({ theme, onToggle, className = '' }: ThemeToggleProps) {
   return (
     <button
       onClick={onToggle}
@@ -17,3 +23,4 @@ export default function ThemeToggle({ theme, onToggle, className = '' }) {
     </button>
   );
 }
+

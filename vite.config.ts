@@ -10,11 +10,12 @@ export default defineConfig({
     port: 5173,
     allowedHosts: ['harinezumi.myddns.me'],
     proxy: {
-      '/api': {
-        target: 'http://localhost:8000',  // backend container port đã expose
-        changeOrigin: true,
+      '/api/v1/': {
+        target: 'https://harinezumi.myddns.me/api/v1/',  // backend container port đã expose
+        changeOrigin: false,
         secure: false,
       },
     },
   },
 })
+
