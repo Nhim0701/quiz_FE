@@ -52,6 +52,7 @@ export default function Test() {
           data = await getQuestionsByCategory<QuestionProps[]>(categoryToUse);
         }
         setQuestions(data);
+        setTimeRemaining(144 * data.length); // 144s per question
       } catch (error) {
         console.error("Failed to fetch questions:", error);
       } finally {

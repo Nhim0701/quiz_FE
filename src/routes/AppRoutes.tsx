@@ -6,6 +6,7 @@ import Register from "../pages/Register";
 import Profile from "../pages/Profile";
 import Test from "../pages/Test";
 import Result from "../pages/Result";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 /**
  * Central app routing + top-level state wiring with JWT authentication.
@@ -28,15 +29,30 @@ export default function AppRoutes() {
       />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      {user ? (
-        <>
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/test" element={<Test />} />
-          <Route path="/result" element={<Result />} />
-        </>
-      ) : (
-        <Navigate to="/login" replace />
-      )}
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/test"
+        element={
+          <ProtectedRoute>
+            <Test />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/result"
+        element={
+          <ProtectedRoute>
+            <Result />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Fallback for unknown routes */}
       <Route
