@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface TestSelectorProps {
   topics: string[];
   onSelectTopic: (topic: string) => void;
