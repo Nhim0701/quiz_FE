@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { commonApi } from "../lib/api";
 import ThemeToggle from "../components/ui/theme-toggle";
 import useApp from "../hooks/useApp";
 import { useQuestionsStore } from "../hooks/useQuestions";
+import { useTestStore } from "../hooks/useTest";
 import { QuestionProps, ResponseItem } from "../types";
 import {
   TestHeader,
@@ -27,6 +27,7 @@ export default function Test() {
   const { loading, setLoading, showError } = useApp();
   const { getQuestionsByCategory, getQuestionsByCategoryAndSet } =
     useQuestionsStore();
+  const { submitBulk } = useTestStore();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number[]>>({}); // questionId -> array of answer ids
   const [flags, setFlags] = useState<Record<number, boolean>>({}); // questionId -> true/false
@@ -199,7 +200,7 @@ export default function Test() {
     if (responses.length > 0) {
       setSubmitting(true);
       try {
-        await commonApi.submitBulk<void>(responses);
+        await submitBulk<void>(responses);
       } catch (error) {
         const errorMessage =
           error instanceof Error

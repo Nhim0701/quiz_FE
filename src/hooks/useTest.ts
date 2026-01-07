@@ -1,5 +1,7 @@
 import { create } from "zustand";
-import { QuestionProps } from "@/types";
+import { QuestionProps, ResponseItem } from "@/types";
+import apiClient from "@/lib/axios";
+import { API_ENDPOINTS } from "@/constants";
 
 interface TestState {
   // Test configuration
@@ -43,6 +45,7 @@ interface TestState {
   // Submission
   submitting: boolean;
   setSubmitting: (submitting: boolean) => void;
+  submitBulk: <T>(responses: ResponseItem[]) => Promise<T>;
 
   // Initialize test
   initializeTest: (
@@ -154,6 +157,12 @@ export const useTestStore = create<TestState>((set, get) => ({
 
   // Submission
   setSubmitting: (submitting) => set({ submitting }),
+  submitBulk: async <T>(responses: ResponseItem[]): Promise<T> => {
+    const response = await apiClient.post(API_ENDPOINTS.RESPONSES.SUBMIT_BULK, {
+      responses,
+    });
+    return response.data;
+  },
 
   // Initialize test
   initializeTest: (category, questionSet, testType, questions) => {

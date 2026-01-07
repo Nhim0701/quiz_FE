@@ -1,8 +1,7 @@
 // API utility for backend communication
 import { AxiosRequestConfig } from "axios";
-import { ResponseItem } from "../types";
 import apiClient from "@/lib/axios";
-import { API_ENDPOINTS, STORAGE_KEYS } from "@/constants";
+import { STORAGE_KEYS } from "@/constants";
 
 // Token management
 export const tokenManager = {
@@ -30,19 +29,5 @@ async function apiFetch<T>(
     throw error;
   }
 }
-
-// Common APIs
-export const commonApi = {
-  getDashboard: async <T>(): Promise<T> => {
-    const response = await apiClient.get<T>(API_ENDPOINTS.RESPONSES.DASHBOARD);
-    return response.data;
-  },
-  submitBulk: async <T>(responses: ResponseItem[]): Promise<T> => {
-    const response = await apiClient.post(API_ENDPOINTS.RESPONSES.SUBMIT_BULK, {
-      responses,
-    });
-    return response.data;
-  },
-};
 
 export default apiFetch;

@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { DashboardProps, CategoryWithSetsProps } from "@/types";
+import apiClient from "@/lib/axios";
+import { API_ENDPOINTS } from "@/constants";
 
 interface ProfileState {
   // Dashboard data
@@ -13,6 +15,9 @@ interface ProfileState {
   // Loading state
   loading: boolean;
   setLoading: (loading: boolean) => void;
+
+  // API methods
+  getDashboard: <T>() => Promise<T>;
 
   // Refresh dashboard data
   refreshDashboard: () => Promise<void>;
@@ -32,6 +37,12 @@ export const useProfileStore = create<ProfileState>((set) => ({
 
   // Loading
   setLoading: (loading) => set({ loading }),
+
+  // API methods
+  getDashboard: async <T>(): Promise<T> => {
+    const response = await apiClient.get<T>(API_ENDPOINTS.RESPONSES.DASHBOARD);
+    return response.data;
+  },
 
   // Refresh dashboard (placeholder - will be implemented with API call)
   refreshDashboard: async () => {

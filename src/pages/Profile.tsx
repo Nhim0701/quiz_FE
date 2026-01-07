@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { commonApi } from "../lib/api";
 import useApp from "../hooks/useApp";
 import { useAuth } from "../hooks/useAuth";
 import { useQuestionsStore } from "../hooks/useQuestions";
+import { useProfileStore } from "../hooks/useProfile";
 import { CategoryWithSetsProps, DashboardProps } from "../types";
 import {
   ProfileHeader,
@@ -24,6 +24,7 @@ export default function Profile() {
   );
   const { setLoading, showError } = useApp();
   const { getCategoriesWithSets } = useQuestionsStore();
+  const { getDashboard } = useProfileStore();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,7 +33,7 @@ export default function Profile() {
         const categoriesData = await getCategoriesWithSets<
           CategoryWithSetsProps[]
         >();
-        const dashboard = await commonApi.getDashboard<DashboardProps>();
+        const dashboard = await getDashboard<DashboardProps>();
         setCategoriesWithSets(categoriesData);
         setDashboardData(dashboard);
       } catch (error) {
