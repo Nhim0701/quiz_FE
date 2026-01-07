@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import apiClient from "@/lib/axios";
 import { tokenManager } from "@/lib/api";
+import { API_ENDPOINTS, STORAGE_KEYS } from "@/constants";
 
 interface UserData {
   email: string;
@@ -48,7 +49,7 @@ const fetchUserData = async (
 ): Promise<void> => {
   if (setLoading) setLoading(true);
   try {
-    const response = await apiClient.get<UserResponse>("/api/v1/users/me");
+    const response = await apiClient.get<UserResponse>(API_ENDPOINTS.AUTH.ME);
     set({
       user: {
         name: response.data.account_name,
@@ -80,7 +81,7 @@ export const useAuthStoreInternal = create<AuthState>()(
       },
       register: async (userData, setLoading) => {
         const response = await apiClient.post<AuthResponse>(
-          "/api/v1/auth/register",
+          API_ENDPOINTS.AUTH.REGISTER,
           {
             user_email: userData.email,
             account_name: userData.name,
@@ -98,7 +99,7 @@ export const useAuthStoreInternal = create<AuthState>()(
       },
       login: async (credentials, setLoading) => {
         const response = await apiClient.post<AuthResponse>(
-          "/api/v1/auth/login",
+          API_ENDPOINTS.AUTH.LOGIN,
           {
             user_email: credentials.email,
             user_password: credentials.password,
@@ -119,7 +120,7 @@ export const useAuthStoreInternal = create<AuthState>()(
       },
     }),
     {
-      name: "auth-storage",
+      name: STORAGE_KEYS.AUTH,
       partialize: (state) => ({ user: state.user }),
     }
   )

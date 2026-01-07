@@ -2,6 +2,7 @@
 export const STORAGE_KEYS = {
   ACCESS_TOKEN: "access_token",
   THEME: "theme",
+  AUTH: "auth-storage",
 } as const;
 
 // SessionStorage Keys
