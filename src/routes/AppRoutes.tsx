@@ -6,7 +6,7 @@ import Register from "../pages/Register";
 import Profile from "../pages/Profile";
 import Test from "../pages/Test";
 import Result from "../pages/Result";
-import ProtectedRoute from "../components/ProtectedRoute";
+import ProtectedRoute from "../middleware/ProtectedRoute";
 
 /**
  * Central app routing + top-level state wiring with JWT authentication.

@@ -2,7 +2,7 @@ import { useState, FormEvent, ChangeEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import useApp from "../hooks/useApp";
-import ThemeToggle from "../components/ThemeToggle";
+import ThemeToggle from "../components/ui/theme-toggle";
 
 interface FormData {
   name: string;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
-import ThemeToggle from "../components/ThemeToggle";
+import ThemeToggle from "../components/ui/theme-toggle";
 import { QuestionProps } from "../types";
 
 interface LocationState {

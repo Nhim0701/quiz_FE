@@ -1,6 +1,6 @@
 import { BrowserRouter as Router } from "react-router-dom";
 import AppRoutes from "./routes/AppRoutes";
-import Loading from "./components/Loading";
+import Loading from "./components/ui/loading";
 import { tokenManager } from "./utils/api";
 import { useEffect } from "react";
 import { useAuth } from "./hooks/useAuth";
