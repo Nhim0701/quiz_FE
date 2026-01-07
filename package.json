@@ -12,11 +12,15 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.16",
     "axios": "^1.13.2",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.469.0",
     "lodash": "^4.17.21",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.9.6",
+    "tailwind-merge": "^2.5.5",
     "tailwindcss": "^4.1.16",
     "zustand": "^5.0.9"
   },
