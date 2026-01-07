@@ -1,7 +1,7 @@
 import { FileText, ArrowRight } from "lucide-react";
 import { useProfileStore } from "@/hooks/useProfile";
 import { useNavigate } from "react-router-dom";
-import { ROUTES } from "@/constants";
+import { getTestRoute } from "@/constants";
 import { useTranslation } from "@/i18n";
 import {
   Accordion,
@@ -16,12 +16,7 @@ export function TestList() {
   const { t } = useTranslation();
 
   const handleStartTest = (category: string, questionSet: string) => {
-    navigate(ROUTES.TEST, {
-      state: {
-        category,
-        questionSet,
-      },
-    });
+    navigate(getTestRoute(category, questionSet));
   };
   if (!categoriesWithSets || categoriesWithSets.length === 0) {
     return (

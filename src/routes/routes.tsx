@@ -63,12 +63,17 @@ const routes: RouteObject[] = [
     ],
   },
   {
-    path: "test",
-    lazy: createLazyRoute("./test/route"),
-  },
-  {
-    path: "result",
-    lazy: createLazyRoute("./result/route"),
+    lazy: createLazyRoute("./app/route"),
+    children: [
+      {
+        path: "tests/:testId",
+        lazy: createLazyRoute("./tests.$testId/route"),
+      },
+      {
+        path: "tests/:testId/result",
+        lazy: createLazyRoute("./tests.$testId.result/route"),
+      },
+    ],
   },
   {
     path: "*",

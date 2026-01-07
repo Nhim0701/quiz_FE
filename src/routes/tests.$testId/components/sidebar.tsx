@@ -2,7 +2,7 @@ import { useTranslation } from "@/i18n";
 import { useTestStore } from "@/hooks/useTest";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ROUTES, TIME_CONSTANTS } from "@/constants";
+import { TIME_CONSTANTS, getTestResultRoute } from "@/constants";
 import { SubmissionItem } from "@/types";
 import useApp from "@/hooks/useApp";
 
@@ -20,6 +20,7 @@ export function TestSidebar() {
     timeRemaining,
     category,
     testType,
+    questionSet,
     goToQuestion,
     submitBulk,
     setTimeStarted,
@@ -70,7 +71,11 @@ export function TestSidebar() {
       }
     }
 
-    navigate(ROUTES.RESULT, {
+    const resultRoute = getTestResultRoute(
+      category || testType || "",
+      questionSet || undefined
+    );
+    navigate(resultRoute, {
       state: {
         answers,
         questions,

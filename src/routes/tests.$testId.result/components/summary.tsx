@@ -2,7 +2,7 @@ import { CheckCircle } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { useResultStore } from "@/hooks/useResult";
 import { useNavigate } from "react-router-dom";
-import { ROUTES } from "@/constants";
+import { ROUTES, getTestRoute } from "@/constants";
 
 export function ResultSummary() {
   const { t } = useTranslation();
@@ -23,9 +23,11 @@ export function ResultSummary() {
   };
 
   const handleRetake = () => {
-    navigate(ROUTES.TEST, {
-      state: { testType: summary.testType },
-    });
+    if (summary.testType) {
+      navigate(getTestRoute(summary.testType));
+    } else {
+      navigate(ROUTES.TESTS);
+    }
   };
   const completionPercentage = Math.round(
     (summary.answered / summary.total) * 100

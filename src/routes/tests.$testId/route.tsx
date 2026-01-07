@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { redirect } from "react-router-dom";
 import { tokenManager } from "@/lib/api";
 import { useAuthStoreInternal } from "@/hooks/useAuth";
@@ -7,20 +7,14 @@ import ThemeToggle from "@/components/ui/theme-toggle";
 import useApp from "@/hooks/useApp";
 import { useTestStore } from "@/hooks/useTest";
 import { SubmissionItem } from "@/types";
-import { ROUTES, TIME_CONSTANTS } from "@/constants";
+import { TIME_CONSTANTS, decodeTestId, getTestResultRoute } from "@/constants";
 import { useTranslation } from "@/i18n";
 import {
   TestHeader,
   TestQuestion,
   TestSidebar,
   TestEmpty,
-} from "./components";
-
-interface LocationState {
-  category?: string;
-  questionSet?: string;
-  testType?: string;
-}
+} from "@/routes/tests.$testId/components";
 
 export async function loader() {
   const user = useAuthStoreInternal.getState().user;
@@ -39,11 +33,8 @@ export async function loader() {
 }
 
 export default function Test() {
-  const location = useLocation();
+  const { testId } = useParams<{ testId: string }>();
   const navigate = useNavigate();
-  const { category, questionSet, testType } =
-    (location.state as LocationState) || {};
-
   const { loading, setLoading, showError } = useApp();
   const { t } = useTranslation();
   const {
@@ -104,7 +95,11 @@ export default function Test() {
       }
     }
 
-    navigate(ROUTES.RESULT, {
+    const resultRoute = getTestResultRoute(
+      storeCategory || storeTestType || "",
+      undefined
+    );
+    navigate(resultRoute, {
       state: {
         answers,
         questions,
@@ -133,18 +128,27 @@ export default function Test() {
   ]);
 
   useEffect(() => {
-    // Support both old (testType) and new (category + questionSet) navigation
-    const categoryToUse = category || testType;
+    if (!testId) {
+      navigate("/tests", { replace: true });
+      return;
+    }
 
-    if (!categoryToUse) {
-      navigate(ROUTES.TESTS, { replace: true });
+    let category: string;
+    let questionSet: string | undefined;
+
+    try {
+      const decoded = decodeTestId(testId);
+      category = decoded.category;
+      questionSet = decoded.questionSet;
+    } catch {
+      navigate("/tests", { replace: true });
       return;
     }
 
     const fetchQuestions = async () => {
       setLoading(true);
       try {
-        await fetchAndInitializeTest(categoryToUse, questionSet);
+        await fetchAndInitializeTest(category, questionSet);
       } catch (error) {
         const errorMessage =
           error instanceof Error
@@ -157,15 +161,7 @@ export default function Test() {
     };
 
     fetchQuestions();
-  }, [
-    category,
-    questionSet,
-    testType,
-    navigate,
-    setLoading,
-    fetchAndInitializeTest,
-    showError,
-  ]);
+  }, [testId, navigate, setLoading, fetchAndInitializeTest, showError, t]);
 
   // Timer effect
   useEffect(() => {
@@ -194,16 +190,11 @@ export default function Test() {
   }, [loading, questions.length, timeStarted, setTimeStarted]);
 
   if (!questions.length) {
-    return <TestEmpty onBack={() => navigate(ROUTES.TESTS)} />;
+    return <TestEmpty onBack={() => navigate("/tests")} />;
   }
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-6 sm:py-8 px-4">
-      {/* Theme Toggle - Fixed Position */}
-      <div className="fixed top-4 right-4 z-50">
-        <ThemeToggle />
-      </div>
-
+    <div className="py-6 sm:py-8 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
           {/* Main Question Area */}
@@ -220,4 +211,3 @@ export default function Test() {
     </div>
   );
 }
-

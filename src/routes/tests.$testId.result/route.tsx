@@ -9,7 +9,7 @@ import {
   ResultEmpty,
   ResultSummary,
   ResultReview,
-} from "./";
+} from "@/routes/tests.$testId.result/components";
 import { useResultStore } from "@/hooks/useResult";
 import { ROUTES } from "@/constants";
 
@@ -64,12 +64,7 @@ export default function Result() {
   }
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-6 sm:py-8 px-4">
-      {/* Theme Toggle - Fixed Position */}
-      <div className="fixed top-4 right-4 z-50">
-        <ThemeToggle />
-      </div>
-
+    <div className="py-6 sm:py-8 px-4">
       <Container maxWidth="4xl">
         <ResultSummary />
 
@@ -78,4 +73,3 @@ export default function Result() {
     </div>
   );
 }
-
