@@ -49,6 +49,10 @@ const initOptions: InitOptions = {
     caches: ["localStorage"],
     convertDetectedLanguage: normalizeLanguage,
   },
+  // Disable loading state when changing language
+  react: {
+    useSuspense: false,
+  },
 };
 
 i18n.use(LanguageDetector).use(initReactI18next).init(initOptions);

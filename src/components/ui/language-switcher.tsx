@@ -7,6 +7,7 @@ export function LanguageSwitcher() {
 
   const toggleLanguage = () => {
     const newLang = i18n.language === "vi" ? "en" : "vi";
+    // Change language synchronously without triggering loading
     i18n.changeLanguage(newLang);
   };
 

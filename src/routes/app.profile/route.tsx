@@ -27,7 +27,7 @@ export default function Profile() {
     };
 
     fetchData();
-  }, [setLoading, getDashboard, showError, t]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 sm:p-6">
