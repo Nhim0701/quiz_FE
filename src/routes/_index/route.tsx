@@ -1,6 +1,7 @@
 import { redirect } from "react-router-dom";
 import { tokenManager } from "@/lib/api";
 import { useAuthStoreInternal } from "@/hooks/useAuth";
+import { ROUTES } from "@/constants";
 
 /**
  * Root loader to check auth on app startup and redirect appropriately
@@ -20,6 +21,5 @@ export async function loader() {
   }
 
   // Redirect based on user state
-  throw redirect(user ? "/dashboard" : "/login");
+  throw redirect(user ? ROUTES.DASHBOARD : ROUTES.LOGIN);
 }
-
