@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import apiClient from "@/lib/axios";
 import { tokenManager } from "@/lib/api";
-import useApp from "./useApp";
 
 interface UserData {
   email: string;
@@ -35,12 +34,36 @@ interface UserResponse {
 interface AuthState {
   user: User | null;
   setUser: (user: User | null) => void;
-  getCurrentUser: () => Promise<void>;
+  getCurrentUser: (setLoading?: (loading: boolean) => void) => Promise<void>;
   clearUser: () => void;
-  register: (userData: UserData) => Promise<AuthResponse>;
-  login: (credentials: Credentials) => Promise<AuthResponse>;
+  register: (userData: UserData, setLoading?: (loading: boolean) => void) => Promise<AuthResponse>;
+  login: (credentials: Credentials, setLoading?: (loading: boolean) => void) => Promise<AuthResponse>;
   logout: () => void;
 }
+
+// Helper function to fetch user data
+const fetchUserData = async (
+  set: (state: Partial<AuthState>) => void,
+  setLoading?: (loading: boolean) => void
+): Promise<void> => {
+  if (setLoading) setLoading(true);
+  try {
+    const response = await apiClient.get<UserResponse>("/api/v1/users/me");
+    set({
+      user: {
+        name: response.data.account_name,
+        email: response.data.user_email,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to fetch user:", error);
+    tokenManager.removeToken();
+    set({ user: null });
+    throw error;
+  } finally {
+    if (setLoading) setLoading(false);
+  }
+};
 
 // Internal Zustand store - exported for use in loaders
 export const useAuthStoreInternal = create<AuthState>()(
@@ -48,33 +71,14 @@ export const useAuthStoreInternal = create<AuthState>()(
     (set) => ({
       user: null,
       setUser: (user) => set({ user }),
-      getCurrentUser: async () => {
-        const setLoading = useApp.getState().setLoading;
-        setLoading(true);
-        try {
-          const response = await apiClient.get<UserResponse>(
-            "/api/v1/users/me"
-          );
-          set({
-            user: {
-              name: response.data.account_name,
-              email: response.data.user_email,
-            },
-          });
-          setLoading(false);
-        } catch (error) {
-          console.error("Failed to fetch user:", error);
-          tokenManager.removeToken();
-          set({ user: null });
-          setLoading(false);
-          throw error;
-        }
+      getCurrentUser: async (setLoading) => {
+        await fetchUserData(set, setLoading);
       },
       clearUser: () => {
         set({ user: null });
         tokenManager.removeToken();
       },
-      register: async (userData: UserData): Promise<AuthResponse> => {
+      register: async (userData, setLoading) => {
         const response = await apiClient.post<AuthResponse>(
           "/api/v1/auth/register",
           {
@@ -87,32 +91,12 @@ export const useAuthStoreInternal = create<AuthState>()(
         // Store token on successful registration
         if (response.data.access_token) {
           tokenManager.setToken(response.data.access_token);
-          // Fetch user data after registration
-          const setLoading = useApp.getState().setLoading;
-          setLoading(true);
-          try {
-            const userResponse = await apiClient.get<UserResponse>(
-              "/api/v1/users/me"
-            );
-            set({
-              user: {
-                name: userResponse.data.account_name,
-                email: userResponse.data.user_email,
-              },
-            });
-            setLoading(false);
-          } catch (error) {
-            console.error("Failed to fetch user:", error);
-            tokenManager.removeToken();
-            set({ user: null });
-            setLoading(false);
-            throw error;
-          }
+          await fetchUserData(set, setLoading);
         }
 
         return response.data;
       },
-      login: async (credentials: Credentials): Promise<AuthResponse> => {
+      login: async (credentials, setLoading) => {
         const response = await apiClient.post<AuthResponse>(
           "/api/v1/auth/login",
           {
@@ -124,27 +108,7 @@ export const useAuthStoreInternal = create<AuthState>()(
         // Store token on successful login
         if (response.data.access_token) {
           tokenManager.setToken(response.data.access_token);
-          // Fetch user data after login
-          const setLoading = useApp.getState().setLoading;
-          setLoading(true);
-          try {
-            const userResponse = await apiClient.get<UserResponse>(
-              "/api/v1/users/me"
-            );
-            set({
-              user: {
-                name: userResponse.data.account_name,
-                email: userResponse.data.user_email,
-              },
-            });
-            setLoading(false);
-          } catch (error) {
-            console.error("Failed to fetch user:", error);
-            tokenManager.removeToken();
-            set({ user: null });
-            setLoading(false);
-            throw error;
-          }
+          await fetchUserData(set, setLoading);
         }
 
         return response.data;

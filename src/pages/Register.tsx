@@ -13,22 +13,26 @@ import {
 export default function Register() {
   const navigate = useNavigate();
   const { register } = useAuth();
-  const { showError } = useApp();
-  const [loading, setLoading] = useState(false);
+  const { showError, setLoading } = useApp();
+  const [loading, setLocalLoading] = useState(false);
 
   const handleSubmit = async (
     name: string,
     email: string,
     password: string
   ) => {
+    setLocalLoading(true);
     setLoading(true);
 
     try {
-      await register({
-        name,
-        email,
-        password,
-      });
+      await register(
+        {
+          name,
+          email,
+          password,
+        },
+        setLoading
+      );
       // Navigate to profile page after successful registration (user is already logged in with token)
       navigate("/profile");
     } catch (err) {
@@ -37,6 +41,7 @@ export default function Register() {
         error.message || "Registration failed. Please try again.";
       showError(errorMessage);
     } finally {
+      setLocalLoading(false);
       setLoading(false);
     }
   };

@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useApp from "../hooks/useApp";
 import { useAuth } from "../hooks/useAuth";
-import { useQuestionsStore } from "../hooks/useQuestions";
 import { useProfileStore } from "../hooks/useProfile";
-import { CategoryWithSetsProps, DashboardProps } from "../types";
+import { ROUTES, ERROR_MESSAGES } from "../constants";
 import {
   ProfileHeader,
   ProfileStats,
@@ -16,55 +15,35 @@ import {
 export default function Profile() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [categoriesWithSets, setCategoriesWithSets] = useState<
-    CategoryWithSetsProps[]
-  >([]);
-  const [dashboardData, setDashboardData] = useState<DashboardProps | null>(
-    null
-  );
   const { setLoading, showError } = useApp();
-  const { getCategoriesWithSets } = useQuestionsStore();
-  const { getDashboard } = useProfileStore();
+  const {
+    dashboardData,
+    categoriesWithSets,
+    getDashboard,
+    getCategoriesWithSets,
+  } = useProfileStore();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const categoriesData = await getCategoriesWithSets<
-          CategoryWithSetsProps[]
-        >();
-        const dashboard = await getDashboard<DashboardProps>();
-        setCategoriesWithSets(categoriesData);
-        setDashboardData(dashboard);
+        await Promise.all([getCategoriesWithSets(), getDashboard()]);
       } catch (error) {
         const errorMessage =
           error instanceof Error
             ? error.message
-            : "Failed to fetch dashboard data. Please try again.";
-        console.error("Failed to fetch dashboard data:", error);
+            : ERROR_MESSAGES.FETCH_DASHBOARD_FAILED;
         showError(errorMessage);
-        // Set empty arrays to avoid undefined errors
-        setCategoriesWithSets([]);
-        setDashboardData({
-          overall: {
-            total_answered: 0,
-            total_correct: 0,
-            total_wrong: 0,
-            overall_accuracy: 0,
-          },
-          by_category: [],
-          recent_activity: [],
-        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [setLoading]);
+  }, [setLoading, getCategoriesWithSets, getDashboard, showError]);
 
   const handleStartTest = (category: string, questionSet: string) => {
-    navigate("/test", {
+    navigate(ROUTES.TEST, {
       state: {
         category,
         questionSet,
@@ -74,7 +53,7 @@ export default function Profile() {
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate(ROUTES.LOGIN);
   };
 
   return (

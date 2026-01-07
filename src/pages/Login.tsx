@@ -15,8 +15,8 @@ export default function Login() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { showError } = useApp();
-  const [loading, setLoading] = useState(false);
+  const { showError, setLoading } = useApp();
+  const [loading, setLocalLoading] = useState(false);
 
   // Get destination page from location.state, sessionStorage, or default to /profile
   const getRedirectPath = () => {
@@ -45,10 +45,11 @@ export default function Login() {
   }, [user, navigate, from]);
 
   const handleSubmit = async (email: string, password: string) => {
+    setLocalLoading(true);
     setLoading(true);
 
     try {
-      await login({ email, password });
+      await login({ email, password }, setLoading);
       navigate(from, { replace: true });
     } catch (err) {
       const error = err as Error;
@@ -56,6 +57,7 @@ export default function Login() {
         error.message || "Login failed. Please check your credentials.";
       showError(errorMessage);
     } finally {
+      setLocalLoading(false);
       setLoading(false);
     }
   };

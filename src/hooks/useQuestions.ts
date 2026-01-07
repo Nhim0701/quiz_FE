@@ -6,7 +6,6 @@ import { API_ENDPOINTS } from "@/constants";
 interface QuestionsState {
   // Categories with question sets
   categoriesWithSets: CategoryWithSetsProps[];
-  setCategoriesWithSets: (categories: CategoryWithSetsProps[]) => void;
 
   // Cached questions by category and set
   cachedQuestions: Record<string, QuestionProps[]>; // key: "category:set" or "category"
@@ -24,8 +23,7 @@ interface QuestionsState {
   clearCache: () => void;
 
   // API methods
-  getCategories: <T>() => Promise<T>;
-  getCategoriesWithSets: <T>() => Promise<T>;
+  getCategoriesWithSets: () => Promise<void>;
   getQuestionsByCategory: <T>(category: string) => Promise<T>;
   getQuestionsByCategoryAndSet: <T>(
     category: string,
@@ -37,9 +35,6 @@ export const useQuestionsStore = create<QuestionsState>((set, get) => ({
   // Initial state
   categoriesWithSets: [],
   cachedQuestions: {},
-
-  // Categories with sets
-  setCategoriesWithSets: (categories) => set({ categoriesWithSets: categories }),
 
   // Cache management
   setCachedQuestions: (category, questionSet, questions) => {
@@ -62,16 +57,11 @@ export const useQuestionsStore = create<QuestionsState>((set, get) => ({
   clearCache: () => set({ cachedQuestions: {} }),
 
   // API methods
-  getCategories: async <T>(): Promise<T> => {
-    const response = await apiClient.get<T>(API_ENDPOINTS.QUESTIONS.CATEGORIES);
-    return response.data;
-  },
-
-  getCategoriesWithSets: async <T>(): Promise<T> => {
-    const response = await apiClient.get<T>(
+  getCategoriesWithSets: async () => {
+    const response = await apiClient.get<CategoryWithSetsProps[]>(
       API_ENDPOINTS.QUESTIONS.CATEGORIES_WITH_SETS
     );
-    return response.data;
+    set({ categoriesWithSets: response.data });
   },
 
   getQuestionsByCategory: async <T>(category: string): Promise<T> => {

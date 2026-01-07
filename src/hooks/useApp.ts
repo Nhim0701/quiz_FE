@@ -9,16 +9,13 @@ type Theme = "light" | "dark";
 interface AppState {
   theme: Theme;
   loading: boolean;
-  error: string | null;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
   setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
   showError: (error: string, options?: Parameters<typeof toast.error>[1]) => void;
   showSuccess: (message: string, options?: Parameters<typeof toast.success>[1]) => void;
   showInfo: (message: string, options?: Parameters<typeof toast.info>[1]) => void;
   showWarning: (message: string, options?: Parameters<typeof toast.warning>[1]) => void;
-  clearError: () => void;
 }
 
 // Helper function to get initial theme
@@ -59,7 +56,6 @@ const useApp = create<AppState>()(
     (set) => ({
       theme: getInitialTheme(),
       loading: false,
-      error: null,
       setTheme: (theme: Theme) => {
         if (theme === "light" || theme === "dark") {
           set({ theme });
@@ -74,14 +70,9 @@ const useApp = create<AppState>()(
         });
       },
       setLoading: (loading: boolean) => {
-        console.log("setLoading", loading);
         set({ loading });
       },
-      setError: (error: string | null) => {
-        set({ error });
-      },
       showError: (error: string, options?: Parameters<typeof toast.error>[1]) => {
-        set({ error });
         toast.error(error, {
           ...options,
           className: "toast-error",
@@ -104,9 +95,6 @@ const useApp = create<AppState>()(
           ...options,
           className: "toast-warning",
         });
-      },
-      clearError: () => {
-        set({ error: null });
       },
     }),
     {
