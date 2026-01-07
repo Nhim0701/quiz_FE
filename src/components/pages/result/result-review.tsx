@@ -1,17 +1,17 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { QuestionProps } from "@/types";
 import { ChevronRight } from "lucide-react";
+import { useResultStore } from "../../../hooks/useResult";
 
-interface ResultReviewProps {
-  questions: QuestionProps[];
-  answers: Record<number, number[]>;
-}
-
-export function ResultReview({ questions, answers }: ResultReviewProps) {
+export function ResultReview() {
+  const { questions, answers } = useResultStore();
   const [visibleExplanations, setVisibleExplanations] = useState<
     Record<number, boolean>
   >({});
+
+  if (!questions || questions.length === 0 || !answers) {
+    return null;
+  }
 
   const toggleExplanation = (questionId: number) => {
     setVisibleExplanations((prev) => ({

@@ -1,9 +1,6 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import useApp from "../hooks/useApp";
-import { useAuth } from "../hooks/useAuth";
 import { useProfileStore } from "../hooks/useProfile";
-import { ROUTES } from "../constants";
 import { useTranslation } from "../i18n";
 import {
   ProfileHeader,
@@ -14,16 +11,9 @@ import {
 } from "../components/pages/profile";
 
 export default function Profile() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
   const { setLoading, showError } = useApp();
   const { t } = useTranslation();
-  const {
-    dashboardData,
-    categoriesWithSets,
-    getDashboard,
-    getCategoriesWithSets,
-  } = useProfileStore();
+  const { getDashboard, getCategoriesWithSets } = useProfileStore();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,50 +34,21 @@ export default function Profile() {
     fetchData();
   }, [setLoading, getCategoriesWithSets, getDashboard, showError]);
 
-  const handleStartTest = (category: string, questionSet: string) => {
-    navigate(ROUTES.TEST, {
-      state: {
-        category,
-        questionSet,
-      },
-    });
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate(ROUTES.LOGIN);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 sm:p-6">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
-        <ProfileHeader
-          userName={user?.name}
-          userEmail={user?.email}
-          onLogout={handleLogout}
-        />
+        <ProfileHeader />
 
-        {dashboardData?.overall && (
-          <ProfileStats overall={dashboardData.overall} />
-        )}
+        <ProfileStats />
 
         <div className="space-y-4 sm:space-y-6">
-          <ProfileTests
-            categoriesWithSets={categoriesWithSets}
-            onStartTest={handleStartTest}
-          />
+          <ProfileTests />
 
-          {dashboardData?.by_category && (
-            <ProfileCategoryStats byCategory={dashboardData.by_category} />
-          )}
+          <ProfileCategoryStats />
         </div>
 
         <div className="grid grid-cols-1 gap-6">
-          {dashboardData?.recent_activity && (
-            <ProfileRecentActivity
-              recentActivity={dashboardData.recent_activity}
-            />
-          )}
+          <ProfileRecentActivity />
         </div>
       </div>
     </div>

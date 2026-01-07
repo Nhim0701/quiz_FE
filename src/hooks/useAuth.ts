@@ -56,11 +56,13 @@ const fetchUserData = async (
 ): Promise<void> => {
   if (setLoading) setLoading(true);
   try {
-    const response = await apiClient.get<UserResponse>(API_ENDPOINTS.AUTH.ME);
+    const response = await apiClient.get<ApiSuccessResponse<UserResponse>>(
+      API_ENDPOINTS.AUTH.ME
+    );
     set({
       user: {
-        name: response.data.account_name,
-        email: response.data.user_email,
+        name: response.data.data.account_name,
+        email: response.data.data.user_email,
       },
     });
   } catch (error) {

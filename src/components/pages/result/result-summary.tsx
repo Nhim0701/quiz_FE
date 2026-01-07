@@ -1,33 +1,32 @@
 import { CheckCircle } from "lucide-react";
 import { useTranslation } from "../../../i18n";
+import { useResultStore } from "../../../hooks/useResult";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../../../constants";
 
-interface Summary {
-  total: number;
-  answered: number;
-  testType?: string;
-  date: string;
-  timeSpent: number;
-  timeRemaining: number;
-}
-
-interface ResultSummaryProps {
-  summary: Summary;
-  correctCount: number;
-  wrongCount: number;
-  accuracyPercentage: number;
-  onBack: () => void;
-  onRetake: () => void;
-}
-
-export function ResultSummary({
-  summary,
-  correctCount,
-  wrongCount,
-  accuracyPercentage,
-  onBack,
-  onRetake,
-}: ResultSummaryProps) {
+export function ResultSummary() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { summary, getCorrectCount, getWrongCount, getAccuracyPercentage } =
+    useResultStore();
+
+  if (!summary) {
+    return null;
+  }
+
+  const correctCount = getCorrectCount();
+  const wrongCount = getWrongCount();
+  const accuracyPercentage = getAccuracyPercentage();
+
+  const handleBack = () => {
+    navigate(ROUTES.PROFILE);
+  };
+
+  const handleRetake = () => {
+    navigate(ROUTES.TEST, {
+      state: { testType: summary.testType },
+    });
+  };
   const completionPercentage = Math.round(
     (summary.answered / summary.total) * 100
   );
@@ -101,13 +100,13 @@ export function ResultSummary({
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
         <button
-          onClick={onBack}
+          onClick={handleBack}
           className="px-5 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 dark:hover:from-blue-600 dark:hover:to-indigo-600 transition-all duration-200 font-semibold shadow-md hover:shadow-lg text-sm sm:text-base"
         >
           {t("ui.buttons.backToDashboard")}
         </button>
         <button
-          onClick={onRetake}
+          onClick={handleRetake}
           className="px-5 sm:px-8 py-2.5 sm:py-3 border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 font-semibold text-sm sm:text-base"
         >
           {t("ui.buttons.takeAnotherTest")}

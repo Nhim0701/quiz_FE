@@ -1,17 +1,13 @@
 import { FileText, CheckCircle, XCircle, TrendingUp } from "lucide-react";
+import { useProfileStore } from "../../../hooks/useProfile";
 
-interface OverallStats {
-  total_answered: number;
-  total_correct: number;
-  total_wrong: number;
-  overall_accuracy: number;
-}
+export function ProfileStats() {
+  const { dashboardData } = useProfileStore();
+  const overall = dashboardData?.overall;
 
-interface ProfileStatsProps {
-  overall: OverallStats;
-}
-
-export function ProfileStats({ overall }: ProfileStatsProps) {
+  if (!overall) {
+    return null;
+  }
   const stats = [
     {
       label: "Total Answered",

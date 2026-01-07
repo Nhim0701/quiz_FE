@@ -1,28 +1,102 @@
-import { QuestionProps } from "@/types";
 import { useTranslation } from "../../../i18n";
+import { useTestStore } from "../../../hooks/useTest";
+import { useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { ROUTES, TIME_CONSTANTS } from "../../../constants";
+import { SubmissionItem } from "../../../types";
+import useApp from "../../../hooks/useApp";
 
-interface TestSidebarProps {
-  questions: QuestionProps[];
-  answers: Record<number, number[]>;
-  flags: Record<number, boolean>;
-  revealed: Record<number, boolean>;
-  currentIndex: number;
-  submitting: boolean;
-  onGoToQuestion: (index: number) => void;
-  onFinish: () => void;
-}
-
-export function TestSidebar({
-  questions,
-  answers,
-  flags,
-  revealed,
-  currentIndex,
-  submitting,
-  onGoToQuestion,
-  onFinish,
-}: TestSidebarProps) {
+export function TestSidebar() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { showError } = useApp();
+  const {
+    questions,
+    answers,
+    flags,
+    revealed,
+    currentIndex,
+    submitting,
+    timeRemaining,
+    category,
+    testType,
+    goToQuestion,
+    submitBulk,
+    setTimeStarted,
+    setSubmitting,
+  } = useTestStore();
+
+  const handleFinish = useCallback(async () => {
+    // Stop timer
+    setTimeStarted(false);
+
+    const total = questions.length;
+    const answered = Object.keys(answers).length;
+    const initialTime = questions.length * TIME_CONSTANTS.SECONDS_PER_QUESTION;
+    const timeSpent = initialTime - timeRemaining;
+
+    // Build responses array for backend submission
+    const submissions: SubmissionItem[] = [];
+    for (const [questionId, selectedAnswerIds] of Object.entries(answers)) {
+      const question = questions.find((q) => q.id === parseInt(questionId));
+      if (!question) continue;
+
+      for (const answerId of selectedAnswerIds) {
+        const answer = question.answers.find((a) => a.id === answerId);
+        if (!answer) continue;
+
+        submissions.push({
+          question_id: parseInt(questionId),
+          selected_option_id: answerId,
+          is_correct: answer.is_correct,
+        });
+      }
+    }
+
+    // Submit responses to backend
+    if (submissions.length > 0) {
+      setSubmitting(true);
+      try {
+        await submitBulk<void>(submissions);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : t("errors.submitResponsesFailed");
+        showError(errorMessage);
+        // Continue to result page even if submission fails
+      } finally {
+        setSubmitting(false);
+      }
+    }
+
+    navigate(ROUTES.RESULT, {
+      state: {
+        answers,
+        questions,
+        summary: {
+          total,
+          answered,
+          testType: category || testType,
+          date: new Date().toISOString(),
+          timeSpent,
+          timeRemaining,
+        },
+      },
+    });
+  }, [
+    questions,
+    answers,
+    timeRemaining,
+    category,
+    testType,
+    setTimeStarted,
+    setSubmitting,
+    submitBulk,
+    showError,
+    navigate,
+    t,
+  ]);
   const answeredCount = Object.keys(answers).length;
   const flaggedCount = Object.values(flags).filter(Boolean).length;
 
@@ -50,7 +124,7 @@ export function TestSidebar({
           </div>
         </div>
         <button
-          onClick={onFinish}
+          onClick={handleFinish}
           disabled={submitting}
           className="w-full mt-4 sm:mt-6 px-4 py-2.5 sm:py-3 bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-500 dark:to-emerald-500 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 dark:hover:from-green-600 dark:hover:to-emerald-600 transition-all duration-200 font-semibold text-sm sm:text-base shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
@@ -105,7 +179,7 @@ export function TestSidebar({
             return (
               <button
                 key={q.id}
-                onClick={() => onGoToQuestion(idx)}
+                onClick={() => goToQuestion(idx)}
                 className={`relative aspect-square rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 ${bgClass}`}
               >
                 {idx + 1}

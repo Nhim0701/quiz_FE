@@ -29,63 +29,17 @@ export default function Test() {
   const { t } = useTranslation();
   const {
     questions,
-    currentIndex,
     answers,
-    flags,
-    revealed,
-    submitting,
-    timeRemaining,
     timeStarted,
+    timeRemaining,
     category: storeCategory,
-    questionSet: storeQuestionSet,
     testType: storeTestType,
     fetchAndInitializeTest,
-    submitBulk,
-    goNext,
-    goPrev,
-    goToQuestion,
-    toggleAnswer,
-    toggleFlag,
-    toggleRevealed,
     setTimeRemaining,
     setTimeStarted,
     setSubmitting,
+    submitBulk,
   } = useTestStore();
-
-  useEffect(() => {
-    // Support both old (testType) and new (category + questionSet) navigation
-    const categoryToUse = category || testType;
-
-    if (!categoryToUse) {
-      navigate(ROUTES.PROFILE, { replace: true });
-      return;
-    }
-
-    const fetchQuestions = async () => {
-      setLoading(true);
-      try {
-        await fetchAndInitializeTest(categoryToUse, questionSet);
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t("errors.fetchQuestionsFailed");
-        showError(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchQuestions();
-  }, [
-    category,
-    questionSet,
-    testType,
-    navigate,
-    setLoading,
-    fetchAndInitializeTest,
-    showError,
-  ]);
 
   const handleFinish = useCallback(async () => {
     // Stop timer
@@ -156,7 +110,44 @@ export default function Test() {
     submitBulk,
     showError,
     navigate,
+    t,
   ]);
+
+  useEffect(() => {
+    // Support both old (testType) and new (category + questionSet) navigation
+    const categoryToUse = category || testType;
+
+    if (!categoryToUse) {
+      navigate(ROUTES.PROFILE, { replace: true });
+      return;
+    }
+
+    const fetchQuestions = async () => {
+      setLoading(true);
+      try {
+        await fetchAndInitializeTest(categoryToUse, questionSet);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : t("errors.fetchQuestionsFailed");
+        showError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchQuestions();
+  }, [
+    category,
+    questionSet,
+    testType,
+    navigate,
+    setLoading,
+    fetchAndInitializeTest,
+    showError,
+  ]);
+
 
   // Timer effect
   useEffect(() => {
@@ -188,37 +179,6 @@ export default function Test() {
     return <TestEmpty onBack={() => navigate(ROUTES.PROFILE)} />;
   }
 
-  const currentQuestion = questions[currentIndex];
-  const selectedForCurrent = answers[currentQuestion?.id || 0] || [];
-  const isFlagged = !!flags[currentQuestion?.id || 0];
-  const hasAnswered = selectedForCurrent.length > 0;
-  const isRevealed = !!revealed[currentQuestion?.id || 0];
-
-  // Check if current question has multiple correct answers
-  const correctAnswersCount = currentQuestion?.answers.filter(
-    (a) => a.is_correct
-  ).length;
-  const hasMultipleCorrect = (correctAnswersCount ?? 0) > 1;
-
-  const handleToggleAnswer = (answerId: number) => {
-    if (currentQuestion) {
-      toggleAnswer(currentQuestion.id, answerId);
-    }
-  };
-
-  const handleToggleFlag = () => {
-    if (currentQuestion) {
-      toggleFlag(currentQuestion.id);
-    }
-  };
-
-  const handleGoNext = () => {
-    if (hasAnswered && currentQuestion) {
-      toggleRevealed(currentQuestion.id);
-    }
-    goNext();
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-6 sm:py-8 px-4">
       {/* Theme Toggle - Fixed Position */}
@@ -230,45 +190,13 @@ export default function Test() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
           {/* Main Question Area */}
           <div className="lg:col-span-3 space-y-4 sm:space-y-6">
-            <TestHeader
-              category={storeCategory || category}
-              testType={storeTestType || testType}
-              questionSet={storeQuestionSet || questionSet}
-              currentIndex={currentIndex}
-              totalQuestions={questions.length}
-              timeRemaining={timeRemaining}
-              onClose={() => navigate(ROUTES.PROFILE)}
-            />
+            <TestHeader />
 
-            {currentQuestion && (
-              <TestQuestion
-                question={currentQuestion}
-                currentIndex={currentIndex}
-                selectedAnswers={selectedForCurrent}
-                isFlagged={isFlagged}
-                isRevealed={isRevealed}
-                hasMultipleCorrect={hasMultipleCorrect}
-                onToggleAnswer={handleToggleAnswer}
-                onToggleFlag={handleToggleFlag}
-                onPrevious={goPrev}
-                onNext={handleGoNext}
-                canGoPrevious={currentIndex > 0}
-                canGoNext={currentIndex < questions.length - 1}
-              />
-            )}
+            <TestQuestion />
           </div>
 
           {/* Sidebar */}
-          <TestSidebar
-            questions={questions}
-            answers={answers}
-            flags={flags}
-            revealed={revealed}
-            currentIndex={currentIndex}
-            submitting={submitting}
-            onGoToQuestion={goToQuestion}
-            onFinish={handleFinish}
-          />
+          <TestSidebar />
         </div>
       </div>
     </div>

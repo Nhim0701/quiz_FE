@@ -1,26 +1,24 @@
 import { Clock } from "lucide-react";
 import { useTranslation } from "../../../i18n";
+import { useTestStore } from "../../../hooks/useTest";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../../../constants";
 
-interface TestHeaderProps {
-  category?: string;
-  testType?: string;
-  questionSet?: string;
-  currentIndex: number;
-  totalQuestions: number;
-  timeRemaining: number;
-  onClose: () => void;
-}
-
-export function TestHeader({
-  category,
-  testType,
-  questionSet,
-  currentIndex,
-  totalQuestions,
-  timeRemaining,
-  onClose,
-}: TestHeaderProps) {
+export function TestHeader() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const {
+    category,
+    testType,
+    questionSet,
+    currentIndex,
+    questions,
+    timeRemaining,
+  } = useTestStore();
+
+  const handleClose = () => {
+    navigate(ROUTES.PROFILE);
+  };
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -41,8 +39,8 @@ export function TestHeader({
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
             {t("test.question", {
               current: currentIndex + 1,
-              total: totalQuestions,
-            })}
+              total: questions.length,
+            } as any)}
           </p>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
@@ -57,7 +55,7 @@ export function TestHeader({
             <span>{formatTime(timeRemaining)}</span>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors flex-shrink-0"
             aria-label="Close"
           >
@@ -82,10 +80,15 @@ export function TestHeader({
       <div className="relative w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
         <div
           className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-400 dark:to-indigo-500 transition-all duration-300"
-          style={{ width: `${((currentIndex + 1) / totalQuestions) * 100}%` }}
+          style={{
+            width: `${
+              questions.length > 0
+                ? ((currentIndex + 1) / questions.length) * 100
+                : 0
+            }%`,
+          }}
         ></div>
       </div>
     </div>
   );
 }
-

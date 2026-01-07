@@ -1,20 +1,9 @@
 import { FileText, Check, X } from "lucide-react";
+import { useProfileStore } from "../../../hooks/useProfile";
 
-interface RecentActivity {
-  id: number;
-  category: string;
-  question_preview: string;
-  is_correct: boolean;
-  answered_at: string | null;
-}
-
-interface ProfileRecentActivityProps {
-  recentActivity: RecentActivity[];
-}
-
-export function ProfileRecentActivity({
-  recentActivity,
-}: ProfileRecentActivityProps) {
+export function ProfileRecentActivity() {
+  const { dashboardData } = useProfileStore();
+  const recentActivity = dashboardData?.recent_activity;
   if (!recentActivity || recentActivity.length === 0) {
     return (
       <div className="bg-white dark:bg-slate-800 shadow-sm rounded-xl p-6">

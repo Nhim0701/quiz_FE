@@ -1,3 +1,5 @@
+import { useProfileStore } from "../../../hooks/useProfile";
+
 interface CategoryStat {
   category: string;
   correct_answers: number;
@@ -5,13 +7,10 @@ interface CategoryStat {
   accuracy: number;
 }
 
-interface ProfileCategoryStatsProps {
-  byCategory: CategoryStat[];
-}
+export function ProfileCategoryStats() {
+  const { dashboardData } = useProfileStore();
+  const byCategory = dashboardData?.by_category;
 
-export function ProfileCategoryStats({
-  byCategory,
-}: ProfileCategoryStatsProps) {
   if (!byCategory || byCategory.length === 0) {
     return null;
   }

@@ -1,15 +1,20 @@
 import { FileText, ArrowRight } from "lucide-react";
-import { CategoryWithSetsProps } from "@/types";
+import { useProfileStore } from "../../../hooks/useProfile";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../../../constants";
 
-interface ProfileTestsProps {
-  categoriesWithSets: CategoryWithSetsProps[];
-  onStartTest: (category: string, questionSet: string) => void;
-}
+export function ProfileTests() {
+  const { categoriesWithSets } = useProfileStore();
+  const navigate = useNavigate();
 
-export function ProfileTests({
-  categoriesWithSets,
-  onStartTest,
-}: ProfileTestsProps) {
+  const handleStartTest = (category: string, questionSet: string) => {
+    navigate(ROUTES.TEST, {
+      state: {
+        category,
+        questionSet,
+      },
+    });
+  };
   if (!categoriesWithSets || categoriesWithSets.length === 0) {
     return (
       <div className="bg-white dark:bg-slate-800 shadow-sm rounded-xl p-4 sm:p-6">
@@ -57,7 +62,7 @@ export function ProfileTests({
                 <button
                   key={set.question_set}
                   onClick={() =>
-                    onStartTest(categoryData.category, set.question_set)
+                    handleStartTest(categoryData.category, set.question_set)
                   }
                   className="bg-gradient-to-br from-slate-50 to-slate-100 hover:from-blue-50 hover:to-indigo-50 dark:from-slate-700 dark:to-slate-600 dark:hover:from-blue-900/50 dark:hover:to-indigo-900/50 border-2 border-slate-200 hover:border-blue-400 dark:border-slate-600 dark:hover:border-blue-500 rounded-xl p-4 sm:p-6 text-left transition-all duration-200 hover:shadow-lg group"
                 >

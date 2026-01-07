@@ -1,39 +1,58 @@
 import ReactMarkdown from "react-markdown";
-import { QuestionProps } from "@/types";
 import { Check, X, Flag } from "lucide-react";
 import { useTranslation } from "../../../i18n";
+import { useTestStore } from "../../../hooks/useTest";
 
-interface TestQuestionProps {
-  question: QuestionProps;
-  currentIndex: number;
-  selectedAnswers: number[];
-  isFlagged: boolean;
-  isRevealed: boolean;
-  hasMultipleCorrect: boolean;
-  onToggleAnswer: (answerId: number) => void;
-  onToggleFlag: () => void;
-  onPrevious: () => void;
-  onNext: () => void;
-  canGoPrevious: boolean;
-  canGoNext: boolean;
-}
-
-export function TestQuestion({
-  question,
-  currentIndex,
-  selectedAnswers,
-  isFlagged,
-  isRevealed,
-  hasMultipleCorrect,
-  onToggleAnswer,
-  onToggleFlag,
-  onPrevious,
-  onNext,
-  canGoPrevious,
-  canGoNext,
-}: TestQuestionProps) {
+export function TestQuestion() {
   const { t } = useTranslation();
-  const sortedAnswers = [...question.answers].sort((a, b) => a.id - b.id);
+  const {
+    questions,
+    currentIndex,
+    answers,
+    flags,
+    revealed,
+    toggleAnswer,
+    toggleFlag,
+    toggleRevealed,
+    goPrev,
+    goNext,
+  } = useTestStore();
+
+  const currentQuestion = questions[currentIndex];
+  if (!currentQuestion) {
+    return null;
+  }
+
+  const selectedAnswers = answers[currentQuestion.id] || [];
+  const isFlagged = !!flags[currentQuestion.id];
+  const isRevealed = !!revealed[currentQuestion.id];
+  const hasAnswered = selectedAnswers.length > 0;
+
+  // Check if current question has multiple correct answers
+  const correctAnswersCount = currentQuestion.answers.filter(
+    (a) => a.is_correct
+  ).length;
+  const hasMultipleCorrect = correctAnswersCount > 1;
+
+  const sortedAnswers = [...currentQuestion.answers].sort((a, b) => a.id - b.id);
+
+  const handleToggleAnswer = (answerId: number) => {
+    toggleAnswer(currentQuestion.id, answerId);
+  };
+
+  const handleToggleFlag = () => {
+    toggleFlag(currentQuestion.id);
+  };
+
+  const handleGoNext = () => {
+    if (hasAnswered) {
+      toggleRevealed(currentQuestion.id);
+    }
+    goNext();
+  };
+
+  const canGoPrevious = currentIndex > 0;
+  const canGoNext = currentIndex < questions.length - 1;
 
   return (
     <div className="bg-white dark:bg-slate-800 shadow-sm rounded-xl p-5 sm:p-8">
@@ -57,7 +76,7 @@ export function TestQuestion({
             )}
           </div>
           <p className="text-base sm:text-lg text-slate-800 dark:text-slate-100 leading-relaxed">
-            {question.content}
+            {currentQuestion.content}
           </p>
         </div>
       </div>
@@ -102,7 +121,7 @@ export function TestQuestion({
           return (
             <button
               key={answer.id}
-              onClick={() => !isRevealed && onToggleAnswer(answer.id)}
+              onClick={() => !isRevealed && handleToggleAnswer(answer.id)}
               disabled={isRevealed}
               className={`w-full text-left p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 ${statusClass} ${
                 isRevealed ? "cursor-default" : "cursor-pointer group"
@@ -246,7 +265,7 @@ export function TestQuestion({
       <div className="flex items-center justify-between mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-200 dark:border-slate-700">
         <div className="flex gap-2 sm:gap-3">
           <button
-            onClick={onPrevious}
+            onClick={goPrev}
             disabled={!canGoPrevious}
             className="px-2.5 sm:px-4 py-2 sm:py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 sm:gap-2"
           >
@@ -267,7 +286,7 @@ export function TestQuestion({
             <span className="sm:hidden">{t("ui.buttons.prev")}</span>
           </button>
           <button
-            onClick={onNext}
+            onClick={handleGoNext}
             disabled={!canGoNext}
             className="px-2.5 sm:px-4 py-2 sm:py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 sm:gap-2"
           >
@@ -290,7 +309,7 @@ export function TestQuestion({
 
         <div className="flex gap-2 sm:gap-3">
           <button
-            onClick={onToggleFlag}
+            onClick={handleToggleFlag}
             className={`px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-lg transition-all duration-200 flex items-center gap-1.5 sm:gap-2 text-sm ${
               isFlagged
                 ? "bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700"
