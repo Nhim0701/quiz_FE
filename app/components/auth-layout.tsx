@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet } from "react-router";
 import ThemeToggle from "./ui/theme-toggle";
 import { LanguageSwitcher } from "./ui/language-switcher";
 
@@ -17,4 +17,3 @@ export function AuthLayout() {
     </div>
   );
 }
-

@@ -1,9 +1,9 @@
 import { useTranslation } from "@/i18n";
 import { useTestStore } from "@/hooks/useTest";
 import { useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { TIME_CONSTANTS, getTestResultRoute } from "@/constants";
-import { SubmissionItem } from "@/types";
+import type { SubmissionItem } from "@/types";
 import useApp from "@/hooks/useApp";
 
 export function TestSidebar() {
@@ -122,7 +122,9 @@ export function TestSidebar() {
             </span>
           </div>
           <div className="flex justify-between text-xs sm:text-sm">
-            <span className="text-slate-600 dark:text-slate-400">{t("ui.status.flagged")}</span>
+            <span className="text-slate-600 dark:text-slate-400">
+              {t("ui.status.flagged")}
+            </span>
             <span className="font-semibold text-slate-800 dark:text-slate-200">
               {flaggedCount}
             </span>
@@ -199,4 +201,3 @@ export function TestSidebar() {
     </div>
   );
 }
-

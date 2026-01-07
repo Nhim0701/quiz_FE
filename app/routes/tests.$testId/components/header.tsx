@@ -1,7 +1,7 @@
 import { Clock } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { useTestStore } from "@/hooks/useTest";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { ROUTES } from "@/constants";
 
 export function TestHeader() {

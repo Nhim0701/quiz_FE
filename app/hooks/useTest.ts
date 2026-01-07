@@ -1,5 +1,9 @@
 import { create } from "zustand";
-import { ApiSuccessResponse, QuestionProps, SubmissionItem } from "@/types";
+import type {
+  ApiSuccessResponse,
+  QuestionProps,
+  SubmissionItem,
+} from "@/types";
 import apiClient from "@/lib/axios";
 import { API_ENDPOINTS, TIME_CONSTANTS } from "@/constants";
 

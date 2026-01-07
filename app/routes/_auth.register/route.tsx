@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import useApp from "@/hooks/useApp";
 import { useTranslation } from "@/i18n";
@@ -56,4 +56,3 @@ export default function Register() {
     </>
   );
 }
-

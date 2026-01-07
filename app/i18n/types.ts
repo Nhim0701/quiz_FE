@@ -18,7 +18,7 @@ export type TranslationKey = NestedKeyOf<TranslationKeys>;
 // Helper type to extract the value type for a given key path
 type GetNestedValue<
   T extends object,
-  K extends string
+  K extends string,
 > = K extends `${infer Key}.${infer Rest}`
   ? Key extends keyof T
     ? T[Key] extends object
@@ -26,8 +26,8 @@ type GetNestedValue<
       : never
     : never
   : K extends keyof T
-  ? T[K]
-  : never;
+    ? T[K]
+    : never;
 
 // Extract all parameter names from a string template
 type ExtractParams<T extends string> =
@@ -40,23 +40,22 @@ type ExtractParams<T extends string> =
     : never;
 
 // Type for translation function parameters
-export type TranslationParams<K extends TranslationKey> = GetNestedValue<
-  TranslationKeys,
-  K
-> extends string
-  ? ExtractParams<GetNestedValue<TranslationKeys, K>> extends never
-    ? never
-    : Record<ExtractParams<GetNestedValue<TranslationKeys, K>>, string | number>
-  : never;
+export type TranslationParams<K extends TranslationKey> =
+  GetNestedValue<TranslationKeys, K> extends string
+    ? ExtractParams<GetNestedValue<TranslationKeys, K>> extends never
+      ? never
+      : Record<
+          ExtractParams<GetNestedValue<TranslationKeys, K>>,
+          string | number
+        >
+    : never;
 
 // Typed translation function with optional params
 // TypeScript will enforce correct params at compile time when possible
 export interface TypedTFunction {
   <K extends TranslationKey>(
     key: K,
-    params?: TranslationParams<K> extends never
-      ? never
-      : TranslationParams<K>
+    params?: TranslationParams<K> extends never ? never : TranslationParams<K>
   ): string;
 }
 
@@ -68,4 +67,3 @@ export type Resources = {
   en: { translation: typeof enTranslations };
   vi: { translation: typeof enTranslations };
 };
-

@@ -1,7 +1,7 @@
 // API utility for backend communication
-import { AxiosResponse } from "axios";
+import type { AxiosResponse } from "axios";
 import { STORAGE_KEYS } from "@/constants";
-import { ApiSuccessResponse } from "@/types";
+import type { ApiSuccessResponse } from "@/types";
 
 // Token management
 export const tokenManager = {

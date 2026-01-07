@@ -144,7 +144,9 @@ export function RegisterForm({ onSubmit, loading = false }: RegisterFormProps) {
         className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-500 dark:to-indigo-500 text-white py-2.5 sm:py-3 rounded-lg hover:from-purple-700 hover:to-indigo-700 dark:hover:from-purple-600 dark:hover:to-indigo-600 transition-all duration-200 text-sm font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 mt-5 sm:mt-6 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
       >
         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-        {loading ? t("auth.register.creatingAccount") : t("auth.register.createAccount")}
+        {loading
+          ? t("auth.register.creatingAccount")
+          : t("auth.register.createAccount")}
       </Button>
     </form>
   );

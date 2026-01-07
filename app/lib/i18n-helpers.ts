@@ -1,4 +1,4 @@
-import { useTranslation } from "../i18n";
+import { useTranslation } from "@/i18n";
 
 export const useI18nMessages = () => {
   const { t } = useTranslation();
@@ -60,4 +60,3 @@ export const useI18nMessages = () => {
     },
   };
 };
-

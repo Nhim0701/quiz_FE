@@ -1,14 +1,14 @@
 import { tokenManager } from "@/lib/api";
-import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
+import axios, {
+  type AxiosError,
+  type AxiosInstance,
+  type AxiosResponse,
+} from "axios";
 import { toast } from "sonner";
-import {
-  API_CONFIG,
-  ROUTES,
-  SESSION_KEYS,
-} from "@/constants";
+import { API_CONFIG, ROUTES, SESSION_KEYS } from "@/constants";
 import { useAuthStoreInternal } from "@/hooks/useAuth";
 import { t } from "@/i18n/utils";
-import { ApiErrorResponse, ApiSuccessResponse } from "@/types";
+import type { ApiErrorResponse, ApiSuccessResponse } from "@/types";
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
@@ -75,11 +75,11 @@ apiClient.interceptors.response.use(
     // Handle error responses (4xx, 5xx) with standard structure
     if (error.response) {
       const errorData = error.response.data;
-      
+
       // Check if response follows standard error structure
       if (errorData?.error) {
         const { code, message, trace_id, details } = errorData.error;
-        
+
         // Create error object with standard structure
         const apiError = new Error(message) as Error & {
           code: string;
@@ -87,15 +87,15 @@ apiClient.interceptors.response.use(
           details?: unknown[] | Record<string, unknown> | null;
           status?: number;
         };
-        
+
         apiError.code = code;
         apiError.trace_id = trace_id;
         apiError.details = details || null;
         apiError.status = error.response.status;
-        
+
         return Promise.reject(apiError);
       }
-      
+
       // Fallback for non-standard error responses
       const errorMessage =
         (errorData as { detail?: string })?.detail ||

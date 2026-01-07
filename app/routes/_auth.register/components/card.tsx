@@ -1,5 +1,5 @@
-import { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import type { ReactNode } from "react";
+import { Link } from "react-router";
 
 interface RegisterCardProps {
   children: ReactNode;
@@ -32,4 +32,3 @@ export function RegisterCard({ children }: RegisterCardProps) {
     </div>
   );
 }
-

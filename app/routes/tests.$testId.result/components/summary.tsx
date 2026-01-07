@@ -1,7 +1,7 @@
 import { CheckCircle } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { useResultStore } from "@/hooks/useResult";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { ROUTES, getTestRoute } from "@/constants";
 
 export function ResultSummary() {
@@ -117,4 +117,3 @@ export function ResultSummary() {
     </div>
   );
 }
-

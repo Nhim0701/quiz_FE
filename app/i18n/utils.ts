@@ -7,13 +7,10 @@ import type { TranslationKey, TranslationParams } from "./types";
  */
 export function t<K extends TranslationKey>(
   key: K,
-  params?: TranslationParams<K> extends never
-    ? never
-    : TranslationParams<K>
+  params?: TranslationParams<K> extends never ? never : TranslationParams<K>
 ): string {
   if (params) {
     return i18n.t(key, params as Record<string, string | number>);
   }
   return i18n.t(key);
 }
-

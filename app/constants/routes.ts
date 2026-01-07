@@ -11,12 +11,17 @@ export const ROUTES = {
 } as const;
 
 // Helper functions for dynamic test routes
-export const createTestId = (category: string, questionSet?: string): string => {
+export const createTestId = (
+  category: string,
+  questionSet?: string
+): string => {
   const data = questionSet ? `${category}:${questionSet}` : category;
   return btoa(data).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 };
 
-export const decodeTestId = (testId: string): { category: string; questionSet?: string } => {
+export const decodeTestId = (
+  testId: string
+): { category: string; questionSet?: string } => {
   try {
     const decoded = atob(testId.replace(/-/g, "+").replace(/_/g, "/"));
     const parts = decoded.split(":");
@@ -28,12 +33,18 @@ export const decodeTestId = (testId: string): { category: string; questionSet?: 
   }
 };
 
-export const getTestRoute = (category: string, questionSet?: string): string => {
+export const getTestRoute = (
+  category: string,
+  questionSet?: string
+): string => {
   const testId = createTestId(category, questionSet);
   return `/tests/${testId}`;
 };
 
-export const getTestResultRoute = (category: string, questionSet?: string): string => {
+export const getTestResultRoute = (
+  category: string,
+  questionSet?: string
+): string => {
   const testId = createTestId(category, questionSet);
   return `/tests/${testId}/result`;
 };
@@ -43,4 +54,3 @@ export const DEFAULT_ROUTES = {
   AUTHENTICATED: ROUTES.DASHBOARD,
   UNAUTHENTICATED: ROUTES.LOGIN,
 } as const;
-

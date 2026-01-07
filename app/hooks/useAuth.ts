@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import apiClient from "@/lib/axios";
 import { tokenManager } from "@/lib/api";
 import { API_ENDPOINTS, STORAGE_KEYS } from "@/constants";
-import { ApiSuccessResponse } from "@/types";
+import type { ApiSuccessResponse } from "@/types";
 
 interface UserData {
   email: string;

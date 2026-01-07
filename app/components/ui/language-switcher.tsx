@@ -1,4 +1,4 @@
-import { useTranslation } from "../../i18n";
+import { useTranslation } from "@/i18n";
 import { Button } from "./button";
 import { Globe } from "lucide-react";
 
@@ -24,4 +24,3 @@ export function LanguageSwitcher() {
     </Button>
   );
 }
-

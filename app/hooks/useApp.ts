@@ -30,23 +30,8 @@ interface AppState {
 }
 
 // Helper function to get initial theme
+// Always return default on server to avoid hydration mismatch
 const getInitialTheme = (): Theme => {
-  // Check localStorage first
-  if (typeof window !== "undefined") {
-    const stored = localStorage.getItem(STORAGE_KEYS.THEME);
-    if (stored === THEME_VALUES.LIGHT || stored === THEME_VALUES.DARK) {
-      return stored;
-    }
-
-    // Otherwise, detect system preference
-    if (
-      window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-    ) {
-      return THEME_VALUES.DARK;
-    }
-  }
-
   return THEME_VALUES.LIGHT;
 };
 
@@ -66,7 +51,7 @@ const createToastHandler = <
     | typeof toast.error
     | typeof toast.success
     | typeof toast.info
-    | typeof toast.warning
+    | typeof toast.warning,
 >(
   toastFn: T,
   className: string
@@ -115,9 +100,24 @@ const useApp = create<AppState>()(
         if (state) {
           applyTheme(state.theme);
         } else {
-          // If no persisted state, apply initial theme
-          const initialTheme = getInitialTheme();
-          applyTheme(initialTheme);
+          // If no persisted state, detect system preference or use default
+          if (typeof window !== "undefined") {
+            const stored = localStorage.getItem(STORAGE_KEYS.THEME);
+            if (stored === THEME_VALUES.LIGHT || stored === THEME_VALUES.DARK) {
+              applyTheme(stored);
+              return;
+            }
+
+            // Detect system preference
+            if (
+              window.matchMedia &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches
+            ) {
+              applyTheme(THEME_VALUES.DARK);
+              return;
+            }
+          }
+          applyTheme(THEME_VALUES.LIGHT);
         }
       },
     }

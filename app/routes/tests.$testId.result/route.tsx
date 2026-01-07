@@ -3,7 +3,7 @@ import { useLocation, useNavigate, redirect } from "react-router-dom";
 import { tokenManager } from "@/lib/api";
 import { useAuthStoreInternal } from "@/hooks/useAuth";
 import { Container } from "@/components/ui/container";
-import { QuestionProps } from "@/types";
+import type { QuestionProps } from "@/types";
 import {
   ResultEmpty,
   ResultSummary,

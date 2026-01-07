@@ -1,5 +1,5 @@
-import { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import type { ReactNode } from "react";
+import { Link } from "react-router";
 
 interface LoginCardProps {
   children: ReactNode;
@@ -32,4 +32,3 @@ export function LoginCard({ children }: LoginCardProps) {
     </div>
   );
 }
-

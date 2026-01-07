@@ -1,6 +1,6 @@
 import { FileText, ArrowRight } from "lucide-react";
 import { useProfileStore } from "@/hooks/useProfile";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { getTestRoute } from "@/constants";
 import { useTranslation } from "@/i18n";
 import {

@@ -7,7 +7,11 @@ interface PageHeaderProps {
   className?: string;
 }
 
-export function PageHeader({ title, breadcrumbItems, className }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  breadcrumbItems,
+  className,
+}: PageHeaderProps) {
   return (
     <div className={cn("space-y-2 mb-6", className)}>
       <Breadcrumb items={breadcrumbItems} />
@@ -15,4 +19,3 @@ export function PageHeader({ title, breadcrumbItems, className }: PageHeaderProp
     </div>
   );
 }
-

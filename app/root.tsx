@@ -8,9 +8,9 @@ import {
 } from "react-router";
 
 import type { Route } from "./+types/root";
-import "./assets/css/index.css";
-import "./i18n";
-import { Toaster } from "./components/ui/sonner";
+import "@/assets/css/index.css";
+import "@/i18n";
+import { Toaster } from "@/components/ui/sonner";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },

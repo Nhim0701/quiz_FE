@@ -1,13 +1,8 @@
-import {
-  LayoutDashboard,
-  FileText,
-  User,
-  LogOut,
-} from "lucide-react";
-import { useTranslation } from "../i18n";
-import { useAuth } from "../hooks/useAuth";
-import { useNavigate, useLocation, Link } from "react-router-dom";
-import { ROUTES } from "../constants";
+import { LayoutDashboard, FileText, User, LogOut } from "lucide-react";
+import { useTranslation } from "@/i18n";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate, useLocation, Link } from "react-router";
+import { ROUTES } from "@/constants";
 import {
   Sidebar,
   SidebarContent,
@@ -21,11 +16,7 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "./ui/sidebar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "./ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export function AppSidebar() {
   const { t } = useTranslation();
@@ -107,7 +98,9 @@ export function AppSidebar() {
                 <TooltipContent side="right">
                   <div className="flex flex-col">
                     <span className="font-medium">{user.name}</span>
-                    <span className="text-xs text-muted-foreground">{user.email}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {user.email}
+                    </span>
                   </div>
                 </TooltipContent>
               )}
@@ -158,4 +151,3 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
-

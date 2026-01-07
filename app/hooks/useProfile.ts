@@ -1,8 +1,11 @@
 import { create } from "zustand";
-import { DashboardProps, CategoryWithSetsProps } from "@/types";
+import type {
+  DashboardProps,
+  CategoryWithSetsProps,
+  ApiSuccessResponse,
+} from "@/types";
 import apiClient from "@/lib/axios";
 import { API_ENDPOINTS } from "@/constants";
-import { ApiSuccessResponse } from "@/types";
 
 interface ProfileState {
   // Dashboard data

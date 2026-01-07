@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { QuestionProps } from "@/types";
+import type { QuestionProps } from "@/types";
 
 interface ResultSummary {
   total: number;
@@ -84,4 +84,3 @@ export const useResultStore = create<ResultState>((set, get) => ({
     return Math.round((getCorrectCount() / summary.answered) * 100);
   },
 }));
-

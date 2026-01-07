@@ -1,6 +1,6 @@
 import ProtectedRoute from "@/middleware/protected-route";
 import { Layout } from "@/components/layout";
-import { redirect } from "react-router-dom";
+import { redirect } from "react-router";
 import { tokenManager } from "@/lib/api";
 import { useAuthStoreInternal } from "@/hooks/useAuth";
 
@@ -31,4 +31,3 @@ export default function AppLayout() {
     </ProtectedRoute>
   );
 }
-

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router";
 import { ChevronRight, Home } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { cn } from "@/lib/utils";
@@ -23,7 +23,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
     if (items) return items;
 
     const pathSegments = location.pathname.split("/").filter(Boolean);
-    
+
     // If not in app routes, return empty
     if (pathSegments.length === 0 || pathSegments[0] !== "app") {
       return [];
@@ -63,7 +63,10 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
   return (
     <nav
       aria-label="Breadcrumb"
-      className={cn("flex items-center space-x-1 text-sm text-muted-foreground", className)}
+      className={cn(
+        "flex items-center space-x-1 text-sm text-muted-foreground",
+        className
+      )}
     >
       {breadcrumbItems.map((item, index) => {
         const isLast = index === breadcrumbItems.length - 1;
@@ -102,4 +105,3 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
     </nav>
   );
 }
-

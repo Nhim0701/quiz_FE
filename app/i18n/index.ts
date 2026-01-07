@@ -8,4 +8,3 @@ export type {
   SupportedLanguage,
   Resources,
 } from "./types";
-

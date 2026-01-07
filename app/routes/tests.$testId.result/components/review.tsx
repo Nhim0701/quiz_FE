@@ -34,8 +34,7 @@ export function ResultReview() {
           const correctAnswers = sortedAnswers.filter((a) => a.is_correct);
           const userSelectedCorrect = userAnswers.every((a) => a.is_correct);
           const userSelectedAllCorrect =
-            userAnswers.length === correctAnswers.length &&
-            userSelectedCorrect;
+            userAnswers.length === correctAnswers.length && userSelectedCorrect;
 
           return (
             <AccordionItem
@@ -262,4 +261,3 @@ export function ResultReview() {
     </div>
   );
 }
-

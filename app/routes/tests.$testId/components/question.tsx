@@ -34,7 +34,9 @@ export function TestQuestion() {
   ).length;
   const hasMultipleCorrect = correctAnswersCount > 1;
 
-  const sortedAnswers = [...currentQuestion.answers].sort((a, b) => a.id - b.id);
+  const sortedAnswers = [...currentQuestion.answers].sort(
+    (a, b) => a.id - b.id
+  );
 
   const handleToggleAnswer = (answerId: number) => {
     toggleAnswer(currentQuestion.id, answerId);
@@ -167,12 +169,19 @@ export function TestQuestion() {
                   {sortedAnswers
                     .filter((a) => a.is_correct && a.explanation)
                     .map((answer) => (
-                      <div key={answer.id} className="prose prose-sm dark:prose-invert max-w-none">
+                      <div
+                        key={answer.id}
+                        className="prose prose-sm dark:prose-invert max-w-none"
+                      >
                         {sortedAnswers.filter(
                           (a) => a.is_correct && a.explanation
                         ).length > 1 && (
                           <strong className="block mb-1 text-blue-900 dark:text-blue-200">
-                            Answer {String.fromCharCode(65 + sortedAnswers.indexOf(answer))}:
+                            Answer{" "}
+                            {String.fromCharCode(
+                              65 + sortedAnswers.indexOf(answer)
+                            )}
+                            :
                           </strong>
                         )}
                         <ReactMarkdown
@@ -336,4 +345,3 @@ export function TestQuestion() {
     </div>
   );
 }
-

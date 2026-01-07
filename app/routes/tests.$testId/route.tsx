@@ -1,11 +1,11 @@
 import { useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { redirect } from "react-router-dom";
+import { useParams, useNavigate } from "react-router";
+import { redirect } from "react-router";
 import { tokenManager } from "@/lib/api";
 import { useAuthStoreInternal } from "@/hooks/useAuth";
 import useApp from "@/hooks/useApp";
 import { useTestStore } from "@/hooks/useTest";
-import { SubmissionItem } from "@/types";
+import type { SubmissionItem } from "@/types";
 import { TIME_CONSTANTS, decodeTestId, getTestResultRoute } from "@/constants";
 import { useTranslation } from "@/i18n";
 import {

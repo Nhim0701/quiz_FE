@@ -13,4 +13,3 @@ export const VALIDATION_MESSAGES = {
   // Name
   NAME_REQUIRED: "Name is required",
 } as const;
-

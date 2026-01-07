@@ -51,7 +51,15 @@ export function RecentActivity() {
                 </span>
                 <span className="text-xs text-slate-400 dark:text-slate-500">
                   {activity.answered_at
-                    ? new Date(activity.answered_at).toLocaleDateString()
+                    ? (() => {
+                        const date = new Date(activity.answered_at);
+                        // Use consistent format to avoid hydration mismatch
+                        return date.toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        });
+                      })()
                     : "N/A"}
                 </span>
               </div>
@@ -65,4 +73,3 @@ export function RecentActivity() {
     </div>
   );
 }
-

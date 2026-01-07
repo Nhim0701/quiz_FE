@@ -1,15 +1,10 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import useApp from "@/hooks/useApp";
 import { ROUTES, SESSION_KEYS } from "@/constants";
 import { useTranslation } from "@/i18n";
-import {
-  LoginHeader,
-  LoginForm,
-  LoginCard,
-  LoginFooter,
-} from "./components";
+import { LoginHeader, LoginForm, LoginCard, LoginFooter } from "./components";
 
 export default function Login() {
   const { user, login } = useAuth();

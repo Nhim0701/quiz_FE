@@ -8,4 +8,3 @@ export const TIME_CONSTANTS = {
   // Timer intervals
   TIMER_INTERVAL: 1000, // 1 second
 } as const;
-

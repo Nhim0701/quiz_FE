@@ -11,19 +11,19 @@ export function AppHeader() {
   const { t } = useTranslation();
 
   return (
-    <header 
+    <header
       className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4 transition-[width,margin-left] duration-200"
       style={{
-        width: !isMobile 
-          ? (state === "collapsed" 
-              ? "calc(100vw - var(--sidebar-width-icon) - 2.5rem)" 
-              : "calc(100vw - var(--sidebar-width)) - 1rem")
+        width: !isMobile
+          ? state === "collapsed"
+            ? "calc(100vw - var(--sidebar-width-icon) - 2.5rem)"
+            : "calc(100vw - var(--sidebar-width)) - 1rem"
           : "100%",
-        marginLeft: !isMobile 
-          ? (state === "collapsed" 
-              ? "calc(var(--sidebar-width-icon) + 1.5rem)" 
-              : "calc(var(--sidebar-width))")
-          : 0
+        marginLeft: !isMobile
+          ? state === "collapsed"
+            ? "calc(var(--sidebar-width-icon) + 1.5rem)"
+            : "calc(var(--sidebar-width))"
+          : 0,
       }}
     >
       <Button
@@ -31,7 +31,9 @@ export function AppHeader() {
         size="icon"
         onClick={toggleSidebar}
         className={`h-7 w-7 ${state === "collapsed" ? "ml-4" : "ml-2"}`}
-        aria-label={state === "collapsed" ? t("sidebar.expand") : t("sidebar.collapse")}
+        aria-label={
+          state === "collapsed" ? t("sidebar.expand") : t("sidebar.collapse")
+        }
       >
         {state === "collapsed" ? (
           <PanelLeftOpen className="h-4 w-4" />
@@ -47,4 +49,3 @@ export function AppHeader() {
     </header>
   );
 }
-

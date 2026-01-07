@@ -24,4 +24,3 @@ export function ResultEmpty({ onBack }: ResultEmptyProps) {
     </div>
   );
 }
-
