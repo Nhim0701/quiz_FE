@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { QuestionProps, ResponseItem } from "@/types";
 import apiClient from "@/lib/axios";
-import { API_ENDPOINTS } from "@/constants";
+import { API_ENDPOINTS, TIME_CONSTANTS } from "@/constants";
 
 interface TestState {
   // Test configuration
@@ -54,6 +54,12 @@ interface TestState {
     testType: string | null,
     questions: QuestionProps[]
   ) => void;
+
+  // Fetch and initialize questions
+  fetchAndInitializeTest: (
+    category: string,
+    questionSet?: string
+  ) => Promise<void>;
 
   // Reset test
   resetTest: () => void;
@@ -166,7 +172,6 @@ export const useTestStore = create<TestState>((set, get) => ({
 
   // Initialize test
   initializeTest: (category, questionSet, testType, questions) => {
-    const timePerQuestion = 144; // seconds per question
     set({
       category,
       questionSet,
@@ -176,10 +181,32 @@ export const useTestStore = create<TestState>((set, get) => ({
       answers: {},
       flags: {},
       revealed: {},
-      timeRemaining: questions.length * timePerQuestion,
+      timeRemaining: questions.length * TIME_CONSTANTS.SECONDS_PER_QUESTION,
       timeStarted: false,
       submitting: false,
     });
+  },
+
+  // Fetch and initialize questions
+  fetchAndInitializeTest: async (category, questionSet) => {
+    // Dynamic import to avoid circular dependency
+    const { useQuestionsStore } = await import("./useQuestions");
+    const { getQuestionsByCategory, getQuestionsByCategoryAndSet } =
+      useQuestionsStore.getState();
+    let questions: QuestionProps[];
+
+    if (questionSet) {
+      questions = await getQuestionsByCategoryAndSet<QuestionProps[]>(
+        category,
+        questionSet
+      );
+    } else {
+      questions = await getQuestionsByCategory<QuestionProps[]>(category);
+    }
+
+    const testType = questionSet ? null : category;
+    const { initializeTest } = get();
+    initializeTest(category, questionSet || null, testType, questions);
   },
 
   // Reset test

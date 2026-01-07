@@ -66,6 +66,6 @@ export interface AnswerProps {
 
 export interface ResponseItem {
   question_id: number;
-  selected_options: number[];
-  [key: string]: unknown;
+  selected_option_id: number;
+  is_correct: boolean;
 }
