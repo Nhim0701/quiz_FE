@@ -14,7 +14,8 @@ export default function Login() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { loading, setLoading, showError } = useApp();
+  const { showError } = useApp();
+  const [loading, setLoading] = useState(false);
 
   // Get destination page from location.state or default to /profile
   const from =

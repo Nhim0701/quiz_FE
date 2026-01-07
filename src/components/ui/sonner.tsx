@@ -11,6 +11,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
       richColors
+      closeButton
       toastOptions={{
         classNames: {
           toast:
@@ -21,6 +22,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
             "group-[.toast]:bg-slate-900 group-[.toast]:text-slate-50 dark:group-[.toast]:bg-slate-50 dark:group-[.toast]:text-slate-900",
           cancelButton:
             "group-[.toast]:bg-slate-100 group-[.toast]:text-slate-500 dark:group-[.toast]:bg-slate-800 dark:group-[.toast]:text-slate-400",
+          closeButton:
+            "group-[.toast]:bg-slate-100/50 group-[.toast]:text-slate-500 hover:group-[.toast]:bg-slate-200 dark:group-[.toast]:bg-slate-800/50 dark:group-[.toast]:text-slate-400 dark:hover:group-[.toast]:bg-slate-700",
           error:
             "group-[.toaster]:bg-red-50 group-[.toaster]:text-red-900 group-[.toaster]:border-red-300 group-[.toaster]:border-l-4 dark:group-[.toaster]:bg-red-950/50 dark:group-[.toaster]:text-red-100 dark:group-[.toaster]:border-red-800",
           success:

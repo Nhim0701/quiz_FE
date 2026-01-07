@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import useApp from "../hooks/useApp";
@@ -12,7 +13,8 @@ import {
 export default function Register() {
   const navigate = useNavigate();
   const { register } = useAuth();
-  const { loading, setLoading, showError } = useApp();
+  const { showError } = useApp();
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (
     name: string,
