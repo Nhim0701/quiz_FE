@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useLocation, useNavigate, redirect } from "react-router-dom";
 import { tokenManager } from "@/lib/api";
 import { useAuthStoreInternal } from "@/hooks/useAuth";
-import ThemeToggle from "@/components/ui/theme-toggle";
 import { Container } from "@/components/ui/container";
 import { QuestionProps } from "@/types";
 import {

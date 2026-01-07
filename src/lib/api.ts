@@ -1,6 +1,5 @@
 // API utility for backend communication
-import { AxiosRequestConfig, AxiosResponse } from "axios";
-import apiClient from "@/lib/axios";
+import { AxiosResponse } from "axios";
 import { STORAGE_KEYS } from "@/constants";
 import { ApiSuccessResponse } from "@/types";
 
