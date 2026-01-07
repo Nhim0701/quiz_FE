@@ -41,8 +41,8 @@ interface AuthState {
   logout: () => void;
 }
 
-// Internal Zustand store (not exported)
-const useAuthStoreInternal = create<AuthState>()(
+// Internal Zustand store - exported for use in loaders
+export const useAuthStoreInternal = create<AuthState>()(
   persist(
     (set) => ({
       user: null,

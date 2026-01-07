@@ -1,5 +1,5 @@
 import { useEffect, useState, FormEvent } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import useApp from "../hooks/useApp";
 import ThemeToggle from "../components/ui/theme-toggle";
@@ -10,13 +10,19 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
   const { loading, setLoading } = useApp();
+
+  // Get destination page from location.state or default to /profile
+  const from =
+    (location.state as { from?: { pathname: string } })?.from?.pathname ||
+    "/profile";
 
   useEffect(() => {
     if (user) {
-      navigate("/profile", { replace: true });
+      navigate(from, { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, navigate, from]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -27,7 +33,7 @@ export default function Login() {
 
     try {
       await login({ email, password });
-      navigate("/profile");
+      navigate(from, { replace: true });
     } catch (err) {
       const error = err as Error;
       setError(error.message || "Login failed. Please check your credentials.");
