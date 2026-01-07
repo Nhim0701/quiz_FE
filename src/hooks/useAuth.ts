@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { apiClient, tokenManager } from "../utils/api";
+import apiClient from "@/lib/axios";
+import { tokenManager } from "@/lib/api";
 import useApp from "./useApp";
 
 interface UserData {

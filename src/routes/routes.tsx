@@ -4,7 +4,7 @@ import {
   RouteObject,
   redirect,
 } from "react-router-dom";
-import { tokenManager } from "../utils/api";
+import { tokenManager } from "../lib/api";
 import { useAuthStoreInternal } from "../hooks/useAuth";
 import { Login, Register, Profile, Test, Result } from "../pages";
 import ProtectedRoute from "../middleware/protected-route";

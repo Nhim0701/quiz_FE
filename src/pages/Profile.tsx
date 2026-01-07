@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { questionApi, commonApi } from "../utils/api";
+import { questionApi, commonApi } from "../lib/api";
 import useApp from "../hooks/useApp";
 import { useAuth } from "../hooks/useAuth";
 import { CategoryWithSetsProps, DashboardProps } from "../types";
