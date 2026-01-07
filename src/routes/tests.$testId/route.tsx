@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { redirect } from "react-router-dom";
 import { tokenManager } from "@/lib/api";
 import { useAuthStoreInternal } from "@/hooks/useAuth";
-import ThemeToggle from "@/components/ui/theme-toggle";
 import useApp from "@/hooks/useApp";
 import { useTestStore } from "@/hooks/useTest";
 import { SubmissionItem } from "@/types";
