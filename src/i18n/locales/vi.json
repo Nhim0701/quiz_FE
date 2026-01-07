@@ -108,7 +108,12 @@
   "sidebar": {
     "dashboard": "Bảng Điều Khiển",
     "tests": "Bài Kiểm Tra",
-    "profile": "Hồ Sơ"
+    "profile": "Hồ Sơ",
+    "expand": "Mở rộng",
+    "collapse": "Thu gọn"
+  },
+  "breadcrumb": {
+    "home": "Trang chủ"
   }
 }
 

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/i18n";
-import { registerSchema, type RegisterFormData } from "./register-schema";
+import { registerSchema, type RegisterFormData } from "../register-schema";
 
 interface RegisterFormProps {
   onSubmit: (name: string, email: string, password: string) => Promise<void>;

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/i18n";
-import { loginSchema, type LoginFormData } from "./login-schema";
+import { loginSchema, type LoginFormData } from "../login-schema";
 
 interface LoginFormProps {
   onSubmit: (email: string, password: string) => Promise<void>;

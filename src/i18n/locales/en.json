@@ -108,7 +108,12 @@
   "sidebar": {
     "dashboard": "Dashboard",
     "tests": "Tests",
-    "profile": "Profile"
+    "profile": "Profile",
+    "expand": "Expand",
+    "collapse": "Collapse"
+  },
+  "breadcrumb": {
+    "home": "Home"
   }
 }
 

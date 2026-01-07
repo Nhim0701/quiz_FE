@@ -2,7 +2,8 @@ import { useEffect } from "react";
 import useApp from "@/hooks/useApp";
 import { useProfileStore } from "@/hooks/useProfile";
 import { useTranslation } from "@/i18n";
-import { UserInfo } from "./user-info";
+import { PageHeader } from "@/components/page-header";
+import { UserInfo } from "./components";
 
 export default function Profile() {
   const { setLoading, showError } = useApp();
@@ -31,6 +32,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 sm:p-6">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+        <PageHeader title={t("sidebar.profile")} />
         <UserInfo />
       </div>
     </div>

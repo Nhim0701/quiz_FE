@@ -8,7 +8,7 @@ import {
   RegisterForm,
   RegisterCard,
   RegisterFooter,
-} from "./";
+} from "./components";
 
 export default function Register() {
   const navigate = useNavigate();

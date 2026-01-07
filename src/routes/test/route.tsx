@@ -14,7 +14,7 @@ import {
   TestQuestion,
   TestSidebar,
   TestEmpty,
-} from "./";
+} from "./components";
 
 interface LocationState {
   category?: string;

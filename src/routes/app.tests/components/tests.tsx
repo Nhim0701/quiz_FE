@@ -3,7 +3,7 @@ import { useProfileStore } from "@/hooks/useProfile";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants";
 
-export function ProfileTests() {
+export function Tests() {
   const { categoriesWithSets } = useProfileStore();
   const navigate = useNavigate();
 
@@ -95,4 +95,3 @@ export function ProfileTests() {
     </div>
   );
 }
-

@@ -24,4 +24,3 @@ export function TestEmpty({ onBack }: TestEmptyProps) {
     </div>
   );
 }
-

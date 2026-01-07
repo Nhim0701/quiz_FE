@@ -2,9 +2,8 @@ import { useEffect } from "react";
 import useApp from "@/hooks/useApp";
 import { useProfileStore } from "@/hooks/useProfile";
 import { useTranslation } from "@/i18n";
-import { Stats } from "./stats";
-import { CategoryStats } from "./category-stats";
-import { RecentActivity } from "./recent-activity";
+import { PageHeader } from "@/components/page-header";
+import { Stats, CategoryStats, RecentActivity } from "./components";
 
 export default function Dashboard() {
   const { setLoading, showError } = useApp();
@@ -33,6 +32,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 sm:p-6">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+        <PageHeader title={t("sidebar.dashboard")} />
         <Stats />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
