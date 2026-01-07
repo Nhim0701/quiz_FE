@@ -8,7 +8,7 @@ import {
   RegisterForm,
   RegisterCard,
   RegisterFooter,
-} from "../components/register";
+} from "../components/pages/register";
 
 export default function Register() {
   const [error, setError] = useState("");

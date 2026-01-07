@@ -8,7 +8,7 @@ import {
   LoginForm,
   LoginCard,
   LoginFooter,
-} from "../components/login";
+} from "../components/pages/login";
 
 export default function Login() {
   const { user, login } = useAuth();
