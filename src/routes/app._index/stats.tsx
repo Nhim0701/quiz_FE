@@ -1,7 +1,7 @@
 import { FileText, CheckCircle, XCircle, TrendingUp } from "lucide-react";
 import { useProfileStore } from "@/hooks/useProfile";
 
-export function ProfileStats() {
+export function Stats() {
   const { dashboardData } = useProfileStore();
   const overall = dashboardData?.overall;
 
@@ -65,13 +65,19 @@ export function ProfileStats() {
                   {stat.label}
                 </p>
                 <p
-                  className={`text-2xl sm:text-3xl font-bold truncate ${valueColorClasses[stat.color as keyof typeof valueColorClasses]}`}
+                  className={`text-2xl sm:text-3xl font-bold truncate ${
+                    valueColorClasses[
+                      stat.color as keyof typeof valueColorClasses
+                    ]
+                  }`}
                 >
                   {stat.value}
                 </p>
               </div>
               <div
-                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center flex-shrink-0 ml-2 ${colorClasses[stat.color as keyof typeof colorClasses]}`}
+                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center flex-shrink-0 ml-2 ${
+                  colorClasses[stat.color as keyof typeof colorClasses]
+                }`}
               >
                 <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
@@ -82,4 +88,3 @@ export function ProfileStats() {
     </div>
   );
 }
-

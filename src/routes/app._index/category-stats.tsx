@@ -1,13 +1,6 @@
 import { useProfileStore } from "@/hooks/useProfile";
 
-interface CategoryStat {
-  category: string;
-  correct_answers: number;
-  wrong_answers: number;
-  accuracy: number;
-}
-
-export function ProfileCategoryStats() {
+export function CategoryStats() {
   const { dashboardData } = useProfileStore();
   const byCategory = dashboardData?.by_category;
 

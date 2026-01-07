@@ -1,7 +1,7 @@
 import { FileText, Check, X } from "lucide-react";
 import { useProfileStore } from "@/hooks/useProfile";
 
-export function ProfileRecentActivity() {
+export function RecentActivity() {
   const { dashboardData } = useProfileStore();
   const recentActivity = dashboardData?.recent_activity;
   if (!recentActivity || recentActivity.length === 0) {
