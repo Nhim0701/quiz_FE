@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { QuestionProps, CategoryWithSetsProps } from "@/types";
+import apiClient from "@/lib/axios";
+import { API_ENDPOINTS } from "@/constants";
 
 interface QuestionsState {
   // Categories with question sets
@@ -20,6 +22,15 @@ interface QuestionsState {
 
   // Clear cache
   clearCache: () => void;
+
+  // API methods
+  getCategories: <T>() => Promise<T>;
+  getCategoriesWithSets: <T>() => Promise<T>;
+  getQuestionsByCategory: <T>(category: string) => Promise<T>;
+  getQuestionsByCategoryAndSet: <T>(
+    category: string,
+    questionSet: string
+  ) => Promise<T>;
 }
 
 export const useQuestionsStore = create<QuestionsState>((set, get) => ({
@@ -49,5 +60,35 @@ export const useQuestionsStore = create<QuestionsState>((set, get) => ({
   },
 
   clearCache: () => set({ cachedQuestions: {} }),
+
+  // API methods
+  getCategories: async <T>(): Promise<T> => {
+    const response = await apiClient.get<T>(API_ENDPOINTS.QUESTIONS.CATEGORIES);
+    return response.data;
+  },
+
+  getCategoriesWithSets: async <T>(): Promise<T> => {
+    const response = await apiClient.get<T>(
+      API_ENDPOINTS.QUESTIONS.CATEGORIES_WITH_SETS
+    );
+    return response.data;
+  },
+
+  getQuestionsByCategory: async <T>(category: string): Promise<T> => {
+    const response = await apiClient.get<T>(
+      API_ENDPOINTS.QUESTIONS.BY_CATEGORY(category)
+    );
+    return response.data;
+  },
+
+  getQuestionsByCategoryAndSet: async <T>(
+    category: string,
+    questionSet: string
+  ): Promise<T> => {
+    const response = await apiClient.get<T>(
+      API_ENDPOINTS.QUESTIONS.BY_CATEGORY_AND_SET(category, questionSet)
+    );
+    return response.data;
+  },
 }));
 

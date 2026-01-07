@@ -1,11 +1,12 @@
 import { tokenManager } from "@/lib/api";
 import axios, { AxiosError, AxiosInstance } from "axios";
+import { API_CONFIG, ERROR_MESSAGES } from "@/constants";
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   headers: {
-    "Content-Type": "application/json",
+    "Content-Type": API_CONFIG.CONTENT_TYPE,
   },
 });
 
@@ -14,7 +15,7 @@ apiClient.interceptors.request.use(
   (config) => {
     const token = tokenManager.getToken();
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `${API_CONFIG.AUTHORIZATION_PREFIX} ${token}`;
     }
     return config;
   },
@@ -35,12 +36,12 @@ apiClient.interceptors.response.use(
     if (error.response) {
       const data = error.response.data as { detail?: string };
       const errorMessage =
-        data?.detail || `HTTP error! status: ${error.response.status}`;
+        data?.detail || `${ERROR_MESSAGES.HTTP_ERROR} ${error.response.status}`;
       throw new Error(errorMessage);
     } else if (error.request) {
-      throw new Error("Network error: No response received from server");
+      throw new Error(ERROR_MESSAGES.NETWORK_ERROR);
     } else {
-      throw new Error(`Request error: ${error.message}`);
+      throw new Error(`${ERROR_MESSAGES.REQUEST_ERROR}: ${error.message}`);
     }
   }
 );

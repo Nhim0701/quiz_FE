@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { questionApi, commonApi } from "../lib/api";
+import { commonApi } from "../lib/api";
 import ThemeToggle from "../components/ui/theme-toggle";
 import useApp from "../hooks/useApp";
+import { useQuestionsStore } from "../hooks/useQuestions";
 import { QuestionProps, ResponseItem } from "../types";
 import {
   TestHeader,
@@ -24,7 +25,8 @@ export default function Test() {
 
   const [questions, setQuestions] = useState<QuestionProps[]>([]);
   const { loading, setLoading, showError } = useApp();
-  const { getQuestionsByCategory, getQuestionsByCategoryAndSet } = questionApi;
+  const { getQuestionsByCategory, getQuestionsByCategoryAndSet } =
+    useQuestionsStore();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number[]>>({}); // questionId -> array of answer ids
   const [flags, setFlags] = useState<Record<number, boolean>>({}); // questionId -> true/false

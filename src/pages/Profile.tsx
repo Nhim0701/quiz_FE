@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { questionApi, commonApi } from "../lib/api";
+import { commonApi } from "../lib/api";
 import useApp from "../hooks/useApp";
 import { useAuth } from "../hooks/useAuth";
+import { useQuestionsStore } from "../hooks/useQuestions";
 import { CategoryWithSetsProps, DashboardProps } from "../types";
 import {
   ProfileHeader,
@@ -22,12 +23,13 @@ export default function Profile() {
     null
   );
   const { setLoading, showError } = useApp();
+  const { getCategoriesWithSets } = useQuestionsStore();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const categoriesData = await questionApi.getCategoriesWithSets<
+        const categoriesData = await getCategoriesWithSets<
           CategoryWithSetsProps[]
         >();
         const dashboard = await commonApi.getDashboard<DashboardProps>();
