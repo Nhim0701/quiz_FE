@@ -1,19 +1,44 @@
 import { Outlet } from "react-router-dom";
 import { AppSidebar } from "./app-sidebar";
-import { SidebarInset, SidebarProvider } from "./ui/sidebar";
+import { SidebarInset, SidebarProvider, useSidebar } from "./ui/sidebar";
 import { AppHeader } from "./app-header";
 
-export function Layout() {
+function LayoutContent() {
+  const { state, isMobile } = useSidebar();
+
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset className="h-screen overflow-hidden">
-        <AppHeader />
-        <div className="flex-1 overflow-y-auto">
+    <SidebarInset>
+      <AppHeader />
+      <div
+        className="h-full w-full transition-all duration-200"
+        style={{
+          maxWidth: !isMobile
+            ? state === "collapsed"
+              ? "calc(100vw - var(--sidebar-width-icon) - 1.5rem)"
+              : "calc(100vw - var(--sidebar-width))"
+            : "100%",
+          marginLeft: !isMobile
+            ? state === "collapsed"
+              ? "calc(var(--sidebar-width-icon) + 1.5rem)"
+              : "calc(var(--sidebar-width))"
+            : 0,
+        }}
+      >
+        <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6 h-full w-full">
           <Outlet />
         </div>
-      </SidebarInset>
-    </SidebarProvider>
+      </div>
+    </SidebarInset>
   );
 }
 
+export function Layout() {
+  return (
+    <div className="w-screen h-screen overflow-x-hidden">
+      <SidebarProvider>
+        <AppSidebar />
+        <LayoutContent />
+      </SidebarProvider>
+    </div>
+  );
+}
