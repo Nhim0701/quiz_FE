@@ -19,7 +19,7 @@ export function ResultSummary() {
   const accuracyPercentage = getAccuracyPercentage();
 
   const handleBack = () => {
-    navigate(ROUTES.PROFILE);
+    navigate(ROUTES.DASHBOARD);
   };
 
   const handleRetake = () => {

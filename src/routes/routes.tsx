@@ -6,8 +6,9 @@ import {
 } from "react-router-dom";
 import { tokenManager } from "../lib/api";
 import { useAuthStoreInternal } from "../hooks/useAuth";
-import { Login, Register, Profile, Test, Result } from "../pages";
+import { Login, Register, Profile, Dashboard, Tests, Test, Result } from "../pages";
 import ProtectedRoute from "../middleware/protected-route";
+import { Layout } from "../components/layout";
 
 /**
  * Loader to check authentication before loading route
@@ -47,7 +48,7 @@ const rootLoader = async () => {
   }
 
   // Redirect based on user state
-  throw redirect(user ? "/profile" : "/login");
+  throw redirect(user ? "/dashboard" : "/login");
 };
 
 const routes: RouteObject[] = [
@@ -64,11 +65,35 @@ const routes: RouteObject[] = [
     element: <Register />,
   },
   {
+    path: "/dashboard",
+    loader: protectedLoader,
+    element: (
+      <ProtectedRoute>
+        <Layout>
+          <Dashboard />
+        </Layout>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/tests",
+    loader: protectedLoader,
+    element: (
+      <ProtectedRoute>
+        <Layout>
+          <Tests />
+        </Layout>
+      </ProtectedRoute>
+    ),
+  },
+  {
     path: "/profile",
     loader: protectedLoader,
     element: (
       <ProtectedRoute>
-        <Profile />
+        <Layout>
+          <Profile />
+        </Layout>
       </ProtectedRoute>
     ),
   },
@@ -92,7 +117,7 @@ const routes: RouteObject[] = [
   },
   {
     path: "*",
-    element: <Navigate to="/profile" replace />,
+    element: <Navigate to="/dashboard" replace />,
   },
 ];
 

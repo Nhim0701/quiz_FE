@@ -36,7 +36,7 @@ export default function Login() {
     }
 
     // Priority 3: default
-    return ROUTES.PROFILE;
+    return ROUTES.DASHBOARD;
   };
 
   const from = getRedirectPath();

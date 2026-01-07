@@ -104,6 +104,11 @@
   "result": {
     "wrong": "Wrong",
     "quiz": "Quiz"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "tests": "Tests",
+    "profile": "Profile"
   }
 }
 

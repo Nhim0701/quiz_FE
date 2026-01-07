@@ -5,18 +5,20 @@ import { useTranslation } from "../i18n";
 import {
   ProfileHeader,
   ProfileStats,
+  ProfileCategoryStats,
+  ProfileRecentActivity,
 } from "../components/pages/profile";
 
-export default function Profile() {
+export default function Dashboard() {
   const { setLoading, showError } = useApp();
   const { t } = useTranslation();
-  const { getDashboard } = useProfileStore();
+  const { getDashboard, getCategoriesWithSets } = useProfileStore();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        await getDashboard();
+        await Promise.all([getCategoriesWithSets(), getDashboard()]);
       } catch (error) {
         const errorMessage =
           error instanceof Error
@@ -29,7 +31,7 @@ export default function Profile() {
     };
 
     fetchData();
-  }, [setLoading, getDashboard, showError, t]);
+  }, [setLoading, getCategoriesWithSets, getDashboard, showError]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 sm:p-6">
@@ -37,7 +39,13 @@ export default function Profile() {
         <ProfileHeader />
 
         <ProfileStats />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <ProfileCategoryStats />
+          <ProfileRecentActivity />
+        </div>
       </div>
     </div>
   );
 }
+

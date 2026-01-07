@@ -41,7 +41,7 @@ export default function Result() {
   }, [location.state, setResult]);
 
   if (!summary) {
-    return <ResultEmpty onBack={() => navigate(ROUTES.PROFILE)} />;
+    return <ResultEmpty onBack={() => navigate(ROUTES.DASHBOARD)} />;
   }
 
   return (

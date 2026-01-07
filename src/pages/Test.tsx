@@ -118,7 +118,7 @@ export default function Test() {
     const categoryToUse = category || testType;
 
     if (!categoryToUse) {
-      navigate(ROUTES.PROFILE, { replace: true });
+      navigate(ROUTES.TESTS, { replace: true });
       return;
     }
 
@@ -176,7 +176,7 @@ export default function Test() {
   }, [loading, questions.length, timeStarted, setTimeStarted]);
 
   if (!questions.length) {
-    return <TestEmpty onBack={() => navigate(ROUTES.PROFILE)} />;
+    return <TestEmpty onBack={() => navigate(ROUTES.TESTS)} />;
   }
 
   return (

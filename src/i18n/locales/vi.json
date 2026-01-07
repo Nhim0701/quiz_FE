@@ -104,6 +104,11 @@
   "result": {
     "wrong": "Sai",
     "quiz": "Bài Kiểm Tra"
+  },
+  "sidebar": {
+    "dashboard": "Bảng Điều Khiển",
+    "tests": "Bài Kiểm Tra",
+    "profile": "Hồ Sơ"
   }
 }
 

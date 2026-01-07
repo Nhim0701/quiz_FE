@@ -17,7 +17,7 @@ export function TestHeader() {
   } = useTestStore();
 
   const handleClose = () => {
-    navigate(ROUTES.PROFILE);
+    navigate(ROUTES.TESTS);
   };
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
