@@ -114,6 +114,15 @@
   },
   "breadcrumb": {
     "home": "Home"
+  },
+  "tests": {
+    "availableTests": "Available Tests",
+    "noTestsAvailable": "No tests available",
+    "addQuestionsFirst": "Please add questions to the database first",
+    "totalQuestions": "total questions",
+    "questions": "questions",
+    "questionsLabel": "Questions",
+    "startTest": "Start Test"
   }
 }
 

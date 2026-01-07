@@ -1,2 +1,2 @@
-export { Tests } from "./tests";
+export { TestList } from "./test-list";
 

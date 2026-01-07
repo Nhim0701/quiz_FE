@@ -7,9 +7,9 @@ export function Layout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="h-screen overflow-hidden">
         <AppHeader />
-        <div className="flex flex-1 flex-col overflow-auto">
+        <div className="flex-1 overflow-y-auto">
           <Outlet />
         </div>
       </SidebarInset>

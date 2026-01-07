@@ -114,6 +114,15 @@
   },
   "breadcrumb": {
     "home": "Trang chủ"
+  },
+  "tests": {
+    "availableTests": "Bài Kiểm Tra Có Sẵn",
+    "noTestsAvailable": "Không có bài kiểm tra nào",
+    "addQuestionsFirst": "Vui lòng thêm câu hỏi vào cơ sở dữ liệu trước",
+    "totalQuestions": "tổng câu hỏi",
+    "questions": "câu hỏi",
+    "questionsLabel": "Câu hỏi",
+    "startTest": "Bắt Đầu Bài Kiểm Tra"
   }
 }
 
