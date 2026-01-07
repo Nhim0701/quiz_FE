@@ -1,123 +1,86 @@
-import {
-  createBrowserRouter,
-  Navigate,
-  RouteObject,
-  redirect,
-} from "react-router-dom";
-import { tokenManager } from "../lib/api";
-import { useAuthStoreInternal } from "../hooks/useAuth";
-import { Login, Register, Profile, Dashboard, Tests, Test, Result } from "../pages";
-import ProtectedRoute from "../middleware/protected-route";
-import { Layout } from "../components/layout";
+import { createBrowserRouter, type RouteObject } from "react-router-dom";
 
-/**
- * Loader to check authentication before loading route
- */
-const protectedLoader = async () => {
-  const user = useAuthStoreInternal.getState().user;
-  if (!user && tokenManager.hasToken()) {
-    // If token exists but no user, try to fetch user
-    try {
-      await useAuthStoreInternal.getState().getCurrentUser();
-      return null;
-    } catch {
-      throw redirect("/login");
-    }
-  }
-  if (!user) {
-    throw redirect("/login");
-  }
-  return null;
-};
-
-/**
- * Root loader to check auth on app startup and redirect appropriately
- */
-const rootLoader = async () => {
-  let user = useAuthStoreInternal.getState().user;
-
-  // If token exists but no user, try to fetch user
-  if (tokenManager.hasToken() && !user) {
-    try {
-      await useAuthStoreInternal.getState().getCurrentUser();
-      user = useAuthStoreInternal.getState().user;
-    } catch {
-      // Invalid token, redirect to login
-      throw redirect("/login");
-    }
-  }
-
-  // Redirect based on user state
-  throw redirect(user ? "/dashboard" : "/login");
-};
-
+// File-based routing with folders-for-organization
+// Each route is organized in a folder with route.tsx inside
 const routes: RouteObject[] = [
   {
     path: "/",
-    loader: rootLoader,
+    lazy: async () => {
+      const module = await import("./_index/route");
+      return { loader: module.loader };
+    },
   },
   {
-    path: "/login",
-    element: <Login />,
+    lazy: async () => {
+      const module = await import("./_auth/route");
+      return { Component: module.default };
+    },
+    children: [
+      {
+        path: "login",
+        lazy: async () => {
+          const module = await import("./_auth.login/route");
+          return { Component: module.default };
+        },
+      },
+      {
+        path: "register",
+        lazy: async () => {
+          const module = await import("./_auth.register/route");
+          return { Component: module.default };
+        },
+      },
+    ],
   },
   {
-    path: "/register",
-    element: <Register />,
+    lazy: async () => {
+      const module = await import("./app/route");
+      return { Component: module.default, loader: module.loader };
+    },
+    children: [
+      {
+        index: true,
+        lazy: async () => {
+          const module = await import("./app._index/route");
+          return { Component: module.default };
+        },
+      },
+      {
+        path: "tests",
+        lazy: async () => {
+          const module = await import("./app.tests/route");
+          return { Component: module.default };
+        },
+      },
+      {
+        path: "profile",
+        lazy: async () => {
+          const module = await import("./app.profile/route");
+          return { Component: module.default };
+        },
+      },
+    ],
   },
   {
-    path: "/dashboard",
-    loader: protectedLoader,
-    element: (
-      <ProtectedRoute>
-        <Layout>
-          <Dashboard />
-        </Layout>
-      </ProtectedRoute>
-    ),
+    path: "test",
+    lazy: async () => {
+      const module = await import("./test/route");
+      return { Component: module.default, loader: module.loader };
+    },
   },
   {
-    path: "/tests",
-    loader: protectedLoader,
-    element: (
-      <ProtectedRoute>
-        <Layout>
-          <Tests />
-        </Layout>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/profile",
-    loader: protectedLoader,
-    element: (
-      <ProtectedRoute>
-        <Layout>
-          <Profile />
-        </Layout>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/test",
-    loader: protectedLoader,
-    element: (
-      <ProtectedRoute>
-        <Test />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/result",
-    loader: protectedLoader,
-    element: (
-      <ProtectedRoute>
-        <Result />
-      </ProtectedRoute>
-    ),
+    path: "result",
+    lazy: async () => {
+      const module = await import("./result/route");
+      return { Component: module.default, loader: module.loader };
+    },
   },
   {
     path: "*",
-    element: <Navigate to="/dashboard" replace />,
+    lazy: async () => {
+      const module = await import("./$/route");
+      return { Component: module.default };
+    },
   },
 ];
 
