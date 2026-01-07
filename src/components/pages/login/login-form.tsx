@@ -11,13 +11,15 @@ interface LoginFormProps {
   error?: string;
 }
 
-export function LoginForm({ onSubmit, loading = false, error }: LoginFormProps) {
+export function LoginForm({ onSubmit, loading = false }: LoginFormProps) {
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
 
   const onSubmitForm = async (data: LoginFormData) => {
@@ -25,13 +27,10 @@ export function LoginForm({ onSubmit, loading = false, error }: LoginFormProps) 
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4 sm:space-y-5">
-      {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
-          {error}
-        </div>
-      )}
-
+    <form
+      onSubmit={handleSubmit(onSubmitForm)}
+      className="space-y-4 sm:space-y-5"
+    >
       <div>
         <Label
           htmlFor="email"
@@ -94,4 +93,3 @@ export function LoginForm({ onSubmit, loading = false, error }: LoginFormProps) 
     </form>
   );
 }
-

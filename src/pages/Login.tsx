@@ -12,10 +12,9 @@ import {
 
 export default function Login() {
   const { user, login } = useAuth();
-  const [error, setError] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  const { loading, setLoading } = useApp();
+  const { loading, setLoading, showError } = useApp();
 
   // Get destination page from location.state or default to /profile
   const from =
@@ -29,7 +28,6 @@ export default function Login() {
   }, [user, navigate, from]);
 
   const handleSubmit = async (email: string, password: string) => {
-    setError("");
     setLoading(true);
 
     try {
@@ -37,7 +35,9 @@ export default function Login() {
       navigate(from, { replace: true });
     } catch (err) {
       const error = err as Error;
-      setError(error.message || "Login failed. Please check your credentials.");
+      const errorMessage =
+        error.message || "Login failed. Please check your credentials.";
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -53,11 +53,7 @@ export default function Login() {
       <div className="w-full max-w-md">
         <LoginHeader />
         <LoginCard>
-          <LoginForm
-            onSubmit={handleSubmit}
-            loading={loading}
-            error={error}
-          />
+          <LoginForm onSubmit={handleSubmit} loading={loading} />
         </LoginCard>
         <LoginFooter />
       </div>

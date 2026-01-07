@@ -21,7 +21,7 @@ export default function Profile() {
   const [dashboardData, setDashboardData] = useState<DashboardProps | null>(
     null
   );
-  const { setLoading } = useApp();
+  const { setLoading, showError } = useApp();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,7 +34,12 @@ export default function Profile() {
         setCategoriesWithSets(categoriesData);
         setDashboardData(dashboard);
       } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch dashboard data. Please try again.";
         console.error("Failed to fetch dashboard data:", error);
+        showError(errorMessage);
         // Set empty arrays to avoid undefined errors
         setCategoriesWithSets([]);
         setDashboardData({

@@ -23,7 +23,7 @@ export default function Test() {
     (location.state as LocationState) || {};
 
   const [questions, setQuestions] = useState<QuestionProps[]>([]);
-  const { loading, setLoading } = useApp();
+  const { loading, setLoading, showError } = useApp();
   const { getQuestionsByCategory, getQuestionsByCategoryAndSet } = questionApi;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number[]>>({}); // questionId -> array of answer ids
@@ -59,7 +59,12 @@ export default function Test() {
         setQuestions(data);
         setTimeRemaining(144 * data.length); // 144s per question
       } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch questions. Please try again.";
         console.error("Failed to fetch questions:", error);
+        showError(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -194,7 +199,12 @@ export default function Test() {
       try {
         await commonApi.submitBulk<void>(responses);
       } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Failed to submit responses. Please try again.";
         console.error("Failed to submit responses:", error);
+        showError(errorMessage);
         // Continue to result page even if submission fails
       } finally {
         setSubmitting(false);

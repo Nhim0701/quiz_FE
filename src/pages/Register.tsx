@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import useApp from "../hooks/useApp";
@@ -11,13 +10,15 @@ import {
 } from "../components/pages/register";
 
 export default function Register() {
-  const [error, setError] = useState("");
   const navigate = useNavigate();
   const { register } = useAuth();
-  const { loading, setLoading } = useApp();
+  const { loading, setLoading, showError } = useApp();
 
-  const handleSubmit = async (name: string, email: string, password: string) => {
-    setError("");
+  const handleSubmit = async (
+    name: string,
+    email: string,
+    password: string
+  ) => {
     setLoading(true);
 
     try {
@@ -30,7 +31,9 @@ export default function Register() {
       navigate("/profile");
     } catch (err) {
       const error = err as Error;
-      setError(error.message || "Registration failed. Please try again.");
+      const errorMessage =
+        error.message || "Registration failed. Please try again.";
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -46,11 +49,7 @@ export default function Register() {
       <div className="w-full max-w-md">
         <RegisterHeader />
         <RegisterCard>
-          <RegisterForm
-            onSubmit={handleSubmit}
-            loading={loading}
-            error={error}
-          />
+          <RegisterForm onSubmit={handleSubmit} loading={loading} />
         </RegisterCard>
         <RegisterFooter />
       </div>
