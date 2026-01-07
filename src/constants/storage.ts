@@ -4,6 +4,11 @@ export const STORAGE_KEYS = {
   THEME: "theme",
 } as const;
 
+// SessionStorage Keys
+export const SESSION_KEYS = {
+  REDIRECT_PATH: "redirect_path",
+} as const;
+
 // Theme values
 export const THEME_VALUES = {
   LIGHT: "light",

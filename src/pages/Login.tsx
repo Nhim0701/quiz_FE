@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import useApp from "../hooks/useApp";
 import ThemeToggle from "../components/ui/theme-toggle";
+import { ROUTES, SESSION_KEYS } from "../constants";
 import {
   LoginHeader,
   LoginForm,
@@ -17,10 +18,25 @@ export default function Login() {
   const { showError } = useApp();
   const [loading, setLoading] = useState(false);
 
-  // Get destination page from location.state or default to /profile
-  const from =
-    (location.state as { from?: { pathname: string } })?.from?.pathname ||
-    "/profile";
+  // Get destination page from location.state, sessionStorage, or default to /profile
+  const getRedirectPath = () => {
+    // Priority 1: location.state (from ProtectedRoute)
+    const fromState = (location.state as { from?: { pathname: string } })
+      ?.from?.pathname;
+    if (fromState) return fromState;
+
+    // Priority 2: sessionStorage (from 401 redirect)
+    const fromSession = sessionStorage.getItem(SESSION_KEYS.REDIRECT_PATH);
+    if (fromSession) {
+      sessionStorage.removeItem(SESSION_KEYS.REDIRECT_PATH);
+      return fromSession;
+    }
+
+    // Priority 3: default
+    return ROUTES.PROFILE;
+  };
+
+  const from = getRedirectPath();
 
   useEffect(() => {
     if (user) {

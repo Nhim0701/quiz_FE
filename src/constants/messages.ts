@@ -9,6 +9,7 @@ export const ERROR_MESSAGES = {
   LOGIN_FAILED: "Login failed. Please check your credentials.",
   REGISTRATION_FAILED: "Registration failed. Please try again.",
   FETCH_USER_FAILED: "Failed to fetch user:",
+  SESSION_EXPIRED: "Session expired. Please login again.",
 
   // Data Fetch Errors
   FETCH_QUESTIONS_FAILED: "Failed to fetch questions. Please try again.",
