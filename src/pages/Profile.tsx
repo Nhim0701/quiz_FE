@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import useApp from "../hooks/useApp";
 import { useAuth } from "../hooks/useAuth";
 import { useProfileStore } from "../hooks/useProfile";
-import { ROUTES, ERROR_MESSAGES } from "../constants";
+import { ROUTES } from "../constants";
+import { useTranslation } from "../i18n";
 import {
   ProfileHeader,
   ProfileStats,
@@ -16,6 +17,7 @@ export default function Profile() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { setLoading, showError } = useApp();
+  const { t } = useTranslation();
   const {
     dashboardData,
     categoriesWithSets,
@@ -32,7 +34,7 @@ export default function Profile() {
         const errorMessage =
           error instanceof Error
             ? error.message
-            : ERROR_MESSAGES.FETCH_DASHBOARD_FAILED;
+            : t("errors.fetchDashboardFailed");
         showError(errorMessage);
       } finally {
         setLoading(false);

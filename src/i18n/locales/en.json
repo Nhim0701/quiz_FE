@@ -1,0 +1,109 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "close": "Close",
+    "logout": "Logout",
+    "welcome": "Welcome back, {{name}}!",
+    "email": "Email",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "••••••••"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to continue your quiz journey",
+      "signIn": "Sign In",
+      "signingIn": "Signing In...",
+      "footer": "By continuing, you agree to our Terms of Service and Privacy Policy"
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Join us and start your quiz journey",
+      "nameLabel": "Full Name",
+      "namePlaceholder": "John Doe",
+      "confirmPasswordLabel": "Confirm Password",
+      "createAccount": "Create Account",
+      "creatingAccount": "Creating Account...",
+      "footer": "Already have an account? Sign in"
+    },
+    "validation": {
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email address",
+      "passwordRequired": "Password is required",
+      "passwordMinLength": "Password must be at least 6 characters",
+      "nameRequired": "Name is required",
+      "confirmPasswordRequired": "Please confirm your password",
+      "passwordsNotMatch": "Passwords do not match"
+    }
+  },
+  "errors": {
+    "networkError": "Network error: No response received from server",
+    "requestError": "Request error",
+    "httpError": "HTTP error! status:",
+    "loginFailed": "Login failed. Please check your credentials.",
+    "registrationFailed": "Registration failed. Please try again.",
+    "fetchUserFailed": "Failed to fetch user:",
+    "sessionExpired": "Session expired. Please login again.",
+    "fetchQuestionsFailed": "Failed to fetch questions. Please try again.",
+    "fetchDashboardFailed": "Failed to fetch dashboard data. Please try again.",
+    "submitResponsesFailed": "Failed to submit responses. Please try again.",
+    "genericError": "Something went wrong. Please try again."
+  },
+  "success": {
+    "loginSuccess": "Login successful!",
+    "registrationSuccess": "Registration successful!",
+    "submitSuccess": "Test submitted successfully!"
+  },
+  "info": {
+    "noResultData": "No result data. Please start a test from your profile.",
+    "noQuestions": "No questions found for this test type."
+  },
+  "ui": {
+    "buttons": {
+      "backToDashboard": "Back to Dashboard",
+      "takeAnotherTest": "Take Another Test",
+      "finishTest": "Finish Test",
+      "submitting": "Submitting...",
+      "previous": "Previous",
+      "prev": "Prev",
+      "next": "Next",
+      "flag": "Flag"
+    },
+    "headers": {
+      "testCompleted": "Test Completed!",
+      "yourAnswers": "Your Answers",
+      "progress": "Progress",
+      "questions": "Questions"
+    },
+    "status": {
+      "answered": "Answered",
+      "flagged": "Flagged",
+      "notAnswered": "Not answered",
+      "multipleAnswers": "Multiple Answers"
+    },
+    "explanation": {
+      "show": "Show Explanation",
+      "hide": "Hide Explanation",
+      "title": "Explanation"
+    }
+  },
+  "test": {
+    "question": "Question {{current}} of {{total}}",
+    "timeRemaining": "Time Remaining"
+  },
+  "profile": {
+    "stats": {
+      "totalTests": "Total Tests",
+      "averageScore": "Average Score",
+      "totalQuestions": "Total Questions",
+      "correctAnswers": "Correct Answers"
+    }
+  },
+  "result": {
+    "wrong": "Wrong",
+    "quiz": "Quiz"
+  }
+}
+

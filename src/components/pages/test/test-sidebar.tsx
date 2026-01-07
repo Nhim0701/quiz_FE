@@ -1,4 +1,5 @@
 import { QuestionProps } from "@/types";
+import { useTranslation } from "../../../i18n";
 
 interface TestSidebarProps {
   questions: QuestionProps[];
@@ -21,6 +22,7 @@ export function TestSidebar({
   onGoToQuestion,
   onFinish,
 }: TestSidebarProps) {
+  const { t } = useTranslation();
   const answeredCount = Object.keys(answers).length;
   const flaggedCount = Object.values(flags).filter(Boolean).length;
 
@@ -29,19 +31,19 @@ export function TestSidebar({
       {/* Summary Card */}
       <div className="bg-white dark:bg-slate-800 shadow-sm rounded-xl p-4 sm:p-6">
         <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-3 sm:mb-4 text-base sm:text-lg">
-          Progress
+          {t("ui.headers.progress")}
         </h3>
         <div className="space-y-2.5 sm:space-y-3">
           <div className="flex justify-between text-xs sm:text-sm">
             <span className="text-slate-600 dark:text-slate-400">
-              Answered
+              {t("ui.status.answered")}
             </span>
             <span className="font-semibold text-slate-800 dark:text-slate-200">
               {answeredCount} / {questions.length}
             </span>
           </div>
           <div className="flex justify-between text-xs sm:text-sm">
-            <span className="text-slate-600 dark:text-slate-400">Flagged</span>
+            <span className="text-slate-600 dark:text-slate-400">{t("ui.status.flagged")}</span>
             <span className="font-semibold text-slate-800 dark:text-slate-200">
               {flaggedCount}
             </span>
@@ -55,10 +57,10 @@ export function TestSidebar({
           {submitting ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              Submitting...
+              {t("ui.buttons.submitting")}
             </>
           ) : (
-            "Finish Test"
+            t("ui.buttons.finishTest")
           )}
         </button>
       </div>
@@ -66,7 +68,7 @@ export function TestSidebar({
       {/* Question Navigator */}
       <div className="bg-white dark:bg-slate-800 shadow-sm rounded-xl p-4 sm:p-6">
         <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-3 sm:mb-4 text-base sm:text-lg">
-          Questions
+          {t("ui.headers.questions")}
         </h3>
         <div className="grid grid-cols-5 gap-2">
           {questions.map((q, idx) => {

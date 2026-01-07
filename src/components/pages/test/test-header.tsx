@@ -1,4 +1,5 @@
 import { Clock } from "lucide-react";
+import { useTranslation } from "../../../i18n";
 
 interface TestHeaderProps {
   category?: string;
@@ -19,6 +20,7 @@ export function TestHeader({
   timeRemaining,
   onClose,
 }: TestHeaderProps) {
+  const { t } = useTranslation();
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -37,7 +39,10 @@ export function TestHeader({
             {category || testType} {questionSet && `- ${questionSet}`}
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Question {currentIndex + 1} of {totalQuestions}
+            {t("test.question", {
+              current: currentIndex + 1,
+              total: totalQuestions,
+            })}
           </p>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">

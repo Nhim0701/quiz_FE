@@ -1,15 +1,16 @@
 import { z } from "zod";
+import type { TypedTFunction } from "@/i18n";
 
-export const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email is required")
-    .email("Please enter a valid email address"),
-  password: z
-    .string()
-    .min(1, "Password is required")
-    .min(6, "Password must be at least 6 characters"),
-});
+export const loginSchema = (t: TypedTFunction) =>
+  z.object({
+    email: z
+      .string()
+      .min(1, t("auth.validation.emailRequired"))
+      .email(t("auth.validation.emailInvalid")),
+    password: z
+      .string()
+      .min(1, t("auth.validation.passwordRequired"))
+      .min(6, t("auth.validation.passwordMinLength")),
+  });
 
-export type LoginFormData = z.infer<typeof loginSchema>;
-
+export type LoginFormData = z.infer<ReturnType<typeof loginSchema>>;

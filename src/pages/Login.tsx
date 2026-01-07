@@ -3,7 +3,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import useApp from "../hooks/useApp";
 import ThemeToggle from "../components/ui/theme-toggle";
+import { LanguageSwitcher } from "../components/ui/language-switcher";
 import { ROUTES, SESSION_KEYS } from "../constants";
+import { useTranslation } from "../i18n";
 import {
   LoginHeader,
   LoginForm,
@@ -16,6 +18,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { showError, setLoading } = useApp();
+  const { t } = useTranslation();
   const [loading, setLocalLoading] = useState(false);
 
   // Get destination page from location.state, sessionStorage, or default to /profile
@@ -53,8 +56,7 @@ export default function Login() {
       navigate(from, { replace: true });
     } catch (err) {
       const error = err as Error;
-      const errorMessage =
-        error.message || "Login failed. Please check your credentials.";
+      const errorMessage = error.message || t("errors.loginFailed");
       showError(errorMessage);
     } finally {
       setLocalLoading(false);
@@ -64,8 +66,9 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4">
-      {/* Theme Toggle - Fixed Position */}
-      <div className="fixed top-4 right-4 z-50">
+      {/* Theme Toggle and Language Switcher - Fixed Position */}
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+        <LanguageSwitcher />
         <ThemeToggle />
       </div>
 

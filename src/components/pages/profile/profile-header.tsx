@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ui/theme-toggle";
+import { useTranslation } from "../../../i18n";
 
 interface ProfileHeaderProps {
   userName?: string;
@@ -12,11 +13,12 @@ export function ProfileHeader({
   userEmail,
   onLogout,
 }: ProfileHeaderProps) {
+  const { t } = useTranslation();
   return (
     <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-slate-800 shadow-sm rounded-xl p-4 sm:p-6">
       <div className="flex-1 min-w-0">
         <h1 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 truncate">
-          Welcome back, {userName || userEmail}!
+          {t("common.welcome", { name: userName || userEmail })}
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 truncate">
           {userEmail}
@@ -29,7 +31,7 @@ export function ProfileHeader({
           variant="outline"
           className="flex-1 sm:flex-none bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200"
         >
-          Logout
+          {t("common.logout")}
         </Button>
       </div>
     </header>

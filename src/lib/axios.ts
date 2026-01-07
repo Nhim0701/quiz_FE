@@ -3,11 +3,11 @@ import axios, { AxiosError, AxiosInstance } from "axios";
 import { toast } from "sonner";
 import {
   API_CONFIG,
-  ERROR_MESSAGES,
   ROUTES,
   SESSION_KEYS,
 } from "@/constants";
 import { useAuthStoreInternal } from "@/hooks/useAuth";
+import { t } from "@/i18n/utils";
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
@@ -46,7 +46,7 @@ apiClient.interceptors.response.use(
       useAuthStoreInternal.getState().clearUser();
 
       // Show error toast
-      toast.error(ERROR_MESSAGES.SESSION_EXPIRED);
+      toast.error(t("errors.sessionExpired"));
 
       // Store current path for redirect after login
       const currentPath = window.location.pathname;
@@ -64,12 +64,12 @@ apiClient.interceptors.response.use(
       const data = error.response.data as { detail?: string };
       const errorMessage =
         data?.detail ||
-        `${ERROR_MESSAGES.HTTP_ERROR} ${error.response.status}`;
+        `${t("errors.httpError")} ${error.response.status}`;
       throw new Error(errorMessage);
     } else if (error.request) {
-      throw new Error(ERROR_MESSAGES.NETWORK_ERROR);
+      throw new Error(t("errors.networkError"));
     } else {
-      throw new Error(`${ERROR_MESSAGES.REQUEST_ERROR}: ${error.message}`);
+      throw new Error(`${t("errors.requestError")}: ${error.message}`);
     }
   }
 );

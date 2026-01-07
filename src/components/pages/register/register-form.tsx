@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "../../../i18n";
 import { registerSchema, type RegisterFormData } from "./register-schema";
 
 interface RegisterFormProps {
@@ -13,12 +14,13 @@ interface RegisterFormProps {
 }
 
 export function RegisterForm({ onSubmit, loading = false }: RegisterFormProps) {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(registerSchema(t)),
     mode: "onChange",
     reValidateMode: "onChange",
   });
@@ -37,12 +39,12 @@ export function RegisterForm({ onSubmit, loading = false }: RegisterFormProps) {
           htmlFor="name"
           className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
         >
-          Full Name
+          {t("auth.register.nameLabel")}
         </Label>
         <Input
           id="name"
           type="text"
-          placeholder="John Doe"
+          placeholder={t("auth.register.namePlaceholder")}
           className={`w-full border ${
             errors.name
               ? "border-red-500 dark:border-red-600"
@@ -63,12 +65,12 @@ export function RegisterForm({ onSubmit, loading = false }: RegisterFormProps) {
           htmlFor="email"
           className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
         >
-          Email Address
+          {t("common.emailLabel")}
         </Label>
         <Input
           id="email"
           type="email"
-          placeholder="you@example.com"
+          placeholder={t("common.emailPlaceholder")}
           className={`w-full border ${
             errors.email
               ? "border-red-500 dark:border-red-600"
@@ -89,12 +91,12 @@ export function RegisterForm({ onSubmit, loading = false }: RegisterFormProps) {
           htmlFor="password"
           className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
         >
-          Password
+          {t("common.passwordLabel")}
         </Label>
         <Input
           id="password"
           type="password"
-          placeholder="••••••••"
+          placeholder={t("common.passwordPlaceholder")}
           className={`w-full border ${
             errors.password
               ? "border-red-500 dark:border-red-600"
@@ -115,12 +117,12 @@ export function RegisterForm({ onSubmit, loading = false }: RegisterFormProps) {
           htmlFor="confirmPassword"
           className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
         >
-          Confirm Password
+          {t("auth.register.confirmPasswordLabel")}
         </Label>
         <Input
           id="confirmPassword"
           type="password"
-          placeholder="••••••••"
+          placeholder={t("common.passwordPlaceholder")}
           className={`w-full border ${
             errors.confirmPassword
               ? "border-red-500 dark:border-red-600"
@@ -142,7 +144,7 @@ export function RegisterForm({ onSubmit, loading = false }: RegisterFormProps) {
         className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-500 dark:to-indigo-500 text-white py-2.5 sm:py-3 rounded-lg hover:from-purple-700 hover:to-indigo-700 dark:hover:from-purple-600 dark:hover:to-indigo-600 transition-all duration-200 text-sm font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 mt-5 sm:mt-6 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
       >
         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-        {loading ? "Creating Account..." : "Create Account"}
+        {loading ? t("auth.register.creatingAccount") : t("auth.register.createAccount")}
       </Button>
     </form>
   );

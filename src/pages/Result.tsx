@@ -32,10 +32,6 @@ export default function Result() {
     return <ResultEmpty onBack={() => navigate("/profile")} />;
   }
 
-  const completionPercentage = Math.round(
-    (summary.answered / summary.total) * 100
-  );
-
   // Calculate correct answers
   const correctCount =
     questions?.reduce((count, question) => {

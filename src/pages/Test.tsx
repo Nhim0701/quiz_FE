@@ -4,7 +4,8 @@ import ThemeToggle from "../components/ui/theme-toggle";
 import useApp from "../hooks/useApp";
 import { useTestStore } from "../hooks/useTest";
 import { ResponseItem } from "../types";
-import { ROUTES, ERROR_MESSAGES, TIME_CONSTANTS } from "../constants";
+import { ROUTES, TIME_CONSTANTS } from "../constants";
+import { useTranslation } from "../i18n";
 import {
   TestHeader,
   TestQuestion,
@@ -25,6 +26,7 @@ export default function Test() {
     (location.state as LocationState) || {};
 
   const { loading, setLoading, showError } = useApp();
+  const { t } = useTranslation();
   const {
     questions,
     currentIndex,
@@ -67,7 +69,7 @@ export default function Test() {
         const errorMessage =
           error instanceof Error
             ? error.message
-            : ERROR_MESSAGES.FETCH_QUESTIONS_FAILED;
+            : t("errors.fetchQuestionsFailed");
         showError(errorMessage);
       } finally {
         setLoading(false);
@@ -121,7 +123,7 @@ export default function Test() {
         const errorMessage =
           error instanceof Error
             ? error.message
-            : ERROR_MESSAGES.SUBMIT_RESPONSES_FAILED;
+            : t("errors.submitResponsesFailed");
         showError(errorMessage);
         // Continue to result page even if submission fails
       } finally {

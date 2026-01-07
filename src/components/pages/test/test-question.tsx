@@ -1,6 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import { QuestionProps } from "@/types";
-import { Check, X } from "lucide-react";
+import { Check, X, Flag } from "lucide-react";
+import { useTranslation } from "../../../i18n";
 
 interface TestQuestionProps {
   question: QuestionProps;
@@ -31,6 +32,7 @@ export function TestQuestion({
   canGoPrevious,
   canGoNext,
 }: TestQuestionProps) {
+  const { t } = useTranslation();
   const sortedAnswers = [...question.answers].sort((a, b) => a.id - b.id);
 
   return (
@@ -44,13 +46,13 @@ export function TestQuestion({
             </span>
             {hasMultipleCorrect && (
               <span className="px-2 sm:px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-xs font-medium rounded-full">
-                Multiple Answers
+                {t("ui.status.multipleAnswers")}
               </span>
             )}
             {isFlagged && (
               <span className="px-2 sm:px-3 py-1 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 text-xs font-medium rounded-full flex items-center gap-1">
                 <Flag className="w-3 h-3" />
-                Flagged
+                {t("ui.status.flagged")}
               </span>
             )}
           </div>
@@ -140,12 +142,12 @@ export function TestQuestion({
               </svg>
               <div className="flex-1">
                 <h4 className="font-semibold text-blue-900 dark:text-blue-200 mb-1 text-sm sm:text-base">
-                  Explanation
+                  {t("ui.explanation.title")}
                 </h4>
                 <div className="text-xs sm:text-sm text-blue-800 dark:text-blue-300 space-y-2 sm:space-y-3">
                   {sortedAnswers
                     .filter((a) => a.is_correct && a.explanation)
-                    .map((answer, answerIdx) => (
+                    .map((answer) => (
                       <div key={answer.id} className="prose prose-sm dark:prose-invert max-w-none">
                         {sortedAnswers.filter(
                           (a) => a.is_correct && a.explanation
@@ -261,15 +263,15 @@ export function TestQuestion({
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-            <span className="hidden sm:inline">Previous</span>
-            <span className="sm:hidden">Prev</span>
+            <span className="hidden sm:inline">{t("ui.buttons.previous")}</span>
+            <span className="sm:hidden">{t("ui.buttons.prev")}</span>
           </button>
           <button
             onClick={onNext}
             disabled={!canGoNext}
             className="px-2.5 sm:px-4 py-2 sm:py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 sm:gap-2"
           >
-            Next
+            {t("ui.buttons.next")}
             <svg
               className="w-4 h-4"
               fill="none"
@@ -308,7 +310,7 @@ export function TestQuestion({
                 d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
               />
             </svg>
-            Flag
+            {t("ui.buttons.flag")}
           </button>
         </div>
       </div>

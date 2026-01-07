@@ -1,0 +1,109 @@
+{
+  "common": {
+    "loading": "Đang tải...",
+    "close": "Đóng",
+    "logout": "Đăng xuất",
+    "welcome": "Chào mừng trở lại, {{name}}!",
+    "email": "Email",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "Mật khẩu",
+    "passwordPlaceholder": "••••••••"
+  },
+  "auth": {
+    "login": {
+      "title": "Chào Mừng Trở Lại",
+      "subtitle": "Đăng nhập để tiếp tục hành trình quiz của bạn",
+      "signIn": "Đăng Nhập",
+      "signingIn": "Đang đăng nhập...",
+      "footer": "Bằng cách tiếp tục, bạn đồng ý với Điều khoản Dịch vụ và Chính sách Bảo mật của chúng tôi"
+    },
+    "register": {
+      "title": "Tạo Tài Khoản",
+      "subtitle": "Tham gia cùng chúng tôi và bắt đầu hành trình quiz của bạn",
+      "nameLabel": "Họ và Tên",
+      "namePlaceholder": "Nguyễn Văn A",
+      "confirmPasswordLabel": "Xác nhận Mật khẩu",
+      "createAccount": "Tạo Tài Khoản",
+      "creatingAccount": "Đang tạo tài khoản...",
+      "footer": "Đã có tài khoản? Đăng nhập"
+    },
+    "validation": {
+      "emailRequired": "Email là bắt buộc",
+      "emailInvalid": "Vui lòng nhập địa chỉ email hợp lệ",
+      "passwordRequired": "Mật khẩu là bắt buộc",
+      "passwordMinLength": "Mật khẩu phải có ít nhất 6 ký tự",
+      "nameRequired": "Tên là bắt buộc",
+      "confirmPasswordRequired": "Vui lòng xác nhận mật khẩu",
+      "passwordsNotMatch": "Mật khẩu không khớp"
+    }
+  },
+  "errors": {
+    "networkError": "Lỗi mạng: Không nhận được phản hồi từ máy chủ",
+    "requestError": "Lỗi yêu cầu",
+    "httpError": "Lỗi HTTP! mã trạng thái:",
+    "loginFailed": "Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập của bạn.",
+    "registrationFailed": "Đăng ký thất bại. Vui lòng thử lại.",
+    "fetchUserFailed": "Không thể lấy thông tin người dùng:",
+    "sessionExpired": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+    "fetchQuestionsFailed": "Không thể tải câu hỏi. Vui lòng thử lại.",
+    "fetchDashboardFailed": "Không thể tải dữ liệu bảng điều khiển. Vui lòng thử lại.",
+    "submitResponsesFailed": "Không thể gửi câu trả lời. Vui lòng thử lại.",
+    "genericError": "Đã xảy ra lỗi. Vui lòng thử lại."
+  },
+  "success": {
+    "loginSuccess": "Đăng nhập thành công!",
+    "registrationSuccess": "Đăng ký thành công!",
+    "submitSuccess": "Gửi bài kiểm tra thành công!"
+  },
+  "info": {
+    "noResultData": "Không có dữ liệu kết quả. Vui lòng bắt đầu bài kiểm tra từ trang cá nhân của bạn.",
+    "noQuestions": "Không tìm thấy câu hỏi cho loại bài kiểm tra này."
+  },
+  "ui": {
+    "buttons": {
+      "backToDashboard": "Quay lại Bảng Điều Khiển",
+      "takeAnotherTest": "Làm Bài Kiểm Tra Khác",
+      "finishTest": "Hoàn Thành Bài Kiểm Tra",
+      "submitting": "Đang gửi...",
+      "previous": "Trước",
+      "prev": "Trước",
+      "next": "Tiếp",
+      "flag": "Đánh Dấu"
+    },
+    "headers": {
+      "testCompleted": "Hoàn Thành Bài Kiểm Tra!",
+      "yourAnswers": "Câu Trả Lời Của Bạn",
+      "progress": "Tiến Độ",
+      "questions": "Câu Hỏi"
+    },
+    "status": {
+      "answered": "Đã trả lời",
+      "flagged": "Đã đánh dấu",
+      "notAnswered": "Chưa trả lời",
+      "multipleAnswers": "Nhiều câu trả lời"
+    },
+    "explanation": {
+      "show": "Hiển thị Giải thích",
+      "hide": "Ẩn Giải thích",
+      "title": "Giải thích"
+    }
+  },
+  "test": {
+    "question": "Câu hỏi {{current}} / {{total}}",
+    "timeRemaining": "Thời gian còn lại"
+  },
+  "profile": {
+    "stats": {
+      "totalTests": "Tổng Số Bài Kiểm Tra",
+      "averageScore": "Điểm Trung Bình",
+      "totalQuestions": "Tổng Số Câu Hỏi",
+      "correctAnswers": "Câu Trả Lời Đúng"
+    }
+  },
+  "result": {
+    "wrong": "Sai",
+    "quiz": "Bài Kiểm Tra"
+  }
+}
+
