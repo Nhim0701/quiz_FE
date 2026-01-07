@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { DashboardProps, CategoryWithSetsProps } from "@/types";
 import apiClient from "@/lib/axios";
 import { API_ENDPOINTS } from "@/constants";
+import { ApiSuccessResponse } from "@/types";
 
 interface ProfileState {
   // Dashboard data
@@ -22,17 +23,16 @@ export const useProfileStore = create<ProfileState>((set) => ({
 
   // API methods
   getDashboard: async () => {
-    const response = await apiClient.get<DashboardProps>(
+    const response = await apiClient.get<ApiSuccessResponse<DashboardProps>>(
       API_ENDPOINTS.RESPONSES.DASHBOARD
     );
-    set({ dashboardData: response.data });
+    set({ dashboardData: response.data.data });
   },
 
   getCategoriesWithSets: async () => {
-    const response = await apiClient.get<CategoryWithSetsProps[]>(
-      API_ENDPOINTS.QUESTIONS.CATEGORIES_WITH_SETS
-    );
-    set({ categoriesWithSets: response.data });
+    const response = await apiClient.get<
+      ApiSuccessResponse<CategoryWithSetsProps[]>
+    >(API_ENDPOINTS.QUESTIONS.CATEGORIES_WITH_SETS);
+    set({ categoriesWithSets: response.data.data });
   },
 }));
-

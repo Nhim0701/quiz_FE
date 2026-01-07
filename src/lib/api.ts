@@ -1,7 +1,8 @@
 // API utility for backend communication
-import { AxiosRequestConfig } from "axios";
+import { AxiosRequestConfig, AxiosResponse } from "axios";
 import apiClient from "@/lib/axios";
 import { STORAGE_KEYS } from "@/constants";
+import { ApiSuccessResponse } from "@/types";
 
 // Token management
 export const tokenManager = {
@@ -13,21 +14,42 @@ export const tokenManager = {
   hasToken: (): boolean => !!localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN),
 };
 
-// Base API fetch wrapper (for backward compatibility)
-async function apiFetch<T>(
-  url: string,
-  options: AxiosRequestConfig = {}
-): Promise<T> {
-  try {
-    const response = await apiClient.request<T>({
-      url,
-      ...options,
-    });
-    return response.data;
-  } catch (error) {
-    // Error is already handled by interceptor
-    throw error;
-  }
-}
+// Helper function to extract data from standard API response
+export const extractApiData = <T>(
+  response: AxiosResponse<ApiSuccessResponse<T> | T>
+): T => {
+  const responseData = response.data;
 
-export default apiFetch;
+  // If response has standard structure { data, meta }
+  if (
+    responseData &&
+    typeof responseData === "object" &&
+    "data" in responseData &&
+    !Array.isArray(responseData)
+  ) {
+    const apiResponse = responseData as ApiSuccessResponse<T>;
+    return apiResponse.data;
+  }
+
+  // Fallback: return response data as is (for backward compatibility)
+  return responseData as T;
+};
+
+// Helper function to extract meta from standard API response
+export const extractApiMeta = (
+  response: AxiosResponse<ApiSuccessResponse | unknown>
+): Record<string, unknown> | undefined => {
+  const responseData = response.data;
+
+  if (
+    responseData &&
+    typeof responseData === "object" &&
+    "meta" in responseData &&
+    !Array.isArray(responseData)
+  ) {
+    const apiResponse = responseData as ApiSuccessResponse;
+    return apiResponse.meta;
+  }
+
+  return undefined;
+};

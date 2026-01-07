@@ -1,5 +1,9 @@
 import { create } from "zustand";
-import { QuestionProps, CategoryWithSetsProps } from "@/types";
+import {
+  QuestionProps,
+  CategoryWithSetsProps,
+  ApiSuccessResponse,
+} from "@/types";
 import apiClient from "@/lib/axios";
 import { API_ENDPOINTS } from "@/constants";
 
@@ -58,27 +62,26 @@ export const useQuestionsStore = create<QuestionsState>((set, get) => ({
 
   // API methods
   getCategoriesWithSets: async () => {
-    const response = await apiClient.get<CategoryWithSetsProps[]>(
-      API_ENDPOINTS.QUESTIONS.CATEGORIES_WITH_SETS
-    );
-    set({ categoriesWithSets: response.data });
+    const response = await apiClient.get<
+      ApiSuccessResponse<CategoryWithSetsProps[]>
+    >(API_ENDPOINTS.QUESTIONS.CATEGORIES_WITH_SETS);
+    set({ categoriesWithSets: response.data.data });
   },
 
   getQuestionsByCategory: async <T>(category: string): Promise<T> => {
-    const response = await apiClient.get<T>(
+    const response = await apiClient.get<ApiSuccessResponse<T>>(
       API_ENDPOINTS.QUESTIONS.BY_CATEGORY(category)
     );
-    return response.data;
+    return response.data.data;
   },
 
   getQuestionsByCategoryAndSet: async <T>(
     category: string,
     questionSet: string
   ): Promise<T> => {
-    const response = await apiClient.get<T>(
+    const response = await apiClient.get<ApiSuccessResponse<T>>(
       API_ENDPOINTS.QUESTIONS.BY_CATEGORY_AND_SET(category, questionSet)
     );
-    return response.data;
+    return response.data.data;
   },
 }));
-

@@ -64,8 +64,25 @@ export interface AnswerProps {
   explanation: string | null;
 }
 
-export interface ResponseItem {
+export interface SubmissionItem {
   question_id: number;
   selected_option_id: number;
   is_correct: boolean;
+}
+
+// API Response Types
+export interface ApiSuccessResponse<T = unknown> {
+  data: T;
+  meta?: Record<string, unknown>;
+}
+
+export interface ApiErrorDetail {
+  code: string;
+  message: string;
+  trace_id: string;
+  details?: unknown[] | Record<string, unknown> | null;
+}
+
+export interface ApiErrorResponse {
+  error: ApiErrorDetail;
 }

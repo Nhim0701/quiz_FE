@@ -18,8 +18,8 @@ export const API_ENDPOINTS = {
 
   // Response endpoints
   RESPONSES: {
-    DASHBOARD: "/api/v1/responses/dashboard",
-    SUBMIT_BULK: "/api/v1/responses/submit-bulk",
+    DASHBOARD: "/api/v1/submissions/dashboard",
+    SUBMIT_BULK: "/api/v1/submissions/submit-bulk",
   },
 } as const;
 

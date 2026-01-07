@@ -1,5 +1,5 @@
 import { tokenManager } from "@/lib/api";
-import axios, { AxiosError, AxiosInstance } from "axios";
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import { toast } from "sonner";
 import {
   API_CONFIG,
@@ -8,6 +8,7 @@ import {
 } from "@/constants";
 import { useAuthStoreInternal } from "@/hooks/useAuth";
 import { t } from "@/i18n/utils";
+import { ApiErrorResponse, ApiSuccessResponse } from "@/types";
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
@@ -31,12 +32,24 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor for error handling
+// Response interceptor for handling standard response structure
 apiClient.interceptors.response.use(
-  (response) => {
+  (response: AxiosResponse<ApiSuccessResponse | unknown>) => {
+    // For success responses (2xx), check if response follows standard structure
+    // If response has { data, meta } structure, return as is
+    // Otherwise, pass through and let helper functions handle extraction
+    if (
+      response.data &&
+      typeof response.data === "object" &&
+      "data" in response.data
+    ) {
+      // Already in standard format { data, meta }
+      return response as AxiosResponse<ApiSuccessResponse>;
+    }
+    // Pass through non-standard responses (will be handled by helper functions)
     return response;
   },
-  (error: AxiosError) => {
+  (error: AxiosError<ApiErrorResponse>) => {
     console.error("API Error:", error);
 
     // Handle 401 Unauthorized - redirect to login
@@ -59,11 +72,33 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Handle other error responses
+    // Handle error responses (4xx, 5xx) with standard structure
     if (error.response) {
-      const data = error.response.data as { detail?: string };
+      const errorData = error.response.data;
+      
+      // Check if response follows standard error structure
+      if (errorData?.error) {
+        const { code, message, trace_id, details } = errorData.error;
+        
+        // Create error object with standard structure
+        const apiError = new Error(message) as Error & {
+          code: string;
+          trace_id: string;
+          details?: unknown[] | Record<string, unknown> | null;
+          status?: number;
+        };
+        
+        apiError.code = code;
+        apiError.trace_id = trace_id;
+        apiError.details = details || null;
+        apiError.status = error.response.status;
+        
+        return Promise.reject(apiError);
+      }
+      
+      // Fallback for non-standard error responses
       const errorMessage =
-        data?.detail ||
+        (errorData as { detail?: string })?.detail ||
         `${t("errors.httpError")} ${error.response.status}`;
       throw new Error(errorMessage);
     } else if (error.request) {

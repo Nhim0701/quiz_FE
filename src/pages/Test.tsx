@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ThemeToggle from "../components/ui/theme-toggle";
 import useApp from "../hooks/useApp";
 import { useTestStore } from "../hooks/useTest";
-import { ResponseItem } from "../types";
+import { SubmissionItem } from "../types";
 import { ROUTES, TIME_CONSTANTS } from "../constants";
 import { useTranslation } from "../i18n";
 import {
@@ -97,7 +97,7 @@ export default function Test() {
     const timeSpent = initialTime - timeRemaining;
 
     // Build responses array for backend submission
-    const responses: ResponseItem[] = [];
+    const submissions: SubmissionItem[] = [];
     for (const [questionId, selectedAnswerIds] of Object.entries(answers)) {
       const question = questions.find((q) => q.id === parseInt(questionId));
       if (!question) continue;
@@ -106,7 +106,7 @@ export default function Test() {
         const answer = question.answers.find((a) => a.id === answerId);
         if (!answer) continue;
 
-        responses.push({
+        submissions.push({
           question_id: parseInt(questionId),
           selected_option_id: answerId,
           is_correct: answer.is_correct,
@@ -115,10 +115,10 @@ export default function Test() {
     }
 
     // Submit responses to backend
-    if (responses.length > 0) {
+    if (submissions.length > 0) {
       setSubmitting(true);
       try {
-        await submitBulk<void>(responses);
+        await submitBulk<void>(submissions);
       } catch (error) {
         const errorMessage =
           error instanceof Error

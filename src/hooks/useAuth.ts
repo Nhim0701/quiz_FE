@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import apiClient from "@/lib/axios";
 import { tokenManager } from "@/lib/api";
 import { API_ENDPOINTS, STORAGE_KEYS } from "@/constants";
+import { ApiSuccessResponse } from "@/types";
 
 interface UserData {
   email: string;
@@ -37,8 +38,14 @@ interface AuthState {
   setUser: (user: User | null) => void;
   getCurrentUser: (setLoading?: (loading: boolean) => void) => Promise<void>;
   clearUser: () => void;
-  register: (userData: UserData, setLoading?: (loading: boolean) => void) => Promise<AuthResponse>;
-  login: (credentials: Credentials, setLoading?: (loading: boolean) => void) => Promise<AuthResponse>;
+  register: (
+    userData: UserData,
+    setLoading?: (loading: boolean) => void
+  ) => Promise<void>;
+  login: (
+    credentials: Credentials,
+    setLoading?: (loading: boolean) => void
+  ) => Promise<void>;
   logout: () => void;
 }
 
@@ -80,7 +87,7 @@ export const useAuthStoreInternal = create<AuthState>()(
         tokenManager.removeToken();
       },
       register: async (userData, setLoading) => {
-        const response = await apiClient.post<AuthResponse>(
+        const response = await apiClient.post<ApiSuccessResponse<AuthResponse>>(
           API_ENDPOINTS.AUTH.REGISTER,
           {
             user_email: userData.email,
@@ -90,15 +97,13 @@ export const useAuthStoreInternal = create<AuthState>()(
         );
 
         // Store token on successful registration
-        if (response.data.access_token) {
-          tokenManager.setToken(response.data.access_token);
+        if (response.data.data) {
+          tokenManager.setToken(response.data.data.access_token);
           await fetchUserData(set, setLoading);
         }
-
-        return response.data;
       },
       login: async (credentials, setLoading) => {
-        const response = await apiClient.post<AuthResponse>(
+        const response = await apiClient.post<ApiSuccessResponse<AuthResponse>>(
           API_ENDPOINTS.AUTH.LOGIN,
           {
             user_email: credentials.email,
@@ -107,12 +112,10 @@ export const useAuthStoreInternal = create<AuthState>()(
         );
 
         // Store token on successful login
-        if (response.data.access_token) {
-          tokenManager.setToken(response.data.access_token);
+        if (response.data.data) {
+          tokenManager.setToken(response.data.data.access_token);
           await fetchUserData(set, setLoading);
         }
-
-        return response.data;
       },
       logout: () => {
         set({ user: null });
