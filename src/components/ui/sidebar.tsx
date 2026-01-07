@@ -252,6 +252,10 @@ const Sidebar = React.forwardRef<
               : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l",
             className
           )}
+          style={{
+            minWidth: state === "expanded" ? "var(--sidebar-width)" : undefined,
+            ...(props.style as React.CSSProperties),
+          }}
           {...props}
         >
           <div
