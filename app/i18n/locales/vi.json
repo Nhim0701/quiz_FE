@@ -18,7 +18,9 @@
       "subtitle": "Đăng nhập để tiếp tục hành trình quiz của bạn",
       "signIn": "Đăng Nhập",
       "signingIn": "Đang đăng nhập...",
-      "footer": "Bằng cách tiếp tục, bạn đồng ý với Điều khoản Dịch vụ và Chính sách Bảo mật của chúng tôi"
+      "footer": "Bằng cách tiếp tục, bạn đồng ý với Điều khoản Dịch vụ và Chính sách Bảo mật của chúng tôi",
+      "newToQuiz": "Mới tham gia Quiz?",
+      "createAccount": "Tạo Tài Khoản"
     },
     "register": {
       "title": "Tạo Tài Khoản",
@@ -28,7 +30,9 @@
       "confirmPasswordLabel": "Xác nhận Mật khẩu",
       "createAccount": "Tạo Tài Khoản",
       "creatingAccount": "Đang tạo tài khoản...",
-      "footer": "Đã có tài khoản? Đăng nhập"
+      "footer": "Đã có tài khoản? Đăng nhập",
+      "alreadyHaveAccount": "Đã có tài khoản?",
+      "signInInstead": "Đăng Nhập Thay Vào Đó"
     },
     "validation": {
       "emailRequired": "Email là bắt buộc",
@@ -117,7 +121,8 @@
     "tests": "Bài Kiểm Tra",
     "profile": "Hồ Sơ",
     "expand": "Mở rộng",
-    "collapse": "Thu gọn"
+    "collapse": "Thu gọn",
+    "toggleSidebar": "Bật/Tắt Thanh Bên"
   },
   "breadcrumb": {
     "home": "Trang chủ"

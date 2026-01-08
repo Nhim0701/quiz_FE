@@ -18,7 +18,9 @@
       "subtitle": "Sign in to continue your quiz journey",
       "signIn": "Sign In",
       "signingIn": "Signing In...",
-      "footer": "By continuing, you agree to our Terms of Service and Privacy Policy"
+      "footer": "By continuing, you agree to our Terms of Service and Privacy Policy",
+      "newToQuiz": "New to Quiz?",
+      "createAccount": "Create an Account"
     },
     "register": {
       "title": "Create Account",
@@ -28,7 +30,9 @@
       "confirmPasswordLabel": "Confirm Password",
       "createAccount": "Create Account",
       "creatingAccount": "Creating Account...",
-      "footer": "Already have an account? Sign in"
+      "footer": "Already have an account? Sign in",
+      "alreadyHaveAccount": "Already have an account?",
+      "signInInstead": "Sign In Instead"
     },
     "validation": {
       "emailRequired": "Email is required",
@@ -117,7 +121,8 @@
     "tests": "Tests",
     "profile": "Profile",
     "expand": "Expand",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+    "toggleSidebar": "Toggle Sidebar"
   },
   "breadcrumb": {
     "home": "Home"

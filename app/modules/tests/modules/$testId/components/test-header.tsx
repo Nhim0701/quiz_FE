@@ -57,7 +57,7 @@ export function TestHeader() {
           <button
             onClick={handleClose}
             className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors flex-shrink-0"
-            aria-label="Close"
+            aria-label={t("common.close")}
           >
             <svg
               className="w-5 h-5 sm:w-6 sm:h-6"

@@ -11,8 +11,8 @@ export default [
 
   // Auth modules
   layout("modules/auth/_layout.tsx", [
-    route("/login", "modules/auth/login/index.tsx"),
-    route("/register", "modules/auth/register/index.tsx"),
+    route("/login", "modules/auth/login.tsx"),
+    route("/register", "modules/auth/register.tsx"),
   ]),
 
   layout("modules/_layout.tsx", [
