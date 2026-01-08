@@ -1,32 +1,23 @@
 // Application Routes
 export const ROUTES = {
   ROOT: "/",
+  //Auth routes
   LOGIN: "/login",
   REGISTER: "/register",
+
+  //Profile routes
   PROFILE: "/profile",
   DASHBOARD: "/dashboard",
-  TESTS: "/tests",
-  TEST: "/test",
-  RESULT: "/result",
+
+  //Tests routes
+  TESTS: {
+    TEST_ID: ":testId",
+    INDEX: "/tests",
+    TAKE: (testId?: string) => (testId ? `/tests/${testId}/take` : `/take`),
+    RESULT: (testId?: string) =>
+      testId ? `/tests/${testId}/result` : `/result`,
+  },
 } as const;
-
-export const decodeTestId = (
-  testId: string
-): { category: string; questionSet?: string } => {
-  try {
-    const decoded = atob(testId.replace(/-/g, "+").replace(/_/g, "/"));
-    const parts = decoded.split(":");
-    const category = parts[0] || "";
-    const questionSet = parts[1];
-    return { category, questionSet };
-  } catch {
-    throw new Error("Invalid test ID");
-  }
-};
-
-export const getTestResultRoute = (questionSetId: string): string => {
-  return `/tests/${questionSetId}/result`;
-};
 
 // Default redirect routes
 export const DEFAULT_ROUTES = {

@@ -21,7 +21,7 @@ export function TestList() {
       <div className="px-6 pb-6">
         <Accordion type="single" collapsible className="w-full">
           {categories.map((category) => (
-            <TestCategoryItem key={category.id} categoryId={category.id} />
+            <TestCategoryItem key={category.id} category={category} />
           ))}
         </Accordion>
       </div>

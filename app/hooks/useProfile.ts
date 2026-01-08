@@ -35,12 +35,12 @@ export const useProfileStore = create<ProfileState>((set) => ({
   },
 
   getCategoriesWithSets: async () => {
-    // Lấy danh sách categories từ useCategoriesStore
+    // Get categories list from useCategoriesStore
     const { getCategories } = useCategoriesStore.getState();
     await getCategories();
     const { categories } = useCategoriesStore.getState();
 
-    // Lấy question sets cho từng category từ useQuestionSetsStore
+    // Get question sets for each category from useQuestionSetsStore
     const { getQuestionSetsByCategory } = useQuestionSetsStore.getState();
     const categoriesWithSetsPromises = categories.map(async (category) => {
       const questionSets = await getQuestionSetsByCategory(category.id);

@@ -1,15 +1,12 @@
 import { useTranslation } from "@/i18n";
 import { useTestStore } from "@/hooks/useTest";
-import { useCallback } from "react";
-import { useNavigate } from "react-router";
-import { TIME_CONSTANTS, getTestResultRoute } from "@/constants";
-import type { SubmissionItem } from "@/types";
-import useApp from "@/hooks/useApp";
+import { useNavigate, useParams } from "react-router";
+import { ROUTES } from "@/constants";
 
 export function TestSidebar() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { showError } = useApp();
+  const { testId } = useParams<{ testId: string }>();
   const {
     questions,
     answers,
@@ -17,91 +14,15 @@ export function TestSidebar() {
     revealed,
     currentIndex,
     submitting,
-    timeRemaining,
-    category,
-    testType,
-    questionSet,
     goToQuestion,
-    submitBulk,
-    setTimeStarted,
-    setSubmitting,
+    finishTest,
   } = useTestStore();
 
-  const handleFinish = useCallback(async () => {
-    // Stop timer
-    setTimeStarted(false);
-
-    const total = questions.length;
-    const answered = Object.keys(answers).length;
-    const initialTime = questions.length * TIME_CONSTANTS.SECONDS_PER_QUESTION;
-    const timeSpent = initialTime - timeRemaining;
-
-    // Build responses array for backend submission
-    const submissions: SubmissionItem[] = [];
-    for (const [questionId, selectedAnswerIds] of Object.entries(answers)) {
-      const question = questions.find((q) => q.id === parseInt(questionId));
-      if (!question) continue;
-
-      for (const answerId of selectedAnswerIds) {
-        const answer = question.answers.find((a) => a.id === answerId);
-        if (!answer) continue;
-
-        submissions.push({
-          question_id: parseInt(questionId),
-          selected_option_id: answerId,
-          is_correct: answer.is_correct,
-        });
-      }
-    }
-
-    // Submit responses to backend
-    if (submissions.length > 0) {
-      setSubmitting(true);
-      try {
-        await submitBulk<void>(submissions);
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t("errors.submitResponsesFailed");
-        showError(errorMessage);
-        // Continue to result page even if submission fails
-      } finally {
-        setSubmitting(false);
-      }
-    }
-
-    const resultRoute = getTestResultRoute(
-      category || testType || "",
-      questionSet || undefined
-    );
-    navigate(resultRoute, {
-      state: {
-        answers,
-        questions,
-        summary: {
-          total,
-          answered,
-          testType: category || testType,
-          date: new Date().toISOString(),
-          timeSpent,
-          timeRemaining,
-        },
-      },
+  const handleFinish = async () => {
+    await finishTest(navigate, testId || "", (errorMessage) => {
+      console.error(errorMessage);
     });
-  }, [
-    questions,
-    answers,
-    timeRemaining,
-    category,
-    testType,
-    setTimeStarted,
-    setSubmitting,
-    submitBulk,
-    showError,
-    navigate,
-    t,
-  ]);
+  };
   const answeredCount = Object.keys(answers).length;
   const flaggedCount = Object.values(flags).filter(Boolean).length;
 

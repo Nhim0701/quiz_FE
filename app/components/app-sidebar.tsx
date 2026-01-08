@@ -54,7 +54,7 @@ export function AppSidebar() {
     {
       title: t("sidebar.tests"),
       icon: FileText,
-      url: ROUTES.TESTS,
+      url: ROUTES.TESTS.INDEX,
     },
     {
       title: t("sidebar.profile"),

@@ -5,29 +5,35 @@ import {
   route,
   type RouteConfig,
 } from "@react-router/dev/routes";
+import { ROUTES } from "./constants";
 
 export default [
   index("modules/home.tsx"),
 
   // Auth modules
   layout("modules/auth/_layout.tsx", [
-    route("/login", "modules/auth/login.tsx"),
-    route("/register", "modules/auth/register.tsx"),
+    route(ROUTES.LOGIN, "modules/auth/login.tsx"),
+    route(ROUTES.REGISTER, "modules/auth/register.tsx"),
   ]),
 
   layout("modules/_layout.tsx", [
-    route("/dashboard", "modules/dashboard/index.tsx"),
+    route(ROUTES.DASHBOARD, "modules/dashboard/index.tsx"),
 
     // Tests routes
-    ...prefix("/tests", [
+    ...prefix(ROUTES.TESTS.INDEX, [
       index("modules/tests/index.tsx"),
-      ...prefix("/:testId", [
+
+      ...prefix(ROUTES.TESTS.TEST_ID, [
         index("modules/tests/modules/$testId/index.tsx"),
-        route("/result", "modules/tests/modules/$testId/result.tsx"),
+        route(ROUTES.TESTS.TAKE(), "modules/tests/modules/$testId/take.tsx"),
+        route(
+          ROUTES.TESTS.RESULT(),
+          "modules/tests/modules/$testId/result.tsx"
+        ),
       ]),
     ]),
 
     // Profile routes
-    ...prefix("/profile", [route("/", "modules/profile/index.tsx")]),
+    ...prefix(ROUTES.PROFILE, [index("modules/profile/index.tsx")]),
   ]),
 ] satisfies RouteConfig;

@@ -10,16 +10,16 @@ export const API_ENDPOINTS = {
   },
 
   // Question endpoints
-  QUESTIONS: {
-    BY_CATEGORY: (category: string) => `/api/v1/questions/by-category/${category}`,
-    BY_CATEGORY_AND_SET: (category: string, questionSet: string) =>
-      `/api/v1/questions/by-category/${category}/set/${questionSet}`,
+  QUESTION_SETS: {
+    LIST: "/api/v1/question-sets/",
+    GET: (questionSetId: string) => `/api/v1/question-sets/${questionSetId}`,
   },
 
   // Category endpoints
   CATEGORIES: {
     LIST: "/api/v1/categories/",
-    QUESTION_SETS: (categoryId: string | number) =>
+    GET: (categoryId: string) => `/api/v1/categories/${categoryId}`,
+    QUESTION_SETS: (categoryId: string) =>
       `/api/v1/categories/${categoryId}/question-sets`,
   },
 
@@ -35,4 +35,3 @@ export const API_CONFIG = {
   CONTENT_TYPE: "application/json",
   AUTHORIZATION_PREFIX: "Bearer",
 } as const;
-

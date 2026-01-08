@@ -17,13 +17,13 @@ export default function Tests() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Lấy danh sách categories
+        // Get categories list
         await getCategories();
 
-        // Lấy categories sau khi fetch xong
+        // Get categories after fetching
         const { categories: fetchedCategories } = useCategoriesStore.getState();
 
-        // Lấy question sets cho từng category
+        // Get question sets for each category
         if (fetchedCategories.length > 0) {
           const questionSetsPromises = fetchedCategories.map((category) =>
             getQuestionSetsByCategory(category.id)
@@ -42,7 +42,6 @@ export default function Tests() {
     };
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

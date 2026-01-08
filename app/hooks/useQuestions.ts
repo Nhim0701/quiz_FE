@@ -30,11 +30,6 @@ interface QuestionsState {
 
   // API methods
   getCategoriesWithSets: () => Promise<void>;
-  getQuestionsByCategory: <T>(category: string) => Promise<T>;
-  getQuestionsByCategoryAndSet: <T>(
-    category: string,
-    questionSet: string
-  ) => Promise<T>;
 }
 
 export const useQuestionsStore = create<QuestionsState>((set, get) => ({
@@ -64,12 +59,12 @@ export const useQuestionsStore = create<QuestionsState>((set, get) => ({
 
   // API methods
   getCategoriesWithSets: async () => {
-    // Lấy danh sách categories từ useCategoriesStore
+    // Get categories list from useCategoriesStore
     const { getCategories } = useCategoriesStore.getState();
     await getCategories();
     const { categories } = useCategoriesStore.getState();
 
-    // Lấy question sets cho từng category từ useQuestionSetsStore
+    // Get question sets for each category from useQuestionSetsStore
     const { getQuestionSetsByCategory } = useQuestionSetsStore.getState();
     const categoriesWithSetsPromises = categories.map(async (category) => {
       const questionSets = await getQuestionSetsByCategory(category.id);
@@ -89,20 +84,4 @@ export const useQuestionsStore = create<QuestionsState>((set, get) => ({
     set({ categoriesWithSets });
   },
 
-  getQuestionsByCategory: async <T>(category: string): Promise<T> => {
-    const response = await apiClient.get<ApiSuccessResponse<T>>(
-      API_ENDPOINTS.QUESTIONS.BY_CATEGORY(category)
-    );
-    return response.data.data;
-  },
-
-  getQuestionsByCategoryAndSet: async <T>(
-    category: string,
-    questionSet: string
-  ): Promise<T> => {
-    const response = await apiClient.get<ApiSuccessResponse<T>>(
-      API_ENDPOINTS.QUESTIONS.BY_CATEGORY_AND_SET(category, questionSet)
-    );
-    return response.data.data;
-  },
 }));

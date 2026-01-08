@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useTranslation } from "@/i18n";
-import { useCategoriesStore } from "@/hooks/useCategories";
+import { type Category } from "@/hooks/useCategories";
 import { useQuestionSetsStore } from "@/hooks/useQuestionSets";
 import {
   AccordionItem,
@@ -10,25 +10,21 @@ import {
 import { TestQuestionSetCard } from "./test-question-set-card";
 
 interface TestCategoryItemProps {
-  categoryId: number;
+  category: Category;
 }
 
-export function TestCategoryItem({ categoryId }: TestCategoryItemProps) {
-  const { t } = useTranslation();
-  const { categories } = useCategoriesStore();
-  const { questionSetsByCategory } = useQuestionSetsStore();
+const EMPTY_ARRAY: never[] = [];
 
-  const category = useMemo(
-    () => categories.find((cat) => cat.id === categoryId),
-    [categories, categoryId]
+export function TestCategoryItem({ category }: TestCategoryItemProps) {
+  const { t } = useTranslation();
+
+  const questionSetsRaw = useQuestionSetsStore(
+    (state) => state.questionSetsByCategory[category.id]
   );
 
-  console.log(category);
-  console.log(questionSetsByCategory);
-
   const questionSets = useMemo(
-    () => questionSetsByCategory[categoryId] || [],
-    [questionSetsByCategory, categoryId]
+    () => questionSetsRaw || EMPTY_ARRAY,
+    [questionSetsRaw]
   );
 
   const totalQuestions = useMemo(() => {
@@ -57,7 +53,7 @@ export function TestCategoryItem({ categoryId }: TestCategoryItemProps) {
         </div>
       </AccordionTrigger>
       <AccordionContent className="pt-4 sm:pt-6">
-        {questionSets && questionSets.length > 0 ? (
+        {questionSets.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {questionSets.map((set) => (
               <TestQuestionSetCard key={set.id} set={set} />
