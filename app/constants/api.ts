@@ -11,11 +11,16 @@ export const API_ENDPOINTS = {
 
   // Question endpoints
   QUESTIONS: {
-    CATEGORIES: "/api/v1/questions/categories",
-    CATEGORIES_WITH_SETS: "/api/v1/questions/categories-with-sets",
     BY_CATEGORY: (category: string) => `/api/v1/questions/by-category/${category}`,
     BY_CATEGORY_AND_SET: (category: string, questionSet: string) =>
       `/api/v1/questions/by-category/${category}/set/${questionSet}`,
+  },
+
+  // Category endpoints
+  CATEGORIES: {
+    LIST: "/api/v1/categories/",
+    QUESTION_SETS: (categoryId: string | number) =>
+      `/api/v1/categories/${categoryId}/question-sets`,
   },
 
   // Response endpoints

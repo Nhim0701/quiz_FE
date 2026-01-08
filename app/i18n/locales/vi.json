@@ -135,7 +135,8 @@
     "totalQuestions": "tổng câu hỏi",
     "questions": "câu hỏi",
     "questionsLabel": "Câu hỏi",
-    "startTest": "Bắt Đầu Bài Kiểm Tra"
+    "startTest": "Bắt Đầu Bài Kiểm Tra",
+    "noQuestionSets": "Không có tập câu hỏi nào"
   },
   "notFound": {
     "title": "Không Tìm Thấy Trang",
@@ -161,4 +162,3 @@
     }
   }
 }
-

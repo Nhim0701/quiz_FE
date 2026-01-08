@@ -9,13 +9,13 @@ import { Stats, CategoryStats, RecentActivity } from "./components";
 export default function Dashboard() {
   const { setLoading, showError } = useApp();
   const { t } = useTranslation();
-  const { getDashboard, getCategoriesWithSets } = useProfileStore();
+  const { getDashboard } = useProfileStore();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        await Promise.all([getCategoriesWithSets(), getDashboard()]);
+        await getDashboard();
       } catch (error) {
         const errorMessage =
           error instanceof Error

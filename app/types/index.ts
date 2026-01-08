@@ -44,9 +44,10 @@ export interface CategoryWithSetsProps {
 }
 
 export interface QuestionSetProps {
-  question_set: string;
+  id: string;
+  name: string;
   question_count: number;
-  question_range: string;
+  category_id: string;
 }
 
 export interface QuestionProps {

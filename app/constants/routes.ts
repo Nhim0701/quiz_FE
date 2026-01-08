@@ -10,15 +10,6 @@ export const ROUTES = {
   RESULT: "/result",
 } as const;
 
-// Helper functions for dynamic test routes
-export const createTestId = (
-  category: string,
-  questionSet?: string
-): string => {
-  const data = questionSet ? `${category}:${questionSet}` : category;
-  return btoa(data).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
-};
-
 export const decodeTestId = (
   testId: string
 ): { category: string; questionSet?: string } => {
@@ -33,20 +24,8 @@ export const decodeTestId = (
   }
 };
 
-export const getTestRoute = (
-  category: string,
-  questionSet?: string
-): string => {
-  const testId = createTestId(category, questionSet);
-  return `/tests/${testId}`;
-};
-
-export const getTestResultRoute = (
-  category: string,
-  questionSet?: string
-): string => {
-  const testId = createTestId(category, questionSet);
-  return `/tests/${testId}/result`;
+export const getTestResultRoute = (questionSetId: string): string => {
+  return `/tests/${questionSetId}/result`;
 };
 
 // Default redirect routes

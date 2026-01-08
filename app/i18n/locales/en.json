@@ -135,7 +135,8 @@
     "totalQuestions": "total questions",
     "questions": "questions",
     "questionsLabel": "Questions",
-    "startTest": "Start Test"
+    "startTest": "Start Test",
+    "noQuestionSets": "No question sets available"
   },
   "notFound": {
     "title": "Page Not Found",
@@ -161,4 +162,3 @@
     }
   }
 }
-
