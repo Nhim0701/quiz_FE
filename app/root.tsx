@@ -11,6 +11,7 @@ import type { Route } from "./+types/root";
 import "@/assets/css/index.css";
 import "@/i18n";
 import { Toaster } from "@/components/ui/sonner";
+import { NotFound } from "@/components/not-found";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -79,16 +80,19 @@ export default function App() {
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+  // Show 404 page for 404 errors
+  if (isRouteErrorResponse(error) && error.status === 404) {
+    return <NotFound />;
+  }
+
+  // For other errors, show error details (especially in development)
   let message = "Oops!";
   let details = "An unexpected error occurred.";
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Error";
-    details =
-      error.status === 404
-        ? "The requested page could not be found."
-        : error.statusText || details;
+    message = "Error";
+    details = error.statusText || details;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
     stack = error.stack;

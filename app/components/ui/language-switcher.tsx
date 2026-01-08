@@ -1,6 +1,5 @@
 import { useTranslation } from "@/i18n";
 import { Button } from "./button";
-import { Globe } from "lucide-react";
 
 export function LanguageSwitcher() {
   const { i18n } = useTranslation();
@@ -11,6 +10,8 @@ export function LanguageSwitcher() {
     i18n.changeLanguage(newLang);
   };
 
+  const flagSrc = i18n.language === "vi" ? "/svg/vi-flag.svg" : "/svg/en-flag.svg";
+
   return (
     <Button
       onClick={toggleLanguage}
@@ -19,7 +20,11 @@ export function LanguageSwitcher() {
       className="flex items-center gap-2"
       aria-label="Toggle language"
     >
-      <Globe className="w-4 h-4" />
+      <img
+        src={flagSrc}
+        alt={`${i18n.language} flag`}
+        className="w-4 h-4 object-contain"
+      />
       <span className="uppercase">{i18n.language}</span>
     </Button>
   );

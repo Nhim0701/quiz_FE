@@ -8,7 +8,9 @@
     "emailLabel": "Email",
     "emailPlaceholder": "you@example.com",
     "passwordLabel": "Password",
-    "passwordPlaceholder": "••••••••"
+    "passwordPlaceholder": "••••••••",
+    "switchToLightMode": "Switch to light mode",
+    "switchToDarkMode": "Switch to dark mode"
   },
   "auth": {
     "login": {
@@ -103,7 +105,12 @@
   },
   "result": {
     "wrong": "Wrong",
-    "quiz": "Quiz"
+    "quiz": "Quiz",
+    "review": {
+      "correct": "Correct",
+      "incorrect": "Incorrect",
+      "answer": "Answer"
+    }
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -123,6 +130,29 @@
     "questions": "questions",
     "questionsLabel": "Questions",
     "startTest": "Start Test"
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "Oops! The page you're looking for doesn't exist. It might have been moved or deleted.",
+    "backToDashboard": "Back to Dashboard"
+  },
+  "dashboard": {
+    "stats": {
+      "totalAnswered": "Total Answered",
+      "correctAnswers": "Correct Answers",
+      "wrongAnswers": "Wrong Answers",
+      "accuracy": "Accuracy"
+    },
+    "categoryStats": {
+      "title": "Performance by Category",
+      "correct": "correct",
+      "wrong": "wrong"
+    },
+    "recentActivity": {
+      "title": "Recent Activity",
+      "noActivity": "No activity yet. Start a test to see your progress!",
+      "notAvailable": "N/A"
+    }
   }
 }
 

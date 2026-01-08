@@ -1,6 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import { Check, X } from "lucide-react";
 import { useResultStore } from "@/hooks/useResult";
+import { useTranslation } from "@/i18n";
 import {
   Accordion,
   AccordionContent,
@@ -9,6 +10,7 @@ import {
 } from "@/components/ui/accordion";
 
 export function ResultReview() {
+  const { t } = useTranslation();
   const { questions, answers } = useResultStore();
 
   if (!questions || questions.length === 0 || !answers) {
@@ -18,7 +20,7 @@ export function ResultReview() {
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-4 sm:p-8">
       <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4 sm:mb-6">
-        Your Answers
+        {t("ui.headers.yourAnswers")}
       </h2>
       <Accordion type="single" collapsible className="w-full">
         {questions.map((question, idx) => {
@@ -63,16 +65,16 @@ export function ResultReview() {
                       {userSelectedAllCorrect ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 text-xs font-medium rounded-full">
                           <Check className="w-3 h-3" />
-                          Correct
+                          {t("result.review.correct")}
                         </span>
                       ) : userAnswers.length > 0 ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 text-xs font-medium rounded-full">
                           <X className="w-3 h-3" />
-                          Incorrect
+                          {t("result.review.incorrect")}
                         </span>
                       ) : (
                         <span className="inline-flex items-center px-2 py-0.5 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-xs font-medium rounded-full">
-                          Not answered
+                          {t("ui.status.notAnswered")}
                         </span>
                       )}
                     </div>
@@ -146,7 +148,7 @@ export function ResultReview() {
                         </svg>
                         <div className="flex-1">
                           <h4 className="font-semibold text-blue-900 dark:text-blue-200 mb-1 text-sm sm:text-base">
-                            Explanation
+                            {t("ui.explanation.title")}
                           </h4>
                           <div className="text-xs sm:text-sm text-blue-800 dark:text-blue-300 space-y-2 sm:space-y-3">
                             {sortedAnswers
@@ -160,7 +162,7 @@ export function ResultReview() {
                                     (a) => a.is_correct && a.explanation
                                   ).length > 1 && (
                                     <strong className="block mb-1 text-blue-900 dark:text-blue-200">
-                                      Answer{" "}
+                                      {t("result.review.answer")}{" "}
                                       {String.fromCharCode(
                                         65 + sortedAnswers.indexOf(answer)
                                       )}

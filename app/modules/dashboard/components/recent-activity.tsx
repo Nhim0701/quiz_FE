@@ -1,19 +1,21 @@
 import { FileText, Check, X } from "lucide-react";
 import { useProfileStore } from "@/hooks/useProfile";
+import { useTranslation } from "@/i18n";
 
 export function RecentActivity() {
+  const { t } = useTranslation();
   const { dashboardData } = useProfileStore();
   const recentActivity = dashboardData?.recent_activity;
   if (!recentActivity || recentActivity.length === 0) {
     return (
       <div className="bg-white dark:bg-slate-800 shadow-sm rounded-xl p-6">
         <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">
-          Recent Activity
+          {t("dashboard.recentActivity.title")}
         </h2>
         <div className="text-center py-12">
           <FileText className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
           <p className="text-slate-500 dark:text-slate-400">
-            No activity yet. Start a test to see your progress!
+            {t("dashboard.recentActivity.noActivity")}
           </p>
         </div>
       </div>
@@ -23,7 +25,7 @@ export function RecentActivity() {
   return (
     <div className="bg-white dark:bg-slate-800 shadow-sm rounded-xl p-6">
       <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">
-        Recent Activity
+        {t("dashboard.recentActivity.title")}
       </h2>
       <div className="space-y-3">
         {recentActivity.map((activity) => (
@@ -60,7 +62,7 @@ export function RecentActivity() {
                           day: "numeric",
                         });
                       })()
-                    : "N/A"}
+                    : t("dashboard.recentActivity.notAvailable")}
                 </span>
               </div>
               <p className="text-sm text-slate-700 dark:text-slate-300 line-clamp-2">

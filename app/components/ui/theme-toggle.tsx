@@ -1,4 +1,5 @@
 import useApp from "@/hooks/useApp";
+import { useTranslation } from "@/i18n";
 
 interface ThemeToggleProps {
   className?: string;
@@ -6,12 +7,15 @@ interface ThemeToggleProps {
 
 export default function ThemeToggle({ className = "" }: ThemeToggleProps) {
   const { theme, toggleTheme } = useApp();
+  const { t } = useTranslation();
   return (
     <button
       onClick={toggleTheme}
       className={`p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 transition-colors ${className}`}
       aria-label={
-        theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+        theme === "dark"
+          ? t("common.switchToLightMode")
+          : t("common.switchToDarkMode")
       }
     >
       {theme === "dark" ? (

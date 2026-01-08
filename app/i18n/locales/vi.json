@@ -8,7 +8,9 @@
     "emailLabel": "Email",
     "emailPlaceholder": "you@example.com",
     "passwordLabel": "Mật khẩu",
-    "passwordPlaceholder": "••••••••"
+    "passwordPlaceholder": "••••••••",
+    "switchToLightMode": "Chuyển sang chế độ sáng",
+    "switchToDarkMode": "Chuyển sang chế độ tối"
   },
   "auth": {
     "login": {
@@ -103,7 +105,12 @@
   },
   "result": {
     "wrong": "Sai",
-    "quiz": "Bài Kiểm Tra"
+    "quiz": "Bài Kiểm Tra",
+    "review": {
+      "correct": "Đúng",
+      "incorrect": "Sai",
+      "answer": "Câu trả lời"
+    }
   },
   "sidebar": {
     "dashboard": "Bảng Điều Khiển",
@@ -123,6 +130,29 @@
     "questions": "câu hỏi",
     "questionsLabel": "Câu hỏi",
     "startTest": "Bắt Đầu Bài Kiểm Tra"
+  },
+  "notFound": {
+    "title": "Không Tìm Thấy Trang",
+    "description": "Ồ! Trang bạn đang tìm kiếm không tồn tại. Trang có thể đã được di chuyển hoặc xóa.",
+    "backToDashboard": "Quay lại Bảng Điều Khiển"
+  },
+  "dashboard": {
+    "stats": {
+      "totalAnswered": "Tổng Số Đã Trả Lời",
+      "correctAnswers": "Câu Trả Lời Đúng",
+      "wrongAnswers": "Câu Trả Lời Sai",
+      "accuracy": "Độ Chính Xác"
+    },
+    "categoryStats": {
+      "title": "Hiệu Suất Theo Danh Mục",
+      "correct": "đúng",
+      "wrong": "sai"
+    },
+    "recentActivity": {
+      "title": "Hoạt Động Gần Đây",
+      "noActivity": "Chưa có hoạt động nào. Bắt đầu làm bài kiểm tra để xem tiến độ của bạn!",
+      "notAvailable": "Không có"
+    }
   }
 }
 

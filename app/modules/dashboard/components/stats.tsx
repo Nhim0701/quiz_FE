@@ -1,7 +1,9 @@
 import { FileText, CheckCircle, XCircle, TrendingUp } from "lucide-react";
 import { useProfileStore } from "@/hooks/useProfile";
+import { useTranslation } from "@/i18n";
 
 export function Stats() {
+  const { t } = useTranslation();
   const { dashboardData } = useProfileStore();
   const overall = dashboardData?.overall;
 
@@ -10,25 +12,25 @@ export function Stats() {
   }
   const stats = [
     {
-      label: "Total Answered",
+      label: t("dashboard.stats.totalAnswered"),
       value: overall.total_answered,
       icon: FileText,
       color: "blue",
     },
     {
-      label: "Correct Answers",
+      label: t("dashboard.stats.correctAnswers"),
       value: overall.total_correct,
       icon: CheckCircle,
       color: "green",
     },
     {
-      label: "Wrong Answers",
+      label: t("dashboard.stats.wrongAnswers"),
       value: overall.total_wrong,
       icon: XCircle,
       color: "red",
     },
     {
-      label: "Accuracy",
+      label: t("dashboard.stats.accuracy"),
       value: `${overall.overall_accuracy}%`,
       icon: TrendingUp,
       color: "indigo",

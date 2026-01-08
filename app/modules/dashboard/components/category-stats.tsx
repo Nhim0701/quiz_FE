@@ -1,6 +1,8 @@
 import { useProfileStore } from "@/hooks/useProfile";
+import { useTranslation } from "@/i18n";
 
 export function CategoryStats() {
+  const { t } = useTranslation();
   const { dashboardData } = useProfileStore();
   const byCategory = dashboardData?.by_category;
 
@@ -11,7 +13,7 @@ export function CategoryStats() {
   return (
     <div className="bg-white dark:bg-slate-800 shadow-sm rounded-xl p-6">
       <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">
-        Performance by Category
+        {t("dashboard.categoryStats.title")}
       </h2>
       <div className="space-y-3">
         {byCategory.map((stat) => (
@@ -29,11 +31,11 @@ export function CategoryStats() {
             </div>
             <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
               <span className="text-green-600 dark:text-green-400">
-                {stat.correct_answers} correct
+                {stat.correct_answers} {t("dashboard.categoryStats.correct")}
               </span>
               <span>•</span>
               <span className="text-red-600 dark:text-red-400">
-                {stat.wrong_answers} wrong
+                {stat.wrong_answers} {t("dashboard.categoryStats.wrong")}
               </span>
             </div>
             <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 mt-2">
