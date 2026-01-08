@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Clock } from "lucide-react";
 import { useTranslation } from "@/i18n";
-import { useTestStore } from "@/hooks/useTest";
+import { useTestStore } from "~/modules/tests/modules/$testId/hooks/store";
 import {
-  useQuestionSetsStore,
-  type QuestionSetProps,
-} from "@/hooks/useQuestionSets";
+  useTestsStore,
+  type TestProps,
+} from "@/hooks/useTests";
 import { useNavigate, useParams } from "react-router";
 import { ROUTES } from "@/constants";
 
@@ -13,23 +13,23 @@ export function TestHeader() {
   const { t } = useTranslation();
 
   const navigate = useNavigate();
-  const { testId: questionSetId } = useParams<{ testId: string }>();
+  const { testId } = useParams<{ testId: string }>();
   const { currentIndex, questions, timeRemaining } = useTestStore();
-  const getQuestionSetById = useQuestionSetsStore(
-    (state) => state.getQuestionSetById
+  const getTestById = useTestsStore(
+    (state) => state.getTestById
   );
 
-  const [questionSet, setQuestionSet] = useState<QuestionSetProps | null>(null);
+  const [test, setTest] = useState<TestProps | null>(null);
 
   useEffect(() => {
-    if (questionSetId) {
-      getQuestionSetById(questionSetId).then((set) => {
-        setQuestionSet(set);
+    if (testId) {
+      getTestById(testId).then((testData) => {
+        setTest(testData);
       });
     } else {
-      setQuestionSet(null);
+      setTest(null);
     }
-  }, [questionSetId, getQuestionSetById]);
+  }, [testId, getTestById]);
 
   const handleClose = () => {
     navigate(ROUTES.TESTS.INDEX);
@@ -49,7 +49,7 @@ export function TestHeader() {
       <div className="flex items-center justify-between mb-4">
         <div className="min-w-0 flex-1 pr-4">
           <h1 className="text-lg sm:text-2xl font-bold text-slate-800 dark:text-slate-100 capitalize truncate">
-            {questionSet?.name || ""}
+            {test?.name || ""}
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
             {t("test.question", {

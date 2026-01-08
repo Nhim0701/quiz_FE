@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router";
-import { useTestStore } from "@/hooks/useTest";
+import { useTestStore } from "./hooks/store";
 import { TIME_CONSTANTS, ROUTES } from "@/constants";
 import { useTranslation } from "@/i18n";
 import { TestHeader, TestQuestion, TestSidebar, TestEmpty } from "./components";

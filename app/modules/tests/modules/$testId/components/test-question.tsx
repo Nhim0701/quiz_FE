@@ -1,7 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import { Check, X, Flag } from "lucide-react";
 import { useTranslation } from "@/i18n";
-import { useTestStore } from "@/hooks/useTest";
+import { useTestStore } from "~/modules/tests/modules/$testId/hooks/store";
 
 export function TestQuestion() {
   const { t } = useTranslation();

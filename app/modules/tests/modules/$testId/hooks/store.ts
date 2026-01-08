@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { ApiSuccessResponse, PaginationMeta } from "@/types";
-import type { QuestionProps } from "./useQuestions";
+import type { QuestionProps } from "../../../../../hooks/useQuestions";
 import type { SubmissionItem } from "@/types";
 import apiClient from "@/lib/axios";
 import { API_ENDPOINTS, TIME_CONSTANTS } from "@/constants";
@@ -51,11 +51,11 @@ interface TestState {
   setLoading: (loading: boolean) => void;
 
   // Initialize test
-  initializeTest: (questionSetId: string, questions: QuestionProps[]) => void;
+  initializeTest: (testId: string, questions: QuestionProps[]) => void;
 
   // Fetch and initialize questions
   fetchAndInitializeTest: (
-    questionSetId: string,
+    testId: string,
     setLoading?: (loading: boolean) => void,
     onError?: (message: string) => void
   ) => Promise<void>;
@@ -235,7 +235,7 @@ export const useTestStore = create<TestState>((set, get) => ({
   setLoading: (loading) => set({ loading }),
 
   // Initialize test
-  initializeTest: (questionSetId, questions) => {
+  initializeTest: (testId, questions) => {
     set({
       questions,
       currentIndex: 0,
@@ -249,12 +249,8 @@ export const useTestStore = create<TestState>((set, get) => ({
     });
   },
 
-  // Fetch and initialize questions from question set (with pagination support)
-  fetchAndInitializeTest: async (
-    questionSetId: string,
-    setLoading,
-    onError
-  ) => {
+  // Fetch and initialize questions from test (with pagination support)
+  fetchAndInitializeTest: async (testId: string, setLoading, onError) => {
     if (setLoading) setLoading(true);
     set({ loading: true });
 
@@ -264,7 +260,7 @@ export const useTestStore = create<TestState>((set, get) => ({
       // Fetch first page to get pagination info
       const firstResponse = await apiClient.get<
         ApiSuccessResponse<QuestionProps[]>
-      >(API_ENDPOINTS.QUESTION_SETS.QUESTIONS(questionSetId), {
+      >(API_ENDPOINTS.TESTS.QUESTIONS(testId), {
         params: {
           page: 1,
           page_size: 100,
@@ -286,7 +282,7 @@ export const useTestStore = create<TestState>((set, get) => ({
       if (totalPages > 1) {
         const remainingPages = Array.from({ length: totalPages - 1 }, (_, i) =>
           apiClient.get<ApiSuccessResponse<QuestionProps[]>>(
-            `${API_ENDPOINTS.QUESTION_SETS.QUESTIONS(questionSetId)}`,
+            `${API_ENDPOINTS.TESTS.QUESTIONS(testId)}`,
             { params: { page: i + 2, page_size: 100 } }
           )
         );
@@ -299,7 +295,7 @@ export const useTestStore = create<TestState>((set, get) => ({
       }
 
       const { initializeTest } = get();
-      initializeTest(questionSetId, allQuestions);
+      initializeTest(testId, allQuestions);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to fetch questions";

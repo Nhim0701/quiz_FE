@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { useLocation, useNavigate, redirect } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Container } from "@/components/ui/container";
-import type { QuestionProps } from "@/types";
+import type { QuestionProps } from "@/hooks/useQuestions";
 import { ResultEmpty, ResultSummary, ResultReview } from "./components";
 import { useResultStore } from "@/hooks/useResult";
 import { ROUTES } from "@/constants";
@@ -15,7 +15,7 @@ interface LocationState {
     timeSpent: number;
     timeRemaining: number;
   };
-  answers?: Record<number, number[]>;
+  answers?: Record<string, string[]>;
   questions?: QuestionProps[];
 }
 

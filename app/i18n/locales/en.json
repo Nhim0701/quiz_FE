@@ -136,7 +136,7 @@
     "questions": "questions",
     "questionsLabel": "Questions",
     "startTest": "Start Test",
-    "noQuestionSets": "No question sets available"
+    "noTests": "No tests available"
   },
   "notFound": {
     "title": "Page Not Found",

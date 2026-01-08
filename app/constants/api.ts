@@ -9,22 +9,21 @@ export const API_ENDPOINTS = {
     ME: "/api/v1/users/me",
   },
 
-  // Question endpoints
-  QUESTION_SETS: {
-    LIST: "/api/v1/question-sets/",
-    GET: (questionSetId: string) => `/api/v1/question-sets/${questionSetId}`,
-    QUESTIONS: (questionSetId: string) =>
-      `/api/v1/question-sets/${questionSetId}/questions`,
-    QUESTION: (questionSetId: string, questionId: string) =>
-      `/api/v1/question-sets/${questionSetId}/questions/${questionId}`,
+  // Tests endpoints
+  TESTS: {
+    LIST: "/api/v1/tests/",
+    GET: (testId: string) => `/api/v1/tests/${testId}`,
+    QUESTIONS: (testId: string) => `/api/v1/tests/${testId}/questions`,
+    QUESTION: (testId: string, questionId: string) =>
+      `/api/v1/tests/${testId}/questions/${questionId}`,
   },
 
   // Category endpoints
   CATEGORIES: {
     LIST: "/api/v1/categories/",
     GET: (categoryId: string) => `/api/v1/categories/${categoryId}`,
-    QUESTION_SETS: (categoryId: string) =>
-      `/api/v1/categories/${categoryId}/question-sets`,
+    TESTS: (categoryId: string) =>
+      `/api/v1/categories/${categoryId}/tests`,
   },
 
   // Response endpoints

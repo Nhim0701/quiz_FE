@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import useApp from "@/hooks/useApp";
 import { useCategoriesStore } from "@/hooks/useCategories";
-import { useQuestionSetsStore } from "@/hooks/useQuestionSets";
+import { useTestsStore } from "@/hooks/useTests";
 import { useTranslation } from "@/i18n";
 import { PageHeader } from "@/components/page-header";
 import { Container } from "@/components/ui/container";
@@ -11,7 +11,7 @@ export default function Tests() {
   const { setLoading, showError } = useApp();
   const { t } = useTranslation();
   const { getCategories } = useCategoriesStore();
-  const { getQuestionSetsByCategory } = useQuestionSetsStore();
+  const { getTestsByCategory } = useTestsStore();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -23,12 +23,12 @@ export default function Tests() {
         // Get categories after fetching
         const { categories: fetchedCategories } = useCategoriesStore.getState();
 
-        // Get question sets for each category
+        // Get tests for each category
         if (fetchedCategories.length > 0) {
-          const questionSetsPromises = fetchedCategories.map((category) =>
-            getQuestionSetsByCategory(category.id)
+          const testsPromises = fetchedCategories.map((category) =>
+            getTestsByCategory(category.id)
           );
-          await Promise.all(questionSetsPromises);
+          await Promise.all(testsPromises);
         }
       } catch (error) {
         const errorMessage =
