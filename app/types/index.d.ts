@@ -24,7 +24,7 @@ export interface DashboardProps {
 
 export interface SubmissionItem {
   question_id: string;
-  selected_option_id: string;
+  answer_id: string;
   is_correct: boolean;
 }
 

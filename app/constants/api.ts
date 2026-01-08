@@ -16,20 +16,19 @@ export const API_ENDPOINTS = {
     QUESTIONS: (testId: string) => `/api/v1/tests/${testId}/questions`,
     QUESTION: (testId: string, questionId: string) =>
       `/api/v1/tests/${testId}/questions/${questionId}`,
+    SUBMIT: (testId: string) => `/api/v1/tests/${testId}/submit`,
   },
 
   // Category endpoints
   CATEGORIES: {
     LIST: "/api/v1/categories/",
     GET: (categoryId: string) => `/api/v1/categories/${categoryId}`,
-    TESTS: (categoryId: string) =>
-      `/api/v1/categories/${categoryId}/tests`,
+    TESTS: (categoryId: string) => `/api/v1/categories/${categoryId}/tests`,
   },
 
   // Response endpoints
   RESPONSES: {
     DASHBOARD: "/api/v1/submissions/dashboard",
-    SUBMIT_BULK: "/api/v1/submissions/submit-bulk",
   },
 } as const;
 

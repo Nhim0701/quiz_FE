@@ -37,7 +37,8 @@ interface TestState {
   // Submission
   submitting: boolean;
   setSubmitting: (submitting: boolean) => void;
-  submitBulk: <T>(
+  submit: <T>(
+    testId: string,
     responses: SubmissionItem[]
   ) => Promise<ApiSuccessResponse<T>>;
   finishTest: (
@@ -153,11 +154,12 @@ export const useTestStore = create<TestState>((set, get) => ({
 
   // Submission
   setSubmitting: (submitting) => set({ submitting }),
-  submitBulk: async <T>(
+  submit: async <T>(
+    testId: string,
     submissions: SubmissionItem[]
   ): Promise<ApiSuccessResponse<T>> => {
     const response = await apiClient.post<ApiSuccessResponse<T>>(
-      API_ENDPOINTS.RESPONSES.SUBMIT_BULK,
+      API_ENDPOINTS.TESTS.SUBMIT(testId),
       {
         submissions,
       }
@@ -172,7 +174,7 @@ export const useTestStore = create<TestState>((set, get) => ({
       timeStarted,
       setTimeStarted,
       setSubmitting,
-      submitBulk,
+      submit,
     } = get();
 
     // Stop timer
@@ -195,7 +197,7 @@ export const useTestStore = create<TestState>((set, get) => ({
 
         submissions.push({
           question_id: questionId,
-          selected_option_id: answerId,
+          answer_id: answerId,
           is_correct: answer.is_correct,
         });
       }
@@ -205,7 +207,7 @@ export const useTestStore = create<TestState>((set, get) => ({
     if (submissions.length > 0) {
       setSubmitting(true);
       try {
-        await submitBulk<void>(submissions);
+        await submit<void>(testId, submissions);
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Failed to submit responses";
