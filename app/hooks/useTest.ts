@@ -3,14 +3,12 @@ import type {
   ApiSuccessResponse,
   QuestionProps,
   SubmissionItem,
+  PaginationMeta,
 } from "@/types";
 import apiClient from "@/lib/axios";
 import { API_ENDPOINTS, TIME_CONSTANTS } from "@/constants";
 
 interface TestState {
-  // Test configuration
-  questionSet: string | null;
-
   // Questions
   questions: QuestionProps[];
 
@@ -59,10 +57,7 @@ interface TestState {
   setLoading: (loading: boolean) => void;
 
   // Initialize test
-  initializeTest: (
-    questionSet: string | null,
-    questions: QuestionProps[]
-  ) => void;
+  initializeTest: (questionSetId: string, questions: QuestionProps[]) => void;
 
   // Fetch and initialize questions
   fetchAndInitializeTest: (
@@ -81,7 +76,6 @@ interface TestState {
 
 export const useTestStore = create<TestState>((set, get) => ({
   // Initial state
-  questionSet: null,
   questions: [],
   currentIndex: 0,
   answers: {},
@@ -184,8 +178,16 @@ export const useTestStore = create<TestState>((set, get) => ({
     return response.data;
   },
   finishTest: async (navigate, testId, onError) => {
-    const { questions, answers, timeRemaining, timeStarted, setTimeStarted, setSubmitting, submitBulk } = get();
-    
+    const {
+      questions,
+      answers,
+      timeRemaining,
+      timeStarted,
+      setTimeStarted,
+      setSubmitting,
+      submitBulk,
+    } = get();
+
     // Stop timer
     setTimeStarted(false);
 
@@ -219,9 +221,7 @@ export const useTestStore = create<TestState>((set, get) => ({
         await submitBulk<void>(submissions);
       } catch (error) {
         const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "Failed to submit responses";
+          error instanceof Error ? error.message : "Failed to submit responses";
         if (onError) onError(errorMessage);
         // Continue to result page even if submission fails
       } finally {
@@ -248,9 +248,8 @@ export const useTestStore = create<TestState>((set, get) => ({
   setLoading: (loading) => set({ loading }),
 
   // Initialize test
-  initializeTest: (questionSet, questions) => {
+  initializeTest: (questionSetId, questions) => {
     set({
-      questionSet,
       questions,
       currentIndex: 0,
       answers: {},
@@ -263,24 +262,60 @@ export const useTestStore = create<TestState>((set, get) => ({
     });
   },
 
-  // Fetch and initialize questions from question set
-  fetchAndInitializeTest: async (questionSetId: string, setLoading, onError) => {
+  // Fetch and initialize questions from question set (with pagination support)
+  fetchAndInitializeTest: async (
+    questionSetId: string,
+    setLoading,
+    onError
+  ) => {
     if (setLoading) setLoading(true);
     set({ loading: true });
-    
+
     try {
-      const response = await apiClient.get<
+      const allQuestions: QuestionProps[] = [];
+
+      // Fetch first page to get pagination info
+      const firstResponse = await apiClient.get<
         ApiSuccessResponse<QuestionProps[]>
-      >(API_ENDPOINTS.QUESTION_SETS.GET(questionSetId));
-      
-      const questions = response.data.data || [];
+      >(API_ENDPOINTS.QUESTION_SETS.QUESTIONS(questionSetId), {
+        params: {
+          page: 1,
+          page_size: 100,
+        },
+      });
+
+      const firstPageData = firstResponse.data.data || [];
+      allQuestions.push(...firstPageData);
+
+      // Check if there's pagination meta and fetch remaining pages
+      const meta = firstResponse.data.meta;
+      let totalPages = 1;
+      if (meta && typeof meta === "object" && "total_pages" in meta) {
+        const paginationMeta = meta as PaginationMeta;
+        totalPages = paginationMeta.total_pages;
+      }
+
+      // Fetch remaining pages if any
+      if (totalPages > 1) {
+        const remainingPages = Array.from({ length: totalPages - 1 }, (_, i) =>
+          apiClient.get<ApiSuccessResponse<QuestionProps[]>>(
+            `${API_ENDPOINTS.QUESTION_SETS.QUESTIONS(questionSetId)}`,
+            { params: { page: i + 2, page_size: 100 } }
+          )
+        );
+
+        const remainingResponses = await Promise.all(remainingPages);
+        remainingResponses.forEach((response) => {
+          const pageData = response.data.data || [];
+          allQuestions.push(...pageData);
+        });
+      }
+
       const { initializeTest } = get();
-      initializeTest(questionSetId, questions);
+      initializeTest(questionSetId, allQuestions);
     } catch (error) {
       const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch questions";
+        error instanceof Error ? error.message : "Failed to fetch questions";
       if (onError) onError(errorMessage);
       throw error;
     } finally {
@@ -303,7 +338,6 @@ export const useTestStore = create<TestState>((set, get) => ({
   // Reset test
   resetTest: () => {
     set({
-      questionSet: null,
       questions: [],
       currentIndex: 0,
       answers: {},

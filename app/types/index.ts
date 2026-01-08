@@ -72,9 +72,19 @@ export interface SubmissionItem {
 }
 
 // API Response Types
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
+
+export interface ApiResponseMeta extends PaginationMeta {
+  [key: string]: unknown;
+}
 export interface ApiSuccessResponse<T = unknown> {
   data: T;
-  meta?: Record<string, unknown>;
+  meta?: ApiResponseMeta;
 }
 
 export interface ApiErrorDetail {

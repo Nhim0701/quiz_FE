@@ -28,20 +28,14 @@ export default function Test() {
   }, [finishTest]);
 
   useEffect(() => {
-    console.log("fetchAndInitializeTest", testId);
     if (!testId) {
       navigate(ROUTES.TESTS.INDEX, { replace: true });
       return;
     }
 
-    fetchAndInitializeTest(
-      testId,
-      setLoading,
-      (errorMessage) => {
-        // Error handling can be done here if needed
-        console.error(errorMessage);
-      }
-    );
+    fetchAndInitializeTest(testId, setLoading, (errorMessage) => {
+      console.error(errorMessage);
+    });
   }, [testId, navigate, fetchAndInitializeTest, setLoading]);
 
   // Timer effect
@@ -63,7 +57,14 @@ export default function Test() {
     }, TIME_CONSTANTS.TIMER_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [timeStarted, loading, questions.length, setTimeRemaining, navigate, testId]);
+  }, [
+    timeStarted,
+    loading,
+    questions.length,
+    setTimeRemaining,
+    navigate,
+    testId,
+  ]);
 
   // Start timer when questions are loaded
   useEffect(() => {

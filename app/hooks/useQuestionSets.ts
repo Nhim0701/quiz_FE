@@ -12,25 +12,31 @@ export interface QuestionSetProps {
 
 interface QuestionSetsState {
   // Question sets by category ID
-  questionSetsByCategory: Record<number, QuestionSetProps[]>;
-  loading: Record<number, boolean>;
-  error: Record<number, string | null>;
+  questionSetsByCategory: Record<string, QuestionSetProps[]>;
+  // Question sets by ID cache
+  questionSetsById: Record<string, QuestionSetProps>;
+  loading: Record<string, boolean>;
+  error: Record<string, string | null>;
 
   // API methods
   getQuestionSetsByCategory: (
-    categoryId: number
+    categoryId: string
   ) => Promise<QuestionSetProps[]>;
+  getQuestionSetById: (
+    questionSetId: string
+  ) => Promise<QuestionSetProps | null>;
   clearQuestionSetsByCategory: (categoryId?: number) => void;
 }
 
 export const useQuestionSetsStore = create<QuestionSetsState>((set, get) => ({
   // Initial state
   questionSetsByCategory: {},
+  questionSetsById: {},
   loading: {},
   error: {},
 
   // API methods
-  getQuestionSetsByCategory: async (categoryId: number) => {
+  getQuestionSetsByCategory: async (categoryId: string) => {
     const { questionSetsByCategory } = get();
 
     // Return cached data if available
@@ -69,6 +75,79 @@ export const useQuestionSetsStore = create<QuestionSetsState>((set, get) => ({
         loading: { ...state.loading, [categoryId]: false },
       }));
       throw error;
+    }
+  },
+
+  getQuestionSetById: async (questionSetId: string) => {
+    const { questionSetsByCategory, questionSetsById } = get();
+
+    // Check cache by ID first
+    if (questionSetsById[questionSetId]) {
+      return questionSetsById[questionSetId];
+    }
+
+    // Search through all categories to find the question set
+    for (const questionSets of Object.values(questionSetsByCategory)) {
+      const found = questionSets.find((set) => set.id === questionSetId);
+      if (found) {
+        // Cache it
+        set((state) => ({
+          questionSetsById: {
+            ...state.questionSetsById,
+            [questionSetId]: found,
+          },
+        }));
+        return found;
+      }
+    }
+
+    // If not found in cache, fetch from API
+    try {
+      const response = await apiClient.get<
+        ApiSuccessResponse<QuestionSetProps>
+      >(API_ENDPOINTS.QUESTION_SETS.GET(questionSetId));
+
+      const questionSet = response.data.data;
+
+      if (questionSet) {
+        // Cache it
+        set((state) => ({
+          questionSetsById: {
+            ...state.questionSetsById,
+            [questionSetId]: questionSet,
+          },
+        }));
+
+        // Also add to category cache if we have category_id
+        if (questionSet.category_id) {
+          const categoryId = parseInt(questionSet.category_id);
+          if (!isNaN(categoryId)) {
+            set((state) => {
+              const categorySets =
+                state.questionSetsByCategory[categoryId] || [];
+              const exists = categorySets.some(
+                (set) => set.id === questionSetId
+              );
+              if (!exists) {
+                return {
+                  questionSetsByCategory: {
+                    ...state.questionSetsByCategory,
+                    [categoryId]: [...categorySets, questionSet],
+                  },
+                };
+              }
+              return state;
+            });
+          }
+        }
+
+        return questionSet;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Failed to fetch question set:", error);
+      return null;
     }
   },
 

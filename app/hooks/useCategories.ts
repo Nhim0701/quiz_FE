@@ -4,7 +4,7 @@ import apiClient from "@/lib/axios";
 import { API_ENDPOINTS } from "@/constants";
 
 export interface Category {
-  id: number;
+  id: string;
   name: string;
 }
 
@@ -29,9 +29,9 @@ export const useCategoriesStore = create<CategoriesState>((set) => ({
   getCategories: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await apiClient.get<
-        ApiSuccessResponse<Array<Category>>
-      >(API_ENDPOINTS.CATEGORIES.LIST);
+      const response = await apiClient.get<ApiSuccessResponse<Array<Category>>>(
+        API_ENDPOINTS.CATEGORIES.LIST
+      );
       set({ categories: response.data.data, loading: false });
     } catch (error) {
       const errorMessage =

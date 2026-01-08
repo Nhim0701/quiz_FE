@@ -1,7 +1,7 @@
 // API utility for backend communication
 import type { AxiosResponse } from "axios";
 import { STORAGE_KEYS } from "@/constants";
-import type { ApiSuccessResponse } from "@/types";
+import type { ApiResponseMeta, ApiSuccessResponse } from "@/types";
 
 // Token management
 export const tokenManager = {
@@ -63,7 +63,7 @@ export const extractApiData = <T>(
 // Helper function to extract meta from standard API response
 export const extractApiMeta = (
   response: AxiosResponse<ApiSuccessResponse | unknown>
-): Record<string, unknown> | undefined => {
+): ApiResponseMeta | undefined => {
   const responseData = response.data;
 
   if (

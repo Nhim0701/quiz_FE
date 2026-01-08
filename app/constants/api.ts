@@ -13,6 +13,10 @@ export const API_ENDPOINTS = {
   QUESTION_SETS: {
     LIST: "/api/v1/question-sets/",
     GET: (questionSetId: string) => `/api/v1/question-sets/${questionSetId}`,
+    QUESTIONS: (questionSetId: string) =>
+      `/api/v1/question-sets/${questionSetId}/questions`,
+    QUESTION: (questionSetId: string, questionId: string) =>
+      `/api/v1/question-sets/${questionSetId}/questions/${questionId}`,
   },
 
   // Category endpoints

@@ -1,23 +1,38 @@
+import { useEffect, useState } from "react";
 import { Clock } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { useTestStore } from "@/hooks/useTest";
-import { useNavigate } from "react-router";
+import {
+  useQuestionSetsStore,
+  type QuestionSetProps,
+} from "@/hooks/useQuestionSets";
+import { useNavigate, useParams } from "react-router";
 import { ROUTES } from "@/constants";
 
 export function TestHeader() {
   const { t } = useTranslation();
+
   const navigate = useNavigate();
-  const {
-    category,
-    testType,
-    questionSet,
-    currentIndex,
-    questions,
-    timeRemaining,
-  } = useTestStore();
+  const { testId: questionSetId } = useParams<{ testId: string }>();
+  const { currentIndex, questions, timeRemaining } = useTestStore();
+  const getQuestionSetById = useQuestionSetsStore(
+    (state) => state.getQuestionSetById
+  );
+
+  const [questionSet, setQuestionSet] = useState<QuestionSetProps | null>(null);
+
+  useEffect(() => {
+    if (questionSetId) {
+      getQuestionSetById(questionSetId).then((set) => {
+        setQuestionSet(set);
+      });
+    } else {
+      setQuestionSet(null);
+    }
+  }, [questionSetId, getQuestionSetById]);
 
   const handleClose = () => {
-    navigate(ROUTES.TESTS);
+    navigate(ROUTES.TESTS.INDEX);
   };
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -34,7 +49,7 @@ export function TestHeader() {
       <div className="flex items-center justify-between mb-4">
         <div className="min-w-0 flex-1 pr-4">
           <h1 className="text-lg sm:text-2xl font-bold text-slate-800 dark:text-slate-100 capitalize truncate">
-            {category || testType} {questionSet && `- ${questionSet}`}
+            {questionSet?.name || ""}
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
             {t("test.question", {
