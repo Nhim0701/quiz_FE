@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useTranslation } from "@/i18n";
 import { loginSchema, type LoginFormData } from "../schemas/login-schema";
 import useApp from "~/hooks/useApp";
@@ -26,6 +27,8 @@ export function LoginForm({ redirectPath }: LoginFormProps) {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
+    setValue,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema(t)),
     mode: "onChange",
@@ -33,15 +36,20 @@ export function LoginForm({ redirectPath }: LoginFormProps) {
     resetOptions: {
       keepValues: true,
     },
+    defaultValues: {
+      rememberMe: false,
+    },
   });
 
+  const rememberMe = watch("rememberMe");
+
   const onSubmitForm = async (data: LoginFormData) => {
-    const { email, password } = data;
+    const { email, password, rememberMe } = data;
     setLocalLoading(true);
     setLoading(true);
 
     try {
-      await login({ email, password }, setLoading);
+      await login({ email, password, rememberMe: rememberMe ?? false }, setLoading);
       navigate(redirectPath, { replace: true });
     } catch (err) {
       const error = err as Error;
@@ -109,6 +117,21 @@ export function LoginForm({ redirectPath }: LoginFormProps) {
             {errors.password.message}
           </p>
         )}
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="rememberMe"
+          checked={rememberMe}
+          onCheckedChange={(checked) => setValue("rememberMe", checked === true)}
+          disabled={loading}
+        />
+        <Label
+          htmlFor="rememberMe"
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+        >
+          {t("auth.login.rememberMe")}
+        </Label>
       </div>
 
       <Button

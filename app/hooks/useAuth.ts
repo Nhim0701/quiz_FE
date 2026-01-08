@@ -14,6 +14,7 @@ interface UserData {
 interface Credentials {
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 interface AuthResponse {
@@ -46,7 +47,7 @@ interface AuthState {
     credentials: Credentials,
     setLoading?: (loading: boolean) => void
   ) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 // Helper function to fetch user data
@@ -110,16 +111,38 @@ export const useAuthStoreInternal = create<AuthState>()(
           {
             user_email: credentials.email,
             user_password: credentials.password,
+            remember_me: credentials.rememberMe ?? false,
           }
         );
 
         // Store token on successful login
         if (response.data.data) {
-          tokenManager.setToken(response.data.data.access_token);
+          const rememberMe = credentials.rememberMe ?? false;
+          tokenManager.setToken(response.data.data.access_token, rememberMe);
+          
+          // Store refresh token if available and rememberMe is true
+          if (response.data.data.refresh_token && rememberMe) {
+            tokenManager.setRefreshToken(response.data.data.refresh_token);
+          }
+          
           await fetchUserData(set, setLoading);
         }
       },
-      logout: () => {
+      logout: async () => {
+        // Revoke refresh token if exists
+        const refreshToken = tokenManager.getRefreshToken();
+        if (refreshToken) {
+          try {
+            await apiClient.post(API_ENDPOINTS.AUTH.REVOKE, {
+              refresh_token: refreshToken,
+            });
+          } catch (error) {
+            // Log error but don't block logout
+            console.error("Failed to revoke refresh token:", error);
+          }
+        }
+
+        // Clear user and tokens
         set({ user: null });
         tokenManager.removeToken();
       },

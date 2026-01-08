@@ -11,6 +11,7 @@ export const loginSchema = (t: TypedTFunction) =>
       .string()
       .min(1, t("auth.validation.passwordRequired"))
       .min(6, t("auth.validation.passwordMinLength")),
+    rememberMe: z.boolean().optional().default(false),
   });
 
 export type LoginFormData = z.infer<ReturnType<typeof loginSchema>>;

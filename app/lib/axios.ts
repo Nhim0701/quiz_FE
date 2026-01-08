@@ -3,13 +3,20 @@ import axios, {
   type AxiosError,
   type AxiosInstance,
   type AxiosResponse,
+  type InternalAxiosRequestConfig,
 } from "axios";
 import { toast } from "sonner";
-import { API_CONFIG, ERROR, ROUTES, SESSION_KEYS } from "@/constants";
+import { API_CONFIG, API_ENDPOINTS, ERROR, ROUTES, SESSION_KEYS } from "@/constants";
 import { useAuthStoreInternal } from "@/hooks/useAuth";
 import { t } from "@/i18n/utils";
 import type { ApiErrorResponse, ApiSuccessResponse } from "@/types";
 import type { TranslationKey } from "@/i18n";
+
+interface AuthResponse {
+  access_token: string;
+  token_type: string;
+  refresh_token?: string;
+}
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
@@ -18,6 +25,24 @@ const apiClient: AxiosInstance = axios.create({
     "Content-Type": API_CONFIG.CONTENT_TYPE,
   },
 });
+
+// Flag to prevent multiple refresh attempts
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: unknown) => void;
+  reject: (error?: unknown) => void;
+}> = [];
+
+const processQueue = (error: Error | null, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
 
 // Request interceptor to add token
 apiClient.interceptors.request.use(
@@ -50,29 +75,107 @@ apiClient.interceptors.response.use(
     // Pass through non-standard responses (will be handled by helper functions)
     return response;
   },
-  (error: AxiosError<ApiErrorResponse>) => {
-    // Handle 401 Unauthorized - redirect to login
+  async (error: AxiosError<ApiErrorResponse>) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
+
+    // Handle 401 Unauthorized - try to refresh token
     if (
       error.response?.status === 401 &&
       error.response?.data?.error?.code !==
-        ERROR.INCORRECT_EMAIL_OR_PASSWORD.CODE
+        ERROR.INCORRECT_EMAIL_OR_PASSWORD.CODE &&
+      originalRequest &&
+      !originalRequest._retry
     ) {
-      // Clear token and user
-      tokenManager.removeToken();
-      useAuthStoreInternal.getState().clearUser();
-
-      // Show error toast
-      toast.error(t("errors.sessionExpired"));
-
-      // Store current path for redirect after login
-      const currentPath = window.location.pathname;
-      if (currentPath !== ROUTES.LOGIN && currentPath !== ROUTES.REGISTER) {
-        sessionStorage.setItem(SESSION_KEYS.REDIRECT_PATH, currentPath);
+      if (isRefreshing) {
+        // If already refreshing, queue this request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `${API_CONFIG.AUTHORIZATION_PREFIX} ${token}`;
+            }
+            return apiClient(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
       }
 
-      // Redirect to login
-      window.location.href = ROUTES.LOGIN;
-      return Promise.reject(error);
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = tokenManager.getRefreshToken();
+      if (!refreshToken) {
+        // No refresh token, redirect to login
+        processQueue(new Error("No refresh token"));
+        isRefreshing = false;
+        tokenManager.removeToken();
+        useAuthStoreInternal.getState().clearUser();
+        toast.error(t("errors.sessionExpired"));
+
+        const currentPath = window.location.pathname;
+        if (currentPath !== ROUTES.LOGIN && currentPath !== ROUTES.REGISTER) {
+          sessionStorage.setItem(SESSION_KEYS.REDIRECT_PATH, currentPath);
+        }
+        window.location.href = ROUTES.LOGIN;
+        return Promise.reject(error);
+      }
+
+      try {
+        // Try to refresh token
+        const response = await axios.post<ApiSuccessResponse<AuthResponse>>(
+          `${import.meta.env.VITE_API_BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`,
+          { refresh_token: refreshToken },
+          {
+            headers: {
+              "Content-Type": API_CONFIG.CONTENT_TYPE,
+            },
+          }
+        );
+
+        const { access_token, refresh_token: newRefreshToken } =
+          response.data.data;
+
+        // Store new tokens
+        // If we had a refresh token before, we should use localStorage (rememberMe = true)
+        // Otherwise, check if new refresh token exists
+        const hadRefreshToken = !!tokenManager.getRefreshToken();
+        const shouldRemember = hadRefreshToken || !!newRefreshToken;
+        tokenManager.setToken(access_token, shouldRemember);
+        
+        if (newRefreshToken) {
+          tokenManager.setRefreshToken(newRefreshToken);
+        }
+
+        // Update authorization header
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `${API_CONFIG.AUTHORIZATION_PREFIX} ${access_token}`;
+        }
+
+        // Process queued requests
+        processQueue(null, access_token);
+        isRefreshing = false;
+
+        // Retry original request
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed, redirect to login
+        processQueue(refreshError as Error);
+        isRefreshing = false;
+        tokenManager.removeToken();
+        useAuthStoreInternal.getState().clearUser();
+        toast.error(t("errors.sessionExpired"));
+
+        const currentPath = window.location.pathname;
+        if (currentPath !== ROUTES.LOGIN && currentPath !== ROUTES.REGISTER) {
+          sessionStorage.setItem(SESSION_KEYS.REDIRECT_PATH, currentPath);
+        }
+        window.location.href = ROUTES.LOGIN;
+        return Promise.reject(refreshError);
+      }
     }
 
     // Handle error responses (4xx, 5xx) with standard structure

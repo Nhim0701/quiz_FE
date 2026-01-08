@@ -40,8 +40,8 @@ export function AppSidebar() {
       : user.email[0]?.toUpperCase() || ""
     : "";
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate(ROUTES.LOGIN);
   };
 
