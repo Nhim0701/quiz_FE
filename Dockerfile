@@ -9,7 +9,7 @@ RUN npm run build
 # Stage 2: Serve static bằng một server nhẹ (optional) hoặc leave container tĩnh
 FROM node:20-alpine
 WORKDIR /app
-COPY --from=builder /build/client/ ./client
+COPY --from=builder /app/build/client/ ./client
 
 # Nếu muốn dùng serve để test
 RUN npm install -g serve
