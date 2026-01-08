@@ -1,10 +1,7 @@
 import { create } from "zustand";
-import type {
-  ApiSuccessResponse,
-  QuestionProps,
-  SubmissionItem,
-  PaginationMeta,
-} from "@/types";
+import type { ApiSuccessResponse, PaginationMeta } from "@/types";
+import type { QuestionProps } from "./useQuestions";
+import type { SubmissionItem } from "@/types";
 import apiClient from "@/lib/axios";
 import { API_ENDPOINTS, TIME_CONSTANTS } from "@/constants";
 
@@ -20,19 +17,16 @@ interface TestState {
   goPrev: () => void;
 
   // Answers
-  answers: Record<number, number[]>; // questionId -> array of answer ids
-  toggleAnswer: (questionId: number, answerId: number) => void;
-  clearAnswers: () => void;
+  answers: Record<string, string[]>; // questionId -> array of answer ids
+  toggleAnswer: (questionId: string, answerId: string) => void;
 
   // Flags
-  flags: Record<number, boolean>; // questionId -> true/false
-  toggleFlag: (questionId: number) => void;
-  clearFlags: () => void;
+  flags: Record<string, boolean>; // questionId -> true/false
+  toggleFlag: (questionId: string) => void;
 
   // Revealed questions
-  revealed: Record<number, boolean>; // questionId -> true/false
-  toggleRevealed: (questionId: number) => void;
-  clearRevealed: () => void;
+  revealed: Record<string, boolean>; // questionId -> true/false
+  toggleRevealed: (questionId: string) => void;
 
   // Timer
   timeRemaining: number; // in seconds
@@ -68,10 +62,6 @@ interface TestState {
 
   // Timer management
   startTimer: () => void;
-  stopTimer: () => void;
-
-  // Reset test
-  resetTest: () => void;
 }
 
 export const useTestStore = create<TestState>((set, get) => ({
@@ -113,7 +103,7 @@ export const useTestStore = create<TestState>((set, get) => ({
     ).length;
     const hasMultipleCorrect = correctAnswersCount > 1;
 
-    let next: number[];
+    let next: string[];
     if (existing.includes(answerId)) {
       // Always allow deselecting
       next = existing.filter((id) => id !== answerId);
@@ -134,7 +124,6 @@ export const useTestStore = create<TestState>((set, get) => ({
       },
     });
   },
-  clearAnswers: () => set({ answers: {} }),
 
   // Flags
   toggleFlag: (questionId) => {
@@ -146,7 +135,6 @@ export const useTestStore = create<TestState>((set, get) => ({
       },
     });
   },
-  clearFlags: () => set({ flags: {} }),
 
   // Revealed
   toggleRevealed: (questionId) => {
@@ -158,7 +146,6 @@ export const useTestStore = create<TestState>((set, get) => ({
       },
     });
   },
-  clearRevealed: () => set({ revealed: {} }),
 
   // Timer
   setTimeRemaining: (time) => set({ timeRemaining: time }),
@@ -199,7 +186,7 @@ export const useTestStore = create<TestState>((set, get) => ({
     // Build responses array for backend submission
     const submissions: SubmissionItem[] = [];
     for (const [questionId, selectedAnswerIds] of Object.entries(answers)) {
-      const question = questions.find((q) => q.id === parseInt(questionId));
+      const question = questions.find((q) => q.id === questionId);
       if (!question) continue;
 
       for (const answerId of selectedAnswerIds) {
@@ -207,7 +194,7 @@ export const useTestStore = create<TestState>((set, get) => ({
         if (!answer) continue;
 
         submissions.push({
-          question_id: parseInt(questionId),
+          question_id: questionId,
           selected_option_id: answerId,
           is_correct: answer.is_correct,
         });
@@ -330,23 +317,5 @@ export const useTestStore = create<TestState>((set, get) => ({
     if (!loading && questions.length > 0 && !timeStarted) {
       set({ timeStarted: true });
     }
-  },
-  stopTimer: () => {
-    set({ timeStarted: false });
-  },
-
-  // Reset test
-  resetTest: () => {
-    set({
-      questions: [],
-      currentIndex: 0,
-      answers: {},
-      flags: {},
-      revealed: {},
-      timeRemaining: 0,
-      timeStarted: false,
-      submitting: false,
-      loading: false,
-    });
   },
 }));

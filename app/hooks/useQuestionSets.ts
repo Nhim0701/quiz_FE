@@ -25,7 +25,6 @@ interface QuestionSetsState {
   getQuestionSetById: (
     questionSetId: string
   ) => Promise<QuestionSetProps | null>;
-  clearQuestionSetsByCategory: (categoryId?: number) => void;
 }
 
 export const useQuestionSetsStore = create<QuestionSetsState>((set, get) => ({
@@ -148,30 +147,6 @@ export const useQuestionSetsStore = create<QuestionSetsState>((set, get) => ({
     } catch (error) {
       console.error("Failed to fetch question set:", error);
       return null;
-    }
-  },
-
-  clearQuestionSetsByCategory: (categoryId?: number) => {
-    if (categoryId) {
-      set((state) => {
-        const newQuestionSets = { ...state.questionSetsByCategory };
-        const newLoading = { ...state.loading };
-        const newError = { ...state.error };
-        delete newQuestionSets[categoryId];
-        delete newLoading[categoryId];
-        delete newError[categoryId];
-        return {
-          questionSetsByCategory: newQuestionSets,
-          loading: newLoading,
-          error: newError,
-        };
-      });
-    } else {
-      set({
-        questionSetsByCategory: {},
-        loading: {},
-        error: {},
-      });
     }
   },
 }));

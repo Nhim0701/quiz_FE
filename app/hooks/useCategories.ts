@@ -16,7 +16,6 @@ interface CategoriesState {
 
   // API methods
   getCategories: () => Promise<void>;
-  clearCategories: () => void;
 }
 
 export const useCategoriesStore = create<CategoriesState>((set) => ({
@@ -40,6 +39,4 @@ export const useCategoriesStore = create<CategoriesState>((set) => ({
       throw error;
     }
   },
-
-  clearCategories: () => set({ categories: [], error: null }),
 }));

@@ -36,7 +36,6 @@ interface UserResponse {
 
 interface AuthState {
   user: User | null;
-  setUser: (user: User | null) => void;
   getCurrentUser: (setLoading?: (loading: boolean) => void) => Promise<void>;
   clearUser: () => void;
   register: (
@@ -81,7 +80,6 @@ export const useAuthStoreInternal = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      setUser: (user) => set({ user }),
       getCurrentUser: async (setLoading) => {
         await fetchUserData(set, setLoading);
       },
@@ -119,12 +117,12 @@ export const useAuthStoreInternal = create<AuthState>()(
         if (response.data.data) {
           const rememberMe = credentials.rememberMe ?? false;
           tokenManager.setToken(response.data.data.access_token, rememberMe);
-          
+
           // Store refresh token if available and rememberMe is true
           if (response.data.data.refresh_token && rememberMe) {
             tokenManager.setRefreshToken(response.data.data.refresh_token);
           }
-          
+
           await fetchUserData(set, setLoading);
         }
       },

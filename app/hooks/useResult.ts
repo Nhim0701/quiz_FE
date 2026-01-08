@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { QuestionProps } from "@/types";
+import type { QuestionProps } from "./useQuestions";
 
 interface ResultSummary {
   total: number;
@@ -13,18 +13,15 @@ interface ResultSummary {
 interface ResultState {
   // Result data
   summary: ResultSummary | null;
-  answers: Record<number, number[]>; // questionId -> array of answer ids
+  answers: Record<string, string[]>; // questionId -> array of answer ids
   questions: QuestionProps[];
 
   // Set result data
   setResult: (
     summary: ResultSummary,
-    answers: Record<number, number[]>,
+    answers: Record<string, string[]>,
     questions: QuestionProps[]
   ) => void;
-
-  // Clear result
-  clearResult: () => void;
 
   // Calculate stats
   getCorrectCount: () => number;
@@ -41,14 +38,6 @@ export const useResultStore = create<ResultState>((set, get) => ({
   // Set result
   setResult: (summary, answers, questions) =>
     set({ summary, answers, questions }),
-
-  // Clear result
-  clearResult: () =>
-    set({
-      summary: null,
-      answers: {},
-      questions: [],
-    }),
 
   // Calculate correct count
   getCorrectCount: () => {
