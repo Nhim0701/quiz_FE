@@ -1,5 +1,6 @@
 import { memo } from "react";
-import { Outlet, Navigate, useLocation } from "react-router";
+import { Outlet } from "react-router";
+import type { Route } from "./+types/_layout";
 import { AppSidebar } from "@/components/app-sidebar";
 import {
   SidebarInset,
@@ -7,7 +8,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { AppHeader } from "@/components/app-header";
-import { useAuth } from "@/hooks/useAuth";
+import authMiddleware from "@/middleware/auth";
 
 const LayoutContent = memo(() => {
   const { state, isMobile } = useSidebar();
@@ -38,15 +39,11 @@ const LayoutContent = memo(() => {
   );
 });
 
+export const clientMiddleware: Route.ClientMiddlewareFunction[] = [
+  authMiddleware,
+];
+
 export default function Layout() {
-  const { user } = useAuth();
-  const location = useLocation();
-
-  if (!user) {
-    // Save current location to redirect back after login
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
   return (
     <div className="w-screen h-screen overflow-x-hidden">
       <SidebarProvider>

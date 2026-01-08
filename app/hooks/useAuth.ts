@@ -22,7 +22,7 @@ interface AuthResponse {
   refresh_token?: string;
 }
 
-interface User {
+export interface User {
   name: string;
   email: string;
 }
