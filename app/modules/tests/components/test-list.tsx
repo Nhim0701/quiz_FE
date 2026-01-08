@@ -10,7 +10,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-export function TestList() {
+export default function TestList() {
   const { categoriesWithSets } = useProfileStore();
   const navigate = useNavigate();
   const { t } = useTranslation();

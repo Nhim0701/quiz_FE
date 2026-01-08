@@ -1,14 +1,8 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate, redirect } from "react-router-dom";
-import { tokenManager } from "@/lib/api";
-import { useAuthStoreInternal } from "@/hooks/useAuth";
 import { Container } from "@/components/ui/container";
 import type { QuestionProps } from "@/types";
-import {
-  ResultEmpty,
-  ResultSummary,
-  ResultReview,
-} from "@/routes/tests.$testId.result/components";
+import { ResultEmpty, ResultSummary, ResultReview } from "./components";
 import { useResultStore } from "@/hooks/useResult";
 import { ROUTES } from "@/constants";
 
@@ -23,22 +17,6 @@ interface LocationState {
   };
   answers?: Record<number, number[]>;
   questions?: QuestionProps[];
-}
-
-export async function loader() {
-  const user = useAuthStoreInternal.getState().user;
-  if (!user && tokenManager.hasToken()) {
-    try {
-      await useAuthStoreInternal.getState().getCurrentUser();
-      return null;
-    } catch {
-      throw redirect("/login");
-    }
-  }
-  if (!user) {
-    throw redirect("/login");
-  }
-  return null;
 }
 
 export default function Result() {

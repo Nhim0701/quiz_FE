@@ -7,12 +7,9 @@ import { useTranslation } from "@/i18n";
 import { LoginHeader, LoginForm, LoginCard, LoginFooter } from "./components";
 
 export default function Login() {
-  const { user, login } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { showError, setLoading } = useApp();
-  const { t } = useTranslation();
-  const [loading, setLocalLoading] = useState(false);
 
   // Get destination page from location.state, sessionStorage, or default to /profile
   const getRedirectPath = () => {
@@ -40,28 +37,11 @@ export default function Login() {
     }
   }, [user, navigate, from]);
 
-  const handleSubmit = async (email: string, password: string) => {
-    setLocalLoading(true);
-    setLoading(true);
-
-    try {
-      await login({ email, password }, setLoading);
-      navigate(from, { replace: true });
-    } catch (err) {
-      const error = err as Error;
-      const errorMessage = error.message || t("errors.loginFailed");
-      showError(errorMessage);
-    } finally {
-      setLocalLoading(false);
-      setLoading(false);
-    }
-  };
-
   return (
     <>
       <LoginHeader />
       <LoginCard>
-        <LoginForm onSubmit={handleSubmit} loading={loading} />
+        <LoginForm redirectPath={from} />
       </LoginCard>
       <LoginFooter />
     </>

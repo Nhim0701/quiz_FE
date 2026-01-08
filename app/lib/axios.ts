@@ -5,10 +5,11 @@ import axios, {
   type AxiosResponse,
 } from "axios";
 import { toast } from "sonner";
-import { API_CONFIG, ROUTES, SESSION_KEYS } from "@/constants";
+import { API_CONFIG, ERROR, ROUTES, SESSION_KEYS } from "@/constants";
 import { useAuthStoreInternal } from "@/hooks/useAuth";
 import { t } from "@/i18n/utils";
 import type { ApiErrorResponse, ApiSuccessResponse } from "@/types";
+import type { TranslationKey } from "@/i18n";
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
@@ -50,10 +51,12 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error: AxiosError<ApiErrorResponse>) => {
-    console.error("API Error:", error);
-
     // Handle 401 Unauthorized - redirect to login
-    if (error.response?.status === 401) {
+    if (
+      error.response?.status === 401 &&
+      error.response?.data?.error?.code !==
+        ERROR.INCORRECT_EMAIL_OR_PASSWORD.CODE
+    ) {
       // Clear token and user
       tokenManager.removeToken();
       useAuthStoreInternal.getState().clearUser();
@@ -80,8 +83,13 @@ apiClient.interceptors.response.use(
       if (errorData?.error) {
         const { code, message, trace_id, details } = errorData.error;
 
+        // Get i18n message from error code
+        const errorMessage = t(
+          ERROR[code as keyof typeof ERROR].MESSAGE_KEY as TranslationKey
+        );
+
         // Create error object with standard structure
-        const apiError = new Error(message) as Error & {
+        const apiError = new Error(errorMessage) as Error & {
           code: string;
           trace_id: string;
           details?: unknown[] | Record<string, unknown> | null;

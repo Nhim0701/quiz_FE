@@ -42,7 +42,7 @@
     "networkError": "Lỗi mạng: Không nhận được phản hồi từ máy chủ",
     "requestError": "Lỗi yêu cầu",
     "httpError": "Lỗi HTTP! mã trạng thái:",
-    "loginFailed": "Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập của bạn.",
+    "loginFailed": "Đăng nhập thất bại. Vui lòng kiểm tra email hoặc mật khẩu của bạn.",
     "registrationFailed": "Đăng ký thất bại. Vui lòng thử lại.",
     "fetchUserFailed": "Không thể lấy thông tin người dùng:",
     "sessionExpired": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",

@@ -6,3 +6,4 @@ export * from "./messages";
 export * from "./validation";
 export * from "./ui";
 export * from "./time";
+export * from "./error";

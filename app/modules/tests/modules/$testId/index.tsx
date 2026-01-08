@@ -1,35 +1,11 @@
 import { useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router";
-import { redirect } from "react-router";
-import { tokenManager } from "@/lib/api";
-import { useAuthStoreInternal } from "@/hooks/useAuth";
 import useApp from "@/hooks/useApp";
 import { useTestStore } from "@/hooks/useTest";
 import type { SubmissionItem } from "@/types";
 import { TIME_CONSTANTS, decodeTestId, getTestResultRoute } from "@/constants";
 import { useTranslation } from "@/i18n";
-import {
-  TestHeader,
-  TestQuestion,
-  TestSidebar,
-  TestEmpty,
-} from "@/routes/tests.$testId/components";
-
-export async function loader() {
-  const user = useAuthStoreInternal.getState().user;
-  if (!user && tokenManager.hasToken()) {
-    try {
-      await useAuthStoreInternal.getState().getCurrentUser();
-      return null;
-    } catch {
-      throw redirect("/login");
-    }
-  }
-  if (!user) {
-    throw redirect("/login");
-  }
-  return null;
-}
+import { TestHeader, TestQuestion, TestSidebar, TestEmpty } from "./components";
 
 export default function Test() {
   const { testId } = useParams<{ testId: string }>();

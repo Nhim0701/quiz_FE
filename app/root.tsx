@@ -33,6 +33,36 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        {/* Apply theme before React hydrates to prevent hydration mismatch */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var stored = localStorage.getItem('theme');
+                  var theme = null;
+                  if (stored) {
+                    try {
+                      var parsed = JSON.parse(stored);
+                      theme = parsed && parsed.state && parsed.state.theme ? parsed.state.theme : null;
+                    } catch (e) {
+                      // Fallback: check if stored is direct value
+                      if (stored === 'dark' || stored === 'light') {
+                        theme = stored;
+                      }
+                    }
+                  }
+                  if (theme === 'dark' || theme === 'light') {
+                    document.documentElement.classList.toggle('dark', theme === 'dark');
+                  } else {
+                    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    document.documentElement.classList.toggle('dark', prefersDark);
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
       </head>
       <body>
         {children}

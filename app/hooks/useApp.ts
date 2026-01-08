@@ -96,28 +96,19 @@ const useApp = create<AppState>()(
       // Only persist theme, not other state
       partialize: (state) => ({ theme: state.theme }), // Don't persist loading state
       // Initialize theme class on load
+      // Note: Theme is already applied by inline script in root.tsx before hydration
+      // This ensures store state matches what's in the DOM after hydration
       onRehydrateStorage: () => (state) => {
+        if (typeof window === "undefined") return;
+        
+        // Theme class is already applied by inline script before React hydrates
         if (state) {
+          // Store has persisted state, ensure DOM matches (should already match)
           applyTheme(state.theme);
         } else {
-          // If no persisted state, detect system preference or use default
-          if (typeof window !== "undefined") {
-            const stored = localStorage.getItem(STORAGE_KEYS.THEME);
-            if (stored === THEME_VALUES.LIGHT || stored === THEME_VALUES.DARK) {
-              applyTheme(stored);
-              return;
-            }
-
-            // Detect system preference
-            if (
-              window.matchMedia &&
-              window.matchMedia("(prefers-color-scheme: dark)").matches
-            ) {
-              applyTheme(THEME_VALUES.DARK);
-              return;
-            }
-          }
-          applyTheme(THEME_VALUES.LIGHT);
+          // No persisted state - sync store with what inline script set
+          const isDark = document.documentElement.classList.contains(THEME_VALUES.DARK);
+          useApp.setState({ theme: isDark ? THEME_VALUES.DARK : THEME_VALUES.LIGHT });
         }
       },
     }

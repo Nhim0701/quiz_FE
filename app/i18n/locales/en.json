@@ -42,7 +42,7 @@
     "networkError": "Network error: No response received from server",
     "requestError": "Request error",
     "httpError": "HTTP error! status:",
-    "loginFailed": "Login failed. Please check your credentials.",
+    "loginFailed": "Login failed. Please check your email or password.",
     "registrationFailed": "Registration failed. Please try again.",
     "fetchUserFailed": "Failed to fetch user:",
     "sessionExpired": "Session expired. Please login again.",

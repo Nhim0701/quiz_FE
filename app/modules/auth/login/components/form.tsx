@@ -5,16 +5,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/i18n";
-import { loginSchema, type LoginFormData } from "../login-schema";
+import { loginSchema, type LoginFormData } from "../schemas/login-schema";
+import useApp from "~/hooks/useApp";
+import { useState } from "react";
+import { useAuth } from "~/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface LoginFormProps {
-  onSubmit: (email: string, password: string) => Promise<void>;
-  loading?: boolean;
-  error?: string;
+  redirectPath: string;
 }
 
-export function LoginForm({ onSubmit, loading = false }: LoginFormProps) {
+export function LoginForm({ redirectPath }: LoginFormProps) {
   const { t } = useTranslation();
+  const { showError, setLoading } = useApp();
+  const [loading, setLocalLoading] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
@@ -23,10 +30,28 @@ export function LoginForm({ onSubmit, loading = false }: LoginFormProps) {
     resolver: zodResolver(loginSchema(t)),
     mode: "onChange",
     reValidateMode: "onChange",
+    resetOptions: {
+      keepValues: true,
+    },
   });
 
   const onSubmitForm = async (data: LoginFormData) => {
-    await onSubmit(data.email, data.password);
+    const { email, password } = data;
+    setLocalLoading(true);
+    setLoading(true);
+
+    try {
+      await login({ email, password }, setLoading);
+      navigate(redirectPath, { replace: true });
+    } catch (err) {
+      const error = err as Error;
+      console.log(error);
+      const errorMessage = error.message || t("errors.loginFailed");
+      showError(errorMessage);
+    } finally {
+      setLocalLoading(false);
+      setLoading(false);
+    }
   };
 
   return (
