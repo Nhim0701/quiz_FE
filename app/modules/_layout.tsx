@@ -15,7 +15,6 @@ const LayoutContent = memo(() => {
 
   return (
     <SidebarInset>
-      <AppHeader />
       <div
         className="h-full w-full transition-all duration-200"
         style={{
@@ -31,6 +30,7 @@ const LayoutContent = memo(() => {
             : 0,
         }}
       >
+        <AppHeader />
         <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6 h-full w-full">
           <Outlet />
         </div>
