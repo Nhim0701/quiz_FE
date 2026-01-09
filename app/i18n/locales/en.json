@@ -33,7 +33,7 @@
       "creatingAccount": "Creating Account...",
       "footer": "Already have an account? Sign in",
       "alreadyHaveAccount": "Already have an account?",
-      "signInInstead": "Sign In Instead"
+      "signInInstead": "Sign In"
     },
     "validation": {
       "emailRequired": "Email is required",
@@ -106,6 +106,22 @@
       "averageScore": "Average Score",
       "totalQuestions": "Total Questions",
       "correctAnswers": "Correct Answers"
+    },
+    "basicInfo": {
+      "title": "Basic Information",
+      "id": "ID",
+      "about": "About",
+      "address": "Address",
+      "details": "Details",
+      "phone": "Phone",
+      "birthday": "Birthday"
+    },
+    "professional": {
+      "title": "Professional Information",
+      "jobTitle": "Job Title",
+      "company": "Company",
+      "joinDate": "Join Date",
+      "noInfo": "No professional information available"
     }
   },
   "result": {

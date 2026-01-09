@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export function CategoryStats() {
   const { t } = useTranslation();
   const { dashboardData } = useMe();
-  const byCategory = dashboardData?.by_category;
+  console.log(dashboardData);
+  const byCategory = dashboardData?.byCategory;
 
   if (!byCategory || byCategory.length === 0) {
     return null;
@@ -33,11 +34,11 @@ export function CategoryStats() {
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                 <span className="text-green-600 dark:text-green-400">
-                  {stat.correct_answers} {t("dashboard.categoryStats.correct")}
+                  {stat.correctAnswers} {t("dashboard.categoryStats.correct")}
                 </span>
                 <span>•</span>
                 <span className="text-red-600 dark:text-red-400">
-                  {stat.wrong_answers} {t("dashboard.categoryStats.wrong")}
+                  {stat.wrongAnswers} {t("dashboard.categoryStats.wrong")}
                 </span>
               </div>
               <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 mt-2">

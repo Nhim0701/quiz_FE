@@ -6,8 +6,8 @@ import { API_ENDPOINTS } from "@/constants";
 export interface TestProps {
   id: string;
   name: string;
-  question_count: number;
-  category_id: string;
+  questionCount: number;
+  categoryId: string;
 }
 
 interface TestsState {
@@ -117,9 +117,9 @@ export const useTestsStore = create<TestsState>((set, get) => ({
           },
         }));
 
-        // Also add to category cache if we have category_id
-        if (test.category_id) {
-          const categoryId = parseInt(test.category_id);
+        // Also add to category cache if we have categoryId
+        if (test.categoryId) {
+          const categoryId = parseInt(test.categoryId);
           if (!isNaN(categoryId)) {
             set((state) => {
               const categoryTests =

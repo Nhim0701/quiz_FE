@@ -29,7 +29,7 @@ export function TestCategoryItem({ category }: TestCategoryItemProps) {
 
   const totalQuestions = useMemo(() => {
     return tests.reduce(
-      (sum, test) => sum + (test.question_count || 0),
+      (sum, test) => sum + (test.questionCount || 0),
       0
     );
   }, [tests]);

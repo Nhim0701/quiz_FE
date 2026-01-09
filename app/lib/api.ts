@@ -14,6 +14,7 @@ import { useAuthStoreInternal } from "@/hooks/useAuth";
 import { t } from "@/i18n/utils";
 import type { ApiSuccessResponse } from "@/types";
 import type { AuthResponse } from "@/hooks/useAuth";
+import apiClient from "@/lib/axios";
 
 // interface JwtPayload {
 //   exp?: number;
@@ -175,28 +176,28 @@ export const tokenManager = {
       throw new Error("No refresh token available");
     }
 
-    const response = await axios.post<ApiSuccessResponse<AuthResponse>>(
-      `${API_BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`,
-      { refresh_token: refreshToken },
+    // Use apiClient to get automatic case conversion
+    const response = await apiClient.post<ApiSuccessResponse<AuthResponse>>(
+      API_ENDPOINTS.AUTH.REFRESH,
       {
-        headers: {
-          "Content-Type": API_CONFIG.CONTENT_TYPE,
-        },
+        // Request data in camelCase - will be converted to snake_case by interceptor
+        refreshToken: refreshToken,
       }
     );
 
-    const { access_token, refresh_token: newRefreshToken } = response.data.data;
+    // Response data is already converted to camelCase by interceptor
+    const { accessToken, refreshToken: newRefreshToken } = response.data.data;
 
     // Store new tokens
     const hadRefreshToken = !!tokenManager.getRefreshToken();
     const shouldRemember = hadRefreshToken || !!newRefreshToken;
-    tokenManager.setToken(access_token, shouldRemember);
+    tokenManager.setToken(accessToken, shouldRemember);
 
     if (newRefreshToken) {
       tokenManager.setRefreshToken(newRefreshToken);
     }
 
-    return access_token;
+    return accessToken;
   },
   /**
    * Attempt to refresh token and handle queue

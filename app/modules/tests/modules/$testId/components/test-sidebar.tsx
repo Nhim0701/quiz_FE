@@ -118,7 +118,7 @@ function TestSidebarContent() {
               if (isQuestionRevealed && hasAnswer) {
                 const userAnswers = answers[q.id] || [];
                 const correctAnswers = q.answers
-                  .filter((a) => a.is_correct)
+                  .filter((a) => a.isCorrect)
                   .map((a) => a.id);
 
                 isCorrect =

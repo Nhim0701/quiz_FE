@@ -34,7 +34,7 @@ export function TestQuestion() {
 
   // Check if current question has multiple correct answers
   const correctAnswersCount = currentQuestion.answers.filter(
-    (a) => a.is_correct
+    (a) => a.isCorrect
   ).length;
   const hasMultipleCorrect = correctAnswersCount > 1;
 
@@ -87,7 +87,7 @@ export function TestQuestion() {
       <div className="space-y-2.5 sm:space-y-3 mb-5 sm:mb-6">
         {currentQuestion.answers.map((answer, idx) => {
           const isSelected = selectedAnswers.includes(answer.id);
-          const isCorrect = answer.is_correct;
+          const isCorrect = answer.isCorrect;
 
           let statusClass =
             "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50";
@@ -152,7 +152,7 @@ export function TestQuestion() {
 
       {/* Explanation */}
       {isRevealed &&
-        currentQuestion.answers.some((a) => a.is_correct && a.explanation) && (
+        currentQuestion.answers.some((a) => a.isCorrect && a.explanation) && (
           <div className="mt-5 sm:mt-6 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
             <div className="flex items-start gap-2 sm:gap-3">
               <svg
@@ -172,14 +172,14 @@ export function TestQuestion() {
                 </h4>
                 <div className="text-xs sm:text-sm text-blue-800 dark:text-blue-300 space-y-2 sm:space-y-3">
                   {currentQuestion.answers
-                    .filter((a) => a.is_correct && a.explanation)
+                    .filter((a) => a.isCorrect && a.explanation)
                     .map((answer) => (
                       <div
                         key={answer.id}
                         className="prose prose-sm dark:prose-invert max-w-none"
                       >
                         {currentQuestion.answers.filter(
-                          (a) => a.is_correct && a.explanation
+                          (a) => a.isCorrect && a.explanation
                         ).length > 1 && (
                           <strong className="block mb-1 text-blue-900 dark:text-blue-200">
                             Answer{" "}

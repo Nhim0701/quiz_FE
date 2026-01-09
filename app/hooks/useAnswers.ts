@@ -1,6 +1,6 @@
 export interface AnswerProps {
   id: string;
   content: string;
-  is_correct: boolean;
+  isCorrect: boolean;
   explanation: string | null;
 }

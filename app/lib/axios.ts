@@ -9,6 +9,7 @@ import { API_BASE_URL, API_CONFIG, ERROR } from "@/constants";
 import { t } from "@/i18n/utils";
 import type { ApiErrorResponse, ApiSuccessResponse } from "@/types";
 import type { TranslationKey } from "@/i18n";
+import { toCamelCase, toSnakeCase } from "@/lib/case-converter";
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
@@ -18,7 +19,7 @@ const apiClient: AxiosInstance = axios.create({
   },
 });
 
-// Request interceptor to add token and check expiration
+// Request interceptor to add token, check expiration, and convert request data
 apiClient.interceptors.request.use(
   async (config) => {
     const token = tokenManager.getToken();
@@ -49,6 +50,11 @@ apiClient.interceptors.request.use(
       }
     }
 
+    // Convert request data from camelCase to snake_case
+    if (config.data && typeof config.data === "object") {
+      config.data = toSnakeCase(config.data);
+    }
+
     return config;
   },
   (error) => {
@@ -56,21 +62,40 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor for handling standard response structure
+// Response interceptor for handling standard response structure and converting to camelCase
 apiClient.interceptors.response.use(
   (response: AxiosResponse<ApiSuccessResponse | unknown>) => {
     // For success responses (2xx), check if response follows standard structure
-    // If response has { data, meta } structure, return as is
-    // Otherwise, pass through and let helper functions handle extraction
+    // If response has { data, meta } structure, convert data to camelCase
     if (
       response.data &&
       typeof response.data === "object" &&
       "data" in response.data
     ) {
-      // Already in standard format { data, meta }
-      return response as AxiosResponse<ApiSuccessResponse>;
+      const apiResponse = response.data as ApiSuccessResponse;
+      // Convert data from snake_case to camelCase
+      const convertedData = toCamelCase(apiResponse.data);
+      // Convert meta if exists
+      const convertedMeta = apiResponse.meta
+        ? toCamelCase(apiResponse.meta)
+        : undefined;
+      return {
+        ...response,
+        data: {
+          ...apiResponse,
+          data: convertedData,
+          meta: convertedMeta,
+        },
+      } as AxiosResponse<ApiSuccessResponse>;
     }
-    // Pass through non-standard responses (will be handled by helper functions)
+    // For non-standard responses, convert the entire response data
+    if (response.data && typeof response.data === "object") {
+      return {
+        ...response,
+        data: toCamelCase(response.data),
+      };
+    }
+    // Pass through other responses
     return response;
   },
   async (error: AxiosError<ApiErrorResponse>) => {
@@ -109,7 +134,15 @@ apiClient.interceptors.response.use(
 
       // Check if response follows standard error structure
       if (errorData?.error) {
-        const { code, message, trace_id, details } = errorData.error;
+        // Convert error response from snake_case to camelCase
+        const convertedError = toCamelCase(errorData.error) as {
+          code: string;
+          message: string;
+          traceId: string;
+          details?: unknown[] | Record<string, unknown> | null;
+        };
+
+        const { code, message, traceId, details } = convertedError;
 
         // Get i18n message from error code
         const errorMessage = t(
@@ -119,13 +152,13 @@ apiClient.interceptors.response.use(
         // Create error object with standard structure
         const apiError = new Error(errorMessage) as Error & {
           code: string;
-          trace_id: string;
+          traceId: string;
           details?: unknown[] | Record<string, unknown> | null;
           status?: number;
         };
 
         apiError.code = code;
-        apiError.trace_id = trace_id;
+        apiError.traceId = traceId;
         apiError.details = details || null;
         apiError.status = error.response.status;
 

@@ -63,8 +63,8 @@ function ResultSidebarContent({ onQuestionClick }: ResultSidebarProps) {
             );
 
             // Check if answer is correct
-            const correctAnswers = question.answers.filter((a) => a.is_correct);
-            const userSelectedCorrect = userAnswers.every((a) => a.is_correct);
+            const correctAnswers = question.answers.filter((a) => a.isCorrect);
+            const userSelectedCorrect = userAnswers.every((a) => a.isCorrect);
             const userSelectedAllCorrect =
               userAnswers.length === correctAnswers.length && userSelectedCorrect;
 

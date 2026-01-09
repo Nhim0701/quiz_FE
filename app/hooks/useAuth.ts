@@ -7,7 +7,7 @@ import type { ApiSuccessResponse } from "@/types";
 
 interface UserData {
   email: string;
-  name: string;
+  fullName: string;
   password: string;
 }
 
@@ -18,20 +18,22 @@ interface Credentials {
 }
 
 export interface AuthResponse {
-  access_token: string;
-  token_type: string;
-  refresh_token?: string;
+  accessToken: string;
+  tokenType: string;
+  refreshToken?: string;
 }
 
 export interface User {
-  name: string;
+  id: string;
+  userId: string;
+  fullName: string;
   email: string;
-}
-
-interface UserResponse {
-  account_name: string;
-  user_email: string;
-  [key: string]: unknown;
+  phone?: string;
+  birthday?: string;
+  address?: string;
+  jobTitle?: string;
+  company?: string;
+  joinDate?: string;
 }
 
 interface AuthState {
@@ -56,15 +58,11 @@ const fetchUserData = async (
 ): Promise<void> => {
   if (setLoading) setLoading(true);
   try {
-    const response = await apiClient.get<ApiSuccessResponse<UserResponse>>(
+    const response = await apiClient.get<ApiSuccessResponse<User>>(
       API_ENDPOINTS.ME.GET
     );
-    set({
-      user: {
-        name: response.data.data.account_name,
-        email: response.data.data.user_email,
-      },
-    });
+    // Data is already converted to camelCase by axios interceptor
+    set({ user: response.data.data });
   } catch (error) {
     console.error("Failed to fetch user:", error);
     tokenManager.removeToken();
@@ -91,15 +89,17 @@ export const useAuthStoreInternal = create<AuthState>()(
         const response = await apiClient.post<ApiSuccessResponse<AuthResponse>>(
           API_ENDPOINTS.AUTH.REGISTER,
           {
-            user_email: userData.email,
-            account_name: userData.name,
-            user_password: userData.password,
+            // Request data in camelCase - will be converted to snake_case by interceptor
+            userEmail: userData.email,
+            fullName: userData.fullName,
+            userPassword: userData.password,
           }
         );
 
         // Store token on successful registration
+        // Response data is already converted to camelCase by interceptor
         if (response.data.data) {
-          tokenManager.setToken(response.data.data.access_token);
+          tokenManager.setToken(response.data.data.accessToken);
           await fetchUserData(set, setLoading);
         }
       },
@@ -107,20 +107,22 @@ export const useAuthStoreInternal = create<AuthState>()(
         const response = await apiClient.post<ApiSuccessResponse<AuthResponse>>(
           API_ENDPOINTS.AUTH.LOGIN,
           {
-            user_email: credentials.email,
-            user_password: credentials.password,
-            remember_me: credentials.rememberMe ?? false,
+            // Request data in camelCase - will be converted to snake_case by interceptor
+            userEmail: credentials.email,
+            userPassword: credentials.password,
+            rememberMe: credentials.rememberMe ?? false,
           }
         );
 
         // Store token on successful login
+        // Response data is already converted to camelCase by interceptor
         if (response.data.data) {
           const rememberMe = credentials.rememberMe ?? false;
-          tokenManager.setToken(response.data.data.access_token, rememberMe);
+          tokenManager.setToken(response.data.data.accessToken, rememberMe);
 
           // Store refresh token if available and rememberMe is true
-          if (response.data.data.refresh_token && rememberMe) {
-            tokenManager.setRefreshToken(response.data.data.refresh_token);
+          if (response.data.data.refreshToken && rememberMe) {
+            tokenManager.setRefreshToken(response.data.data.refreshToken);
           }
 
           await fetchUserData(set, setLoading);
@@ -132,7 +134,8 @@ export const useAuthStoreInternal = create<AuthState>()(
         if (refreshToken) {
           try {
             await apiClient.post(API_ENDPOINTS.AUTH.REVOKE, {
-              refresh_token: refreshToken,
+              // Request data in camelCase - will be converted to snake_case by interceptor
+              refreshToken: refreshToken,
             });
           } catch (error) {
             // Log error but don't block logout

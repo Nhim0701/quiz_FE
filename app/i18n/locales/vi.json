@@ -33,7 +33,7 @@
       "creatingAccount": "Đang tạo tài khoản...",
       "footer": "Đã có tài khoản? Đăng nhập",
       "alreadyHaveAccount": "Đã có tài khoản?",
-      "signInInstead": "Đăng Nhập Thay Vào Đó"
+      "signInInstead": "Đăng Nhập"
     },
     "validation": {
       "emailRequired": "Email là bắt buộc",
@@ -106,6 +106,22 @@
       "averageScore": "Điểm Trung Bình",
       "totalQuestions": "Tổng Số Câu Hỏi",
       "correctAnswers": "Câu Trả Lời Đúng"
+    },
+    "basicInfo": {
+      "title": "Thông Tin Cơ Bản",
+      "id": "ID",
+      "about": "Giới Thiệu",
+      "address": "Địa Chỉ",
+      "details": "Chi Tiết Nhân Viên",
+      "phone": "Điện Thoại",
+      "birthday": "Ngày Sinh"
+    },
+    "professional": {
+      "title": "Thông Tin Nghề Nghiệp",
+      "jobTitle": "Chức Danh",
+      "company": "Công Ty",
+      "joinDate": "Ngày Tham Gia",
+      "noInfo": "Chưa có thông tin nghề nghiệp"
     }
   },
   "result": {

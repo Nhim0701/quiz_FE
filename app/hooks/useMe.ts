@@ -4,48 +4,48 @@ import apiClient from "@/lib/axios";
 import { API_ENDPOINTS } from "@/constants";
 
 export interface OverallStatsProps {
-  total_answered: number;
-  total_correct: number;
-  total_wrong: number;
-  overall_accuracy: number;
+  totalAnswered: number;
+  totalCorrect: number;
+  totalWrong: number;
+  overallAccuracy: number;
 }
 
 export interface ByCategoryStatsProps {
   category: string;
-  total_answered: number;
-  correct_answers: number;
-  wrong_answers: number;
+  totalAnswered: number;
+  correctAnswers: number;
+  wrongAnswers: number;
   accuracy: number;
-  last_attempt: string | null;
+  lastAttempt: string | null;
 }
 
 export interface ByTestStatsProps {
-  test_id: string;
-  test_name: string;
-  total_answered: number;
-  total_submitted: number;
-  correct_answers: number;
-  correct_submissions: number;
-  wrong_answers: number;
-  wrong_submissions: number;
+  testId: string;
+  testName: string;
+  totalAnswered: number;
+  totalSubmitted: number;
+  correctAnswers: number;
+  correctSubmissions: number;
+  wrongAnswers: number;
+  wrongSubmissions: number;
   accuracy: number;
-  last_attempt: string | null;
+  lastAttempt: string | null;
 }
 
 export interface RecentActivityStatsProps {
   id: number;
   category: string;
-  test_name: string;
-  question_preview: string;
-  is_correct: boolean;
-  answered_at: number | null;
+  testName: string;
+  questionPreview: string;
+  isCorrect: boolean;
+  answeredAt: number | null;
 }
 
 export interface DashboardProps {
   overall: OverallStatsProps;
-  by_category: ByCategoryStatsProps[];
-  by_test: Record<string, ByTestStatsProps[]>;
-  recent_activity: RecentActivityStatsProps[];
+  byCategory: ByCategoryStatsProps[];
+  byTest: Record<string, ByTestStatsProps[]>;
+  recentActivity: RecentActivityStatsProps[];
 }
 
 interface MeState {

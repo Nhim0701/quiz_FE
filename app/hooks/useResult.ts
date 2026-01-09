@@ -47,7 +47,7 @@ export const useResultStore = create<ResultState>((set, get) => ({
       if (userAnswerIds.length === 0) return count;
 
       const correctAnswerIds = question.answers
-        .filter((a) => a.is_correct)
+        .filter((a) => a.isCorrect)
         .map((a) => a.id);
 
       // Check if user selected all correct answers and no incorrect ones

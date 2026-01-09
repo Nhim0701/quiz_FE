@@ -28,7 +28,7 @@ export function TestCard({ test }: TestCardProps) {
             <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
           <Badge variant="outline" className="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700 ml-2">
-            {test.question_count} {t("tests.questions")}
+            {test.questionCount} {t("tests.questions")}
           </Badge>
         </div>
       </CardHeader>

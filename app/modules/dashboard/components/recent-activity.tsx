@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 export function RecentActivity() {
   const { t } = useTranslation();
   const { dashboardData } = useMe();
-  const recentActivity = dashboardData?.recent_activity;
+  const recentActivity = dashboardData?.recentActivity;
   if (!recentActivity || recentActivity.length === 0) {
     return (
       <Card>
@@ -41,12 +41,12 @@ export function RecentActivity() {
             >
               <div
                 className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                  activity.is_correct
+                  activity.isCorrect
                     ? "bg-green-100 dark:bg-green-900/30"
                     : "bg-red-100 dark:bg-red-900/30"
                 }`}
               >
-                {activity.is_correct ? (
+                {activity.isCorrect ? (
                   <Check className="w-5 h-5 text-green-600 dark:text-green-400" />
                 ) : (
                   <X className="w-5 h-5 text-red-600 dark:text-red-400" />
@@ -70,15 +70,15 @@ export function RecentActivity() {
                     <span className="text-purple-600 dark:text-purple-400 font-semibold">
                       {t("dashboard.recentActivity.test")}:
                     </span>
-                    {activity.test_name}
+                    {activity.testName}
                   </Badge>
                   <span className="text-xs text-slate-400 dark:text-slate-500">
-                    {formatUnixTimestamp(activity.answered_at) ||
+                    {formatUnixTimestamp(activity.answeredAt) ||
                       t("dashboard.recentActivity.notAvailable")}
                   </span>
                 </div>
                 <p className="text-sm text-slate-700 dark:text-slate-300 line-clamp-2">
-                  {activity.question_preview}
+                  {activity.questionPreview}
                 </p>
               </div>
             </div>

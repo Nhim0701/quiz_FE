@@ -100,7 +100,7 @@ export const useTestStore = create<TestState>((set, get) => ({
 
     const existing = answers[questionId] || [];
     const correctAnswersCount = question.answers.filter(
-      (a) => a.is_correct
+      (a) => a.isCorrect
     ).length;
     const hasMultipleCorrect = correctAnswersCount > 1;
 
@@ -196,9 +196,9 @@ export const useTestStore = create<TestState>((set, get) => ({
         if (!answer) continue;
 
         submissions.push({
-          question_id: questionId,
-          answer_id: answerId,
-          is_correct: answer.is_correct,
+          questionId: questionId,
+          answerId: answerId,
+          isCorrect: answer.isCorrect,
         });
       }
     }
@@ -265,7 +265,8 @@ export const useTestStore = create<TestState>((set, get) => ({
       >(API_ENDPOINTS.TESTS.QUESTIONS(testId), {
         params: {
           page: 1,
-          page_size: 100,
+          // Request params in camelCase - will be converted to snake_case by interceptor
+          pageSize: 100,
         },
       });
 
@@ -273,11 +274,12 @@ export const useTestStore = create<TestState>((set, get) => ({
       allQuestions.push(...firstPageData);
 
       // Check if there's pagination meta and fetch remaining pages
+      // Meta is already converted to camelCase by interceptor
       const meta = firstResponse.data.meta;
       let totalPages = 1;
-      if (meta && typeof meta === "object" && "total_pages" in meta) {
+      if (meta && typeof meta === "object" && "totalPages" in meta) {
         const paginationMeta = meta as PaginationMeta;
-        totalPages = paginationMeta.total_pages;
+        totalPages = paginationMeta.totalPages;
       }
 
       // Fetch remaining pages if any
@@ -285,7 +287,7 @@ export const useTestStore = create<TestState>((set, get) => ({
         const remainingPages = Array.from({ length: totalPages - 1 }, (_, i) =>
           apiClient.get<ApiSuccessResponse<QuestionProps[]>>(
             `${API_ENDPOINTS.TESTS.QUESTIONS(testId)}`,
-            { params: { page: i + 2, page_size: 100 } }
+            { params: { page: i + 2, pageSize: 100 } }
           )
         );
 

@@ -59,8 +59,8 @@ export function ResultReview() {
           );
 
           // Check if answer is correct
-          const correctAnswers = question.answers.filter((a) => a.is_correct);
-          const userSelectedCorrect = userAnswers.every((a) => a.is_correct);
+          const correctAnswers = question.answers.filter((a) => a.isCorrect);
+          const userSelectedCorrect = userAnswers.every((a) => a.isCorrect);
           const userSelectedAllCorrect =
             userAnswers.length === correctAnswers.length && userSelectedCorrect;
 
@@ -115,7 +115,7 @@ export function ResultReview() {
                   <div className="space-y-2">
                     {question.answers.map((answer, ansIdx) => {
                       const isSelected = userAnswerIds.includes(answer.id);
-                      const isCorrect = answer.is_correct;
+                      const isCorrect = answer.isCorrect;
 
                       return (
                         <Card
@@ -161,7 +161,7 @@ export function ResultReview() {
                   </div>
 
                   {/* Explanation */}
-                  {question.answers.some((a) => a.is_correct && a.explanation) && (
+                  {question.answers.some((a) => a.isCorrect && a.explanation) && (
                     <Alert className="bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800">
                       <Info className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
                       <AlertTitle className="text-sm sm:text-base">
@@ -170,14 +170,14 @@ export function ResultReview() {
                       <AlertDescription className="text-xs sm:text-sm">
                         <div className="space-y-2 sm:space-y-3 text-blue-800 dark:text-blue-300">
                           {question.answers
-                            .filter((a) => a.is_correct && a.explanation)
+                            .filter((a) => a.isCorrect && a.explanation)
                             .map((answer) => (
                               <div
                                 key={answer.id}
                                 className="prose prose-sm dark:prose-invert max-w-none"
                               >
                                 {question.answers.filter(
-                                  (a) => a.is_correct && a.explanation
+                                  (a) => a.isCorrect && a.explanation
                                 ).length > 1 && (
                                   <strong className="block mb-1 text-blue-900 dark:text-blue-200">
                                     {t("result.review.answer")}{" "}

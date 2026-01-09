@@ -25,8 +25,8 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const getInitials = (name: string) => {
-    return name
+  const getInitials = (fullName: string) => {
+    return fullName
       .split(" ")
       .map((n) => n[0])
       .join("")
@@ -35,8 +35,8 @@ export function AppSidebar() {
   };
 
   const initials = user
-    ? user.name
-      ? getInitials(user.name)
+    ? user.fullName
+      ? getInitials(user.fullName)
       : user.email[0]?.toUpperCase() || ""
     : "";
 
@@ -86,7 +86,7 @@ export function AppSidebar() {
                     }}
                   >
                     <span className="text-sm font-medium text-sidebar-foreground truncate whitespace-nowrap">
-                      {user.name}
+                      {user.fullName}
                     </span>
                     <span className="text-xs text-sidebar-foreground/70 truncate whitespace-nowrap">
                       {user.email}
@@ -97,7 +97,7 @@ export function AppSidebar() {
               {state === "collapsed" && (
                 <TooltipContent side="right">
                   <div className="flex flex-col">
-                    <span className="font-medium">{user.name}</span>
+                    <span className="font-medium">{user.fullName}</span>
                     <span className="text-xs text-muted-foreground">
                       {user.email}
                     </span>

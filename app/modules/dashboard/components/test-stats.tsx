@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export function TestStats() {
   const { t } = useTranslation();
   const { dashboardData } = useMe();
-  const byTest = dashboardData?.by_test;
+  const byTest = dashboardData?.byTest;
 
   if (
     !byTest ||
@@ -30,12 +30,12 @@ export function TestStats() {
         <div className="space-y-3">
           {testStats.map((stat) => (
             <div
-              key={stat.test_id}
+              key={stat.testId}
               className="border-b border-slate-100 dark:border-slate-700 last:border-0 pb-3 last:pb-0"
             >
               <div className="flex items-center justify-between mb-1">
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  {stat.test_name}
+                  {stat.testName}
                 </span>
                 <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
                   {stat.accuracy}%
@@ -43,17 +43,17 @@ export function TestStats() {
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                 <span className="text-green-600 dark:text-green-400">
-                  {stat.correct_answers} {t("dashboard.testStats.correct")}
+                  {stat.correctAnswers} {t("dashboard.testStats.correct")}
                 </span>
                 <span>•</span>
                 <span className="text-red-600 dark:text-red-400">
-                  {stat.wrong_answers} {t("dashboard.testStats.wrong")}
+                  {stat.wrongAnswers} {t("dashboard.testStats.wrong")}
                 </span>
-                {stat.total_submitted > 0 && (
+                {stat.totalSubmitted > 0 && (
                   <>
                     <span>•</span>
                     <span className="text-blue-600 dark:text-blue-400">
-                      {stat.total_submitted}{" "}
+                      {stat.totalSubmitted}{" "}
                       {t("dashboard.testStats.submissions")}
                     </span>
                   </>

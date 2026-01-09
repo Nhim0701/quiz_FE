@@ -14,25 +14,25 @@ export function Stats() {
   const stats = [
     {
       label: t("dashboard.stats.totalAnswered"),
-      value: overall.total_answered,
+      value: overall.totalAnswered,
       icon: FileText,
       color: "blue",
     },
     {
       label: t("dashboard.stats.correctAnswers"),
-      value: overall.total_correct,
+      value: overall.totalCorrect,
       icon: CheckCircle,
       color: "green",
     },
     {
       label: t("dashboard.stats.wrongAnswers"),
-      value: overall.total_wrong,
+      value: overall.totalWrong,
       icon: XCircle,
       color: "red",
     },
     {
       label: t("dashboard.stats.accuracy"),
-      value: `${overall.overall_accuracy}%`,
+      value: `${overall.overallAccuracy}%`,
       icon: TrendingUp,
       color: "indigo",
     },
