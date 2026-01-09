@@ -28,7 +28,7 @@ export const API_ENDPOINTS = {
 
   // Category endpoints
   CATEGORIES: {
-    LIST: "/api/v1/categories/",
+    LIST: "/api/v1/categories",
     GET: (categoryId: string) => `/api/v1/categories/${categoryId}`,
     TESTS: (categoryId: string) => `/api/v1/categories/${categoryId}/tests`,
   },
