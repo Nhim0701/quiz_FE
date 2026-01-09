@@ -1,6 +1,7 @@
 import { FileText, CheckCircle, XCircle, TrendingUp } from "lucide-react";
 import { useMe } from "@/hooks/useMe";
 import { useTranslation } from "@/i18n";
+import { Card, CardContent } from "@/components/ui/card";
 
 export function Stats() {
   const { t } = useTranslation();
@@ -57,10 +58,8 @@ export function Stats() {
         };
 
         return (
-          <div
-            key={stat.label}
-            className="bg-white dark:bg-slate-800 shadow-sm rounded-xl p-4 sm:p-6"
-          >
+          <Card key={stat.label} className="p-4 sm:p-6">
+            <CardContent className="p-0">
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
                 <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mb-1">
@@ -84,7 +83,8 @@ export function Stats() {
                 <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
             </div>
-          </div>
+            </CardContent>
+          </Card>
         );
       })}
     </div>

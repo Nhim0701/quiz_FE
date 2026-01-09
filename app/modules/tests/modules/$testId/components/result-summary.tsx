@@ -3,6 +3,8 @@ import { useTranslation } from "@/i18n";
 import { useResultStore } from "@/hooks/useResult";
 import { useNavigate } from "react-router";
 import { ROUTES } from "@/constants";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export function ResultSummary() {
   const { t } = useTranslation();
@@ -30,7 +32,7 @@ export function ResultSummary() {
   );
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6 sm:p-8">
+    <Card className="p-6 sm:p-8">
       <div className="text-center mb-8">
         <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-500 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 rounded-full mb-4">
           <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
@@ -97,19 +99,19 @@ export function ResultSummary() {
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-        <button
+        <Button
           onClick={handleBack}
-          className="px-5 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 dark:hover:from-blue-600 dark:hover:to-indigo-600 transition-all duration-200 font-semibold shadow-md hover:shadow-lg text-sm sm:text-base"
+          className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 hover:from-blue-700 hover:to-indigo-700 dark:hover:from-blue-600 dark:hover:to-indigo-600"
         >
           {t("ui.buttons.backToDashboard")}
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={handleRetake}
-          className="px-5 sm:px-8 py-2.5 sm:py-3 border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 font-semibold text-sm sm:text-base"
+          variant="outline"
         >
           {t("ui.buttons.takeAnotherTest")}
-        </button>
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 }

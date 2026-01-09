@@ -2,6 +2,10 @@ import ReactMarkdown from "react-markdown";
 import { Check, X, Flag } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { useTestStore } from "~/modules/tests/modules/$testId/hooks/store";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export function TestQuestion() {
   const { t } = useTranslation();
@@ -34,11 +38,7 @@ export function TestQuestion() {
   ).length;
   const hasMultipleCorrect = correctAnswersCount > 1;
 
-  const sortedAnswers = [...currentQuestion.answers].sort(
-    (a, b) => a.id - b.id
-  );
-
-  const handleToggleAnswer = (answerId: number) => {
+  const handleToggleAnswer = (answerId: string) => {
     toggleAnswer(currentQuestion.id, answerId);
   };
 
@@ -57,24 +57,24 @@ export function TestQuestion() {
   const canGoNext = currentIndex < questions.length - 1;
 
   return (
-    <div className="bg-white dark:bg-slate-800 shadow-sm rounded-xl p-5 sm:p-8">
+    <Card className="p-5 sm:p-8">
       {/* Question Header */}
       <div className="flex items-start justify-between mb-5 sm:mb-6">
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-            <span className="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-sm sm:text-base font-bold">
+            <Badge className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-sm sm:text-base font-bold justify-center">
               {currentIndex + 1}
-            </span>
+            </Badge>
             {hasMultipleCorrect && (
-              <span className="px-2 sm:px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-xs font-medium rounded-full">
+              <Badge variant="outline" className="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-700">
                 {t("ui.status.multipleAnswers")}
-              </span>
+              </Badge>
             )}
             {isFlagged && (
-              <span className="px-2 sm:px-3 py-1 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 text-xs font-medium rounded-full flex items-center gap-1">
+              <Badge variant="outline" className="bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 border-yellow-300 dark:border-yellow-700 flex items-center gap-1">
                 <Flag className="w-3 h-3" />
                 {t("ui.status.flagged")}
-              </span>
+              </Badge>
             )}
           </div>
           <p className="text-base sm:text-lg text-slate-800 dark:text-slate-100 leading-relaxed">
@@ -85,7 +85,7 @@ export function TestQuestion() {
 
       {/* Answer Options */}
       <div className="space-y-2.5 sm:space-y-3 mb-5 sm:mb-6">
-        {sortedAnswers.map((answer, idx) => {
+        {currentQuestion.answers.map((answer, idx) => {
           const isSelected = selectedAnswers.includes(answer.id);
           const isCorrect = answer.is_correct;
 
@@ -121,33 +121,38 @@ export function TestQuestion() {
           }
 
           return (
-            <button
+            <Button
               key={answer.id}
               onClick={() => !isRevealed && handleToggleAnswer(answer.id)}
               disabled={isRevealed}
-              className={`w-full text-left p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 ${statusClass} ${
-                isRevealed ? "cursor-default" : "cursor-pointer group"
-              }`}
+              variant="outline"
+              className={cn(
+                "w-full !justify-start !items-center text-left p-3 sm:p-4 rounded-xl border-2 transition-all duration-200",
+                "!h-auto !px-3 sm:!px-4 !py-3 sm:!py-4",
+                statusClass,
+                isRevealed ? "cursor-default" : "cursor-pointer group",
+                "hover:!bg-transparent focus-visible:!ring-0 focus-visible:!ring-offset-0"
+              )}
             >
-              <div className="flex items-center gap-3 sm:gap-4">
+              <div className="flex items-center gap-3 sm:gap-4 w-full">
                 <div
                   className={`flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-sm sm:text-base font-semibold ${badgeClass}`}
                 >
                   {String.fromCharCode(65 + idx)}
                 </div>
-                <span className="flex-1 text-sm sm:text-base text-slate-700 dark:text-slate-200">
+                <span className="flex-1 text-sm sm:text-base text-slate-700 dark:text-slate-200 break-words whitespace-normal">
                   {answer.content}
                 </span>
                 {showIndicator && indicatorIcon}
               </div>
-            </button>
+            </Button>
           );
         })}
       </div>
 
       {/* Explanation */}
       {isRevealed &&
-        sortedAnswers.some((a) => a.is_correct && a.explanation) && (
+        currentQuestion.answers.some((a) => a.is_correct && a.explanation) && (
           <div className="mt-5 sm:mt-6 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
             <div className="flex items-start gap-2 sm:gap-3">
               <svg
@@ -166,20 +171,20 @@ export function TestQuestion() {
                   {t("ui.explanation.title")}
                 </h4>
                 <div className="text-xs sm:text-sm text-blue-800 dark:text-blue-300 space-y-2 sm:space-y-3">
-                  {sortedAnswers
+                  {currentQuestion.answers
                     .filter((a) => a.is_correct && a.explanation)
                     .map((answer) => (
                       <div
                         key={answer.id}
                         className="prose prose-sm dark:prose-invert max-w-none"
                       >
-                        {sortedAnswers.filter(
+                        {currentQuestion.answers.filter(
                           (a) => a.is_correct && a.explanation
                         ).length > 1 && (
                           <strong className="block mb-1 text-blue-900 dark:text-blue-200">
                             Answer{" "}
                             {String.fromCharCode(
-                              65 + sortedAnswers.indexOf(answer)
+                              65 + currentQuestion.answers.indexOf(answer)
                             )}
                             :
                           </strong>
@@ -273,10 +278,12 @@ export function TestQuestion() {
       {/* Action Buttons */}
       <div className="flex items-center justify-between mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-200 dark:border-slate-700">
         <div className="flex gap-2 sm:gap-3">
-          <button
+          <Button
             onClick={goPrev}
             disabled={!canGoPrevious}
-            className="px-2.5 sm:px-4 py-2 sm:py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 sm:gap-2"
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1.5 sm:gap-2"
           >
             <svg
               className="w-4 h-4"
@@ -293,11 +300,13 @@ export function TestQuestion() {
             </svg>
             <span className="hidden sm:inline">{t("ui.buttons.previous")}</span>
             <span className="sm:hidden">{t("ui.buttons.prev")}</span>
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleGoNext}
             disabled={!canGoNext}
-            className="px-2.5 sm:px-4 py-2 sm:py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 sm:gap-2"
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1.5 sm:gap-2"
           >
             {t("ui.buttons.next")}
             <svg
@@ -313,35 +322,25 @@ export function TestQuestion() {
                 d="M9 5l7 7-7 7"
               />
             </svg>
-          </button>
+          </Button>
         </div>
 
         <div className="flex gap-2 sm:gap-3">
-          <button
+          <Button
             onClick={handleToggleFlag}
-            className={`px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-lg transition-all duration-200 flex items-center gap-1.5 sm:gap-2 text-sm ${
+            variant={isFlagged ? "secondary" : "outline"}
+            size="sm"
+            className={`flex items-center gap-1.5 sm:gap-2 ${
               isFlagged
-                ? "bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700"
-                : "border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                ? "bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 border-yellow-300 dark:border-yellow-700 hover:bg-yellow-200 dark:hover:bg-yellow-900/70"
+                : ""
             }`}
           >
-            <svg
-              className="w-4 h-4"
-              fill={isFlagged ? "currentColor" : "none"}
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
-              />
-            </svg>
+            <Flag className="w-4 h-4" fill={isFlagged ? "currentColor" : "none"} />
             {t("ui.buttons.flag")}
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
