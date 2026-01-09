@@ -7,7 +7,7 @@ import { Button } from "./ui/button";
 import { useTranslation } from "@/i18n";
 
 export function AppHeader() {
-  const { toggleSidebar, state, isMobile } = useSidebar();
+  const { toggleSidebar, state } = useSidebar();
   const { t } = useTranslation();
 
   return (

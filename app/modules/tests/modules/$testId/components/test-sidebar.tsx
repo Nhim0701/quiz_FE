@@ -200,7 +200,7 @@ export function TestSidebar() {
 
   // Desktop (≥ 1024px): Sticky sidebar
   return (
-    <div className="lg:col-span-1 space-y-4 sm:space-y-6 lg:sticky lg:top-6 lg:self-start">
+    <div className="lg:col-span-1 space-y-4 sm:space-y-6 lg:sticky lg:top-[88px] lg:z-40 lg:self-start">
       <TestSidebarContent />
     </div>
   );
