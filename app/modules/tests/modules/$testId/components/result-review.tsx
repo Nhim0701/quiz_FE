@@ -1,5 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import { Check, X, Info } from "lucide-react";
+import { useState } from "react";
 import { useResultStore } from "@/hooks/useResult";
 import { useTranslation } from "@/i18n";
 import {
@@ -11,25 +12,47 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ResultSidebar } from "./result-sidebar";
 
 export function ResultReview() {
   const { t } = useTranslation();
   const { questions, answers } = useResultStore();
+  const [openQuestion, setOpenQuestion] = useState<string | undefined>(undefined);
 
   if (!questions || questions.length === 0 || !answers) {
     return null;
   }
 
+  const handleQuestionClick = (questionId: string) => {
+    setOpenQuestion(`question-${questionId}`);
+    // Scroll after a short delay to ensure accordion is open
+    setTimeout(() => {
+      const element = document.getElementById(`question-${questionId}`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 100);
+  };
+
   return (
-    <Card className="p-4 sm:p-8">
-      <CardHeader className="p-0 pb-4 sm:pb-6">
-        <CardTitle className="text-xl sm:text-2xl">
-          {t("ui.headers.yourAnswers")}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-      <Accordion type="single" collapsible className="w-full">
-        {questions.map((question, idx) => {
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
+      {/* Main Review Area */}
+      <div className="lg:col-span-3 w-full">
+        <Card className="p-4 sm:p-8">
+          <CardHeader className="p-0 pb-4 sm:pb-6">
+            <CardTitle className="text-xl sm:text-2xl">
+              {t("ui.headers.yourAnswers")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+          <Accordion 
+            type="single" 
+            collapsible 
+            className="w-full"
+            value={openQuestion}
+            onValueChange={setOpenQuestion}
+          >
+            {questions.map((question, idx) => {
           const userAnswerIds = answers[question.id] || [];
           const userAnswers = question.answers.filter((a) =>
             userAnswerIds.includes(a.id)
@@ -45,6 +68,7 @@ export function ResultReview() {
             <AccordionItem
               key={question.id}
               value={`question-${question.id}`}
+              id={`question-${question.id}`}
               className="border-b border-slate-200 dark:border-slate-700 last:border-0"
             >
               <AccordionTrigger className="hover:no-underline py-4 sm:py-6">
@@ -255,5 +279,10 @@ export function ResultReview() {
       </Accordion>
       </CardContent>
     </Card>
+      </div>
+
+      {/* Sidebar - Desktop: sticky, Mobile: floating button with sheet */}
+      <ResultSidebar onQuestionClick={handleQuestionClick} />
+    </div>
   );
 }

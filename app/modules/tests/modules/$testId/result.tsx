@@ -42,7 +42,7 @@ export default function Result() {
 
   return (
     <div className="py-6 sm:py-8 px-4">
-      <Container maxWidth="4xl">
+      <Container maxWidth="6xl">
         <ResultSummary />
 
         <ResultReview />

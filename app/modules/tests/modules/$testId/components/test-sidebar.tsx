@@ -1,11 +1,37 @@
+import { useState, useEffect } from "react";
 import { useTranslation } from "@/i18n";
 import { useTestStore } from "~/modules/tests/modules/$testId/hooks/store";
 import { useNavigate, useParams } from "react-router";
 import { ROUTES } from "@/constants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
 
-export function TestSidebar() {
+// Hook to detect mobile and tablet (< 1024px)
+function useIsMobileOrTablet() {
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkSize = () => {
+      setIsMobileOrTablet(window.innerWidth < 1024); // lg breakpoint
+    };
+
+    checkSize();
+    window.addEventListener("resize", checkSize);
+    return () => window.removeEventListener("resize", checkSize);
+  }, []);
+
+  return isMobileOrTablet;
+}
+
+function TestSidebarContent() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { testId } = useParams<{ testId: string }>();
@@ -29,7 +55,7 @@ export function TestSidebar() {
   const flaggedCount = Object.values(flags).filter(Boolean).length;
 
   return (
-    <div className="lg:col-span-1 space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Summary Card */}
       <Card>
         <CardHeader className="pb-3">
@@ -134,6 +160,48 @@ export function TestSidebar() {
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+export function TestSidebar() {
+  const { t } = useTranslation();
+  const isMobileOrTablet = useIsMobileOrTablet();
+  const [open, setOpen] = useState(false);
+
+  // Mobile/Tablet: Floating button with sheet
+  if (isMobileOrTablet) {
+    return (
+      <>
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <Button
+              size="icon"
+              className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white"
+              aria-label="Open test navigator"
+            >
+              <Menu className="h-6 w-6" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-full sm:max-w-sm overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>{t("ui.headers.progress")}</SheetTitle>
+            </SheetHeader>
+            <div className="mt-6">
+              <TestSidebarContent />
+            </div>
+          </SheetContent>
+        </Sheet>
+        {/* Empty div to maintain grid structure on mobile/tablet */}
+        <div className="hidden lg:block" />
+      </>
+    );
+  }
+
+  // Desktop (≥ 1024px): Sticky sidebar
+  return (
+    <div className="lg:col-span-1 space-y-4 sm:space-y-6 lg:sticky lg:top-6 lg:self-start">
+      <TestSidebarContent />
     </div>
   );
 }
