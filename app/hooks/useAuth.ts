@@ -36,6 +36,21 @@ export interface User {
   joinDate?: string;
 }
 
+interface UpdateUserData {
+  userId?: string;
+  fullName?: string;
+  phone?: string;
+  birthday?: string;
+  address?: string;
+  jobTitle?: string;
+  company?: string;
+}
+
+interface ChangePasswordData {
+  currentPassword: string;
+  newPassword: string;
+}
+
 interface AuthState {
   user: User | null;
   getCurrentUser: (setLoading?: (loading: boolean) => void) => Promise<void>;
@@ -49,6 +64,14 @@ interface AuthState {
     setLoading?: (loading: boolean) => void
   ) => Promise<void>;
   logout: () => Promise<void>;
+  updateUserInfo: (
+    userData: UpdateUserData,
+    setLoading?: (loading: boolean) => void
+  ) => Promise<void>;
+  changePassword: (
+    passwordData: ChangePasswordData,
+    setLoading?: (loading: boolean) => void
+  ) => Promise<void>;
 }
 
 // Helper function to fetch user data
@@ -90,9 +113,9 @@ export const useAuthStoreInternal = create<AuthState>()(
           API_ENDPOINTS.AUTH.REGISTER,
           {
             // Request data in camelCase - will be converted to snake_case by interceptor
-            userEmail: userData.email,
+            email: userData.email,
             fullName: userData.fullName,
-            userPassword: userData.password,
+            password: userData.password,
           }
         );
 
@@ -108,8 +131,8 @@ export const useAuthStoreInternal = create<AuthState>()(
           API_ENDPOINTS.AUTH.LOGIN,
           {
             // Request data in camelCase - will be converted to snake_case by interceptor
-            userEmail: credentials.email,
-            userPassword: credentials.password,
+            email: credentials.email,
+            password: credentials.password,
             rememberMe: credentials.rememberMe ?? false,
           }
         );
@@ -147,6 +170,46 @@ export const useAuthStoreInternal = create<AuthState>()(
         set({ user: null });
         tokenManager.removeToken();
       },
+      updateUserInfo: async (userData, setLoading) => {
+        if (setLoading) setLoading(true);
+        try {
+          const response = await apiClient.put<ApiSuccessResponse<User>>(
+            API_ENDPOINTS.ME.UPDATE,
+            {
+              // Request data in camelCase - will be converted to snake_case by interceptor
+              userId: userData.userId,
+              fullName: userData.fullName,
+              phone: userData.phone,
+              birthday: userData.birthday,
+              address: userData.address,
+              jobTitle: userData.jobTitle,
+              company: userData.company,
+            }
+          );
+          // Update user in store
+          set({ user: response.data.data });
+        } catch (error) {
+          console.error("Failed to update user info:", error);
+          throw error;
+        } finally {
+          if (setLoading) setLoading(false);
+        }
+      },
+      changePassword: async (passwordData, setLoading) => {
+        if (setLoading) setLoading(true);
+        try {
+          await apiClient.put(API_ENDPOINTS.ME.CHANGE_PASSWORD, {
+            // Request data in camelCase - will be converted to snake_case by interceptor
+            currentPassword: passwordData.currentPassword,
+            newPassword: passwordData.newPassword,
+          });
+        } catch (error) {
+          console.error("Failed to change password:", error);
+          throw error;
+        } finally {
+          if (setLoading) setLoading(false);
+        }
+      },
     }),
     {
       name: STORAGE_KEYS.AUTH,
@@ -157,8 +220,15 @@ export const useAuthStoreInternal = create<AuthState>()(
 
 // Single unified hook
 export const useAuth = () => {
-  const { user, getCurrentUser, register, login, logout } =
-    useAuthStoreInternal.getState();
+  const {
+    user,
+    getCurrentUser,
+    register,
+    login,
+    logout,
+    updateUserInfo,
+    changePassword,
+  } = useAuthStoreInternal.getState();
 
   return {
     user,
@@ -166,5 +236,7 @@ export const useAuth = () => {
     login,
     logout,
     getCurrentUser,
+    updateUserInfo,
+    changePassword,
   };
 };

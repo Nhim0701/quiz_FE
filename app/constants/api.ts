@@ -13,6 +13,8 @@ export const API_ENDPOINTS = {
   // Me endpoints
   ME: {
     GET: "/api/v1/me",
+    UPDATE: "/api/v1/me",
+    CHANGE_PASSWORD: "/api/v1/me/password",
     DASHBOARD: "/api/v1/me/dashboard",
   },
 

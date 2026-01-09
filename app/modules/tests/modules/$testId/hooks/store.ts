@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { ApiSuccessResponse, PaginationMeta } from "@/types";
-import type { QuestionProps } from "../../../../../hooks/useQuestions";
+import type { QuestionProps, } from "@/hooks/useQuestions";
 import type { SubmissionItem } from "@/types";
 import apiClient from "@/lib/axios";
 import { API_ENDPOINTS, TIME_CONSTANTS } from "@/constants";
