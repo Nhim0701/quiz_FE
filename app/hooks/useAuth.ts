@@ -17,7 +17,7 @@ interface Credentials {
   rememberMe?: boolean;
 }
 
-interface AuthResponse {
+export interface AuthResponse {
   access_token: string;
   token_type: string;
   refresh_token?: string;
@@ -57,7 +57,7 @@ const fetchUserData = async (
   if (setLoading) setLoading(true);
   try {
     const response = await apiClient.get<ApiSuccessResponse<UserResponse>>(
-      API_ENDPOINTS.AUTH.ME
+      API_ENDPOINTS.ME.GET
     );
     set({
       user: {

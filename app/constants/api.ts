@@ -6,7 +6,12 @@ export const API_ENDPOINTS = {
     REGISTER: "/api/v1/auth/register",
     REFRESH: "/api/v1/auth/token/refresh",
     REVOKE: "/api/v1/auth/token/revoke",
-    ME: "/api/v1/users/me",
+  },
+
+  // Me endpoints
+  ME: {
+    GET: "/api/v1/me",
+    DASHBOARD: "/api/v1/me/dashboard",
   },
 
   // Tests endpoints
@@ -28,7 +33,7 @@ export const API_ENDPOINTS = {
 
   // Response endpoints
   RESPONSES: {
-    DASHBOARD: "/api/v1/submissions/dashboard",
+    DASHBOARD: "/api/v1/me/dashboard",
   },
 } as const;
 

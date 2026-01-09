@@ -1,15 +1,15 @@
 import { useEffect } from "react";
 import useApp from "@/hooks/useApp";
-import { useProfileStore } from "@/hooks/useProfile";
+import { useMe } from "@/hooks/useMe";
 import { useTranslation } from "@/i18n";
 import { PageHeader } from "@/components/page-header";
 import { Container } from "@/components/ui/container";
-import { Stats, CategoryStats, RecentActivity } from "./components";
+import { Stats, CategoryStats, TestStats, RecentActivity } from "./components";
 
 export default function Dashboard() {
   const { setLoading, showError } = useApp();
   const { t } = useTranslation();
-  const { getDashboard } = useProfileStore();
+  const { getDashboard } = useMe();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,6 +37,9 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <CategoryStats />
+        <TestStats />
+      </div>
+      <div className="mt-4 sm:mt-6">
         <RecentActivity />
       </div>
     </Container>

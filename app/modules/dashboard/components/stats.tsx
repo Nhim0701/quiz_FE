@@ -1,10 +1,10 @@
 import { FileText, CheckCircle, XCircle, TrendingUp } from "lucide-react";
-import { useProfileStore } from "@/hooks/useProfile";
+import { useMe } from "@/hooks/useMe";
 import { useTranslation } from "@/i18n";
 
 export function Stats() {
   const { t } = useTranslation();
-  const { dashboardData } = useProfileStore();
+  const { dashboardData } = useMe();
   const overall = dashboardData?.overall;
 
   if (!overall) {

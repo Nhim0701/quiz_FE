@@ -1,10 +1,11 @@
 import { FileText, Check, X } from "lucide-react";
-import { useProfileStore } from "@/hooks/useProfile";
+import { useMe } from "@/hooks/useMe";
 import { useTranslation } from "@/i18n";
+import { formatUnixTimestamp } from "@/lib/utils";
 
 export function RecentActivity() {
   const { t } = useTranslation();
-  const { dashboardData } = useProfileStore();
+  const { dashboardData } = useMe();
   const recentActivity = dashboardData?.recent_activity;
   if (!recentActivity || recentActivity.length === 0) {
     return (
@@ -47,22 +48,22 @@ export function RecentActivity() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="inline-block px-2 py-1 text-xs font-medium bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded">
+                  <span className="text-blue-600 dark:text-blue-400 font-semibold">
+                    {t("dashboard.recentActivity.category")}:
+                  </span>
                   {activity.category}
                 </span>
+                <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded">
+                  <span className="text-purple-600 dark:text-purple-400 font-semibold">
+                    {t("dashboard.recentActivity.test")}:
+                  </span>
+                  {activity.test_name}
+                </span>
                 <span className="text-xs text-slate-400 dark:text-slate-500">
-                  {activity.answered_at
-                    ? (() => {
-                        const date = new Date(activity.answered_at);
-                        // Use consistent format to avoid hydration mismatch
-                        return date.toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        });
-                      })()
-                    : t("dashboard.recentActivity.notAvailable")}
+                  {formatUnixTimestamp(activity.answered_at) ||
+                    t("dashboard.recentActivity.notAvailable")}
                 </span>
               </div>
               <p className="text-sm text-slate-700 dark:text-slate-300 line-clamp-2">

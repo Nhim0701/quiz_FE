@@ -1,27 +1,3 @@
-export interface DashboardProps {
-  overall: {
-    total_answered: number;
-    total_correct: number;
-    total_wrong: number;
-    overall_accuracy: number;
-  };
-  by_category: {
-    category: string;
-    total_answered: number;
-    correct_answers: number;
-    wrong_answers: number;
-    accuracy: number;
-    last_attempt: string | null;
-  }[];
-  recent_activity: {
-    id: number;
-    category: string;
-    question_preview: string;
-    is_correct: boolean;
-    answered_at: string | null;
-  }[];
-}
-
 export interface SubmissionItem {
   question_id: string;
   answer_id: string;
