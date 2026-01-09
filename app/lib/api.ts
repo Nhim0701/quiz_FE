@@ -1,8 +1,15 @@
 // API utility for backend communication
-import { jwtDecode, type JwtPayload} from "jwt-decode";
+import { jwtDecode, type JwtPayload } from "jwt-decode";
 import axios from "axios";
 import { toast } from "sonner";
-import { API_CONFIG, API_ENDPOINTS, ROUTES, SESSION_KEYS, STORAGE_KEYS } from "@/constants";
+import {
+  API_BASE_URL,
+  API_CONFIG,
+  API_ENDPOINTS,
+  ROUTES,
+  SESSION_KEYS,
+  STORAGE_KEYS,
+} from "@/constants";
 import { useAuthStoreInternal } from "@/hooks/useAuth";
 import { t } from "@/i18n/utils";
 import type { ApiSuccessResponse } from "@/types";
@@ -169,7 +176,7 @@ export const tokenManager = {
     }
 
     const response = await axios.post<ApiSuccessResponse<AuthResponse>>(
-      `${import.meta.env.VITE_API_BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`,
+      `${API_BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`,
       { refresh_token: refreshToken },
       {
         headers: {
@@ -241,5 +248,5 @@ export const tokenManager = {
 
 // Export convenience functions for backward compatibility
 export const attemptTokenRefresh = tokenManager.attemptRefresh;
-export const redirectToLoginOnTokenExpired = tokenManager.redirectToLoginOnExpired;
-
+export const redirectToLoginOnTokenExpired =
+  tokenManager.redirectToLoginOnExpired;

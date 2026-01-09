@@ -5,19 +5,18 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
-import { API_CONFIG, ERROR } from "@/constants";
+import { API_BASE_URL, API_CONFIG, ERROR } from "@/constants";
 import { t } from "@/i18n/utils";
 import type { ApiErrorResponse, ApiSuccessResponse } from "@/types";
 import type { TranslationKey } from "@/i18n";
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": API_CONFIG.CONTENT_TYPE,
   },
 });
-
 
 // Request interceptor to add token and check expiration
 apiClient.interceptors.request.use(
@@ -32,7 +31,9 @@ apiClient.interceptors.request.use(
         if (!refreshToken) {
           // No refresh token, clear and redirect
           tokenManager.redirectToLoginOnExpired();
-          return Promise.reject(new Error("Token expired and no refresh token available"));
+          return Promise.reject(
+            new Error("Token expired and no refresh token available")
+          );
         }
 
         try {
