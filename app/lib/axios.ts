@@ -130,12 +130,13 @@ apiClient.interceptors.response.use(
 
     // Handle error responses (4xx, 5xx) with standard structure
     if (error.response) {
-      const errorData = error.response.data;
+      const errorData = error.response.data as unknown;
 
       // Check if response follows standard error structure
-      if (errorData?.error) {
+      const apiErrorResponse = errorData as ApiErrorResponse;
+      if (apiErrorResponse?.error) {
         // Convert error response from snake_case to camelCase
-        const convertedError = toCamelCase(errorData.error) as {
+        const convertedError = toCamelCase(apiErrorResponse.error) as {
           code: string;
           message: string;
           traceId: string;
@@ -166,9 +167,54 @@ apiClient.interceptors.response.use(
       }
 
       // Fallback for non-standard error responses
-      const errorMessage =
-        (errorData as { detail?: string })?.detail ||
-        `${t("errors.httpError")} ${error.response.status}`;
+      let errorMessage: string;
+
+      if (errorData && typeof errorData === "object") {
+        // Try to extract error message from various possible structures
+        const data = errorData as unknown as Record<string, unknown>;
+        
+        // Check for common error message fields
+        if (typeof data.message === "string") {
+          errorMessage = data.message;
+        } else if (typeof data.detail === "string") {
+          errorMessage = data.detail;
+        } else if (Array.isArray(data.details)) {
+          // Format array of error details
+          errorMessage = data.details
+            .map((detail) => {
+              if (typeof detail === "string") return detail;
+              if (typeof detail === "object" && detail !== null) {
+                const detailObj = detail as Record<string, unknown>;
+                if (typeof detailObj.message === "string") {
+                  return detailObj.message;
+                }
+                return JSON.stringify(detailObj);
+              }
+              return String(detail);
+            })
+            .join(", ");
+        } else if (data.details && typeof data.details === "object") {
+          // Format object of error details (e.g., validation errors)
+          const detailsObj = data.details as Record<string, unknown>;
+          const messages = Object.entries(detailsObj)
+            .map(([key, value]) => {
+              if (Array.isArray(value)) {
+                return `${key}: ${value.join(", ")}`;
+              }
+              return `${key}: ${String(value)}`;
+            })
+            .join("; ");
+          errorMessage = messages || t("errors.requestError");
+        } else {
+          // If we can't extract a meaningful message, use generic error
+          errorMessage = t("errors.requestError");
+        }
+      } else if (typeof errorData === "string") {
+        errorMessage = errorData;
+      } else {
+        errorMessage = `${t("errors.httpError")} ${error.response.status}`;
+      }
+
       throw new Error(errorMessage);
     } else if (error.request) {
       throw new Error(t("errors.networkError"));
