@@ -1,14 +1,18 @@
 import { z } from "zod";
 import type { TypedTFunction } from "@/i18n";
 
+/**
+ * Register form validation schema
+ * Uses Zod for runtime validation
+ */
 export const registerSchema = (t: TypedTFunction) =>
   z
     .object({
-      name: z.string().min(1, t("auth.validation.nameRequired")).trim(),
       email: z
         .string()
         .min(1, t("auth.validation.emailRequired"))
         .email(t("auth.validation.emailInvalid")),
+      fullName: z.string().min(1, t("auth.validation.nameRequired")).trim(),
       password: z
         .string()
         .min(1, t("auth.validation.passwordRequired"))
@@ -22,4 +26,8 @@ export const registerSchema = (t: TypedTFunction) =>
       path: ["confirmPassword"],
     });
 
+/**
+ * Register form data type - inferred from schema
+ * This matches the RegisterFormData type in @/types/auth
+ */
 export type RegisterFormData = z.infer<ReturnType<typeof registerSchema>>;

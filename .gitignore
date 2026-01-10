@@ -10,3 +10,4 @@ vite.config.js
 /.react-router/
 /build/
 instructions.md
+*.md

@@ -11,7 +11,7 @@ import {
 } from "../schemas/register-schema";
 
 interface RegisterFormProps {
-  onSubmit: (name: string, email: string, password: string) => Promise<void>;
+  onSubmit: (data: RegisterFormData) => Promise<void>;
   loading?: boolean;
   error?: string;
 }
@@ -29,7 +29,7 @@ export function RegisterForm({ onSubmit, loading = false }: RegisterFormProps) {
   });
 
   const onSubmitForm = async (data: RegisterFormData) => {
-    await onSubmit(data.name, data.email, data.password);
+    await onSubmit(data);
   };
 
   return (
@@ -39,26 +39,26 @@ export function RegisterForm({ onSubmit, loading = false }: RegisterFormProps) {
     >
       <div>
         <Label
-          htmlFor="name"
+          htmlFor="fullName"
           className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
         >
           {t("auth.register.nameLabel")}
         </Label>
         <Input
-          id="name"
+          id="fullName"
           type="text"
           placeholder={t("auth.register.namePlaceholder")}
           className={`w-full border ${
-            errors.name
+            errors.fullName
               ? "border-red-500 dark:border-red-600"
               : "border-slate-300 dark:border-slate-600"
           } dark:bg-slate-700 dark:text-slate-100 rounded-lg px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent transition`}
           disabled={loading}
-          {...register("name")}
+          {...register("fullName")}
         />
-        {errors.name && (
+        {errors.fullName && (
           <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-            {errors.name.message}
+            {errors.fullName.message}
           </p>
         )}
       </div>

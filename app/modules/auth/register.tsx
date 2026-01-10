@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth, type RegisterFormData } from "@/hooks/useAuth";
 import useApp from "@/hooks/useApp";
 import { useTranslation } from "@/i18n";
 import {
@@ -17,23 +17,13 @@ export default function Register() {
   const { t } = useTranslation();
   const [loading, setLocalLoading] = useState(false);
 
-  const handleSubmit = async (
-    name: string,
-    email: string,
-    password: string
-  ) => {
+  const handleSubmit = async (formData: RegisterFormData) => {
     setLocalLoading(true);
     setLoading(true);
 
     try {
-      await register(
-        {
-          name,
-          email,
-          password,
-        },
-        setLoading
-      );
+      // Pass form data directly - useAuth will handle mapping to API payload
+      await register(formData, setLoading);
       // Navigate to profile page after successful registration (user is already logged in with token)
       navigate("/profile");
     } catch (err) {

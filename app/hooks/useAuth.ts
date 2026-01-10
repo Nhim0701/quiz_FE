@@ -4,72 +4,35 @@ import apiClient from "@/lib/axios";
 import { tokenManager } from "@/lib/api";
 import { API_ENDPOINTS, STORAGE_KEYS } from "@/constants";
 import type { ApiSuccessResponse } from "@/types";
-
-interface UserData {
-  email: string;
-  fullName: string;
-  password: string;
-}
-
-interface Credentials {
-  email: string;
-  password: string;
-  rememberMe?: boolean;
-}
-
-export interface AuthResponse {
-  accessToken: string;
-  tokenType: string;
-  refreshToken?: string;
-}
-
-export interface User {
-  id: string;
-  userId: string;
-  fullName: string;
-  email: string;
-  phone?: string;
-  birthday?: string;
-  address?: string;
-  jobTitle?: string;
-  company?: string;
-  joinDate?: string;
-}
-
-interface UpdateUserData {
-  userId?: string;
-  fullName?: string;
-  phone?: string;
-  birthday?: string;
-  address?: string;
-  jobTitle?: string;
-  company?: string;
-}
-
-interface ChangePasswordData {
-  currentPassword: string;
-  newPassword: string;
-}
+import type {
+  RegisterFormData,
+  LoginFormData,
+  UpdateUserFormData,
+  ChangePasswordFormData,
+  AuthResponse,
+  User,
+} from "@/types/auth";
+import { AuthMapper } from "@/mappers/auth.mapper";
 
 interface AuthState {
   user: User | null;
   getCurrentUser: (setLoading?: (loading: boolean) => void) => Promise<void>;
   clearUser: () => void;
   register: (
-    userData: UserData,
+    formData: RegisterFormData,
     setLoading?: (loading: boolean) => void
   ) => Promise<void>;
   login: (
-    credentials: Credentials,
+    formData: LoginFormData,
     setLoading?: (loading: boolean) => void
   ) => Promise<void>;
   logout: () => Promise<void>;
   updateUserInfo: (
-    userData: UpdateUserData,
+    formData: UpdateUserFormData,
     setLoading?: (loading: boolean) => void
   ) => Promise<void>;
   changePassword: (
-    passwordData: ChangePasswordData,
+    formData: ChangePasswordFormData,
     setLoading?: (loading: boolean) => void
   ) => Promise<void>;
 }
@@ -108,15 +71,13 @@ export const useAuthStoreInternal = create<AuthState>()(
         set({ user: null });
         tokenManager.removeToken();
       },
-      register: async (userData, setLoading) => {
+      register: async (formData, setLoading) => {
+        // Convert UI form data to API payload using mapper
+        const payload = AuthMapper.toRegisterPayload(formData);
+
         const response = await apiClient.post<ApiSuccessResponse<AuthResponse>>(
           API_ENDPOINTS.AUTH.REGISTER,
-          {
-            // Request data in camelCase - will be converted to snake_case by interceptor
-            email: userData.email,
-            fullName: userData.fullName,
-            password: userData.password,
-          }
+          payload
         );
 
         // Store token on successful registration
@@ -126,21 +87,19 @@ export const useAuthStoreInternal = create<AuthState>()(
           await fetchUserData(set, setLoading);
         }
       },
-      login: async (credentials, setLoading) => {
+      login: async (formData, setLoading) => {
+        // Convert UI form data to API payload using mapper
+        const payload = AuthMapper.toLoginPayload(formData);
+
         const response = await apiClient.post<ApiSuccessResponse<AuthResponse>>(
           API_ENDPOINTS.AUTH.LOGIN,
-          {
-            // Request data in camelCase - will be converted to snake_case by interceptor
-            email: credentials.email,
-            password: credentials.password,
-            rememberMe: credentials.rememberMe ?? false,
-          }
+          payload
         );
 
         // Store token on successful login
         // Response data is already converted to camelCase by interceptor
         if (response.data.data) {
-          const rememberMe = credentials.rememberMe ?? false;
+          const rememberMe = formData.rememberMe ?? false;
           tokenManager.setToken(response.data.data.accessToken, rememberMe);
 
           // Store refresh token if available and rememberMe is true
@@ -156,10 +115,9 @@ export const useAuthStoreInternal = create<AuthState>()(
         const refreshToken = tokenManager.getRefreshToken();
         if (refreshToken) {
           try {
-            await apiClient.post(API_ENDPOINTS.AUTH.REVOKE, {
-              // Request data in camelCase - will be converted to snake_case by interceptor
-              refreshToken: refreshToken,
-            });
+            // Convert to API payload using mapper
+            const payload = AuthMapper.toRevokeTokenPayload(refreshToken);
+            await apiClient.post(API_ENDPOINTS.AUTH.REVOKE, payload);
           } catch (error) {
             // Log error but don't block logout
             console.error("Failed to revoke refresh token:", error);
@@ -170,21 +128,15 @@ export const useAuthStoreInternal = create<AuthState>()(
         set({ user: null });
         tokenManager.removeToken();
       },
-      updateUserInfo: async (userData, setLoading) => {
+      updateUserInfo: async (formData, setLoading) => {
         if (setLoading) setLoading(true);
         try {
+          // Convert UI form data to API payload using mapper
+          const payload = AuthMapper.toUpdateUserPayload(formData);
+
           const response = await apiClient.put<ApiSuccessResponse<User>>(
             API_ENDPOINTS.ME.UPDATE,
-            {
-              // Request data in camelCase - will be converted to snake_case by interceptor
-              userId: userData.userId,
-              fullName: userData.fullName,
-              phone: userData.phone,
-              birthday: userData.birthday,
-              address: userData.address,
-              jobTitle: userData.jobTitle,
-              company: userData.company,
-            }
+            payload
           );
           // Update user in store
           set({ user: response.data.data });
@@ -195,14 +147,13 @@ export const useAuthStoreInternal = create<AuthState>()(
           if (setLoading) setLoading(false);
         }
       },
-      changePassword: async (passwordData, setLoading) => {
+      changePassword: async (formData, setLoading) => {
         if (setLoading) setLoading(true);
         try {
-          await apiClient.put(API_ENDPOINTS.ME.CHANGE_PASSWORD, {
-            // Request data in camelCase - will be converted to snake_case by interceptor
-            currentPassword: passwordData.currentPassword,
-            newPassword: passwordData.newPassword,
-          });
+          // Convert UI form data to API payload using mapper
+          const payload = AuthMapper.toChangePasswordPayload(formData);
+
+          await apiClient.put(API_ENDPOINTS.ME.CHANGE_PASSWORD, payload);
         } catch (error) {
           console.error("Failed to change password:", error);
           throw error;
@@ -240,3 +191,13 @@ export const useAuth = () => {
     changePassword,
   };
 };
+
+// Re-export types for external use
+export type {
+  RegisterFormData,
+  LoginFormData,
+  UpdateUserFormData,
+  ChangePasswordFormData,
+  User,
+  AuthResponse,
+} from "@/types/auth";
