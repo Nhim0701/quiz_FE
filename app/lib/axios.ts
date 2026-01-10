@@ -52,9 +52,7 @@ apiClient.interceptors.request.use(
 
     // Convert request data from camelCase to snake_case
     if (config.data && typeof config.data === "object") {
-      console.log("🔵 Axios Interceptor - Before toSnakeCase:", config.data);
       config.data = toSnakeCase(config.data);
-      console.log("🟢 Axios Interceptor - After toSnakeCase:", config.data);
     }
 
     return config;

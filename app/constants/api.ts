@@ -39,6 +39,32 @@ export const API_ENDPOINTS = {
   RESPONSES: {
     DASHBOARD: "/api/v1/me/dashboard",
   },
+
+  // Admin endpoints
+  ADMIN: {
+    QUESTIONS: {
+      LIST: "/api/v1/admin/questions",
+      GET: (questionId: string) => `/api/v1/admin/questions/${questionId}`,
+      CREATE: "/api/v1/admin/questions",
+      UPDATE: (questionId: string) => `/api/v1/admin/questions/${questionId}`,
+      DELETE: (questionId: string) => `/api/v1/admin/questions/${questionId}`,
+    },
+    CATEGORIES: {
+      LIST: "/api/v1/admin/categories",
+      GET: (categoryId: string) => `/api/v1/admin/categories/${categoryId}`,
+      CREATE: "/api/v1/admin/categories",
+      UPDATE: (categoryId: string) => `/api/v1/admin/categories/${categoryId}`,
+      DELETE: (categoryId: string) => `/api/v1/admin/categories/${categoryId}`,
+    },
+    ANSWERS: {
+      LIST: (questionId: string) => `/api/v1/admin/questions/${questionId}/answers`,
+      CREATE: (questionId: string) => `/api/v1/admin/questions/${questionId}/answers`,
+      UPDATE: (questionId: string, answerId: string) =>
+        `/api/v1/admin/questions/${questionId}/answers/${answerId}`,
+      DELETE: (questionId: string, answerId: string) =>
+        `/api/v1/admin/questions/${questionId}/answers/${answerId}`,
+    },
+  },
 } as const;
 
 // API Configuration

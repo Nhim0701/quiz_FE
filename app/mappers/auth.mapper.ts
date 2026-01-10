@@ -37,15 +37,12 @@ export class AuthMapper {
    * Omits: confirmPassword (only used for UI validation)
    */
   static toRegisterPayload(formData: RegisterFormData) {
-    console.log("🔵 AuthMapper.toRegisterPayload - Input:", formData);
-    const payload = {
+    return {
       email: formData.email,
       fullName: formData.fullName,
       password: formData.password,
       // confirmPassword is NOT sent to API - it's only for UI validation
     };
-    console.log("🟢 AuthMapper.toRegisterPayload - Output:", payload);
-    return payload;
   }
 
   /**

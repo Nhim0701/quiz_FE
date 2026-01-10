@@ -1,6 +1,7 @@
-import { LayoutDashboard, FileText, User, LogOut } from "lucide-react";
+import { LayoutDashboard, FileText, User, LogOut, Shield } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { useAuth } from "@/hooks/useAuth";
+import { useRole } from "@/hooks/useRole";
 import { useNavigate, useLocation, Link } from "react-router";
 import { ROUTES } from "@/constants";
 import {
@@ -21,6 +22,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 export function AppSidebar() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
+  const { isAdmin } = useRole();
   const { state } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
@@ -62,6 +64,20 @@ export function AppSidebar() {
       url: ROUTES.PROFILE,
     },
   ];
+
+  // Admin-only menu items
+  const adminMenuItems = [
+    {
+      title: "Content Management",
+      icon: Shield,
+      url: ROUTES.ADMIN.CONTENT,
+    },
+  ];
+
+  // Debug: Check admin status
+  console.log("👤 Sidebar - User:", user);
+  console.log("👤 Sidebar - Is Admin:", isAdmin());
+  console.log("👤 Sidebar - User Role:", user?.role);
 
   return (
     <Sidebar collapsible="icon">
@@ -131,6 +147,38 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Admin Menu - Only visible to admins */}
+        {isAdmin() && (
+          <>
+            <SidebarSeparator />
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {adminMenuItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = location.pathname === item.url;
+                    return (
+                      <SidebarMenuItem key={item.url}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActive}
+                          tooltip={item.title}
+                        >
+                          <Link to={item.url}>
+                            <Icon />
+                            <span>{item.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
+        )}
+
         <SidebarSeparator />
         <SidebarGroup>
           <SidebarGroupContent>

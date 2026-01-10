@@ -1,6 +1,8 @@
 // Application Routes
 export const ROUTES = {
   ROOT: "/",
+  HOME: "/",
+
   //Auth routes
   LOGIN: "/login",
   REGISTER: "/register",
@@ -8,6 +10,11 @@ export const ROUTES = {
   //Profile routes
   PROFILE: "/profile",
   DASHBOARD: "/dashboard",
+
+  //Admin routes
+  ADMIN: {
+    CONTENT: "/content",
+  },
 
   //Tests routes
   TESTS: {
