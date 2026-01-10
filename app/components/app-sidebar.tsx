@@ -74,11 +74,6 @@ export function AppSidebar() {
     },
   ];
 
-  // Debug: Check admin status
-  console.log("👤 Sidebar - User:", user);
-  console.log("👤 Sidebar - Is Admin:", isAdmin());
-  console.log("👤 Sidebar - User Role:", user?.role);
-
   return (
     <Sidebar collapsible="icon">
       <SidebarRail />

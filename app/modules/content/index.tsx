@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { adminMiddleware } from "@/middleware/admin";
-import { QuestionList } from "./content/components/QuestionList";
-import { CategoryFilter } from "./content/components/CategoryFilter";
-import { SearchBar } from "./content/components/SearchBar";
+import { QuestionList } from "../admin/content/components/QuestionList";
+import { CategoryFilter } from "../admin/content/components/CategoryFilter";
+import { SearchBar } from "../admin/content/components/SearchBar";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import type { Route } from "./+types/content";
+import type { Route } from "./+types/index";
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   await adminMiddleware();
   return null;
 }

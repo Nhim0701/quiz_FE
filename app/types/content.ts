@@ -3,28 +3,29 @@
 // ============================================
 
 /**
- * Answer option for a question
+ * Answer option for a question (from backend API)
+ * Backend returns snake_case, axios interceptor converts to camelCase
  */
 export interface Answer {
   id: string;
-  label: string; // A, B, C, D, E, F
-  text: string;
+  content: string;
   isCorrect: boolean;
+  explanation?: string | null;
 }
 
 /**
- * Question with answers
+ * Question with answers (from backend API)
+ * Backend returns snake_case, axios interceptor converts to camelCase
  */
 export interface Question {
   id: string;
-  questionId: string;
-  categoryId: string;
-  categoryName: string;
-  questionText: string;
+  content: string;
+  imageUrl?: string | null;
+  category: string;
+  test: string;
+  isMultipleChoice: boolean;
+  createdAt: number;
   answers: Answer[];
-  correctAnswer: string; // e.g., "A", "B", etc.
-  createdAt?: string;
-  updatedAt?: string;
 }
 
 /**
@@ -32,10 +33,8 @@ export interface Question {
  */
 export interface Category {
   id: string;
-  categoryId: string;
   name: string;
   description?: string;
-  questionCount?: number;
 }
 
 /**
@@ -43,20 +42,17 @@ export interface Category {
  */
 export interface QuestionFilters {
   search?: string;
-  categoryId?: string;
+  category?: string;
   page?: number;
   pageSize?: number;
 }
 
 /**
- * Question form data for create/update
+ * Pagination metadata
  */
-export interface QuestionFormData {
-  questionText: string;
-  categoryId: string;
-  answers: {
-    label: string;
-    text: string;
-    isCorrect: boolean;
-  }[];
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }

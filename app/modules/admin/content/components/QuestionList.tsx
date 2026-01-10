@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import apiClient from "@/lib/axios";
 import { API_ENDPOINTS } from "@/constants";
-import type { ApiSuccessResponse } from "@/types";
-import type { Question } from "@/types/content";
+import type { Question, PaginationMeta } from "@/types/content";
 import { QuestionCard } from "./QuestionCard";
 import { Loader2 } from "lucide-react";
 
@@ -11,11 +10,21 @@ interface QuestionListProps {
   categoryId?: string;
 }
 
+interface QuestionListResponse {
+  data: Question[];
+  meta: PaginationMeta;
+}
+
 export function QuestionList({ searchQuery, categoryId }: QuestionListProps) {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [meta, setMeta] = useState<PaginationMeta>({
+    total: 0,
+    page: 1,
+    pageSize: 20,
+    totalPages: 1,
+  });
 
   useEffect(() => {
     loadQuestions();
@@ -27,42 +36,27 @@ export function QuestionList({ searchQuery, categoryId }: QuestionListProps) {
       const params = new URLSearchParams();
 
       if (searchQuery) {
-        params.append("search", searchQuery);
+        params.append("key", "content");
+        params.append("value", searchQuery);
       }
 
       if (categoryId) {
-        params.append("category_id", categoryId);
+        params.append("key", "category");
+        params.append("value", categoryId);
       }
 
       params.append("page", page.toString());
       params.append("page_size", "20");
 
-      const url = `${API_ENDPOINTS.ADMIN.QUESTIONS.LIST}?${params.toString()}`;
-      const response = await apiClient.get<ApiSuccessResponse<Question[]>>(url);
+      const url = `${API_ENDPOINTS.QUESTIONS.LIST}?${params.toString()}`;
+      const response = await apiClient.get<QuestionListResponse>(url);
 
       setQuestions(response.data.data);
-
-      if (response.data.meta) {
-        setTotalPages(response.data.meta.totalPages || 1);
-      }
+      setMeta(response.data.meta);
     } catch (error) {
       console.error("Failed to load questions:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDelete = async (questionId: string) => {
-    if (!confirm("Are you sure you want to delete this question?")) {
-      return;
-    }
-
-    try {
-      await apiClient.delete(API_ENDPOINTS.ADMIN.QUESTIONS.DELETE(questionId));
-      // Reload questions after delete
-      loadQuestions();
-    } catch (error) {
-      console.error("Failed to delete question:", error);
     }
   };
 
@@ -78,7 +72,7 @@ export function QuestionList({ searchQuery, categoryId }: QuestionListProps) {
     return (
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-12 text-center">
         <p className="text-slate-600 dark:text-slate-400">
-          No questions found. Try adjusting your filters or add a new question.
+          No questions found. Try adjusting your filters.
         </p>
       </div>
     );
@@ -87,32 +81,28 @@ export function QuestionList({ searchQuery, categoryId }: QuestionListProps) {
   return (
     <div className="space-y-4">
       {questions.map((question) => (
-        <QuestionCard
-          key={question.id}
-          question={question}
-          onDelete={handleDelete}
-        />
+        <QuestionCard key={question.id} question={question} />
       ))}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 mt-8">
+      {meta.totalPages > 1 && (
+        <div className="flex justify-center items-center gap-4 mt-8">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-700"
+            disabled={page === 1 || loading}
+            className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
           >
             Previous
           </button>
 
           <span className="text-slate-600 dark:text-slate-400">
-            Page {page} of {totalPages}
+            Page {meta.page} of {meta.totalPages} ({meta.total} total)
           </span>
 
           <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-700"
+            onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
+            disabled={page === meta.totalPages || loading}
+            className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
           >
             Next
           </button>
