@@ -35,7 +35,7 @@ export default [
 
     // Profile routes
     ...prefix(ROUTES.PROFILE, [index("modules/profile/index.tsx")]),
-
+    
     // Admin routes
     route(ROUTES.ADMIN.CONTENT, "modules/content/index.tsx"),
   ]),
