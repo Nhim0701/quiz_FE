@@ -44,6 +44,7 @@ export interface Action<T> {
   onClick: (item: T) => void;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost";
   icon?: React.ReactNode;
+  actionType?: "edit" | "viewInfo" | "delete";
 }
 
 export interface ScrollConfig {

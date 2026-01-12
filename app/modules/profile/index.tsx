@@ -1,36 +1,32 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Edit, Lock } from "lucide-react";
-import useApp from "@/hooks/useApp";
+import { useBreadcrumb } from "@/hooks/useApp";
+import { usePageData } from "@/hooks/usePageData";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "@/i18n";
+import { ROUTES } from "@/constants";
 import { PageHeader } from "@/components/page-header";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { UserInfo } from "./components";
 import { ChangePasswordModal } from "./components/change-password-modal";
+import useApp from "@/hooks/useApp";
 
 export default function Profile() {
-  const { setLoading, showError } = useApp();
+  const { setLoading } = useApp();
   const { t } = useTranslation();
   const { getCurrentUser } = useAuth();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await getCurrentUser(setLoading);
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t("errors.fetchUserFailed");
-        showError(errorMessage);
-      }
-    };
+  useBreadcrumb([
+    {
+      label: t("sidebar.profile"),
+      href: ROUTES.PROFILE,
+    },
+  ]);
 
-    fetchData();
-  }, []);
+  usePageData(() => getCurrentUser(setLoading), "errors.fetchUserFailed", []);
 
   return (
     <Container>

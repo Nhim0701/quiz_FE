@@ -1,48 +1,40 @@
-import { useEffect } from "react";
-import useApp from "@/hooks/useApp";
+import { useBreadcrumb } from "@/hooks/useApp";
+import { usePageData } from "@/hooks/usePageData";
 import { useCategoriesStore } from "@/hooks/useCategories";
 import { useTestsStore } from "@/hooks/useTests";
 import { useTranslation } from "@/i18n";
+import { ROUTES } from "@/constants";
 import { PageHeader } from "@/components/page-header";
 import { Container } from "@/components/ui/container";
 import { TestList } from "./components";
 
 export default function Tests() {
-  const { setLoading, showError } = useApp();
   const { t } = useTranslation();
   const { fetchCategories } = useCategoriesStore();
   const { getTestsByCategory } = useTestsStore();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Get categories list
-        await fetchCategories(1, 100);
+  useBreadcrumb([
+    {
+      label: t("sidebar.tests"),
+      href: ROUTES.TESTS.INDEX,
+    },
+  ]);
 
-        // Get categories after fetching
-        const { categories: fetchedCategories } = useCategoriesStore.getState();
+  usePageData(async () => {
+    // Get categories list
+    await fetchCategories(1, 100);
 
-        // Get tests for each category
-        if (fetchedCategories.length > 0) {
-          const testsPromises = fetchedCategories.map((category) =>
-            getTestsByCategory(category.id)
-          );
-          await Promise.all(testsPromises);
-        }
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t("errors.fetchDashboardFailed");
-        showError(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    };
+    // Get categories after fetching
+    const { categories: fetchedCategories } = useCategoriesStore.getState();
 
-    fetchData();
-  }, []);
+    // Get tests for each category
+    if (fetchedCategories.length > 0) {
+      const testsPromises = fetchedCategories.map((category) =>
+        getTestsByCategory(category.id)
+      );
+      await Promise.all(testsPromises);
+    }
+  }, "errors.fetchDashboardFailed", []);
 
   return (
     <Container>

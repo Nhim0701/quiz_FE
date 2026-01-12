@@ -12,6 +12,7 @@
     "switchToLightMode": "Switch to light mode",
     "switchToDarkMode": "Switch to dark mode",
     "edit": "Edit",
+    "viewInfo": "View info",
     "cancel": "Cancel",
     "take": "Take Test",
     "result": "Result",
@@ -193,8 +194,10 @@
     "expand": "Expand",
     "collapse": "Collapse",
     "toggleSidebar": "Toggle Sidebar",
+    "userMenu": "User Menu",
+    "adminMenu": "Admin Menu",
     "admin": {
-      "content": "Content Management",
+      "index": "Admin",
       "categories": "Categories",
       "tests": "Tests"
     }
@@ -244,6 +247,9 @@
     }
   },
   "admin": {
+    "common": {
+      "noPermission": "You don't have permission to access this page"
+    },
     "categories": {
       "title": "Category management",
       "cardTitle": "List categories",

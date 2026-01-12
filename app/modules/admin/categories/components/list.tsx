@@ -344,6 +344,7 @@ export function CategoriesList({
             label: t("common.edit"),
             onClick: handleEdit,
             icon: <Edit className="h-4 w-4" />,
+            actionType: "edit" as const,
           },
         ]
       : []),
@@ -354,6 +355,7 @@ export function CategoriesList({
             onClick: handleDelete,
             variant: "destructive" as const,
             icon: <Trash2 className="h-4 w-4" />,
+            actionType: "delete" as const,
           },
         ]
       : []),

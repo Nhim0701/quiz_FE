@@ -12,6 +12,7 @@
     "switchToLightMode": "Chuyển sang chế độ sáng",
     "switchToDarkMode": "Chuyển sang chế độ tối",
     "edit": "Sửa",
+    "viewInfo": "Xem thông tin",
     "cancel": "Hủy",
     "take": "Làm bài",
     "result": "Kết quả",
@@ -231,6 +232,9 @@
     }
   },
   "admin": {
+    "common": {
+      "noPermission": "Bạn không có quyền truy cập trang này"
+    },
     "categories": {
       "title": "Quản lý danh mục",
       "cardTitle": "Danh sách danh mục",
@@ -309,8 +313,10 @@
     "expand": "Mở rộng",
     "collapse": "Thu gọn",
     "toggleSidebar": "Bật/Tắt Thanh Bên",
+    "userMenu": "Menu Người dùng",
+    "adminMenu": "Menu Admin",
     "admin": {
-      "content": "Quản Lý Nội Dung",
+      "index": "Admin",
       "categories": "Danh Mục",
       "tests": "Bài Kiểm Tra"
     }

@@ -247,7 +247,3 @@ export const tokenManager = {
   },
 };
 
-// Export convenience functions for backward compatibility
-export const attemptTokenRefresh = tokenManager.attemptRefresh;
-export const redirectToLoginOnTokenExpired =
-  tokenManager.redirectToLoginOnExpired;

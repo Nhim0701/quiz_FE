@@ -10,7 +10,7 @@ import {
 import { usePaginationStore } from "@/hooks/usePagination";
 import { useTestsStore, type TestProps } from "@/hooks/useTests";
 import { useCategoriesStore } from "@/hooks/useCategories";
-import { Edit, Trash2 } from "lucide-react";
+import { Eye, Trash2 } from "lucide-react";
 import useApp from "@/hooks/useApp";
 import {
   AlertDialogAction,
@@ -358,9 +358,9 @@ export function TestsList({ roles }: TestsListProps) {
     setPageSize(newPageSize);
   };
 
-  const handleEdit = (test: TestProps) => {
-    // TODO: Implement edit functionality
-    console.log("Edit test:", test);
+  const handleViewInfo = (test: TestProps) => {
+    // TODO: Implement view info functionality
+    console.log("View test info:", test);
   };
 
   const handleDelete = (test: TestProps) => {
@@ -486,9 +486,10 @@ export function TestsList({ roles }: TestsListProps) {
     ...(roles.update
       ? [
           {
-            label: t("common.edit"),
-            onClick: handleEdit,
-            icon: <Edit className="h-4 w-4" />,
+            label: t("common.viewInfo"),
+            onClick: handleViewInfo,
+            icon: <Eye className="h-4 w-4" />,
+            actionType: "viewInfo" as const,
           },
         ]
       : []),
@@ -499,6 +500,7 @@ export function TestsList({ roles }: TestsListProps) {
             onClick: handleDelete,
             variant: "destructive" as const,
             icon: <Trash2 className="h-4 w-4" />,
+            actionType: "delete" as const,
           },
         ]
       : []),

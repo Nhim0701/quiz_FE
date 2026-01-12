@@ -18,6 +18,7 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -143,6 +144,9 @@ export function AppSidebar() {
           )}
         </SidebarHeader>
         <SidebarGroup>
+          <SidebarGroupLabel>
+            {state === "collapsed" ? null : t("sidebar.userMenu")}
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => {
@@ -172,6 +176,9 @@ export function AppSidebar() {
           <>
             <SidebarSeparator />
             <SidebarGroup>
+              <SidebarGroupLabel>
+                {state === "collapsed" ? null : t("sidebar.adminMenu")}
+              </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {adminMenuItems.map((item) => {

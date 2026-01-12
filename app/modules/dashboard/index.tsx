@@ -1,34 +1,24 @@
-import { useEffect } from "react";
-import useApp from "@/hooks/useApp";
+import { useBreadcrumb } from "@/hooks/useApp";
+import { usePageData } from "@/hooks/usePageData";
 import { useMe } from "@/hooks/useMe";
 import { useTranslation } from "@/i18n";
+import { ROUTES } from "@/constants";
 import { PageHeader } from "@/components/page-header";
 import { Container } from "@/components/ui/container";
 import { Stats, CategoryStats, TestStats, RecentActivity } from "./components";
 
 export default function Dashboard() {
-  const { setLoading, showError } = useApp();
   const { t } = useTranslation();
   const { getDashboard } = useMe();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        await getDashboard();
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t("errors.fetchDashboardFailed");
-        showError(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    };
+  useBreadcrumb([
+    {
+      label: t("sidebar.dashboard"),
+      href: ROUTES.DASHBOARD,
+    },
+  ]);
 
-    fetchData();
-  }, []);
+  usePageData(() => getDashboard(), "errors.fetchDashboardFailed", []);
 
   return (
     <Container>
