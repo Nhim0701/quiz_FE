@@ -10,3 +10,4 @@ export * from "./error";
 export * from "./roles";
 export * from "./permissions";
 export * from "./pagination";
+export * from "./filters";

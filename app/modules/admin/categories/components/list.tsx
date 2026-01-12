@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useLocation } from "react-router";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { useLocation, useSearchParams } from "react-router";
 import { useTranslation } from "@/i18n";
 import {
   DataTable,
@@ -17,6 +17,22 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
+import {
+  SearchInput,
+  ActiveFilters,
+  FilterActions,
+  type ActiveFilter,
+} from "@/components/common/filters";
+import {
+  useFilterActions,
+  useFilterHandlers,
+  useFilterIdsConfig,
+  createStringFilterHandler,
+  createStringConverter,
+  useSyncFilterToUrl,
+  useApplyFilterFromUrl,
+  FilterManager,
+} from "@/hooks/useFilter";
 
 interface CategoriesListProps {
   roles: {
@@ -30,6 +46,7 @@ interface CategoriesListProps {
 export function CategoriesList({ roles }: CategoriesListProps) {
   const { t } = useTranslation();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { showError, showSuccess, showDialog, closeDialog } = useApp();
   const {
     page,
@@ -40,6 +57,13 @@ export function CategoriesList({ roles }: CategoriesListProps) {
     setTotal,
     setCurrentRoute,
   } = usePaginationStore();
+
+  // Search filter state
+  const [search, setSearch] = useState("");
+
+  // Track if filters are being applied from URL to skip initial fetch
+  const isApplyingFiltersFromUrl = useRef(false);
+  const hasInitialFetch = useRef(false);
 
   // Reset pagination when route changes (but keep when same route)
   useEffect(() => {
@@ -56,10 +80,158 @@ export function CategoriesList({ roles }: CategoriesListProps) {
     refreshCategories,
   } = useCategoriesStore();
 
+  // Filter handlers configuration
+  const filterHandlers = useMemo(
+    () => [
+      {
+        filterId: "name",
+        resetValue: () => setSearch(""),
+      },
+    ],
+    []
+  );
+
+  // Filter configuration for URL sync
+  const filterConfig = useMemo(
+    () => [
+      {
+        filterKey: "name",
+        value: search,
+        defaultValue: "",
+        converter: createStringConverter(),
+      },
+    ],
+    [search]
+  );
+
+  // Apply filters from URL on mount
+  const { hasFilterParams } = useApplyFilterFromUrl({
+    filterHandlers: {
+      name: createStringFilterHandler(setSearch),
+    },
+    onFilterApplied: async () => {
+      // Mark that we're applying filters from URL
+      isApplyingFiltersFromUrl.current = true;
+      hasInitialFetch.current = true;
+
+      // Reset to first page when applying filters from URL
+      setPage(1);
+      // Fetch data directly with filters from URL to ensure UI updates
+      try {
+        const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
+        const apiFilters = FilterManager.convertFiltersToApiParams(urlFilters);
+        const result = await fetchCategories(1, pageSize, apiFilters);
+        if (result?.meta) {
+          setTotal(result.meta.total || 0);
+        } else if (result?.data) {
+          setTotal(result.data.length);
+        }
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : t("errors.fetchDashboardFailed");
+        showError(errorMessage);
+      } finally {
+        // Reset flag after a short delay to allow state updates to complete
+        setTimeout(() => {
+          isApplyingFiltersFromUrl.current = false;
+        }, 100);
+      }
+    },
+    hookId: "categories",
+  });
+
+  // Sync filters to URL
+  useSyncFilterToUrl({
+    filters: filterConfig,
+    hookId: "categories",
+  });
+
+  // Filter handlers
+  const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
+    handlers: filterHandlers,
+    onFilterChange: () => {
+      // Reset to first page when filter changes
+      setPage(1);
+    },
+  });
+
+  // Active filters for display
+  const activeFilters = useMemo<ActiveFilter[]>(() => {
+    const filters: ActiveFilter[] = [];
+    if (search) {
+      filters.push({
+        id: "name",
+        label: t("admin.categories.columns.name"),
+        value: search,
+      });
+    }
+    return filters;
+  }, [search, t]);
+
+  // Filter IDs config for color mapping
+  const filterIdsConfig = useFilterIdsConfig({
+    handlers: filterHandlers,
+    colorMap: {
+      name: "primary",
+    },
+  });
+
+  // Filter actions
+  const filterActionButtons = useFilterActions({
+    onSearch: () => {
+      setPage(1);
+    },
+    activeFilters,
+    onClearFilters: handleClearAllFilters,
+  });
+
+  // Convert filter config to API params format
+  const apiFilters = useMemo(() => {
+    const activeFilters: Array<{ key: string; value: string }> = [];
+    filterConfig.forEach((filter) => {
+      const converted = filter.converter(filter.value);
+      if (converted === null) return;
+
+      let isActive = false;
+      if (Array.isArray(converted)) {
+        isActive = converted.length > 0;
+      } else if (filter.defaultValue !== undefined) {
+        const defaultConverted = filter.converter(filter.defaultValue);
+        isActive = converted !== defaultConverted;
+      } else {
+        isActive = converted !== "";
+      }
+
+      if (isActive) {
+        const filterValue = Array.isArray(converted)
+          ? converted.join(",")
+          : converted;
+        activeFilters.push({
+          key: filter.filterKey,
+          value: filterValue,
+        });
+      }
+    });
+    return FilterManager.convertFiltersToApiParams(activeFilters);
+  }, [filterConfig]);
+
   useEffect(() => {
+    // Skip initial fetch if filters are being applied from URL
+    // This prevents duplicate API calls
+    if (hasFilterParams && !hasInitialFetch.current) {
+      return;
+    }
+
+    // Skip fetch if we're currently applying filters from URL
+    if (isApplyingFiltersFromUrl.current) {
+      return;
+    }
+
     const loadCategories = async () => {
       try {
-        const result = await fetchCategories(page, pageSize);
+        const result = await fetchCategories(page, pageSize, apiFilters);
         if (result?.meta) {
           setTotal(result.meta.total || 0);
         } else if (result?.data) {
@@ -75,7 +247,18 @@ export function CategoriesList({ roles }: CategoriesListProps) {
     };
 
     loadCategories();
-  }, [page, pageSize, fetchCategories, setTotal, showError, t]);
+    hasInitialFetch.current = true;
+  }, [
+    page,
+    pageSize,
+    apiFilters,
+    search,
+    hasFilterParams,
+    fetchCategories,
+    setTotal,
+    showError,
+    t,
+  ]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -94,7 +277,7 @@ export function CategoriesList({ roles }: CategoriesListProps) {
       try {
         await deleteCategory(category.id);
         showSuccess(t("admin.categories.deleteSuccess"));
-        await refreshCategories(page, pageSize);
+        await refreshCategories(page, pageSize, apiFilters);
         closeDialog();
       } catch (error) {
         const errorMessage =
@@ -107,9 +290,12 @@ export function CategoriesList({ roles }: CategoriesListProps) {
       title: t("admin.categories.delete"),
       content: (
         <AlertDialogDescription>
-          {t("admin.categories.confirmDelete", {
-            name: category.name,
-          } as any)}
+          {(
+            t as (
+              key: string,
+              params?: Record<string, string | number>
+            ) => string
+          )("admin.categories.confirmDelete", { name: category.name })}
         </AlertDialogDescription>
       ),
       footer: (
@@ -148,7 +334,7 @@ export function CategoriesList({ roles }: CategoriesListProps) {
     },
     {
       key: "questionCount",
-      header: t("admin.categories.columns.questionCount" as any),
+      header: t("admin.categories.columns.questionCount"),
       meta: { center: true },
       render: (category) => (
         <span className="text-muted-foreground">
@@ -182,6 +368,32 @@ export function CategoriesList({ roles }: CategoriesListProps) {
 
   return (
     <>
+      {/* Filter Bar */}
+      <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-1 items-center gap-2">
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            onSearch={() => setPage(1)}
+            placeholderKey="common.searchPlaceholder"
+            className="flex-1"
+            searchKey="name"
+          />
+          <FilterActions buttons={filterActionButtons} />
+        </div>
+      </div>
+
+      {/* Active Filters */}
+      {activeFilters.length > 0 && (
+        <div className="mb-4">
+          <ActiveFilters
+            filters={activeFilters}
+            onRemove={handleRemoveFilter}
+            filterIdsConfig={filterIdsConfig}
+          />
+        </div>
+      )}
+
       <DataTable
         columns={columns}
         data={categories}

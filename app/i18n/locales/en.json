@@ -24,7 +24,9 @@
       "nextPage": "Next page",
       "lastPage": "Last page",
       "page": "Page {{page}}"
-    }
+    },
+    "search": "Search",
+    "searchPlaceholder": "Search by category name..."
   },
   "auth": {
     "login": {

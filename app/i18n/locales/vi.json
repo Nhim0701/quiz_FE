@@ -24,7 +24,9 @@
       "nextPage": "Trang sau",
       "lastPage": "Trang cuối",
       "page": "Trang {{page}}"
-    }
+    },
+    "search": "Tìm kiếm",
+    "searchPlaceholder": "Tìm kiếm theo tên danh mục..."
   },
   "auth": {
     "login": {

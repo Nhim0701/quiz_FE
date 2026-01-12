@@ -27,12 +27,17 @@ interface CategoriesState {
   // API methods
   fetchCategories: (
     page?: number,
-    pageSize?: number
+    pageSize?: number,
+    filters?: Record<string, string>
   ) => Promise<{ data: Category[]; meta?: ApiResponseMeta } | undefined>;
   createCategory: (data: { name: string }) => Promise<Category>;
   updateCategory: (id: string, data: { name: string }) => Promise<Category>;
   deleteCategory: (id: string) => Promise<void>;
-  refreshCategories: (page?: number, pageSize?: number) => Promise<void>;
+  refreshCategories: (
+    page?: number,
+    pageSize?: number,
+    filters?: Record<string, string>
+  ) => Promise<void>;
 }
 
 export const useCategoriesStore = create<CategoriesState>((set, get) => ({
@@ -55,16 +60,32 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
   },
 
   // API methods
-  fetchCategories: async (page = 1, pageSize = 10) => {
+  fetchCategories: async (
+    page = 1,
+    pageSize = 10,
+    filters?: Record<string, string>
+  ) => {
     set({ loading: true, error: null });
     try {
+      const params: Record<string, any> = {
+        page,
+        pageSize,
+      };
+
+      // Add filter params if provided
+      // Filters are already in format: {filter-key-1: "name", filter-value-1: "C02", ...}
+      if (filters) {
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value && typeof value === "string" && value.trim()) {
+            params[key] = value;
+          }
+        });
+      }
+
       const response = await apiClient.get<ApiSuccessResponse<Category[]>>(
         API_ENDPOINTS.CATEGORIES.LIST,
         {
-          params: {
-            page,
-            pageSize,
-          },
+          params,
         }
       );
 
@@ -132,7 +153,11 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
     }
   },
 
-  refreshCategories: async (page = 1, pageSize = 10) => {
-    await get().fetchCategories(page, pageSize);
+  refreshCategories: async (
+    page = 1,
+    pageSize = 10,
+    filters?: Record<string, string>
+  ) => {
+    await get().fetchCategories(page, pageSize, filters);
   },
 }));
