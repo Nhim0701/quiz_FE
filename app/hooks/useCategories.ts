@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { ApiSuccessResponse } from "@/types";
+import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
 import apiClient from "@/lib/axios";
 import { API_ENDPOINTS } from "@/constants";
 
@@ -15,29 +15,124 @@ interface CategoriesState {
   loading: boolean;
   error: string | null;
 
+  // Form state
+  isSheetOpen: boolean;
+  editingCategory: Category | null;
+
+  // Actions
+  openSheet: (category?: Category | null) => void;
+  closeSheet: () => void;
+  setEditingCategory: (category: Category | null) => void;
+
   // API methods
-  getCategories: () => Promise<void>;
+  fetchCategories: (
+    page?: number,
+    pageSize?: number
+  ) => Promise<{ data: Category[]; meta?: ApiResponseMeta } | undefined>;
+  createCategory: (data: { name: string }) => Promise<Category>;
+  updateCategory: (id: string, data: { name: string }) => Promise<Category>;
+  deleteCategory: (id: string) => Promise<void>;
+  refreshCategories: (page?: number, pageSize?: number) => Promise<void>;
 }
 
-export const useCategoriesStore = create<CategoriesState>((set) => ({
+export const useCategoriesStore = create<CategoriesState>((set, get) => ({
   // Initial state
   categories: [],
   loading: false,
   error: null,
+  isSheetOpen: false,
+  editingCategory: null,
+
+  // Form actions
+  openSheet: (category = null) => {
+    set({ isSheetOpen: true, editingCategory: category });
+  },
+  closeSheet: () => {
+    set({ isSheetOpen: false, editingCategory: null });
+  },
+  setEditingCategory: (category) => {
+    set({ editingCategory: category });
+  },
 
   // API methods
-  getCategories: async () => {
+  fetchCategories: async (page = 1, pageSize = 10) => {
     set({ loading: true, error: null });
     try {
-      const response = await apiClient.get<ApiSuccessResponse<Array<Category>>>(
-        API_ENDPOINTS.CATEGORIES.LIST
+      const response = await apiClient.get<ApiSuccessResponse<Category[]>>(
+        API_ENDPOINTS.CATEGORIES.LIST,
+        {
+          params: {
+            page,
+            pageSize,
+          },
+        }
       );
-      set({ categories: response.data.data, loading: false });
+
+      const data = response.data.data || [];
+      const meta = response.data.meta;
+
+      set({
+        categories: data,
+        loading: false,
+      });
+
+      return { data, meta };
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to fetch categories";
       set({ error: errorMessage, loading: false });
       throw error;
     }
+  },
+
+  createCategory: async (data) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await apiClient.post<ApiSuccessResponse<Category>>(
+        API_ENDPOINTS.CATEGORIES.LIST,
+        data
+      );
+      set({ loading: false });
+      return response.data.data;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create category";
+      set({ error: errorMessage, loading: false });
+      throw error;
+    }
+  },
+
+  updateCategory: async (id, data) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await apiClient.put<ApiSuccessResponse<Category>>(
+        API_ENDPOINTS.CATEGORIES.GET(id),
+        data
+      );
+      set({ loading: false });
+      return response.data.data;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update category";
+      set({ error: errorMessage, loading: false });
+      throw error;
+    }
+  },
+
+  deleteCategory: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      await apiClient.delete(API_ENDPOINTS.CATEGORIES.GET(id));
+      set({ loading: false });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to delete category";
+      set({ error: errorMessage, loading: false });
+      throw error;
+    }
+  },
+
+  refreshCategories: async (page = 1, pageSize = 10) => {
+    await get().fetchCategories(page, pageSize);
   },
 }));

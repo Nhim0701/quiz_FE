@@ -52,7 +52,7 @@ export function useRole() {
     if (!resource) return false;
     return checkPermission(
       user?.permissions,
-      buildPermission(resource, ACTIONS.ADMIN_READ)
+      buildPermission(resource, ACTIONS.READ)
     );
   };
 

@@ -79,7 +79,7 @@ export function AppSidebar() {
       title: t("sidebar.admin.categories"),
       icon: FolderTree,
       url: ROUTES.ADMIN.CATEGORIES,
-      permission: COMMON_PERMISSIONS.CATEGORY_ADMIN_READ,
+      permission: COMMON_PERMISSIONS.CATEGORY_READ,
     },
   ].filter((item) => {
     if (item.permission === null) {

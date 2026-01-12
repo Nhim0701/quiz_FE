@@ -1,14 +1,13 @@
 /**
  * Permission matcher for RBAC system
- * 
+ *
  * Permission format: resource::action
  * Examples:
  * - "*::*" = full access to all resources and actions
- * - "category::admin-read" = admin read access to category
  * - "category::read" = read access to category
- * 
- * Hierarchy: *::* > resource::admin-action > resource::action
- * 
+ *
+ * Hierarchy: *::* > resource::action
+ *
  * Use constants from @/constants/permissions for permission strings
  */
 
@@ -28,11 +27,6 @@ const WILDCARD_RESOURCE = "*";
  * Wildcard action indicator
  */
 const WILDCARD_ACTION = "*";
-
-/**
- * Admin action prefix
- */
-const ADMIN_PREFIX = "admin-";
 
 /**
  * Parse permission string into resource and action
@@ -70,11 +64,6 @@ const matchStrategies = {
     // Same action
     if (action === requiredAction) return true;
 
-    // Admin action can access base action: category::admin-read -> category::read
-    if (action.startsWith(ADMIN_PREFIX) && requiredAction === action.replace(ADMIN_PREFIX, "")) {
-      return true;
-    }
-
     return false;
   },
 
@@ -109,16 +98,15 @@ const matchStrategies = {
 
 /**
  * Check if user has permission to access a specific scope
- * 
+ *
  * @param userPermissions - Array of user permissions
  * @param requiredPermission - Required permission in format "resource::action"
  * @returns true if user has the required permission
- * 
+ *
  * @example
  * hasPermission(["*::*"], "category::read") // true
- * hasPermission(["category::admin-read"], "category::read") // true
+ * hasPermission(["category::read"], "category::read") // true
  * hasPermission(["category::read"], "category::write") // false
- * hasPermission(["category::admin-read"], "category::admin-write") // false
  */
 export function hasPermission(
   userPermissions: string[] | undefined,
@@ -158,7 +146,7 @@ export function hasPermission(
 
 /**
  * Check if user has any of the required permissions
- * 
+ *
  * @param userPermissions - Array of user permissions
  * @param requiredPermissions - Array of required permissions
  * @returns true if user has at least one of the required permissions
@@ -174,7 +162,7 @@ export function hasAnyPermission(
 
 /**
  * Check if user has all of the required permissions
- * 
+ *
  * @param userPermissions - Array of user permissions
  * @param requiredPermissions - Array of required permissions
  * @returns true if user has all of the required permissions

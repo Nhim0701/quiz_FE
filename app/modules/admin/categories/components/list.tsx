@@ -9,43 +9,36 @@ import {
 import { usePaginationStore } from "@/hooks/usePagination";
 import { useCategoriesStore, type Category } from "@/hooks/useCategories";
 import { Edit, Trash2 } from "lucide-react";
-import apiClient from "@/lib/axios";
-import { API_ENDPOINTS } from "@/constants";
-import type { ApiSuccessResponse } from "@/types";
 import useApp from "@/hooks/useApp";
+import {
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
 
 export function CategoriesList() {
   const { t } = useTranslation();
-  const { setLoading, showError, showSuccess } = useApp();
+  const { showError, showSuccess, showDialog, closeDialog } = useApp();
   const { page, pageSize, total, setPage, setPageSize, setTotal } =
     usePaginationStore();
-  const { categories, loading } = useCategoriesStore();
+  const {
+    categories,
+    loading,
+    fetchCategories,
+    openSheet,
+    deleteCategory,
+    refreshCategories,
+  } = useCategoriesStore();
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      setLoading(true);
+    const loadCategories = async () => {
       try {
-        const response = await apiClient.get<ApiSuccessResponse<Category[]>>(
-          API_ENDPOINTS.CATEGORIES.LIST,
-          {
-            params: {
-              page,
-              pageSize,
-            },
-          }
-        );
-
-        const data = response.data.data || [];
-        const meta = response.data.meta;
-
-        // Update categories in store (for backward compatibility)
-        useCategoriesStore.setState({ categories: data });
-
-        // Update pagination
-        if (meta) {
-          setTotal(meta.total || 0);
-        } else {
-          setTotal(data.length);
+        const result = await fetchCategories(page, pageSize);
+        if (result?.meta) {
+          setTotal(result.meta.total || 0);
+        } else if (result?.data) {
+          setTotal(result.data.length);
         }
       } catch (error) {
         const errorMessage =
@@ -53,59 +46,61 @@ export function CategoriesList() {
             ? error.message
             : t("errors.fetchDashboardFailed");
         showError(errorMessage);
-      } finally {
-        setLoading(false);
       }
     };
 
-    fetchCategories();
-  }, [page, pageSize, setLoading, showError, t, setTotal]);
+    loadCategories();
+  }, [page, pageSize, fetchCategories, setTotal, showError, t]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
 
-  const handlePageSizeChange = (newPageSize: number) => {
-    setPageSize(newPageSize);
+  const handlePageSizeChange = (newPageSize: number | "all") => {
+    setPageSize(newPageSize); // Store handles "all" conversion
   };
 
   const handleEdit = (category: Category) => {
-    // TODO: Implement edit functionality
+    openSheet(category);
   };
 
-  const handleDelete = async (category: Category) => {
-    if (
-      !window.confirm(
-        t("admin.categories.confirmDelete", { name: category.name } as any)
-      )
-    ) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await apiClient.delete(API_ENDPOINTS.CATEGORIES.GET(category.id));
-      showSuccess(t("admin.categories.deleteSuccess"));
-      // Refresh categories
-      const response = await apiClient.get<ApiSuccessResponse<Category[]>>(
-        API_ENDPOINTS.CATEGORIES.LIST,
-        {
-          params: { page, pageSize },
-        }
-      );
-      const data = response.data.data || [];
-      const meta = response.data.meta;
-      useCategoriesStore.setState({ categories: data });
-      if (meta) {
-        setTotal(meta.total || 0);
+  const handleDelete = (category: Category) => {
+    const confirmDelete = async () => {
+      try {
+        await deleteCategory(category.id);
+        showSuccess(t("admin.categories.deleteSuccess"));
+        await refreshCategories(page, pageSize);
+        closeDialog();
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : t("errors.genericError");
+        showError(errorMessage);
       }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : t("errors.genericError");
-      showError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    showDialog({
+      title: t("admin.categories.delete"),
+      content: (
+        <AlertDialogDescription>
+          {t("admin.categories.confirmDelete", {
+            name: category.name,
+          } as any)}
+        </AlertDialogDescription>
+      ),
+      footer: (
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={closeDialog}>
+            {t("common.cancel")}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={confirmDelete}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            {t("admin.categories.delete")}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      ),
+    });
   };
 
   const columns: Column<Category>[] = [
@@ -161,15 +156,13 @@ export function CategoriesList() {
         loading={loading}
         emptyMessage={t("admin.categories.empty")}
       />
-      {total > 0 && (
-        <Pagination
-          page={page}
-          pageSize={pageSize}
-          total={total}
-          onPageChange={handlePageChange}
-          onPageSizeChange={handlePageSizeChange}
-        />
-      )}
+      <Pagination
+        page={page}
+        pageSize={pageSize}
+        total={total}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+      />
     </>
   );
 }

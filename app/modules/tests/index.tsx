@@ -10,7 +10,7 @@ import { TestList } from "./components";
 export default function Tests() {
   const { setLoading, showError } = useApp();
   const { t } = useTranslation();
-  const { getCategories } = useCategoriesStore();
+  const { fetchCategories } = useCategoriesStore();
   const { getTestsByCategory } = useTestsStore();
 
   useEffect(() => {
@@ -18,7 +18,7 @@ export default function Tests() {
       setLoading(true);
       try {
         // Get categories list
-        await getCategories();
+        await fetchCategories(1, 100);
 
         // Get categories after fetching
         const { categories: fetchedCategories } = useCategoriesStore.getState();

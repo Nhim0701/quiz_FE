@@ -2,8 +2,18 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { toast } from "sonner";
 import { STORAGE_KEYS, THEME_VALUES, TOAST_CLASSES } from "@/constants";
+import type { ReactNode } from "react";
 
 type Theme = "light" | "dark";
+
+interface DialogConfig {
+  title?: ReactNode;
+  titleClassName?: string;
+  content?: ReactNode;
+  contentContainerClassName?: string;
+  footer?: ReactNode;
+  footerContainerClassName?: string;
+}
 
 interface AppState {
   theme: Theme;
@@ -27,6 +37,16 @@ interface AppState {
     message: string,
     options?: Parameters<typeof toast.warning>[1]
   ) => void;
+  // Dialog state
+  isDialogOpen: boolean;
+  dialogTitle?: ReactNode;
+  dialogTitleClassName?: string;
+  dialogContent?: ReactNode;
+  dialogContentContainerClassName?: string;
+  dialogFooter?: ReactNode;
+  dialogFooterContainerClassName?: string;
+  showDialog: (config: DialogConfig) => void;
+  closeDialog: () => void;
 }
 
 // Helper function to get initial theme
@@ -90,6 +110,36 @@ const useApp = create<AppState>()(
       showSuccess: createToastHandler(toast.success, TOAST_CLASSES.SUCCESS),
       showInfo: createToastHandler(toast.info, TOAST_CLASSES.INFO),
       showWarning: createToastHandler(toast.warning, TOAST_CLASSES.WARNING),
+      // Dialog state
+      isDialogOpen: false,
+      dialogTitle: undefined,
+      dialogTitleClassName: undefined,
+      dialogContent: undefined,
+      dialogContentContainerClassName: undefined,
+      dialogFooter: undefined,
+      dialogFooterContainerClassName: undefined,
+      showDialog: (config: DialogConfig) => {
+        set({
+          isDialogOpen: true,
+          dialogTitle: config.title,
+          dialogTitleClassName: config.titleClassName,
+          dialogContent: config.content,
+          dialogContentContainerClassName: config.contentContainerClassName,
+          dialogFooter: config.footer,
+          dialogFooterContainerClassName: config.footerContainerClassName,
+        });
+      },
+      closeDialog: () => {
+        set({
+          isDialogOpen: false,
+          dialogTitle: undefined,
+          dialogTitleClassName: undefined,
+          dialogContent: undefined,
+          dialogContentContainerClassName: undefined,
+          dialogFooter: undefined,
+          dialogFooterContainerClassName: undefined,
+        });
+      },
     }),
     {
       name: STORAGE_KEYS.THEME,
@@ -100,15 +150,19 @@ const useApp = create<AppState>()(
       // This ensures store state matches what's in the DOM after hydration
       onRehydrateStorage: () => (state) => {
         if (typeof window === "undefined") return;
-        
+
         // Theme class is already applied by inline script before React hydrates
         if (state) {
           // Store has persisted state, ensure DOM matches (should already match)
           applyTheme(state.theme);
         } else {
           // No persisted state - sync store with what inline script set
-          const isDark = document.documentElement.classList.contains(THEME_VALUES.DARK);
-          useApp.setState({ theme: isDark ? THEME_VALUES.DARK : THEME_VALUES.LIGHT });
+          const isDark = document.documentElement.classList.contains(
+            THEME_VALUES.DARK
+          );
+          useApp.setState({
+            theme: isDark ? THEME_VALUES.DARK : THEME_VALUES.LIGHT,
+          });
         }
       },
     }

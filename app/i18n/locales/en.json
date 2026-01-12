@@ -11,7 +11,18 @@
     "passwordPlaceholder": "••••••••",
     "switchToLightMode": "Switch to light mode",
     "switchToDarkMode": "Switch to dark mode",
-    "edit": "Edit"
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "pagination": {
+      "itemsPerPage": "Items per page:",
+      "all": "All",
+      "summary": "from {{start}} to {{end}} of {{total}} items",
+      "firstPage": "First page",
+      "previousPage": "Previous page",
+      "nextPage": "Next page",
+      "lastPage": "Last page",
+      "page": "Page {{page}}"
+    }
   },
   "auth": {
     "login": {
@@ -232,6 +243,21 @@
       "delete": "Delete",
       "deleteSuccess": "Category deleted successfully",
       "confirmDelete": "Are you sure you want to delete category \"{{name}}\"?",
+      "createTitle": "Create New Category",
+      "editTitle": "Edit Category",
+      "createDescription": "Fill in the information to create a new category",
+      "editDescription": "Update category information",
+      "create": "Create",
+      "update": "Update",
+      "createSuccess": "Category created successfully",
+      "updateSuccess": "Category updated successfully",
+      "form": {
+        "nameLabel": "Category Name",
+        "namePlaceholder": "Enter category name"
+      },
+      "validation": {
+        "nameRequired": "Category name is required"
+      },
       "columns": {
         "id": "ID",
         "name": "Name",

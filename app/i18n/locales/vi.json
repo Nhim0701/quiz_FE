@@ -11,7 +11,18 @@
     "passwordPlaceholder": "••••••••",
     "switchToLightMode": "Chuyển sang chế độ sáng",
     "switchToDarkMode": "Chuyển sang chế độ tối",
-    "edit": "Sửa"
+    "edit": "Sửa",
+    "cancel": "Hủy",
+    "pagination": {
+      "itemsPerPage": "Số mục mỗi trang:",
+      "all": "Tất cả",
+      "summary": "từ {{start}} đến {{end}} trong tổng số {{total}} mục",
+      "firstPage": "Trang đầu",
+      "previousPage": "Trang trước",
+      "nextPage": "Trang sau",
+      "lastPage": "Trang cuối",
+      "page": "Trang {{page}}"
+    }
   },
   "auth": {
     "login": {
@@ -232,6 +243,21 @@
       "delete": "Xóa",
       "deleteSuccess": "Xóa danh mục thành công",
       "confirmDelete": "Bạn có chắc chắn muốn xóa danh mục \"{{name}}\"?",
+      "createTitle": "Tạo Danh Mục Mới",
+      "editTitle": "Sửa Danh Mục",
+      "createDescription": "Điền thông tin để tạo danh mục mới",
+      "editDescription": "Cập nhật thông tin danh mục",
+      "create": "Tạo",
+      "update": "Cập nhật",
+      "createSuccess": "Tạo danh mục thành công",
+      "updateSuccess": "Cập nhật danh mục thành công",
+      "form": {
+        "nameLabel": "Tên danh mục",
+        "namePlaceholder": "Nhập tên danh mục"
+      },
+      "validation": {
+        "nameRequired": "Tên danh mục là bắt buộc"
+      },
       "columns": {
         "id": "ID",
         "name": "Tên",
