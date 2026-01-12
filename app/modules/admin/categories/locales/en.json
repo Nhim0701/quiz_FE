@@ -1,0 +1,33 @@
+{
+  "admin": {
+    "categories": {
+      "title": "Category management",
+      "cardTitle": "List categories",
+      "empty": "No categories found",
+      "noPermission": "You don't have permission to access this page",
+      "delete": "Delete",
+      "deleteSuccess": "Category deleted successfully",
+      "confirmDelete": "Are you sure you want to delete category \"{{name}}\"?",
+      "createTitle": "Create New Category",
+      "editTitle": "Edit Category",
+      "createDescription": "Fill in the information to create a new category",
+      "editDescription": "Update category information",
+      "create": "Create",
+      "update": "Update",
+      "createSuccess": "Category created successfully",
+      "updateSuccess": "Category updated successfully",
+      "form": {
+        "nameLabel": "Category Name",
+        "namePlaceholder": "Enter category name"
+      },
+      "validation": {
+        "nameRequired": "Category name is required"
+      },
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "questionCount": "Questions"
+      }
+    }
+  }
+}

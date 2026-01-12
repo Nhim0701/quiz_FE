@@ -8,7 +8,7 @@ import {
   type Action,
 } from "@/components/common/data-table";
 import { usePaginationStore } from "@/hooks/use-pagination";
-import { useCategoriesStore, type Category } from "@/hooks/use-categories";
+import { useCategoriesStore, type Category } from "../hooks";
 import { Edit, Trash2 } from "lucide-react";
 import useApp from "@/hooks/use-app";
 import {

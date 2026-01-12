@@ -1,4 +1,4 @@
-import { useCategoriesStore } from "@/hooks/use-categories";
+import { useCategoriesStore } from "../../../admin/categories/hooks";
 import { useTranslation } from "@/i18n";
 import { Accordion } from "@/components/ui/accordion";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";

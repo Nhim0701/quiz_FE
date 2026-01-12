@@ -31,7 +31,7 @@ import { cn } from "@/lib/utils";
 import useApp from "@/hooks/use-app";
 import { testSchema, type TestFormData } from "../schemas/test-schema";
 import { useTestsStore } from "@/hooks/use-tests";
-import { useCategoriesStore } from "@/hooks/use-categories";
+import { useCategoriesStore } from "../../categories/hooks";
 import { usePaginationStore } from "@/hooks/use-pagination";
 
 interface TestFormProps {

@@ -1,13 +1,11 @@
 import { useState, useCallback, useEffect } from "react";
-import { useTranslation } from "@/i18n";
 import { useRole } from "@/modules/common/auth/hooks/use-role";
 import { RESOURCES } from "@/constants/permissions";
 import { useAdminLayout } from "../_layout";
 import { CategoriesList, CategoryForm } from "./components";
-import { useCategoriesStore } from "@/hooks/use-categories";
+import { useCategoriesStore } from "./hooks";
 
 export default function AdminCategories() {
-  const { t } = useTranslation();
   const { getNamespaceRoles } = useRole();
   const { openSheet } = useCategoriesStore();
   const { setConfig } = useAdminLayout();

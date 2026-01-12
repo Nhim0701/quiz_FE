@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useTranslation } from "@/i18n";
-import { type Category } from "@/hooks/use-categories";
+import { type Category } from "@/modules/admin/categories/hooks";
 import { useTestsStore } from "@/hooks/use-tests";
 import {
   AccordionItem,
@@ -18,20 +18,12 @@ const EMPTY_ARRAY: never[] = [];
 export function TestCategoryItem({ category }: TestCategoryItemProps) {
   const { t } = useTranslation();
 
-  const testsRaw = useTestsStore(
-    (state) => state.testsByCategory[category.id]
-  );
+  const testsRaw = useTestsStore((state) => state.testsByCategory[category.id]);
 
-  const tests = useMemo(
-    () => testsRaw || EMPTY_ARRAY,
-    [testsRaw]
-  );
+  const tests = useMemo(() => testsRaw || EMPTY_ARRAY, [testsRaw]);
 
   const totalQuestions = useMemo(() => {
-    return tests.reduce(
-      (sum, test) => sum + (test.questionCount || 0),
-      0
-    );
+    return tests.reduce((sum, test) => sum + (test.questionCount || 0), 0);
   }, [tests]);
 
   if (!category) {

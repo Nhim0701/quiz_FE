@@ -9,7 +9,7 @@ import {
 } from "@/components/common/data-table";
 import { usePaginationStore } from "@/hooks/use-pagination";
 import { useTestsStore, type TestProps } from "@/hooks/use-tests";
-import { useCategoriesStore } from "@/hooks/use-categories";
+import { useCategoriesStore } from "../../categories/hooks";
 import { Eye, Trash2 } from "lucide-react";
 import useApp from "@/hooks/use-app";
 import {

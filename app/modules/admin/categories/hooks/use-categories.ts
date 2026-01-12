@@ -22,7 +22,6 @@ interface CategoriesState {
   // Actions
   openSheet: (category?: Category | null) => void;
   closeSheet: () => void;
-  setEditingCategory: (category: Category | null) => void;
 
   // API methods
   fetchCategories: (
@@ -54,9 +53,6 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
   },
   closeSheet: () => {
     set({ isSheetOpen: false, editingCategory: null });
-  },
-  setEditingCategory: (category) => {
-    set({ editingCategory: category });
   },
 
   // API methods

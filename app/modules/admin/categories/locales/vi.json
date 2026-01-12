@@ -1,0 +1,33 @@
+{
+  "admin": {
+    "categories": {
+      "title": "Quản lý danh mục",
+      "cardTitle": "Danh sách danh mục",
+      "empty": "Không tìm thấy danh mục nào",
+      "noPermission": "Bạn không có quyền truy cập trang này",
+      "delete": "Xóa",
+      "deleteSuccess": "Xóa danh mục thành công",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa danh mục \"{{name}}\"?",
+      "createTitle": "Tạo danh mục mới",
+      "editTitle": "Sửa danh mục",
+      "createDescription": "Điền thông tin để tạo danh mục mới",
+      "editDescription": "Cập nhật thông tin danh mục",
+      "create": "Tạo danh mục",
+      "update": "Cập nhật danh mục",
+      "createSuccess": "Tạo danh mục thành công",
+      "updateSuccess": "Cập nhật danh mục thành công",
+      "form": {
+        "nameLabel": "Tên danh mục",
+        "namePlaceholder": "Nhập tên danh mục"
+      },
+      "validation": {
+        "nameRequired": "Tên danh mục là bắt buộc"
+      },
+      "columns": {
+        "id": "ID",
+        "name": "Tên",
+        "questionCount": "Câu Hỏi"
+      }
+    }
+  }
+}

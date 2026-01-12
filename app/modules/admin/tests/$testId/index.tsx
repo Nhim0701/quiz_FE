@@ -6,7 +6,7 @@ import { RESOURCES } from "@/constants/permissions";
 import { ROUTES } from "@/constants";
 import { useAdminLayout } from "../../_layout";
 import { useTestsStore, type TestProps } from "@/hooks/use-tests";
-import { useCategoriesStore } from "@/hooks/use-categories";
+import { useCategoriesStore } from "../../categories/hooks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";

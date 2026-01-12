@@ -17,7 +17,7 @@ import {
   categorySchema,
   type CategoryFormData,
 } from "../schemas/category-schema";
-import { useCategoriesStore } from "@/hooks/use-categories";
+import { useCategoriesStore } from "../hooks";
 import { usePaginationStore } from "@/hooks/use-pagination";
 import { Loader2 } from "lucide-react";
 
