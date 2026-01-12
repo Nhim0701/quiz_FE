@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useTranslation } from "@/i18n";
 import { useRole } from "@/hooks/useRole";
 import { PageHeader } from "@/components/page-header";
@@ -19,9 +19,9 @@ export default function AdminCategories() {
   // Get roles for categories namespace
   const roles = getNamespaceRoles(RESOURCES.CATEGORY);
 
-  const handleClearFiltersReady = (clearFiltersFn: () => void) => {
+  const handleClearFiltersReady = useCallback((clearFiltersFn: () => void) => {
     setClearFilters(() => clearFiltersFn);
-  };
+  }, []);
 
   return (
     <Container>

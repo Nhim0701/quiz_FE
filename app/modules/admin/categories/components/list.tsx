@@ -142,12 +142,16 @@ export function CategoriesList({
     },
   });
 
-  // Expose clearFilters function to parent component
+  // Expose clearFilters function to parent component (only once on mount)
+  const clearFiltersRef = useRef(handleClearAllFilters);
+  clearFiltersRef.current = handleClearAllFilters;
+
   useEffect(() => {
     if (onClearFiltersReady) {
-      onClearFiltersReady(handleClearAllFilters);
+      onClearFiltersReady(() => clearFiltersRef.current());
     }
-  }, [onClearFiltersReady, handleClearAllFilters]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   const activeFilters = useMemo<ActiveFilter[]>(() => {
     const filters: ActiveFilter[] = [];
