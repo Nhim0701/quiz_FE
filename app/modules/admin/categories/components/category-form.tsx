@@ -22,7 +22,11 @@ import { useCategoriesStore } from "@/hooks/useCategories";
 import { usePaginationStore } from "@/hooks/usePagination";
 import { Loader2 } from "lucide-react";
 
-export function CategoryForm() {
+interface CategoryFormProps {
+  onClearFilters?: (() => void) | null;
+}
+
+export function CategoryForm({ onClearFilters }: CategoryFormProps) {
   const { t } = useTranslation();
   const { showSuccess, showError } = useApp();
   const { page, pageSize } = usePaginationStore();
@@ -66,12 +70,18 @@ export function CategoryForm() {
       if (isEditMode && editingCategory) {
         await updateCategory(editingCategory.id, data);
         showSuccess(t("admin.categories.updateSuccess"));
+        closeSheet();
+        await refreshCategories(page, pageSize);
       } else {
         await createCategory(data);
         showSuccess(t("admin.categories.createSuccess"));
+        closeSheet();
+        // Clear filters and fetch all data after create
+        if (onClearFilters) {
+          onClearFilters();
+        }
+        await refreshCategories(1, pageSize);
       }
-      closeSheet();
-      await refreshCategories(page, pageSize);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : t("errors.genericError");

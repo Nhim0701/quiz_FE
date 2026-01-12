@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from "react";
-import { useLocation, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 import { useTranslation } from "@/i18n";
 import {
   DataTable,
@@ -27,7 +27,6 @@ import {
   useFilterActions,
   useFilterHandlers,
   useFilterIdsConfig,
-  createStringFilterHandler,
   createStringConverter,
   useSyncFilterToUrl,
   useApplyFilterFromUrl,
@@ -41,36 +40,27 @@ interface CategoriesListProps {
     update: boolean;
     delete: boolean;
   };
+  onClearFiltersReady?: (clearFilters: () => void) => void;
 }
 
-export function CategoriesList({ roles }: CategoriesListProps) {
+export function CategoriesList({
+  roles,
+  onClearFiltersReady,
+}: CategoriesListProps) {
   const { t } = useTranslation();
-  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { showError, showSuccess, showDialog, closeDialog } = useApp();
-  const {
-    page,
-    pageSize,
-    total,
-    setPage,
-    setPageSize,
-    setTotal,
-    setCurrentRoute,
-  } = usePaginationStore();
+  const { page, pageSize, total, setPage, setPageSize, setTotal } =
+    usePaginationStore();
 
-  // Search filter state
-  const [search, setSearch] = useState("");
+  // Search input state (for typing)
+  const [searchInput, setSearchInput] = useState("");
+  // Search value state (for filtering - only updates on Enter/button click)
+  const [searchValue, setSearchValue] = useState("");
 
   // Track if filters are being applied from URL to skip initial fetch
   const isApplyingFiltersFromUrl = useRef(false);
   const hasInitialFetch = useRef(false);
-
-  // Reset pagination when route changes (but keep when same route)
-  useEffect(() => {
-    // Get route without query params for comparison
-    const routePath = location.pathname;
-    setCurrentRoute(routePath);
-  }, [location.pathname, setCurrentRoute]);
   const {
     categories,
     loading,
@@ -80,43 +70,43 @@ export function CategoriesList({ roles }: CategoriesListProps) {
     refreshCategories,
   } = useCategoriesStore();
 
-  // Filter handlers configuration
   const filterHandlers = useMemo(
     () => [
       {
         filterId: "name",
-        resetValue: () => setSearch(""),
+        resetValue: () => {
+          setSearchInput("");
+          setSearchValue("");
+        },
       },
     ],
     []
   );
 
-  // Filter configuration for URL sync
   const filterConfig = useMemo(
     () => [
       {
         filterKey: "name",
-        value: search,
+        value: searchValue,
         defaultValue: "",
         converter: createStringConverter(),
       },
     ],
-    [search]
+    [searchValue]
   );
 
-  // Apply filters from URL on mount
   const { hasFilterParams } = useApplyFilterFromUrl({
     filterHandlers: {
-      name: createStringFilterHandler(setSearch),
+      name: (_, value) => {
+        setSearchInput(value);
+        setSearchValue(value);
+      },
     },
     onFilterApplied: async () => {
-      // Mark that we're applying filters from URL
       isApplyingFiltersFromUrl.current = true;
       hasInitialFetch.current = true;
-
-      // Reset to first page when applying filters from URL
       setPage(1);
-      // Fetch data directly with filters from URL to ensure UI updates
+
       try {
         const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
         const apiFilters = FilterManager.convertFiltersToApiParams(urlFilters);
@@ -133,22 +123,17 @@ export function CategoriesList({ roles }: CategoriesListProps) {
             : t("errors.fetchDashboardFailed");
         showError(errorMessage);
       } finally {
-        // Reset flag after a short delay to allow state updates to complete
-        setTimeout(() => {
-          isApplyingFiltersFromUrl.current = false;
-        }, 100);
+        isApplyingFiltersFromUrl.current = false;
       }
     },
     hookId: "categories",
   });
 
-  // Sync filters to URL
   useSyncFilterToUrl({
     filters: filterConfig,
     hookId: "categories",
   });
 
-  // Filter handlers
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
     handlers: filterHandlers,
     onFilterChange: () => {
@@ -157,37 +142,43 @@ export function CategoriesList({ roles }: CategoriesListProps) {
     },
   });
 
-  // Active filters for display
+  // Expose clearFilters function to parent component
+  useEffect(() => {
+    if (onClearFiltersReady) {
+      onClearFiltersReady(handleClearAllFilters);
+    }
+  }, [onClearFiltersReady, handleClearAllFilters]);
+
   const activeFilters = useMemo<ActiveFilter[]>(() => {
     const filters: ActiveFilter[] = [];
-    if (search) {
+    if (searchValue) {
       filters.push({
         id: "name",
         label: t("admin.categories.columns.name"),
-        value: search,
+        value: searchValue,
       });
     }
     return filters;
-  }, [search, t]);
+  }, [searchValue, t]);
 
-  // Filter IDs config for color mapping
   const filterIdsConfig = useFilterIdsConfig({
     handlers: filterHandlers,
     colorMap: {
-      name: "primary",
+      name: "blue",
     },
   });
 
-  // Filter actions
+  const handleSearch = () => {
+    setSearchValue(searchInput);
+    setPage(1);
+  };
+
   const filterActionButtons = useFilterActions({
-    onSearch: () => {
-      setPage(1);
-    },
+    onSearch: handleSearch,
     activeFilters,
     onClearFilters: handleClearAllFilters,
   });
 
-  // Convert filter config to API params format
   const apiFilters = useMemo(() => {
     const activeFilters: Array<{ key: string; value: string }> = [];
     filterConfig.forEach((filter) => {
@@ -219,13 +210,10 @@ export function CategoriesList({ roles }: CategoriesListProps) {
 
   useEffect(() => {
     // Skip initial fetch if filters are being applied from URL
-    // This prevents duplicate API calls
-    if (hasFilterParams && !hasInitialFetch.current) {
-      return;
-    }
-
-    // Skip fetch if we're currently applying filters from URL
-    if (isApplyingFiltersFromUrl.current) {
+    if (
+      (hasFilterParams && !hasInitialFetch.current) ||
+      isApplyingFiltersFromUrl.current
+    ) {
       return;
     }
 
@@ -252,7 +240,6 @@ export function CategoriesList({ roles }: CategoriesListProps) {
     page,
     pageSize,
     apiFilters,
-    search,
     hasFilterParams,
     fetchCategories,
     setTotal,
@@ -277,7 +264,9 @@ export function CategoriesList({ roles }: CategoriesListProps) {
       try {
         await deleteCategory(category.id);
         showSuccess(t("admin.categories.deleteSuccess"));
-        await refreshCategories(page, pageSize, apiFilters);
+        // Clear filters and fetch all data after delete
+        handleClearAllFilters();
+        await refreshCategories(1, pageSize);
         closeDialog();
       } catch (error) {
         const errorMessage =
@@ -372,9 +361,9 @@ export function CategoriesList({ roles }: CategoriesListProps) {
       <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-center gap-2">
           <SearchInput
-            value={search}
-            onChange={setSearch}
-            onSearch={() => setPage(1)}
+            value={searchInput}
+            onChange={setSearchInput}
+            onSearch={handleSearch}
             placeholderKey="common.searchPlaceholder"
             className="flex-1"
             searchKey="name"

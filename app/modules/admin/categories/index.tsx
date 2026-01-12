@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "@/i18n";
 import { useRole } from "@/hooks/useRole";
 import { PageHeader } from "@/components/page-header";
@@ -13,9 +14,14 @@ export default function AdminCategories() {
   const { t } = useTranslation();
   const { getNamespaceRoles } = useRole();
   const { openSheet } = useCategoriesStore();
+  const [clearFilters, setClearFilters] = useState<(() => void) | null>(null);
 
   // Get roles for categories namespace
   const roles = getNamespaceRoles(RESOURCES.CATEGORY);
+
+  const handleClearFiltersReady = (clearFiltersFn: () => void) => {
+    setClearFilters(() => clearFiltersFn);
+  };
 
   return (
     <Container>
@@ -35,10 +41,13 @@ export default function AdminCategories() {
           )}
         </CardHeader>
         <CardContent>
-          <CategoriesList roles={roles} />
+          <CategoriesList
+            roles={roles}
+            onClearFiltersReady={handleClearFiltersReady}
+          />
         </CardContent>
       </Card>
-      <CategoryForm />
+      <CategoryForm onClearFilters={clearFilters} />
     </Container>
   );
 }
