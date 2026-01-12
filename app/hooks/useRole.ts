@@ -1,47 +1,68 @@
 import { useAuth } from "./useAuth";
-import type { UserRole } from "@/types/auth";
-import { ROLES } from "@/constants";
+import {
+  hasPermission as checkPermission,
+  hasAnyPermission as checkAnyPermission,
+  hasAllPermissions as checkAllPermissions,
+} from "@/lib/permissions";
+import { PERMISSIONS, buildPermission, ACTIONS } from "@/constants/permissions";
 
 /**
- * Hook to check user roles and permissions
+ * Hook to check user permissions (RBAC)
  */
 export function useRole() {
   const { user } = useAuth();
 
   /**
-   * Check if user has a specific role
+   * Check if user has a specific permission
+   * @param permission - Permission in format "resource::action"
    */
-  const hasRole = (role: UserRole): boolean => {
-    return user?.role === role;
+  const hasPermission = (permission: string): boolean => {
+    return checkPermission(user?.permissions, permission);
   };
 
   /**
-   * Check if user has any of the specified roles
+   * Check if user has any of the specified permissions
+   * @param permissions - Array of permissions
    */
-  const hasAnyRole = (roles: UserRole[]): boolean => {
-    return roles.some((role) => user?.role === role);
+  const hasAnyPermission = (permissions: string[]): boolean => {
+    return checkAnyPermission(user?.permissions, permissions);
   };
 
   /**
-   * Check if user is admin
+   * Check if user has all of the specified permissions
+   * @param permissions - Array of permissions
+   */
+  const hasAllPermissions = (permissions: string[]): boolean => {
+    return checkAllPermissions(user?.permissions, permissions);
+  };
+
+  /**
+   * Check if user is admin (has *::* permission)
    */
   const isAdmin = (): boolean => {
-    return user?.role === ROLES.ADMIN;
+    return checkPermission(user?.permissions, PERMISSIONS.FULL_ACCESS);
   };
 
   /**
-   * Check if user is regular user
+   * Check if user can access admin pages
+   * @param resource - Resource name (e.g., "category", "test")
    */
-  const isUser = (): boolean => {
-    return user?.role === ROLES.USER;
+  const canAccessAdmin = (resource?: string): boolean => {
+    if (isAdmin()) return true;
+    if (!resource) return false;
+    return checkPermission(
+      user?.permissions,
+      buildPermission(resource, ACTIONS.ADMIN_READ)
+    );
   };
 
   return {
     user,
-    role: user?.role,
-    hasRole,
-    hasAnyRole,
+    permissions: user?.permissions || [],
+    hasPermission,
+    hasAnyPermission,
+    hasAllPermissions,
     isAdmin,
-    isUser,
+    canAccessAdmin,
   };
 }

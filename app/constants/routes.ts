@@ -13,6 +13,7 @@ export const ROUTES = {
 
   //Admin routes
   ADMIN: {
+    INDEX: "/admin",
     CONTENT: "/content",
   },
 

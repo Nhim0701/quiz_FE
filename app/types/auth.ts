@@ -61,11 +61,6 @@ export interface AuthResponse {
 }
 
 /**
- * User roles in the system
- */
-export type UserRole = "admin" | "user";
-
-/**
  * User data from API (already transformed to camelCase by axios interceptor)
  */
 export interface User {
@@ -73,7 +68,7 @@ export interface User {
   userId: string;
   fullName: string;
   email: string;
-  role: UserRole;
+  permissions?: string[];
   phone?: string;
   birthday?: string;
   address?: string;

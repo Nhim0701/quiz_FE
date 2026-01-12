@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Edit, Lock } from "lucide-react";
 import useApp from "@/hooks/useApp";
-import { useMe } from "@/hooks/useMe";
+import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "@/i18n";
 import { PageHeader } from "@/components/page-header";
 import { Container } from "@/components/ui/container";
@@ -12,23 +12,20 @@ import { ChangePasswordModal } from "./components/change-password-modal";
 export default function Profile() {
   const { setLoading, showError } = useApp();
   const { t } = useTranslation();
-  const { getDashboard } = useMe();
+  const { getCurrentUser } = useAuth();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
       try {
-        await getDashboard();
+        await getCurrentUser(setLoading);
       } catch (error) {
         const errorMessage =
           error instanceof Error
             ? error.message
-            : t("errors.fetchDashboardFailed");
+            : t("errors.fetchUserFailed");
         showError(errorMessage);
-      } finally {
-        setLoading(false);
       }
     };
 

@@ -1,12 +1,14 @@
 import { redirect } from "react-router";
+import type { Route } from "../modules/+types/_layout";
 import { useAuthStoreInternal } from "@/hooks/useAuth";
-import { ROLES, ROUTES } from "@/constants";
+import { ROUTES, PERMISSIONS } from "@/constants";
+import { hasPermission } from "@/lib/permissions";
 
 /**
  * Middleware to protect admin-only routes
  * Redirects to home if user is not an admin
  */
-export async function adminMiddleware() {
+const adminMiddleware: Route.ClientMiddlewareFunction = async () => {
   const { user } = useAuthStoreInternal.getState();
 
   // Check if user is logged in
@@ -14,10 +16,10 @@ export async function adminMiddleware() {
     throw redirect(ROUTES.LOGIN);
   }
 
-  // Check if user is admin
-  if (user.role !== ROLES.ADMIN) {
+  // Check if user has admin permission (*::*)
+  if (!hasPermission(user.permissions, PERMISSIONS.FULL_ACCESS)) {
     throw redirect(ROUTES.HOME);
   }
+};
 
-  return null;
-}
+export default adminMiddleware;

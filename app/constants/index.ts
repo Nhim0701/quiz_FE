@@ -8,3 +8,4 @@ export * from "./ui";
 export * from "./time";
 export * from "./error";
 export * from "./roles";
+export * from "./permissions";
