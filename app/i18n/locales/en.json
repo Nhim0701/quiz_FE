@@ -56,48 +56,6 @@
     "noResultData": "No result data. Please start a test from your profile.",
     "noQuestions": "No questions found for this test type."
   },
-  "ui": {
-    "buttons": {
-      "backToDashboard": "Back to Dashboard",
-      "takeAnotherTest": "Take Another Test",
-      "finishTest": "Finish Test",
-      "submitting": "Submitting...",
-      "previous": "Previous",
-      "prev": "Prev",
-      "next": "Next",
-      "flag": "Flag"
-    },
-    "headers": {
-      "testCompleted": "Test Completed!",
-      "yourAnswers": "Your Answers",
-      "progress": "Progress",
-      "questions": "Questions"
-    },
-    "status": {
-      "answered": "Answered",
-      "flagged": "Flagged",
-      "notAnswered": "Not answered",
-      "multipleAnswers": "Multiple Answers"
-    },
-    "explanation": {
-      "show": "Show Explanation",
-      "hide": "Hide Explanation",
-      "title": "Explanation"
-    }
-  },
-  "test": {
-    "question": "Question {{current}} of {{total}}",
-    "timeRemaining": "Time Remaining"
-  },
-  "result": {
-    "wrong": "Wrong",
-    "quiz": "Quiz",
-    "review": {
-      "correct": "Correct",
-      "incorrect": "Incorrect",
-      "answer": "Answer"
-    }
-  },
   "sidebar": {
     "dashboard": "Dashboard",
     "tests": "Tests",
@@ -115,16 +73,6 @@
   },
   "breadcrumb": {
     "home": "Home"
-  },
-  "tests": {
-    "availableTests": "Available Tests",
-    "noTestsAvailable": "No tests available",
-    "addQuestionsFirst": "Please add questions to the database first",
-    "totalQuestions": "total questions",
-    "questions": "questions",
-    "questionsLabel": "Questions",
-    "startTest": "Start Test",
-    "noTests": "No tests available"
   },
   "notFound": {
     "title": "Page Not Found",

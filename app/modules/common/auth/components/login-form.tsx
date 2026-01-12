@@ -7,9 +7,9 @@ import { FormField } from "@/components/common/form-field";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useTranslation } from "@/i18n";
 import { loginSchema, type LoginFormData } from "../schemas/login-schema";
-import useApp from "~/hooks/useApp";
+import useApp from "@/hooks/use-app";
 import { useState } from "react";
-import { useAuth } from "~/modules/common/auth/hooks/useAuth";
+import { useAuth } from "@/modules/common/auth/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 
 interface LoginFormProps {

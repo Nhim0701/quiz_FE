@@ -1,6 +1,6 @@
 import { redirect } from "react-router";
 import type { Route } from "../modules/+types/_layout";
-import { useAuthStoreInternal } from "~/modules/common/auth/hooks/useAuth";
+import { useAuthStoreInternal } from "@/modules/common/auth/hooks/use-auth";
 import {
   ROUTES,
   PERMISSIONS,

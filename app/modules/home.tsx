@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { tokenManager } from "@/lib/api";
-import { useAuthStoreInternal } from "@/modules/common/auth/hooks/useAuth";
+import { useAuthStoreInternal } from "@/modules/common/auth/hooks/use-auth";
 import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
 import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/dashboard/constants";
 

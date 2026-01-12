@@ -6,8 +6,8 @@ import {
   FolderTree,
 } from "lucide-react";
 import { useTranslation } from "@/i18n";
-import { useAuth } from "@/modules/common/auth/hooks/useAuth";
-import { useRole } from "@/modules/common/auth/hooks/useRole";
+import { useAuth } from "@/modules/common/auth/hooks/use-auth";
+import { useRole } from "@/modules/common/auth/hooks/use-role";
 import { useNavigate, useLocation, Link } from "react-router";
 import { ROUTES } from "@/constants";
 import { COMMON_PERMISSIONS, RESOURCES } from "@/constants/permissions";

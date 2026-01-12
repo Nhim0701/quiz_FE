@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "@/i18n";
-import { useTestStore } from "~/modules/user/tests/modules/$testId/hooks/store";
+import { useTestStore } from "../hooks";
 import { useNavigate, useParams } from "react-router";
-import { ROUTES } from "@/constants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -127,11 +126,13 @@ function TestSidebarContent() {
               }
 
               let variant: "default" | "secondary" | "outline" = "outline";
-              let className = "bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300";
-              
+              let className =
+                "bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300";
+
               if (isCurrentQ) {
                 variant = "default";
-                className = "bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600";
+                className =
+                  "bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600";
               } else if (isQuestionRevealed && hasAnswer) {
                 variant = "secondary";
                 className = isCorrect
@@ -139,7 +140,8 @@ function TestSidebarContent() {
                   : "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/70";
               } else if (hasAnswer) {
                 variant = "secondary";
-                className = "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/70";
+                className =
+                  "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/70";
               }
 
               return (
@@ -183,7 +185,10 @@ export function TestSidebar() {
               <Menu className="h-6 w-6" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-full sm:max-w-sm overflow-y-auto">
+          <SheetContent
+            side="right"
+            className="w-full sm:max-w-sm overflow-y-auto"
+          >
             <SheetHeader>
               <SheetTitle>{t("ui.headers.progress")}</SheetTitle>
             </SheetHeader>

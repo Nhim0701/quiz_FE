@@ -12,13 +12,13 @@ import {
   SheetDescription,
   SheetFooter,
 } from "@/components/ui/sheet";
-import useApp from "@/hooks/useApp";
+import useApp from "@/hooks/use-app";
 import {
   categorySchema,
   type CategoryFormData,
 } from "../schemas/category-schema";
-import { useCategoriesStore } from "@/hooks/useCategories";
-import { usePaginationStore } from "@/hooks/usePagination";
+import { useCategoriesStore } from "@/hooks/use-categories";
+import { usePaginationStore } from "@/hooks/use-pagination";
 import { Loader2 } from "lucide-react";
 
 interface CategoryFormProps {

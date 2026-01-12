@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { useTranslation } from "@/i18n";
-import useApp from "@/hooks/useApp";
+import useApp from "@/hooks/use-app";
 import type { ApiSuccessResponse } from "@/types";
 import apiClient from "@/lib/axios";
 import { PROFILE_API_ENDPOINTS } from "../constants";

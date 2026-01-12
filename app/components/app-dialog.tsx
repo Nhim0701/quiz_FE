@@ -6,7 +6,7 @@ import {
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import useApp from "@/hooks/useApp";
+import useApp from "@/hooks/use-app";
 
 export function AppDialog() {
   const {

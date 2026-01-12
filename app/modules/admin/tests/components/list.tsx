@@ -7,11 +7,11 @@ import {
   type Column,
   type Action,
 } from "@/components/common/data-table";
-import { usePaginationStore } from "@/hooks/usePagination";
-import { useTestsStore, type TestProps } from "@/hooks/useTests";
-import { useCategoriesStore } from "@/hooks/useCategories";
+import { usePaginationStore } from "@/hooks/use-pagination";
+import { useTestsStore, type TestProps } from "@/hooks/use-tests";
+import { useCategoriesStore } from "@/hooks/use-categories";
 import { Eye, Trash2 } from "lucide-react";
-import useApp from "@/hooks/useApp";
+import useApp from "@/hooks/use-app";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -37,7 +37,7 @@ import {
   FilterManager,
   createStringFilterHandler,
   createArrayFilterHandler,
-} from "@/hooks/useFilter";
+} from "@/hooks/use-filter";
 
 interface TestsListProps {
   roles: {

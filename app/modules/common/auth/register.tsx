@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { useAuth, type RegisterFormData } from "~/modules/common/auth/hooks/useAuth";
-import useApp from "@/hooks/useApp";
+import { useAuth, type RegisterFormData } from "@/modules/common/auth/hooks/use-auth";
+import useApp from "@/hooks/use-app";
 import { useTranslation } from "@/i18n";
 import {
   RegisterHeader,

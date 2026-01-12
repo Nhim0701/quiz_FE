@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "@/i18n";
-import { useResultStore } from "@/hooks/useResult";
+import { useResultStore } from "@/hooks/use-result";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {

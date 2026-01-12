@@ -1,0 +1,54 @@
+{
+  "test": {
+    "question": "Câu hỏi {{current}} / {{total}}",
+    "timeRemaining": "Thời gian còn lại"
+  },
+  "result": {
+    "wrong": "Sai",
+    "quiz": "Bài Kiểm Tra",
+    "review": {
+      "correct": "Đúng",
+      "incorrect": "Sai",
+      "answer": "Câu trả lời"
+    }
+  },
+  "tests": {
+    "availableTests": "Bài Kiểm Tra Có Sẵn",
+    "noTestsAvailable": "Không có bài kiểm tra nào",
+    "addQuestionsFirst": "Vui lòng thêm câu hỏi vào cơ sở dữ liệu trước",
+    "totalQuestions": "tổng câu hỏi",
+    "questions": "câu hỏi",
+    "questionsLabel": "Câu hỏi",
+    "startTest": "Bắt Đầu Bài Kiểm Tra",
+    "noTests": "Không có bài kiểm tra nào"
+  },
+  "ui": {
+    "buttons": {
+      "backToDashboard": "Quay lại Bảng Điều Khiển",
+      "takeAnotherTest": "Làm Bài Kiểm Tra Khác",
+      "finishTest": "Hoàn Thành Bài Kiểm Tra",
+      "submitting": "Đang gửi...",
+      "previous": "Trước",
+      "prev": "Trước",
+      "next": "Tiếp",
+      "flag": "Đánh Dấu"
+    },
+    "headers": {
+      "testCompleted": "Hoàn Thành Bài Kiểm Tra!",
+      "yourAnswers": "Câu Trả Lời Của Bạn",
+      "progress": "Tiến Độ",
+      "questions": "Câu Hỏi"
+    },
+    "status": {
+      "answered": "Đã trả lời",
+      "flagged": "Đã đánh dấu",
+      "notAnswered": "Chưa trả lời",
+      "multipleAnswers": "Nhiều câu trả lời"
+    },
+    "explanation": {
+      "show": "Hiển thị Giải thích",
+      "hide": "Ẩn Giải thích",
+      "title": "Giải thích"
+    }
+  }
+}

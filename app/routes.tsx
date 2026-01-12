@@ -9,6 +9,7 @@ import { ROUTES } from "./constants";
 import { ROUTES as AUTH_ROUTES } from "./modules/common/auth/constants";
 import { ROUTES as DASHBOARD_ROUTES } from "./modules/user/dashboard/constants";
 import { ROUTES as PROFILE_ROUTES } from "./modules/user/profile/constants";
+import { ROUTES as TESTS_ROUTES } from "./modules/user/tests/constants";
 
 export default [
   index("modules/home.tsx"),
@@ -23,18 +24,18 @@ export default [
     route(DASHBOARD_ROUTES.INDEX, "modules/user/dashboard/index.tsx"),
 
     // Tests routes
-    ...prefix(ROUTES.TESTS.INDEX, [
+    ...prefix(TESTS_ROUTES.INDEX, [
       index("modules/user/tests/index.tsx"),
 
-      ...prefix(ROUTES.TESTS.TEST_ID, [
-        index("modules/user/tests/modules/$testId/index.tsx"),
+      ...prefix(TESTS_ROUTES.TEST_ID, [
+        index("modules/user/tests/routes/$testId/index.tsx"),
         route(
-          ROUTES.TESTS.TAKE(),
-          "modules/user/tests/modules/$testId/take.tsx"
+          TESTS_ROUTES.TAKE(),
+          "modules/user/tests/routes/$testId/take.tsx"
         ),
         route(
-          ROUTES.TESTS.RESULT(),
-          "modules/user/tests/modules/$testId/result.tsx"
+          TESTS_ROUTES.RESULT(),
+          "modules/user/tests/routes/$testId/result.tsx"
         ),
       ]),
     ]),

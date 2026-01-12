@@ -2,7 +2,7 @@
 import { jwtDecode, type JwtPayload } from "jwt-decode";
 import { toast } from "sonner";
 import { API_ENDPOINTS, SESSION_KEYS, STORAGE_KEYS } from "@/constants";
-import { useAuthStoreInternal } from "@/modules/common/auth/hooks/useAuth";
+import { useAuthStoreInternal } from "@/modules/common/auth/hooks/use-auth";
 import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
 import { t } from "@/i18n/utils";
 import type { ApiSuccessResponse } from "@/types";

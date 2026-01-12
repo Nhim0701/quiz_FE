@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { useTranslation } from "@/i18n";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { TestProps } from "@/hooks/useTests";
+import type { TestProps } from "@/hooks/use-tests";
 
 interface TestCardProps {
   test: TestProps;

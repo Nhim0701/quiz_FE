@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Edit, Lock } from "lucide-react";
-import { useBreadcrumb } from "@/hooks/useApp";
-import { usePageData } from "@/hooks/usePageData";
+import { useBreadcrumb } from "@/hooks/use-breadcrumb";
+import { usePageData } from "@/hooks/use-page-data";
 import { PageHeader } from "@/components/page-header";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
@@ -15,12 +15,15 @@ export default function Profile() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
-  useBreadcrumb([
-    {
-      label: t("sidebar.profile"),
-      href: ROUTES.INDEX,
-    },
-  ]);
+  useBreadcrumb(
+    [
+      {
+        label: t("sidebar.profile"),
+        href: ROUTES.INDEX,
+      },
+    ],
+    [t]
+  );
 
   usePageData(() => getCurrentUser(setLoading), "errors.fetchUserFailed", []);
 

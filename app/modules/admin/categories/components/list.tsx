@@ -7,10 +7,10 @@ import {
   type Column,
   type Action,
 } from "@/components/common/data-table";
-import { usePaginationStore } from "@/hooks/usePagination";
-import { useCategoriesStore, type Category } from "@/hooks/useCategories";
+import { usePaginationStore } from "@/hooks/use-pagination";
+import { useCategoriesStore, type Category } from "@/hooks/use-categories";
 import { Edit, Trash2 } from "lucide-react";
-import useApp from "@/hooks/useApp";
+import useApp from "@/hooks/use-app";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -31,7 +31,7 @@ import {
   useSyncFilterToUrl,
   useApplyFilterFromUrl,
   FilterManager,
-} from "@/hooks/useFilter";
+} from "@/hooks/use-filter";
 
 interface CategoriesListProps {
   roles: {

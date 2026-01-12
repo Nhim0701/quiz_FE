@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "@/i18n";
-import { useRole } from "~/modules/common/auth/hooks/useRole";
+import { useRole } from "@/modules/common/auth/hooks/use-role";
 import { RESOURCES } from "@/constants/permissions";
 import { useAdminLayout } from "../_layout";
 import { TestsList, TestForm } from "./components";

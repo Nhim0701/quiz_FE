@@ -1,9 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router";
-import { useTestStore } from "./hooks/store";
-import { TIME_CONSTANTS, ROUTES } from "@/constants";
+import { useTestStore, useTestStoreState } from "../../hooks";
+import { TIME_CONSTANTS, ROUTES } from "../../constants";
 import { useTranslation } from "@/i18n";
-import { TestHeader, TestQuestion, TestSidebar, TestEmpty } from "./components";
+import { useBreadcrumb } from "@/hooks/use-breadcrumb";
+import { useTestsStore, type TestProps } from "@/hooks/use-tests";
+import {
+  TestHeader,
+  TestQuestion,
+  TestSidebar,
+  TestEmpty,
+} from "../../components";
 
 export default function Test() {
   const { testId } = useParams<{ testId: string }>();
@@ -12,7 +19,6 @@ export default function Test() {
   const {
     questions,
     timeStarted,
-    timeRemaining,
     loading,
     fetchAndInitializeTest,
     finishTest,
@@ -20,6 +26,13 @@ export default function Test() {
     startTimer,
     setLoading,
   } = useTestStore();
+  const getTestById = useTestsStore((state) => state.getTestById);
+
+  // Initialize test from cache immediately if available
+  const { testsById } = useTestsStore.getState();
+  const [test, setTest] = useState<TestProps | null>(
+    testId ? testsById[testId] || null : null
+  );
 
   // Use ref to store the latest finishTest callback
   const finishTestRef = useRef(finishTest);
@@ -27,9 +40,63 @@ export default function Test() {
     finishTestRef.current = finishTest;
   }, [finishTest]);
 
+  // Fetch test data for breadcrumb - fetch if not in cache
   useEffect(() => {
     if (!testId) {
-      navigate(ROUTES.TESTS.INDEX, { replace: true });
+      setTest(null);
+      return;
+    }
+
+    // If already have test data, don't fetch again
+    if (test && test.id === testId) {
+      return;
+    }
+
+    // Check cache again (in case it was updated)
+    const currentCache = useTestsStore.getState().testsById;
+    if (currentCache[testId]) {
+      setTest(currentCache[testId]);
+      return;
+    }
+
+    // Fetch from API if not in cache
+    getTestById(testId)
+      .then((testData) => {
+        if (testData) {
+          setTest(testData);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to fetch test for breadcrumb:", error);
+      });
+  }, [testId, getTestById, test]);
+
+  // Memoize breadcrumbs to prevent unnecessary re-renders
+  const breadcrumbs = useMemo(() => {
+    const baseBreadcrumb = {
+      label: t("sidebar.tests"),
+      href: ROUTES.INDEX,
+    };
+
+    if (test && testId && test.name) {
+      return [
+        baseBreadcrumb,
+        {
+          label: test.name,
+          href: ROUTES.TAKE(testId),
+        },
+      ];
+    }
+
+    return [baseBreadcrumb];
+  }, [test, testId, t]);
+
+  // Set breadcrumbs
+  useBreadcrumb(breadcrumbs, [test?.id, test?.name, testId, t]);
+
+  useEffect(() => {
+    if (!testId) {
+      navigate(ROUTES.INDEX, { replace: true });
       return;
     }
 
@@ -43,7 +110,7 @@ export default function Test() {
     if (!timeStarted || loading || questions.length === 0) return;
 
     const interval = setInterval(() => {
-      const { timeRemaining: currentTime } = useTestStore.getState();
+      const { timeRemaining: currentTime } = useTestStoreState.getState();
       if (currentTime <= 1) {
         clearInterval(interval);
         setTimeRemaining(0);
@@ -72,7 +139,7 @@ export default function Test() {
   }, [loading, questions.length, startTimer]);
 
   if (!questions.length) {
-    return <TestEmpty onBack={() => navigate(ROUTES.TESTS.INDEX)} />;
+    return <TestEmpty onBack={() => navigate(ROUTES.INDEX)} />;
   }
 
   return (

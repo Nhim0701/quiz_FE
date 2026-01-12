@@ -1,4 +1,4 @@
-import type { AnswerProps } from "./useAnswers";
+import type { AnswerProps } from "./use-answers";
 
 export interface QuestionProps {
   id: string;

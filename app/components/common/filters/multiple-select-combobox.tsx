@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { FILTER_COLOR_PALETTE } from "@/constants/filters";
-import type { FilterColorKey } from "@/hooks/useFilter";
+import type { FilterColorKey } from "@/hooks/use-filter";
 
 // Darker color palette for badges inside combobox
 const BADGE_COLOR_PALETTE: Record<string, string> = {

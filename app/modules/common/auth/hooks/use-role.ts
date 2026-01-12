@@ -1,4 +1,4 @@
-import { useAuth } from "./useAuth";
+import { useAuth } from "./use-auth";
 import {
   hasPermission as checkPermission,
   hasAnyPermission as checkAnyPermission,

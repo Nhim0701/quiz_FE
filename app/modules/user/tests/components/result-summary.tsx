@@ -1,9 +1,9 @@
 import { CheckCircle } from "lucide-react";
 import { useTranslation } from "@/i18n";
-import { useResultStore } from "@/hooks/useResult";
+import { useResultStore } from "@/hooks/use-result";
 import { useNavigate } from "react-router";
-import { ROUTES } from "@/constants";
-import { Card, CardContent } from "@/components/ui/card";
+import { ROUTES as TESTS_ROUTES } from "../constants";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export function ResultSummary() {
@@ -21,11 +21,11 @@ export function ResultSummary() {
   const accuracyPercentage = getAccuracyPercentage();
 
   const handleBack = () => {
-    navigate(ROUTES.DASHBOARD);
+    navigate(TESTS_ROUTES.INDEX);
   };
 
   const handleRetake = () => {
-    navigate(ROUTES.TESTS.TAKE(summary.testType));
+    navigate(TESTS_ROUTES.TAKE(summary.testType));
   };
   const completionPercentage = Math.round(
     (summary.answered / summary.total) * 100
@@ -105,10 +105,7 @@ export function ResultSummary() {
         >
           {t("ui.buttons.backToDashboard")}
         </Button>
-        <Button
-          onClick={handleRetake}
-          variant="outline"
-        >
+        <Button onClick={handleRetake} variant="outline">
           {t("ui.buttons.takeAnotherTest")}
         </Button>
       </div>

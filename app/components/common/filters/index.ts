@@ -10,4 +10,4 @@ export type {
   ActiveFilter,
   FilterIdsConfig,
   FilterColorKey,
-} from "@/hooks/useFilter";
+} from "@/hooks/use-filter";

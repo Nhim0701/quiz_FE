@@ -5,11 +5,12 @@ import {
   useEffect,
   useCallback,
   useRef,
+  useMemo,
   type ReactNode,
 } from "react";
 import { useTranslation, type TranslationKey } from "@/i18n";
-import { useBreadcrumb } from "@/hooks/useApp";
-import { useRole } from "~/modules/common/auth/hooks/useRole";
+import { useBreadcrumb } from "@/hooks/use-breadcrumb";
+import { useRole } from "@/modules/common/auth/hooks/use-role";
 import { ROUTES } from "@/constants";
 import { RESOURCES } from "@/constants/permissions";
 import { PageHeader } from "@/components/page-header";
@@ -73,19 +74,24 @@ export default function Layout() {
       ? "sidebar.admin.categories"
       : "sidebar.admin.tests";
 
-  useBreadcrumb([
-    {
-      label: t("sidebar.admin.index"),
-      href: ROUTES.ADMIN.INDEX,
-    },
-    {
-      label: t(breadcrumbLabel),
-      href:
-        resource === RESOURCES.CATEGORY
-          ? ROUTES.ADMIN.CATEGORIES
-          : ROUTES.ADMIN.TESTS,
-    },
-  ]);
+  const breadcrumbs = useMemo(
+    () => [
+      {
+        label: t("sidebar.admin.index"),
+        href: ROUTES.ADMIN.INDEX,
+      },
+      {
+        label: t(breadcrumbLabel),
+        href:
+          resource === RESOURCES.CATEGORY
+            ? ROUTES.ADMIN.CATEGORIES
+            : ROUTES.ADMIN.TESTS,
+      },
+    ],
+    [t, breadcrumbLabel, resource]
+  );
+
+  useBreadcrumb(breadcrumbs, [t, breadcrumbLabel, resource]);
 
   // Reset config when route changes (but not on initial mount)
   const prevPathnameRef = useRef<string | null>(null);

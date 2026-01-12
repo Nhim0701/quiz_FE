@@ -10,7 +10,7 @@ interface TestEmptyProps {
 export function TestEmpty({ onBack }: TestEmptyProps) {
   const { t } = useTranslation();
   return (
-    <div className="flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="flex items-center justify-center bg-gradient-to-br">
       <Card className="p-8 shadow-lg text-center max-w-md">
         <CardContent className="p-0">
           <FileText className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />

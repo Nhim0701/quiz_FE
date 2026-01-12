@@ -1,2 +1,2 @@
-export { useAuth, useAuthStoreInternal } from "./useAuth";
-export { useRole } from "./useRole";
+export { useAuth, useAuthStoreInternal } from "./use-auth";
+export { useRole } from "./use-role";

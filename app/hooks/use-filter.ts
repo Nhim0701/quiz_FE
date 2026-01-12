@@ -5,8 +5,8 @@ import {
   FILTER_ACTION_IDS,
   FILTER_ACTION_CLASSES,
   FILTER_QUERY_PARAMS,
-} from "~/constants";
-import type { FilterAction } from "~/components/common/filters";
+} from "@/constants";
+import type { FilterAction } from "@/components/common/filters";
 import { camelToSnake } from "@/lib/case-converter";
 
 // ============================================================================

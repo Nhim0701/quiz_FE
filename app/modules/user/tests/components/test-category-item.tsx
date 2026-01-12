@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useTranslation } from "@/i18n";
-import { type Category } from "@/hooks/useCategories";
-import { useTestsStore } from "@/hooks/useTests";
+import { type Category } from "@/hooks/use-categories";
+import { useTestsStore } from "@/hooks/use-tests";
 import {
   AccordionItem,
   AccordionTrigger,

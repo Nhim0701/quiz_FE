@@ -1,7 +1,7 @@
 import { Navigate, useParams } from "react-router";
-import { ROUTES } from "@/constants";
+import { ROUTES } from "../../constants";
 
 export default function Test() {
   const { testId } = useParams<{ testId: string }>();
-  return <Navigate to={ROUTES.TESTS.TAKE(testId)} replace />;
+  return <Navigate to={ROUTES.TAKE(testId)} replace />;
 }

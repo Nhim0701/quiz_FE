@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { Clock, X } from "lucide-react";
 import { useTranslation } from "@/i18n";
-import { useTestStore } from "~/modules/user/tests/modules/$testId/hooks/store";
+import { useTestStore } from "../hooks";
 import {
   useTestsStore,
   type TestProps,
-} from "@/hooks/useTests";
+} from "@/hooks/use-tests";
 import { useNavigate, useParams } from "react-router";
-import { ROUTES } from "@/constants";
+import { ROUTES } from "../constants";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,7 +35,7 @@ export function TestHeader() {
   }, [testId, getTestById]);
 
   const handleClose = () => {
-    navigate(ROUTES.TESTS.INDEX);
+    navigate(ROUTES.INDEX);
   };
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

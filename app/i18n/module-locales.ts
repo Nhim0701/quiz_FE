@@ -8,6 +8,7 @@
 import authEnLocales from "../modules/common/auth/locales/en.json";
 import dashboardEnLocales from "../modules/user/dashboard/locales/en.json";
 import profileEnLocales from "../modules/user/profile/locales/en.json";
+import testsEnLocales from "../modules/user/tests/locales/en.json";
 
 /**
  * Type definition for all module locales
@@ -17,6 +18,7 @@ export type ModuleLocales = {
   auth: typeof authEnLocales;
   dashboard: typeof dashboardEnLocales;
   profile: typeof profileEnLocales;
+  tests: typeof testsEnLocales;
 };
 
 /**
@@ -66,7 +68,7 @@ const extractModuleName = (path: string): string => {
 /**
  * Merge all module locales into a single object
  * @param localeFiles - Object with paths as keys and locale data as values
- * @returns Merged locales object with module names as keys
+ * @returns Merged locales object with module names as keys, or flattened for tests module
  */
 const mergeModuleLocales = (
   localeFiles: Record<string, Record<string, any>>
@@ -76,7 +78,15 @@ const mergeModuleLocales = (
   for (const [path, localeData] of Object.entries(localeFiles)) {
     const moduleName = extractModuleName(path);
     if (moduleName) {
-      merged[moduleName] = localeData;
+      // For tests module, flatten the locales (spread contents directly)
+      // because the JSON already has nested structure (test, tests, ui, result)
+      // Other modules keep their namespace structure
+      if (moduleName === "tests") {
+        // Spread the contents of tests locale directly into merged object
+        Object.assign(merged, localeData);
+      } else {
+        merged[moduleName] = localeData;
+      }
     }
   }
 

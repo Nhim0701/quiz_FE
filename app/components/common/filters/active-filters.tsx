@@ -5,7 +5,7 @@ import type {
   ActiveFilter,
   FilterIdsConfig,
   FilterColorKey,
-} from "@/hooks/useFilter";
+} from "@/hooks/use-filter";
 import { FILTER_PATTERNS, FILTER_COLOR_PALETTE } from "@/constants/filters";
 
 interface ActiveFiltersProps {

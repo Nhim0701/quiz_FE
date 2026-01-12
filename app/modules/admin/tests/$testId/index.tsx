@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useTranslation } from "@/i18n";
-import { useRole } from "~/modules/common/auth/hooks/useRole";
+import { useRole } from "@/modules/common/auth/hooks/use-role";
 import { RESOURCES } from "@/constants/permissions";
 import { ROUTES } from "@/constants";
 import { useAdminLayout } from "../../_layout";
-import { useTestsStore, type TestProps } from "@/hooks/useTests";
-import { useCategoriesStore } from "@/hooks/useCategories";
+import { useTestsStore, type TestProps } from "@/hooks/use-tests";
+import { useCategoriesStore } from "@/hooks/use-categories";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Loading } from "@/components/ui/loading";
+import Loading from "@/components/ui/loading";
 import {
   FileText,
   FolderTree,
@@ -21,7 +21,8 @@ import {
   List,
 } from "lucide-react";
 import { formatUnixTimestamp } from "@/lib/utils";
-import useApp, { useBreadcrumb } from "@/hooks/useApp";
+import useApp from "@/hooks/use-app";
+import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 
 export default function AdminTestInfo() {
   const { t } = useTranslation();
@@ -86,9 +87,7 @@ export default function AdminTestInfo() {
         setTest(testData);
       } catch (error) {
         const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t("errors.genericError");
+          error instanceof Error ? error.message : t("errors.genericError");
         showError(errorMessage);
       } finally {
         setLoading(false);
@@ -114,7 +113,10 @@ export default function AdminTestInfo() {
   );
 
   const categoryName =
-    test?.categoryName || categoryMap.get(test?.categoryId || "") || test?.categoryId || "-";
+    test?.categoryName ||
+    categoryMap.get(test?.categoryId || "") ||
+    test?.categoryId ||
+    "-";
 
   if (!roles.read) {
     return (

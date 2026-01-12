@@ -1,5 +1,5 @@
-import { useBreadcrumb } from "@/hooks/useApp";
-import { usePageData } from "@/hooks/usePageData";
+import { useBreadcrumb } from "@/hooks/use-breadcrumb";
+import { usePageData } from "@/hooks/use-page-data";
 import { useTranslation } from "@/i18n";
 import { ROUTES } from "./constants";
 import { PageHeader } from "@/components/page-header";
@@ -11,12 +11,15 @@ export default function Dashboard() {
   const { t } = useTranslation();
   const { getDashboard } = useDashboard();
 
-  useBreadcrumb([
-    {
-      label: t("sidebar.dashboard"),
-      href: ROUTES.DASHBOARD,
-    },
-  ]);
+  useBreadcrumb(
+    [
+      {
+        label: t("sidebar.dashboard"),
+        href: ROUTES.INDEX,
+      },
+    ],
+    [t]
+  );
 
   usePageData(() => getDashboard(), "errors.fetchDashboardFailed", []);
 
