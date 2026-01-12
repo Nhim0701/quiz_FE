@@ -28,14 +28,8 @@ export function LoginCard({ children }: LoginCardProps) {
         </div>
 
         {/* Register Link */}
-        <Button
-          asChild
-          variant="outline"
-          className="w-full"
-        >
-          <Link to="/register">
-            {t("auth.login.createAccount")}
-          </Link>
+        <Button asChild variant="outline" className="w-full">
+          <Link to="/register">{t("auth.login.createAccount")}</Link>
         </Button>
       </CardContent>
     </Card>

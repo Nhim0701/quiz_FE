@@ -1,7 +1,9 @@
 import enTranslations from "./locales/en.json";
+import type { ModuleLocales } from "./module-locales-types";
 
-// Extract the translation keys type from the English translations
-type TranslationKeys = typeof enTranslations;
+// Merge base translations with module locales for type-safety
+// Extract the translation keys type from the merged English translations
+type TranslationKeys = typeof enTranslations & ModuleLocales;
 
 // Helper type to convert nested object to dot-notation paths
 type NestedKeyOf<ObjectType extends object> = {
@@ -66,4 +68,21 @@ export type SupportedLanguage = "en" | "vi";
 export type Resources = {
   en: { translation: typeof enTranslations };
   vi: { translation: typeof enTranslations };
+};
+
+/**
+ * Type-safe imports for all module locales
+ * This file is used for TypeScript type inference only
+ * Import all module locale files here to ensure type-safety
+ */
+
+// Import module locales directly for type-safety
+import authEnLocales from "../modules/common/auth/locales/en.json";
+
+/**
+ * Type definition for all module locales
+ * Add new module imports above and merge them here
+ */
+export type ModuleLocales = {
+  auth: typeof authEnLocales;
 };

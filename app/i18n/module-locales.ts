@@ -1,0 +1,92 @@
+/**
+ * Type-safe imports for all module locales
+ * This file is used for TypeScript type inference only
+ * Import all module locale files here to ensure type-safety
+ */
+
+// Import module locales directly for type-safety
+import authEnLocales from "../modules/common/auth/locales/en.json";
+
+/**
+ * Type definition for all module locales
+ * Add new module imports above and merge them here
+ */
+export type ModuleLocales = {
+  auth: typeof authEnLocales;
+};
+
+/**
+ * Auto-import all module locales from modules that have locales folder
+ * Uses Vite's glob import to automatically discover and import locale files
+ * Supports nested structure: modules with locales subfolder
+ */
+
+// Auto-import all en.json files from module locales folders
+const moduleEnLocales = import.meta.glob<Record<string, any>>(
+  "../modules/**/locales/en.json",
+  { eager: true }
+);
+
+// Auto-import all vi.json files from module locales folders
+const moduleViLocales = import.meta.glob<Record<string, any>>(
+  "../modules/**/locales/vi.json",
+  { eager: true }
+);
+
+/**
+ * Convert kebab-case to camelCase
+ * Example: "reward-point" -> "rewardPoint"
+ */
+const kebabToCamel = (str: string): string => {
+  return str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+};
+
+/**
+ * Extract module name from path and convert to camelCase
+ * Supports nested structure with locales folder
+ * Example: "../modules/common/auth/locales/en.json" -> "auth" (takes last segment)
+ */
+const extractModuleName = (path: string): string => {
+  const match = path.match(/modules\/(.+)\/locales/);
+  if (match) {
+    const fullPath = match[1];
+    // Get the last segment (e.g., "common/auth" -> "auth")
+    const segments = fullPath.split("/");
+    const lastSegment = segments[segments.length - 1] || "";
+    return kebabToCamel(lastSegment);
+  }
+
+  return "";
+};
+
+/**
+ * Merge all module locales into a single object
+ * @param localeFiles - Object with paths as keys and locale data as values
+ * @returns Merged locales object with module names as keys
+ */
+const mergeModuleLocales = (
+  localeFiles: Record<string, Record<string, any>>
+): Record<string, Record<string, any>> => {
+  const merged: Record<string, Record<string, any>> = {};
+
+  for (const [path, localeData] of Object.entries(localeFiles)) {
+    const moduleName = extractModuleName(path);
+    if (moduleName) {
+      merged[moduleName] = localeData;
+    }
+  }
+
+  return merged;
+};
+
+/**
+ * Merged English locales from all modules
+ * Structure: { auth: {...}, dashboard: {...}, ... }
+ */
+export const moduleEnLocalesMerged = mergeModuleLocales(moduleEnLocales);
+
+/**
+ * Merged Vietnamese locales from all modules
+ * Structure: { auth: {...}, dashboard: {...}, ... }
+ */
+export const moduleViLocalesMerged = mergeModuleLocales(moduleViLocales);

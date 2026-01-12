@@ -3,6 +3,7 @@ import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import en from "./locales/en.json";
 import vi from "./locales/vi.json";
+import { moduleEnLocalesMerged, moduleViLocalesMerged } from "./module-locales";
 import type { Resources, SupportedLanguage } from "./types";
 
 /**
@@ -33,10 +34,16 @@ const normalizeLanguage = (lng: string): SupportedLanguage => {
 const initOptions: InitOptions = {
   resources: {
     en: {
-      translation: en,
+      translation: {
+        ...en,
+        ...moduleEnLocalesMerged,
+      },
     },
     vi: {
-      translation: vi,
+      translation: {
+        ...vi,
+        ...moduleViLocalesMerged,
+      },
     },
   } as Resources,
   fallbackLng: "en",
