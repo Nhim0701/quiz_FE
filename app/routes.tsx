@@ -7,6 +7,8 @@ import {
 } from "@react-router/dev/routes";
 import { ROUTES } from "./constants";
 import { ROUTES as AUTH_ROUTES } from "./modules/common/auth/constants";
+import { ROUTES as DASHBOARD_ROUTES } from "./modules/user/dashboard/constants";
+import { ROUTES as PROFILE_ROUTES } from "./modules/user/profile/constants";
 
 export default [
   index("modules/home.tsx"),
@@ -18,7 +20,7 @@ export default [
   ]),
 
   layout("modules/_layout.tsx", [
-    route(ROUTES.DASHBOARD, "modules/user/dashboard/index.tsx"),
+    route(DASHBOARD_ROUTES.INDEX, "modules/user/dashboard/index.tsx"),
 
     // Tests routes
     ...prefix(ROUTES.TESTS.INDEX, [
@@ -38,7 +40,7 @@ export default [
     ]),
 
     // Profile routes
-    ...prefix(ROUTES.PROFILE, [index("modules/user/profile/index.tsx")]),
+    route(PROFILE_ROUTES.INDEX, "modules/user/profile/index.tsx"),
 
     layout("modules/admin/_layout.tsx", [
       route(ROUTES.ADMIN.CATEGORIES, "modules/admin/categories/index.tsx"),

@@ -6,7 +6,7 @@ export const DASHBOARD_API_ENDPOINTS = {
 } as const;
 
 export const ROUTES = {
-  DASHBOARD: "/dashboard",
+  INDEX: "/dashboard",
 } as const;
 
 /**

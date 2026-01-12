@@ -3,8 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "@/i18n";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { FormField } from "@/components/common/form-field";
 import {
   Sheet,
   SheetContent,
@@ -105,27 +104,17 @@ export function CategoryForm({ onClearFilters }: CategoryFormProps) {
           </SheetDescription>
         </SheetHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-          <div>
-            <Label htmlFor="name">
-              {t("admin.categories.form.nameLabel")}
-              <span className="text-red-500 dark:text-red-400 ml-1">*</span>
-            </Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder={t("admin.categories.form.namePlaceholder")}
-              className={`mt-2 ${
-                errors.name ? "border-red-500 dark:border-red-600" : ""
-              }`}
-              disabled={loading || isSubmitting}
-              {...register("name")}
-            />
-            {errors.name && (
-              <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-                {errors.name.message}
-              </p>
-            )}
-          </div>
+          <FormField
+            id="name"
+            label={t("admin.categories.form.nameLabel")}
+            type="text"
+            placeholder={t("admin.categories.form.namePlaceholder")}
+            register={register("name")}
+            error={errors.name}
+            required
+            disabled={loading || isSubmitting}
+            labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+          />
           <SheetFooter>
             <Button
               type="button"

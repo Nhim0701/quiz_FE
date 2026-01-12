@@ -3,10 +3,6 @@ export const ROUTES = {
   ROOT: "/",
   HOME: "/",
 
-  //Profile routes
-  PROFILE: "/profile",
-  DASHBOARD: "/dashboard",
-
   //Admin routes
   ADMIN: {
     INDEX: "/admin",

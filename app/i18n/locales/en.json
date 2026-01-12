@@ -89,64 +89,6 @@
     "question": "Question {{current}} of {{total}}",
     "timeRemaining": "Time Remaining"
   },
-  "profile": {
-    "stats": {
-      "totalTests": "Total Tests",
-      "averageScore": "Average Score",
-      "totalQuestions": "Total Questions",
-      "correctAnswers": "Correct Answers"
-    },
-    "basicInfo": {
-      "title": "Basic Information",
-      "id": "ID",
-      "about": "About",
-      "address": "Address",
-      "details": "Details",
-      "phone": "Phone",
-      "birthday": "Birthday"
-    },
-    "professional": {
-      "title": "Professional Information",
-      "jobTitle": "Job Title",
-      "company": "Company",
-      "joinDate": "Join Date",
-      "noInfo": "No professional information available"
-    },
-    "edit": {
-      "title": "Edit Information",
-      "updateInfo": "Update Information",
-      "changePassword": "Change Password",
-      "userId": "User ID",
-      "fullName": "Full Name",
-      "currentPassword": "Current Password",
-      "newPassword": "New Password",
-      "save": "Save Changes",
-      "updatePassword": "Update Password"
-    },
-    "update": {
-      "success": "Information updated successfully!",
-      "error": "Failed to update information. Please try again."
-    },
-    "changePassword": {
-      "success": "Password changed successfully!",
-      "error": "Failed to change password. Please check your current password.",
-      "description": "Enter your current password and new password"
-    },
-    "buttons": {
-      "editInfo": "Edit Information",
-      "cancelEdit": "Cancel Edit",
-      "changePassword": "Change Password",
-      "save": "Save",
-      "cancel": "Cancel"
-    },
-    "validation": {
-      "userIdRequired": "User ID is required",
-      "fullNameRequired": "Full name is required",
-      "currentPasswordRequired": "Current password is required",
-      "newPasswordRequired": "New password is required",
-      "newPasswordMustBeDifferent": "New password must be different from current password"
-    }
-  },
   "result": {
     "wrong": "Wrong",
     "quiz": "Quiz",

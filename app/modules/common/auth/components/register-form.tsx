@@ -1,9 +1,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { FormField } from "@/components/common/form-field";
 import { useTranslation } from "@/i18n";
 import {
   registerSchema,
@@ -37,109 +36,53 @@ export function RegisterForm({ onSubmit, loading = false }: RegisterFormProps) {
       onSubmit={handleSubmit(onSubmitForm)}
       className="space-y-3.5 sm:space-y-4"
     >
-      <div>
-        <Label
-          htmlFor="fullName"
-          className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
-        >
-          {t("auth.register.nameLabel")}
-        </Label>
-        <Input
-          id="fullName"
-          type="text"
-          placeholder={t("auth.register.namePlaceholder")}
-          className={`w-full border ${
-            errors.fullName
-              ? "border-red-500 dark:border-red-600"
-              : "border-slate-300 dark:border-slate-600"
-          } dark:bg-slate-700 dark:text-slate-100 rounded-lg px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent transition`}
-          disabled={loading}
-          {...register("fullName")}
-        />
-        {errors.fullName && (
-          <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-            {errors.fullName.message}
-          </p>
-        )}
-      </div>
+      <FormField
+        id="fullName"
+        label={t("auth.register.nameLabel")}
+        type="text"
+        placeholder={t("auth.register.namePlaceholder")}
+        register={register("fullName")}
+        error={errors.fullName}
+        disabled={loading}
+        labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+        className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent transition"
+      />
 
-      <div>
-        <Label
-          htmlFor="email"
-          className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
-        >
-          {t("common.emailLabel")}
-        </Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder={t("common.emailPlaceholder")}
-          className={`w-full border ${
-            errors.email
-              ? "border-red-500 dark:border-red-600"
-              : "border-slate-300 dark:border-slate-600"
-          } dark:bg-slate-700 dark:text-slate-100 rounded-lg px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent transition`}
-          disabled={loading}
-          {...register("email")}
-        />
-        {errors.email && (
-          <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-            {errors.email.message}
-          </p>
-        )}
-      </div>
+      <FormField
+        id="email"
+        label={t("common.emailLabel")}
+        type="email"
+        placeholder={t("common.emailPlaceholder")}
+        register={register("email")}
+        error={errors.email}
+        disabled={loading}
+        labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+        className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent transition"
+      />
 
-      <div>
-        <Label
-          htmlFor="password"
-          className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
-        >
-          {t("common.passwordLabel")}
-        </Label>
-        <Input
-          id="password"
-          type="password"
-          placeholder={t("common.passwordPlaceholder")}
-          className={`w-full border ${
-            errors.password
-              ? "border-red-500 dark:border-red-600"
-              : "border-slate-300 dark:border-slate-600"
-          } dark:bg-slate-700 dark:text-slate-100 rounded-lg px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent transition`}
-          disabled={loading}
-          {...register("password")}
-        />
-        {errors.password && (
-          <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-            {errors.password.message}
-          </p>
-        )}
-      </div>
+      <FormField
+        id="password"
+        label={t("common.passwordLabel")}
+        type="password"
+        placeholder={t("common.passwordPlaceholder")}
+        register={register("password")}
+        error={errors.password}
+        disabled={loading}
+        labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+        className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent transition"
+      />
 
-      <div>
-        <Label
-          htmlFor="confirmPassword"
-          className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
-        >
-          {t("auth.register.confirmPasswordLabel")}
-        </Label>
-        <Input
-          id="confirmPassword"
-          type="password"
-          placeholder={t("common.passwordPlaceholder")}
-          className={`w-full border ${
-            errors.confirmPassword
-              ? "border-red-500 dark:border-red-600"
-              : "border-slate-300 dark:border-slate-600"
-          } dark:bg-slate-700 dark:text-slate-100 rounded-lg px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent transition`}
-          disabled={loading}
-          {...register("confirmPassword")}
-        />
-        {errors.confirmPassword && (
-          <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-            {errors.confirmPassword.message}
-          </p>
-        )}
-      </div>
+      <FormField
+        id="confirmPassword"
+        label={t("auth.register.confirmPasswordLabel")}
+        type="password"
+        placeholder={t("common.passwordPlaceholder")}
+        register={register("confirmPassword")}
+        error={errors.confirmPassword}
+        disabled={loading}
+        labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+        className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent transition"
+      />
 
       <Button
         type="submit"

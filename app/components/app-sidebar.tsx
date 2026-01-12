@@ -28,6 +28,8 @@ import {
 } from "./ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
+import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/dashboard/constants";
+import { ROUTES as PROFILE_ROUTES } from "@/modules/user/profile/constants";
 
 export function AppSidebar() {
   const { t } = useTranslation();
@@ -52,7 +54,7 @@ export function AppSidebar() {
     {
       title: t("sidebar.dashboard"),
       icon: LayoutDashboard,
-      url: ROUTES.DASHBOARD,
+      url: DASHBOARD_ROUTES.INDEX,
     },
     {
       title: t("sidebar.tests"),
@@ -62,7 +64,7 @@ export function AppSidebar() {
     {
       title: t("sidebar.profile"),
       icon: User,
-      url: ROUTES.PROFILE,
+      url: PROFILE_ROUTES.INDEX,
     },
   ];
 

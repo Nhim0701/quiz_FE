@@ -2,11 +2,12 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { tokenManager } from "@/lib/api";
 import { useAuthStoreInternal } from "@/modules/common/auth/hooks/useAuth";
-import { ROUTES } from "@/constants";
 import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
+import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/dashboard/constants";
 
 /**
  * Root component to check auth on app startup and redirect appropriately
+ * In SPA mode, we use useEffect + navigate instead of loader
  */
 export default function Index() {
   const navigate = useNavigate();
@@ -28,7 +29,9 @@ export default function Index() {
       }
 
       // Redirect based on user state
-      navigate(user ? ROUTES.DASHBOARD : AUTH_ROUTES.LOGIN, { replace: true });
+      navigate(user ? DASHBOARD_ROUTES.INDEX : AUTH_ROUTES.LOGIN, {
+        replace: true,
+      });
     };
 
     checkAuthAndRedirect();

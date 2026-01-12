@@ -2,27 +2,23 @@ import { useState } from "react";
 import { Edit, Lock } from "lucide-react";
 import { useBreadcrumb } from "@/hooks/useApp";
 import { usePageData } from "@/hooks/usePageData";
-import { useAuth } from "~/modules/common/auth/hooks/useAuth";
-import { useTranslation } from "@/i18n";
-import { ROUTES } from "@/constants";
 import { PageHeader } from "@/components/page-header";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { UserInfo } from "./components";
 import { ChangePasswordModal } from "./components/change-password-modal";
-import useApp from "@/hooks/useApp";
+import { useProfile } from "./hooks";
+import { ROUTES } from "./constants";
 
 export default function Profile() {
-  const { setLoading } = useApp();
-  const { t } = useTranslation();
-  const { getCurrentUser } = useAuth();
+  const { t, setLoading, getCurrentUser } = useProfile();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   useBreadcrumb([
     {
       label: t("sidebar.profile"),
-      href: ROUTES.PROFILE,
+      href: ROUTES.INDEX,
     },
   ]);
 

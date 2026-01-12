@@ -11,11 +11,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useAuth } from "~/modules/common/auth/hooks/useAuth";
-import { useTranslation } from "@/i18n";
-import useApp from "@/hooks/useApp";
+import { FormField } from "@/components/common/form-field";
+import { useProfile } from "../hooks";
 import {
   changePasswordSchema,
   type ChangePasswordFormData,
@@ -30,9 +27,7 @@ export function ChangePasswordModal({
   open,
   onOpenChange,
 }: ChangePasswordModalProps) {
-  const { changePassword } = useAuth();
-  const { t } = useTranslation();
-  const { showSuccess, showError } = useApp();
+  const { t, handleChangePassword } = useProfile();
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   const {
@@ -46,22 +41,11 @@ export function ChangePasswordModal({
 
   const onSubmit = async (data: ChangePasswordFormData) => {
     try {
-      await changePassword(
-        {
-          currentPassword: data.currentPassword,
-          newPassword: data.newPassword,
-        },
-        setIsChangingPassword
-      );
-      showSuccess(t("profile.changePassword.success"));
+      await handleChangePassword(data, setIsChangingPassword);
       reset();
       onOpenChange(false);
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : t("profile.changePassword.error");
-      showError(errorMessage);
+    } catch (error) {
+      // Error is already handled in handleChangePassword
     }
   };
 
@@ -91,74 +75,35 @@ export function ChangePasswordModal({
           </div>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
-          <div className="space-y-2">
-            <Label htmlFor="currentPassword">
-              {t("profile.edit.currentPassword")}
-            </Label>
-            <Input
-              id="currentPassword"
-              type="password"
-              placeholder={t("common.passwordPlaceholder")}
-              {...register("currentPassword")}
-              disabled={isChangingPassword}
-              className={
-                errors.currentPassword
-                  ? "border-red-500 dark:border-red-600"
-                  : ""
-              }
-            />
-            {errors.currentPassword && (
-              <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                {errors.currentPassword.message}
-              </p>
-            )}
-          </div>
+          <FormField
+            id="currentPassword"
+            label={t("profile.edit.currentPassword")}
+            type="password"
+            placeholder={t("common.passwordPlaceholder")}
+            register={register("currentPassword")}
+            error={errors.currentPassword}
+            disabled={isChangingPassword}
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="newPassword">
-              {t("profile.edit.newPassword")}
-            </Label>
-            <Input
-              id="newPassword"
-              type="password"
-              placeholder={t("common.passwordPlaceholder")}
-              {...register("newPassword")}
-              disabled={isChangingPassword}
-              className={
-                errors.newPassword
-                  ? "border-red-500 dark:border-red-600"
-                  : ""
-              }
-            />
-            {errors.newPassword && (
-              <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                {errors.newPassword.message}
-              </p>
-            )}
-          </div>
+          <FormField
+            id="newPassword"
+            label={t("profile.edit.newPassword")}
+            type="password"
+            placeholder={t("common.passwordPlaceholder")}
+            register={register("newPassword")}
+            error={errors.newPassword}
+            disabled={isChangingPassword}
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">
-              {t("auth.register.confirmPasswordLabel")}
-            </Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder={t("common.passwordPlaceholder")}
-              {...register("confirmPassword")}
-              disabled={isChangingPassword}
-              className={
-                errors.confirmPassword
-                  ? "border-red-500 dark:border-red-600"
-                  : ""
-              }
-            />
-            {errors.confirmPassword && (
-              <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                {errors.confirmPassword.message}
-              </p>
-            )}
-          </div>
+          <FormField
+            id="confirmPassword"
+            label={t("auth.register.confirmPasswordLabel")}
+            type="password"
+            placeholder={t("common.passwordPlaceholder")}
+            register={register("confirmPassword")}
+            error={errors.confirmPassword}
+            disabled={isChangingPassword}
+          />
 
           <DialogFooter className="gap-2 sm:gap-0">
             <Button

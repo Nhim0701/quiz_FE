@@ -3,8 +3,8 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "@/i18n";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FormField, TextareaField } from "@/components/common/form-field";
 import {
   Sheet,
   SheetContent,
@@ -101,27 +101,17 @@ export function TestForm({ isOpen, onClose }: TestFormProps) {
           </SheetDescription>
         </SheetHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-          <div>
-            <Label htmlFor="name">
-              {t("admin.tests.form.nameLabel")}
-              <span className="text-red-500 dark:text-red-400 ml-1">*</span>
-            </Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder={t("admin.tests.form.namePlaceholder")}
-              className={`mt-2 ${
-                errors.name ? "border-red-500 dark:border-red-600" : ""
-              }`}
-              disabled={loading || isSubmitting}
-              {...register("name")}
-            />
-            {errors.name && (
-              <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-                {errors.name.message}
-              </p>
-            )}
-          </div>
+          <FormField
+            id="name"
+            label={t("admin.tests.form.nameLabel")}
+            type="text"
+            placeholder={t("admin.tests.form.namePlaceholder")}
+            register={register("name")}
+            error={errors.name}
+            required
+            disabled={loading || isSubmitting}
+            labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+          />
 
           <div>
             <Label htmlFor="categoryId">
@@ -202,51 +192,31 @@ export function TestForm({ isOpen, onClose }: TestFormProps) {
             )}
           </div>
 
-          <div>
-            <Label htmlFor="description">
-              {t("admin.tests.form.descriptionLabel")}
-            </Label>
-            <textarea
-              id="description"
-              rows={4}
-              placeholder={t("admin.tests.form.descriptionPlaceholder")}
-              className={`mt-2 flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-                errors.description ? "border-red-500 dark:border-red-600" : ""
-              }`}
-              disabled={loading || isSubmitting}
-              {...register("description")}
-            />
-            {errors.description && (
-              <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-                {errors.description.message}
-              </p>
-            )}
-          </div>
+          <TextareaField
+            id="description"
+            label={t("admin.tests.form.descriptionLabel")}
+            rows={4}
+            placeholder={t("admin.tests.form.descriptionPlaceholder")}
+            register={register("description")}
+            error={errors.description}
+            disabled={loading || isSubmitting}
+            labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+          />
 
-          <div>
-            <Label htmlFor="timeLimit">
-              {t("admin.tests.form.timeLimitLabel")}
-              <span className="text-red-500 dark:text-red-400 ml-1">*</span>
-            </Label>
-            <Input
-              id="timeLimit"
-              type="number"
-              min="1"
-              placeholder={t("admin.tests.form.timeLimitPlaceholder")}
-              className={`mt-2 ${
-                errors.timeLimit ? "border-red-500 dark:border-red-600" : ""
-              }`}
-              disabled={loading || isSubmitting}
-              {...register("timeLimit", {
-                valueAsNumber: true,
-              })}
-            />
-            {errors.timeLimit && (
-              <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-                {errors.timeLimit.message}
-              </p>
-            )}
-          </div>
+          <FormField
+            id="timeLimit"
+            label={t("admin.tests.form.timeLimitLabel")}
+            type="number"
+            min="1"
+            placeholder={t("admin.tests.form.timeLimitPlaceholder")}
+            register={register("timeLimit", {
+              valueAsNumber: true,
+            })}
+            error={errors.timeLimit}
+            required
+            disabled={loading || isSubmitting}
+            labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+          />
 
           <SheetFooter>
             <Button
