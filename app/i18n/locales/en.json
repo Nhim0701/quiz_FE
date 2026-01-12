@@ -15,6 +15,7 @@
     "cancel": "Cancel",
     "take": "Take Test",
     "result": "Result",
+    "selected": "selected",
     "pagination": {
       "itemsPerPage": "Items per page:",
       "all": "All",
@@ -244,7 +245,8 @@
   },
   "admin": {
     "categories": {
-      "title": "Categories Management",
+      "title": "Category management",
+      "cardTitle": "List categories",
       "empty": "No categories found",
       "noPermission": "You don't have permission to access this page",
       "delete": "Delete",
@@ -272,12 +274,29 @@
       }
     },
     "tests": {
-      "title": "Tests Management",
+      "title": "Test management",
+      "cardTitle": "List tests",
       "empty": "No tests found",
       "noPermission": "You don't have permission to access this page",
       "delete": "Delete",
+      "create": "Create Test",
+      "createTitle": "Create New Test",
+      "createDescription": "Fill in the information to create a new test",
+      "createSuccess": "Test created successfully",
       "deleteSuccess": "Test deleted successfully",
       "confirmDelete": "Are you sure you want to delete test \"{{name}}\"?",
+      "form": {
+        "nameLabel": "Test Name",
+        "namePlaceholder": "Enter test name",
+        "categoryLabel": "Category",
+        "selectCategory": "Select category...",
+        "searchCategory": "Search category...",
+        "noCategoryFound": "No category found."
+      },
+      "validation": {
+        "nameRequired": "Test name is required",
+        "categoryRequired": "Category is required"
+      },
       "columns": {
         "id": "ID",
         "name": "Name",
@@ -285,6 +304,14 @@
         "questionCount": "Questions",
         "createdAt": "Created At",
         "updatedAt": "Updated At"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by name...",
+        "categoryPlaceholder": "Select categories...",
+        "categorySearch": "Search categories...",
+        "categoryEmpty": "No categories found.",
+        "createDatePlaceholder": "Select create date",
+        "updateDatePlaceholder": "Select update date"
       }
     }
   }

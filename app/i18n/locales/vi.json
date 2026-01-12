@@ -15,6 +15,7 @@
     "cancel": "Hủy",
     "take": "Làm bài",
     "result": "Kết quả",
+    "selected": "đã chọn",
     "pagination": {
       "itemsPerPage": "Số mục mỗi trang:",
       "all": "Tất cả",
@@ -231,18 +232,19 @@
   },
   "admin": {
     "categories": {
-      "title": "Quản Lý Danh Mục",
+      "title": "Quản lý danh mục",
+      "cardTitle": "Danh sách danh mục",
       "empty": "Không tìm thấy danh mục nào",
       "noPermission": "Bạn không có quyền truy cập trang này",
       "delete": "Xóa",
       "deleteSuccess": "Xóa danh mục thành công",
       "confirmDelete": "Bạn có chắc chắn muốn xóa danh mục \"{{name}}\"?",
-      "createTitle": "Tạo Danh Mục Mới",
-      "editTitle": "Sửa Danh Mục",
+      "createTitle": "Tạo danh mục mới",
+      "editTitle": "Sửa danh mục",
       "createDescription": "Điền thông tin để tạo danh mục mới",
       "editDescription": "Cập nhật thông tin danh mục",
-      "create": "Tạo",
-      "update": "Cập nhật",
+      "create": "Tạo danh mục",
+      "update": "Cập nhật danh mục",
       "createSuccess": "Tạo danh mục thành công",
       "updateSuccess": "Cập nhật danh mục thành công",
       "form": {
@@ -259,12 +261,29 @@
       }
     },
     "tests": {
-      "title": "Quản Lý Bài Kiểm Tra",
+      "title": "Quản lý bài kiểm tra",
+      "cardTitle": "Danh sách bài kiểm tra",
       "empty": "Không tìm thấy bài kiểm tra nào",
       "noPermission": "Bạn không có quyền truy cập trang này",
       "delete": "Xóa",
+      "create": "Tạo bài kiểm tra",
+      "createTitle": "Tạo bài kiểm tra mới",
+      "createDescription": "Điền thông tin để tạo bài kiểm tra mới",
+      "createSuccess": "Tạo bài kiểm tra thành công",
       "deleteSuccess": "Xóa bài kiểm tra thành công",
       "confirmDelete": "Bạn có chắc chắn muốn xóa bài kiểm tra \"{{name}}\"?",
+      "form": {
+        "nameLabel": "Tên Bài Kiểm Tra",
+        "namePlaceholder": "Nhập tên bài kiểm tra",
+        "categoryLabel": "Danh Mục",
+        "selectCategory": "Chọn danh mục...",
+        "searchCategory": "Tìm kiếm danh mục...",
+        "noCategoryFound": "Không tìm thấy danh mục nào."
+      },
+      "validation": {
+        "nameRequired": "Tên bài kiểm tra là bắt buộc",
+        "categoryRequired": "Danh mục là bắt buộc"
+      },
       "columns": {
         "id": "ID",
         "name": "Tên",
@@ -272,6 +291,14 @@
         "questionCount": "Câu Hỏi",
         "createdAt": "Ngày Tạo",
         "updatedAt": "Ngày Cập Nhật"
+      },
+      "filters": {
+        "searchPlaceholder": "Tìm kiếm theo tên...",
+        "categoryPlaceholder": "Chọn danh mục...",
+        "categorySearch": "Tìm kiếm danh mục...",
+        "categoryEmpty": "Không tìm thấy danh mục nào.",
+        "createDatePlaceholder": "Chọn ngày tạo",
+        "updateDatePlaceholder": "Chọn ngày cập nhật"
       }
     }
   },

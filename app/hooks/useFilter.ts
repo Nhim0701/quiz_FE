@@ -7,6 +7,7 @@ import {
   FILTER_QUERY_PARAMS,
 } from "~/constants";
 import type { FilterAction } from "~/components/common/filters";
+import { camelToSnake } from "@/lib/case-converter";
 
 // ============================================================================
 // Types
@@ -466,8 +467,9 @@ export const FilterManager = {
 
   /**
    * Convert filter entries to API params format with filter-key-N and filter-value-N
-   * Example: [{key: "name", value: "C02"}, {key: "status", value: "on"}, {key: "id", value: "id1,id2,id3"}]
-   * -> {filter-key-1: "name", filter-value-1: "C02", filter-key-2: "status", filter-value-2: "on", filter-key-3: "id", filter-value-3: "id1,id2,id3"}
+   * Converts filter keys from camelCase to snake_case for backend
+   * Example: [{key: "name", value: "C02"}, {key: "categoryId", value: "1,2"}]
+   * -> {filter-key-1: "name", filter-value-1: "C02", filter-key-2: "category_id", filter-value-2: "1,2"}
    */
   convertFiltersToApiParams(
     filters: FilterEntry[]
@@ -479,7 +481,9 @@ export const FilterManager = {
       const keyParam = FILTER_QUERY_PARAMS.FILTER_KEY(filterIndex);
       const valueParam = FILTER_QUERY_PARAMS.FILTER_VALUE(filterIndex);
 
-      apiParams[keyParam] = filter.key;
+      // Convert filter key from camelCase to snake_case
+      const snakeCaseKey = camelToSnake(filter.key);
+      apiParams[keyParam] = snakeCaseKey;
       apiParams[valueParam] = filter.value;
     });
 

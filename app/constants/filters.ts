@@ -39,7 +39,7 @@ export const FILTER_COLOR_PALETTE = {
   primary: "bg-primary/10 text-primary border-primary/20",
   blue: "bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400",
   green:
-    "bg-green-500/10 text-green-600 border-green-500/20 dark:text-green-400",
+    "bg-green-500/10 text-green-600 border-green-500/20 dark:text-green-400 dark:hover:bg-green-600/20",
   yellow:
     "bg-yellow-500/10 text-yellow-600 border-yellow-500/20 dark:text-yellow-400",
   purple:

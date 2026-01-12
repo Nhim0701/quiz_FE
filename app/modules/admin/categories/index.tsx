@@ -28,7 +28,7 @@ export default function AdminCategories() {
       <PageHeader title={t("admin.categories.title")} />
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle>{t("admin.categories.title")}</CardTitle>
+          <CardTitle>{t("admin.categories.cardTitle")}</CardTitle>
           {roles.create && (
             <Button
               onClick={() => openSheet()}

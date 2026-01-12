@@ -33,10 +33,19 @@ interface TestsState {
   // Admin API methods
   fetchTests: (
     page?: number,
-    pageSize?: number
+    pageSize?: number,
+    filters?: Record<string, string>
   ) => Promise<{ data: TestProps[]; meta?: ApiResponseMeta } | undefined>;
+  createTest: (data: {
+    name: string;
+    categoryId: string;
+  }) => Promise<TestProps>;
   deleteTest: (id: string) => Promise<void>;
-  refreshTests: (page?: number, pageSize?: number) => Promise<void>;
+  refreshTests: (
+    page?: number,
+    pageSize?: number,
+    filters?: Record<string, string>
+  ) => Promise<void>;
 }
 
 export const useTestsStore = create<TestsState>((set, get) => ({
@@ -161,16 +170,31 @@ export const useTestsStore = create<TestsState>((set, get) => ({
   },
 
   // Admin API methods
-  fetchTests: async (page = 1, pageSize = 10) => {
+  fetchTests: async (
+    page = 1,
+    pageSize = 10,
+    filters?: Record<string, string>
+  ) => {
     set({ adminLoading: true, adminError: null });
     try {
+      const params: Record<string, any> = {
+        page,
+        pageSize,
+      };
+
+      // Add filter params if provided
+      if (filters) {
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value && typeof value === "string" && value.trim()) {
+            params[key] = value;
+          }
+        });
+      }
+
       const response = await apiClient.get<ApiSuccessResponse<TestProps[]>>(
         API_ENDPOINTS.TESTS.LIST,
         {
-          params: {
-            page,
-            pageSize,
-          },
+          params,
         }
       );
 
@@ -191,6 +215,23 @@ export const useTestsStore = create<TestsState>((set, get) => ({
     }
   },
 
+  createTest: async (data) => {
+    set({ adminLoading: true, adminError: null });
+    try {
+      const response = await apiClient.post<ApiSuccessResponse<TestProps>>(
+        API_ENDPOINTS.TESTS.LIST,
+        data
+      );
+      set({ adminLoading: false });
+      return response.data.data;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create test";
+      set({ adminError: errorMessage, adminLoading: false });
+      throw error;
+    }
+  },
+
   deleteTest: async (id) => {
     set({ adminLoading: true, adminError: null });
     try {
@@ -204,7 +245,11 @@ export const useTestsStore = create<TestsState>((set, get) => ({
     }
   },
 
-  refreshTests: async (page = 1, pageSize = 10) => {
-    await get().fetchTests(page, pageSize);
+  refreshTests: async (
+    page = 1,
+    pageSize = 10,
+    filters?: Record<string, string>
+  ) => {
+    await get().fetchTests(page, pageSize, filters);
   },
 }));

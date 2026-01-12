@@ -26,7 +26,7 @@ export const FilterActions = ({
             size="sm"
             onClick={button.onClick}
             disabled={!button.onClick}
-            className={cn(button.className)}
+            className={cn("h-10", button.className)}
           >
             <Icon className="size-4" />
           </Button>
