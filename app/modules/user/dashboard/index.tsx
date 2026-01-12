@@ -1,15 +1,15 @@
 import { useBreadcrumb } from "@/hooks/useApp";
 import { usePageData } from "@/hooks/usePageData";
-import { useMe } from "@/hooks/useMe";
 import { useTranslation } from "@/i18n";
-import { ROUTES } from "@/constants";
+import { ROUTES } from "./constants";
 import { PageHeader } from "@/components/page-header";
 import { Container } from "@/components/ui/container";
+import { useDashboard } from "./hooks";
 import { Stats, CategoryStats, TestStats, RecentActivity } from "./components";
 
 export default function Dashboard() {
   const { t } = useTranslation();
-  const { getDashboard } = useMe();
+  const { getDashboard } = useDashboard();
 
   useBreadcrumb([
     {

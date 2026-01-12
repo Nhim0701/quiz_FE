@@ -1,13 +1,13 @@
 import { FileText, Check, X } from "lucide-react";
-import { useMe } from "@/hooks/useMe";
 import { useTranslation } from "@/i18n";
 import { formatUnixTimestamp } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useDashboard } from "../hooks";
 
 export function RecentActivity() {
   const { t } = useTranslation();
-  const { dashboardData } = useMe();
+  const { dashboardData } = useDashboard();
   const recentActivity = dashboardData?.recentActivity;
   if (!recentActivity || recentActivity.length === 0) {
     return (

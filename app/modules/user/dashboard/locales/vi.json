@@ -1,0 +1,26 @@
+{
+  "stats": {
+    "totalAnswered": "Tổng Số Đã Trả Lời",
+    "correctAnswers": "Câu Trả Lời Đúng",
+    "wrongAnswers": "Câu Trả Lời Sai",
+    "accuracy": "Độ Chính Xác"
+  },
+  "categoryStats": {
+    "title": "Thống Kê Theo Danh Mục",
+    "correct": "đúng",
+    "wrong": "sai"
+  },
+  "testStats": {
+    "title": "Thống Kê Theo Bài Kiểm Tra",
+    "correct": "đúng",
+    "wrong": "sai",
+    "submissions": "lần nộp"
+  },
+  "recentActivity": {
+    "title": "Hoạt Động Gần Đây",
+    "noActivity": "Chưa có hoạt động nào. Bắt đầu làm bài kiểm tra để xem tiến độ của bạn!",
+    "notAvailable": "Không có",
+    "category": "Danh mục",
+    "test": "Bài kiểm tra"
+  }
+}

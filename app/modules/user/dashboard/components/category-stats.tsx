@@ -1,10 +1,10 @@
-import { useMe } from "@/hooks/useMe";
 import { useTranslation } from "@/i18n";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useDashboard } from "../hooks";
 
 export function CategoryStats() {
   const { t } = useTranslation();
-  const { dashboardData } = useMe();
+  const { dashboardData } = useDashboard();
   const byCategory = dashboardData?.byCategory;
 
   if (!byCategory || byCategory.length === 0) {

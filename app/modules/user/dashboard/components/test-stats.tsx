@@ -1,10 +1,11 @@
-import { useMe, type ByTestStatsProps } from "@/hooks/useMe";
 import { useTranslation } from "@/i18n";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useDashboard } from "../hooks";
+import type { ByTestStatsProps } from "../types";
 
 export function TestStats() {
   const { t } = useTranslation();
-  const { dashboardData } = useMe();
+  const { dashboardData } = useDashboard();
   const byTest = dashboardData?.byTest;
 
   if (

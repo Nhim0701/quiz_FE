@@ -1,8 +1,10 @@
-import { create } from "zustand";
-import type { ApiSuccessResponse } from "@/types";
-import apiClient from "@/lib/axios";
-import { API_ENDPOINTS } from "@/constants";
+// ============================================
+// DASHBOARD TYPES
+// ============================================
 
+/**
+ * Overall statistics props
+ */
 export interface OverallStatsProps {
   totalAnswered: number;
   totalCorrect: number;
@@ -10,6 +12,9 @@ export interface OverallStatsProps {
   overallAccuracy: number;
 }
 
+/**
+ * Statistics by category props
+ */
 export interface ByCategoryStatsProps {
   category: string;
   totalAnswered: number;
@@ -19,6 +24,9 @@ export interface ByCategoryStatsProps {
   lastAttempt: string | null;
 }
 
+/**
+ * Statistics by test props
+ */
 export interface ByTestStatsProps {
   testId: string;
   testName: string;
@@ -32,6 +40,9 @@ export interface ByTestStatsProps {
   lastAttempt: string | null;
 }
 
+/**
+ * Recent activity statistics props
+ */
 export interface RecentActivityStatsProps {
   id: number;
   category: string;
@@ -41,30 +52,12 @@ export interface RecentActivityStatsProps {
   answeredAt: number | null;
 }
 
+/**
+ * Dashboard data props
+ */
 export interface DashboardProps {
   overall: OverallStatsProps;
   byCategory: ByCategoryStatsProps[];
   byTest: Record<string, ByTestStatsProps[]>;
   recentActivity: RecentActivityStatsProps[];
 }
-
-interface MeState {
-  // Dashboard data
-  dashboardData: DashboardProps | null;
-
-  // API methods
-  getDashboard: () => Promise<void>;
-}
-
-export const useMe = create<MeState>((set) => ({
-  // Initial state
-  dashboardData: null,
-
-  // API methods
-  getDashboard: async () => {
-    const response = await apiClient.get<ApiSuccessResponse<DashboardProps>>(
-      API_ENDPOINTS.ME.DASHBOARD
-    );
-    set({ dashboardData: response.data.data });
-  },
-}));

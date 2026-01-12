@@ -6,6 +6,7 @@
 
 // Import module locales directly for type-safety
 import authEnLocales from "../modules/common/auth/locales/en.json";
+import dashboardEnLocales from "../modules/user/dashboard/locales/en.json";
 
 /**
  * Type definition for all module locales
@@ -13,6 +14,7 @@ import authEnLocales from "../modules/common/auth/locales/en.json";
  */
 export type ModuleLocales = {
   auth: typeof authEnLocales;
+  dashboard: typeof dashboardEnLocales;
 };
 
 /**
