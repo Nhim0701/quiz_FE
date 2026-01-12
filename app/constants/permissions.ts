@@ -19,10 +19,11 @@ export const PERMISSIONS = {
  * Resource names
  */
 export const RESOURCES = {
-  CATEGORY: "category",
-  TEST: "test",
-  QUESTION: "question",
-  USER: "user",
+  CATEGORY: "categories",
+  TEST: "tests",
+  QUESTION: "questions",
+  USER: "users",
+  ROLES: "roles",
   ADMIN: "admin",
 } as const;
 
@@ -73,4 +74,10 @@ export const COMMON_PERMISSIONS = {
   USER_DELETE: buildPermission(RESOURCES.USER, ACTIONS.DELETE),
   USER_CREATE: buildPermission(RESOURCES.USER, ACTIONS.CREATE),
   USER_UPDATE: buildPermission(RESOURCES.USER, ACTIONS.UPDATE),
+
+  // Role permissions
+  ROLE_READ: buildPermission(RESOURCES.ROLES, ACTIONS.READ),
+  ROLE_DELETE: buildPermission(RESOURCES.ROLES, ACTIONS.DELETE),
+  ROLE_CREATE: buildPermission(RESOURCES.ROLES, ACTIONS.CREATE),
+  ROLE_UPDATE: buildPermission(RESOURCES.ROLES, ACTIONS.UPDATE),
 } as const;
