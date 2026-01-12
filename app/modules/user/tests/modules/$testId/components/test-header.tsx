@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Clock, X } from "lucide-react";
 import { useTranslation } from "@/i18n";
-import { useTestStore } from "~/modules/tests/modules/$testId/hooks/store";
+import { useTestStore } from "~/modules/user/tests/modules/$testId/hooks/store";
 import {
   useTestsStore,
   type TestProps,

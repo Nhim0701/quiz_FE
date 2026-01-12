@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "@/i18n";
-import { useTestStore } from "~/modules/tests/modules/$testId/hooks/store";
+import { useTestStore } from "~/modules/user/tests/modules/$testId/hooks/store";
 import { useNavigate, useParams } from "react-router";
 import { ROUTES } from "@/constants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

@@ -5,8 +5,8 @@ import {
   route,
   type RouteConfig,
 } from "@react-router/dev/routes";
-import { ROUTES } from "@/constants";
-import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
+import { ROUTES } from "./constants";
+import { ROUTES as AUTH_ROUTES } from "./modules/common/auth/constants";
 
 export default [
   index("modules/home.tsx"),
@@ -18,24 +18,27 @@ export default [
   ]),
 
   layout("modules/_layout.tsx", [
-    route(ROUTES.DASHBOARD, "modules/dashboard/index.tsx"),
+    route(ROUTES.DASHBOARD, "modules/user/dashboard/index.tsx"),
 
     // Tests routes
     ...prefix(ROUTES.TESTS.INDEX, [
-      index("modules/tests/index.tsx"),
+      index("modules/user/tests/index.tsx"),
 
       ...prefix(ROUTES.TESTS.TEST_ID, [
-        index("modules/tests/modules/$testId/index.tsx"),
-        route(ROUTES.TESTS.TAKE(), "modules/tests/modules/$testId/take.tsx"),
+        index("modules/user/tests/modules/$testId/index.tsx"),
+        route(
+          ROUTES.TESTS.TAKE(),
+          "modules/user/tests/modules/$testId/take.tsx"
+        ),
         route(
           ROUTES.TESTS.RESULT(),
-          "modules/tests/modules/$testId/result.tsx"
+          "modules/user/tests/modules/$testId/result.tsx"
         ),
       ]),
     ]),
 
     // Profile routes
-    ...prefix(ROUTES.PROFILE, [index("modules/profile/index.tsx")]),
+    ...prefix(ROUTES.PROFILE, [index("modules/user/profile/index.tsx")]),
 
     layout("modules/admin/_layout.tsx", [
       route(ROUTES.ADMIN.CATEGORIES, "modules/admin/categories/index.tsx"),

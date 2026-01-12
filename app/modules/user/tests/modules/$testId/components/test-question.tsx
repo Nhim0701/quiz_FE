@@ -1,7 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import { Check, X, Flag } from "lucide-react";
 import { useTranslation } from "@/i18n";
-import { useTestStore } from "~/modules/tests/modules/$testId/hooks/store";
+import { useTestStore } from "~/modules/user/tests/modules/$testId/hooks/store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
