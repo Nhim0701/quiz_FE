@@ -5,7 +5,7 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
-import { API_BASE_URL, API_CONFIG, ERROR } from "@/constants";
+import { API_BASE_URL, API_CONFIG, API_ENDPOINTS, ERROR } from "@/constants";
 import { t } from "@/i18n/utils";
 import type { ApiErrorResponse, ApiSuccessResponse } from "@/types";
 import type { TranslationKey } from "@/i18n";
@@ -19,9 +19,31 @@ const apiClient: AxiosInstance = axios.create({
   },
 });
 
+// Auth endpoints that don't require token refresh
+const authEndpoints = [
+  API_ENDPOINTS.AUTH.LOGIN,
+  API_ENDPOINTS.AUTH.REGISTER,
+  API_ENDPOINTS.AUTH.REFRESH,
+];
+
+// Check if request is to an auth endpoint
+const isAuthEndpoint = (url: string | undefined): boolean => {
+  if (!url) return false;
+  return authEndpoints.some((endpoint) => url.includes(endpoint));
+};
+
 // Request interceptor to add token, check expiration, and convert request data
 apiClient.interceptors.request.use(
   async (config) => {
+    // Skip token handling for auth endpoints (login, register, refresh)
+    if (isAuthEndpoint(config.url)) {
+      // Convert request data from camelCase to snake_case
+      if (config.data && typeof config.data === "object") {
+        config.data = toSnakeCase(config.data);
+      }
+      return config;
+    }
+
     const token = tokenManager.getToken();
 
     if (token) {
@@ -104,12 +126,14 @@ apiClient.interceptors.response.use(
     };
 
     // Handle 401 Unauthorized - try to refresh token
+    // Skip token refresh for auth endpoints (login, register, refresh)
     if (
       error.response?.status === 401 &&
       error.response?.data?.error?.code !==
         ERROR.INCORRECT_EMAIL_OR_PASSWORD.CODE &&
       originalRequest &&
-      !originalRequest._retry
+      !originalRequest._retry &&
+      !isAuthEndpoint(originalRequest.url)
     ) {
       originalRequest._retry = true;
 
