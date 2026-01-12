@@ -1,6 +1,12 @@
 import { Outlet, useLocation, useOutletContext } from "react-router";
 import type { Route } from "../+types/_layout";
-import { useState, useEffect, type ReactNode } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  type ReactNode,
+} from "react";
 import { useTranslation, type TranslationKey } from "@/i18n";
 import { useBreadcrumb } from "@/hooks/useApp";
 import { useRole } from "@/hooks/useRole";
@@ -39,7 +45,12 @@ export default function Layout() {
   const { t } = useTranslation();
   const { getNamespaceRoles } = useRole();
   const location = useLocation();
-  const [config, setConfig] = useState<AdminLayoutConfig | null>(null);
+  const [config, setConfigState] = useState<AdminLayoutConfig | null>(null);
+
+  // Stable setConfig function
+  const setConfig = useCallback((newConfig: AdminLayoutConfig) => {
+    setConfigState(newConfig);
+  }, []);
 
   // Auto-detect resource from route
   const detectedResource =
@@ -76,25 +87,55 @@ export default function Layout() {
     },
   ]);
 
-  // Reset config when route changes
+  // Reset config when route changes (but not on initial mount)
+  const prevPathnameRef = useRef<string | null>(null);
   useEffect(() => {
-    setConfig(null);
+    if (
+      prevPathnameRef.current !== null &&
+      prevPathnameRef.current !== location.pathname
+    ) {
+      setConfigState(() => null);
+    }
+    prevPathnameRef.current = location.pathname;
   }, [location.pathname]);
+
+  // Create default config based on detected resource if config is not set
+  const defaultConfig: AdminLayoutConfig | null =
+    !config && detectedResource
+      ? {
+          resource: detectedResource,
+          titleKey:
+            detectedResource === RESOURCES.CATEGORY
+              ? "admin.categories.title"
+              : "admin.tests.title",
+          cardTitleKey:
+            detectedResource === RESOURCES.CATEGORY
+              ? "admin.categories.cardTitle"
+              : "admin.tests.cardTitle",
+          createKey:
+            detectedResource === RESOURCES.CATEGORY
+              ? "admin.categories.create"
+              : "admin.tests.create",
+        }
+      : null;
+
+  const displayConfig = config || defaultConfig;
 
   if (!roles.read) {
     return (
       <Container>
         <PageHeader
           title={
-            config?.titleKey
-              ? t(config.titleKey as TranslationKey)
+            displayConfig?.titleKey
+              ? t(displayConfig.titleKey as TranslationKey)
               : t("admin.common.noPermission")
           }
         />
         <Card>
           <CardContent className="p-6">
             <p className="text-muted-foreground">
-              {config?.noPermissionMessage || t("admin.common.noPermission")}
+              {displayConfig?.noPermissionMessage ||
+                t("admin.common.noPermission")}
             </p>
           </CardContent>
         </Card>
@@ -103,31 +144,36 @@ export default function Layout() {
   }
 
   return (
-    <Container>
-      {config ? (
+    <Container className="p-2">
+      {displayConfig ? (
         <>
-          <PageHeader title={t(config.titleKey as TranslationKey)} />
+          <PageHeader title={t(displayConfig.titleKey as TranslationKey)} />
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
-              <CardTitle>{t(config.cardTitleKey as TranslationKey)}</CardTitle>
-              {config.showCreateButton !== false &&
-                roles.create &&
-                config.onCreate && (
+              <CardTitle>
+                {t(displayConfig.cardTitleKey as TranslationKey)}
+              </CardTitle>
+              {roles.create &&
+                config &&
+                config.onCreate &&
+                config.showCreateButton !== false && (
                   <Button
                     onClick={config.onCreate}
                     size="sm"
                     className="bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white"
                   >
                     <Plus className="mr-2 h-4 w-4" />
-                    {t(config.createKey as TranslationKey)}
+                    {t(displayConfig.createKey as TranslationKey)}
                   </Button>
                 )}
             </CardHeader>
-            <CardContent className={config.cardContentClassName}>
+            <CardContent className={displayConfig.cardContentClassName}>
               <Outlet context={{ setConfig }} />
             </CardContent>
           </Card>
-          {config.footer && <div className="mt-4">{config.footer}</div>}
+          {displayConfig.footer && (
+            <div className="mt-4">{displayConfig.footer}</div>
+          )}
         </>
       ) : (
         <Outlet context={{ setConfig }} />

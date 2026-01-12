@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { createZodSchema, createRequiredString } from "@/lib/zod-schema";
+import {
+  createZodSchema,
+  createRequiredString,
+  createOptionalString,
+  createNumberField,
+} from "@/lib/zod-schema";
 
 export const testSchema = createZodSchema((t) =>
   z.object({
@@ -8,6 +13,16 @@ export const testSchema = createZodSchema((t) =>
       t,
       "admin.tests.validation.categoryRequired"
     ),
+    description: z
+      .string()
+      .optional()
+      .transform((val) => (val === "" ? undefined : val)),
+    timeLimit: z
+      .number({
+        required_error: t("admin.tests.validation.timeLimitRequired"),
+        invalid_type_error: t("admin.tests.validation.timeLimitRequired"),
+      })
+      .min(1, t("admin.tests.validation.timeLimitMin")),
   })
 );
 

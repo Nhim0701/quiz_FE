@@ -28,7 +28,9 @@
       "page": "Page {{page}}"
     },
     "search": "Search",
-    "searchPlaceholder": "Search by category name..."
+    "searchPlaceholder": "Search by category name...",
+    "seconds": "seconds",
+    "minutes": "minutes"
   },
   "auth": {
     "login": {
@@ -297,19 +299,25 @@
         "categoryLabel": "Category",
         "selectCategory": "Select category...",
         "searchCategory": "Search category...",
-        "noCategoryFound": "No category found."
+        "noCategoryFound": "No category found.",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Enter test description (optional)",
+        "timeLimitLabel": "Time Limit (minutes)",
+        "timeLimitPlaceholder": "Enter time limit in minutes"
       },
       "validation": {
         "nameRequired": "Test name is required",
-        "categoryRequired": "Category is required"
+        "categoryRequired": "Category is required",
+        "timeLimitRequired": "Time limit is required",
+        "timeLimitMin": "Time limit must be at least 1 minute"
       },
       "columns": {
         "id": "ID",
         "name": "Name",
         "category": "Category",
         "questionCount": "Questions",
-        "createdAt": "Created At",
-        "updatedAt": "Updated At"
+        "description": "Description",
+        "timeLimit": "Time Limit"
       },
       "filters": {
         "searchPlaceholder": "Search by name...",

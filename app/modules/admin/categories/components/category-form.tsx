@@ -106,7 +106,10 @@ export function CategoryForm({ onClearFilters }: CategoryFormProps) {
         </SheetHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
           <div>
-            <Label htmlFor="name">{t("admin.categories.form.nameLabel")}</Label>
+            <Label htmlFor="name">
+              {t("admin.categories.form.nameLabel")}
+              <span className="text-red-500 dark:text-red-400 ml-1">*</span>
+            </Label>
             <Input
               id="name"
               type="text"

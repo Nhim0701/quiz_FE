@@ -18,8 +18,9 @@ export default function AdminTests() {
       resource: RESOURCES.TEST,
       titleKey: "admin.tests.title",
       cardTitleKey: "admin.tests.cardTitle",
-      createKey: "admin.tests.create",
+      createKey: "admin.tests.createTitle",
       onCreate: () => setIsFormOpen(true),
+      showCreateButton: true,
       cardContentClassName: "overflow-auto",
       noPermissionMessage: t("admin.tests.noPermission"),
       footer: (

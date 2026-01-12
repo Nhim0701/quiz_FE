@@ -24,7 +24,7 @@ export default function AdminCategories() {
       resource: RESOURCES.CATEGORY,
       titleKey: "admin.categories.title",
       cardTitleKey: "admin.categories.cardTitle",
-      createKey: "admin.categories.create",
+      createKey: "admin.categories.createTitle",
       onCreate: () => openSheet(),
       footer: <CategoryForm onClearFilters={clearFilters} />,
     });

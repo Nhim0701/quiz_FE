@@ -28,7 +28,9 @@
       "page": "Trang {{page}}"
     },
     "search": "Tìm kiếm",
-    "searchPlaceholder": "Tìm kiếm theo tên danh mục..."
+    "searchPlaceholder": "Tìm kiếm theo tên danh mục...",
+    "seconds": "giây",
+    "minutes": "phút"
   },
   "auth": {
     "login": {
@@ -282,19 +284,25 @@
         "categoryLabel": "Danh Mục",
         "selectCategory": "Chọn danh mục...",
         "searchCategory": "Tìm kiếm danh mục...",
-        "noCategoryFound": "Không tìm thấy danh mục nào."
+        "noCategoryFound": "Không tìm thấy danh mục nào.",
+        "descriptionLabel": "Mô Tả",
+        "descriptionPlaceholder": "Nhập mô tả bài kiểm tra (tùy chọn)",
+        "timeLimitLabel": "Thời Gian Giới Hạn (phút)",
+        "timeLimitPlaceholder": "Nhập thời gian giới hạn bằng phút"
       },
       "validation": {
         "nameRequired": "Tên bài kiểm tra là bắt buộc",
-        "categoryRequired": "Danh mục là bắt buộc"
+        "categoryRequired": "Danh mục là bắt buộc",
+        "timeLimitRequired": "Thời gian giới hạn là bắt buộc",
+        "timeLimitMin": "Thời gian giới hạn phải ít nhất 1 phút"
       },
       "columns": {
         "id": "ID",
         "name": "Tên",
         "category": "Danh Mục",
         "questionCount": "Câu Hỏi",
-        "createdAt": "Ngày Tạo",
-        "updatedAt": "Ngày Cập Nhật"
+        "description": "Mô Tả",
+        "timeLimit": "Thời Gian Giới Hạn"
       },
       "filters": {
         "searchPlaceholder": "Tìm kiếm theo tên...",

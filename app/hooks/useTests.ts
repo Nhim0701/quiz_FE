@@ -9,6 +9,8 @@ export interface TestProps {
   questionCount: number;
   categoryId: string;
   categoryName?: string;
+  description?: string;
+  timeLimit: number;
   createdAt?: string | number;
   updatedAt?: string | number;
 }
@@ -39,6 +41,8 @@ interface TestsState {
   createTest: (data: {
     name: string;
     categoryId: string;
+    description?: string;
+    timeLimit: number;
   }) => Promise<TestProps>;
   deleteTest: (id: string) => Promise<void>;
   refreshTests: (

@@ -18,7 +18,6 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
-import { formatUnixTimestamp } from "@/lib/utils";
 import {
   SearchInput,
   ActiveFilters,
@@ -402,35 +401,6 @@ export function TestsList({ roles }: TestsListProps) {
     });
   };
 
-  // Format date helper
-  const formatDate = (date: string | number | undefined): string => {
-    if (!date) return "-";
-
-    // If it's a number, treat as unix timestamp (in seconds)
-    if (typeof date === "number") {
-      return formatUnixTimestamp(date) || "-";
-    }
-
-    // If it's a string, try to parse it
-    if (typeof date === "string") {
-      // Try parsing as ISO string first
-      const dateObj = new Date(date);
-      if (!isNaN(dateObj.getTime())) {
-        // Convert to unix timestamp (seconds)
-        const timestamp = Math.floor(dateObj.getTime() / 1000);
-        return formatUnixTimestamp(timestamp) || "-";
-      }
-
-      // Try parsing as unix timestamp string
-      const timestamp = parseInt(date, 10);
-      if (!isNaN(timestamp)) {
-        return formatUnixTimestamp(timestamp) || "-";
-      }
-    }
-
-    return "-";
-  };
-
   const columns: Column<TestProps>[] = [
     {
       key: "id",
@@ -463,20 +433,22 @@ export function TestsList({ roles }: TestsListProps) {
       ),
     },
     {
-      key: "createdAt",
-      header: t("admin.tests.columns.createdAt" as any),
+      key: "description",
+      header: t("admin.tests.columns.description" as any),
       render: (test) => (
         <span className="text-muted-foreground text-sm">
-          {formatDate(test.createdAt)}
+          {test.description || "-"}
         </span>
       ),
     },
     {
-      key: "updatedAt",
-      header: t("admin.tests.columns.updatedAt" as any),
+      key: "timeLimit",
+      header: t("admin.tests.columns.timeLimit" as any),
+      meta: { center: true },
       render: (test) => (
-        <span className="text-muted-foreground text-sm">
-          {formatDate(test.updatedAt)}
+        <span className="text-muted-foreground">
+          {" "}
+          {`${test.timeLimit} ${t("common.minutes")}`}
         </span>
       ),
     },

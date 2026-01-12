@@ -58,6 +58,8 @@ export function TestForm({ isOpen, onClose }: TestFormProps) {
     defaultValues: {
       name: "",
       categoryId: "",
+      description: "",
+      timeLimit: undefined,
     },
   });
 
@@ -66,6 +68,8 @@ export function TestForm({ isOpen, onClose }: TestFormProps) {
       reset({
         name: "",
         categoryId: "",
+        description: "",
+        timeLimit: undefined,
       });
       // Fetch categories when form opens
       fetchCategories(1, 1000).catch((error) => {
@@ -98,7 +102,10 @@ export function TestForm({ isOpen, onClose }: TestFormProps) {
         </SheetHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
           <div>
-            <Label htmlFor="name">{t("admin.tests.form.nameLabel")}</Label>
+            <Label htmlFor="name">
+              {t("admin.tests.form.nameLabel")}
+              <span className="text-red-500 dark:text-red-400 ml-1">*</span>
+            </Label>
             <Input
               id="name"
               type="text"
@@ -119,6 +126,7 @@ export function TestForm({ isOpen, onClose }: TestFormProps) {
           <div>
             <Label htmlFor="categoryId">
               {t("admin.tests.form.categoryLabel")}
+              <span className="text-red-500 dark:text-red-400 ml-1">*</span>
             </Label>
             <Controller
               name="categoryId"
@@ -190,6 +198,52 @@ export function TestForm({ isOpen, onClose }: TestFormProps) {
             {errors.categoryId && (
               <p className="mt-1 text-xs text-red-600 dark:text-red-400">
                 {errors.categoryId.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="description">
+              {t("admin.tests.form.descriptionLabel")}
+            </Label>
+            <textarea
+              id="description"
+              rows={4}
+              placeholder={t("admin.tests.form.descriptionPlaceholder")}
+              className={`mt-2 flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+                errors.description ? "border-red-500 dark:border-red-600" : ""
+              }`}
+              disabled={loading || isSubmitting}
+              {...register("description")}
+            />
+            {errors.description && (
+              <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                {errors.description.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="timeLimit">
+              {t("admin.tests.form.timeLimitLabel")}
+              <span className="text-red-500 dark:text-red-400 ml-1">*</span>
+            </Label>
+            <Input
+              id="timeLimit"
+              type="number"
+              min="1"
+              placeholder={t("admin.tests.form.timeLimitPlaceholder")}
+              className={`mt-2 ${
+                errors.timeLimit ? "border-red-500 dark:border-red-600" : ""
+              }`}
+              disabled={loading || isSubmitting}
+              {...register("timeLimit", {
+                valueAsNumber: true,
+              })}
+            />
+            {errors.timeLimit && (
+              <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                {errors.timeLimit.message}
               </p>
             )}
           </div>
