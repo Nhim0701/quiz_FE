@@ -1,9 +1,17 @@
-import { LayoutDashboard, FileText, User, LogOut, Shield } from "lucide-react";
+import {
+  LayoutDashboard,
+  FileText,
+  User,
+  LogOut,
+  Shield,
+  FolderTree,
+} from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import { useNavigate, useLocation, Link } from "react-router";
 import { ROUTES } from "@/constants";
+import { COMMON_PERMISSIONS } from "@/constants/permissions";
 import {
   Sidebar,
   SidebarContent,
@@ -22,7 +30,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 export function AppSidebar() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
-  const { isAdmin } = useRole();
+  const { isAdmin, hasPermission } = useRole();
   const { state } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
@@ -65,14 +73,20 @@ export function AppSidebar() {
     },
   ];
 
-  // Admin-only menu items
+  // Admin-only menu items with permission checks
   const adminMenuItems = [
     {
-      title: "Content Management",
-      icon: Shield,
-      url: ROUTES.ADMIN.CONTENT,
+      title: t("sidebar.admin.categories"),
+      icon: FolderTree,
+      url: ROUTES.ADMIN.CATEGORIES,
+      permission: COMMON_PERMISSIONS.CATEGORY_ADMIN_READ,
     },
-  ];
+  ].filter((item) => {
+    if (item.permission === null) {
+      return isAdmin();
+    }
+    return hasPermission(item.permission);
+  });
 
   return (
     <Sidebar collapsible="icon">

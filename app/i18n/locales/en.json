@@ -174,7 +174,11 @@
     "profile": "Profile",
     "expand": "Expand",
     "collapse": "Collapse",
-    "toggleSidebar": "Toggle Sidebar"
+    "toggleSidebar": "Toggle Sidebar",
+    "admin": {
+      "content": "Content Management",
+      "categories": "Categories"
+    }
   },
   "breadcrumb": {
     "home": "Home"
@@ -218,6 +222,21 @@
       "notAvailable": "N/A",
       "category": "Category",
       "test": "Test"
+    }
+  },
+  "admin": {
+    "categories": {
+      "title": "Categories Management",
+      "empty": "No categories found",
+      "noPermission": "You don't have permission to access this page",
+      "delete": "Delete",
+      "deleteSuccess": "Category deleted successfully",
+      "confirmDelete": "Are you sure you want to delete category \"{{name}}\"?",
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "questionCount": "Questions"
+      }
     }
   }
 }

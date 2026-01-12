@@ -14,7 +14,7 @@ export const ROUTES = {
   //Admin routes
   ADMIN: {
     INDEX: "/admin",
-    CONTENT: "/content",
+    CATEGORIES: "/admin/categories",
   },
 
   //Tests routes

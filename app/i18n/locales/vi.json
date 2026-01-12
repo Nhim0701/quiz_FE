@@ -174,7 +174,11 @@
     "profile": "Hồ Sơ",
     "expand": "Mở rộng",
     "collapse": "Thu gọn",
-    "toggleSidebar": "Bật/Tắt Thanh Bên"
+    "toggleSidebar": "Bật/Tắt Thanh Bên",
+    "admin": {
+      "content": "Quản Lý Nội Dung",
+      "categories": "Danh Mục"
+    }
   },
   "breadcrumb": {
     "home": "Trang chủ"
@@ -218,6 +222,21 @@
       "notAvailable": "Không có",
       "category": "Danh mục",
       "test": "Bài kiểm tra"
+    }
+  },
+  "admin": {
+    "categories": {
+      "title": "Quản Lý Danh Mục",
+      "empty": "Không tìm thấy danh mục nào",
+      "noPermission": "Bạn không có quyền truy cập trang này",
+      "delete": "Xóa",
+      "deleteSuccess": "Xóa danh mục thành công",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa danh mục \"{{name}}\"?",
+      "columns": {
+        "id": "ID",
+        "name": "Tên",
+        "questionCount": "Câu Hỏi"
+      }
     }
   }
 }

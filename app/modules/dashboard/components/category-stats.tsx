@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export function CategoryStats() {
   const { t } = useTranslation();
   const { dashboardData } = useMe();
-  console.log(dashboardData);
   const byCategory = dashboardData?.byCategory;
 
   if (!byCategory || byCategory.length === 0) {

@@ -49,11 +49,13 @@ export function LoginForm({ redirectPath }: LoginFormProps) {
     setLoading(true);
 
     try {
-      await login({ email, password, rememberMe: rememberMe ?? false }, setLoading);
+      await login(
+        { email, password, rememberMe: rememberMe ?? false },
+        setLoading
+      );
       navigate(redirectPath, { replace: true });
     } catch (err) {
       const error = err as Error;
-      console.log(error);
       const errorMessage = error.message || t("errors.loginFailed");
       showError(errorMessage);
     } finally {
@@ -123,7 +125,9 @@ export function LoginForm({ redirectPath }: LoginFormProps) {
         <Checkbox
           id="rememberMe"
           checked={rememberMe}
-          onCheckedChange={(checked) => setValue("rememberMe", checked === true)}
+          onCheckedChange={(checked) =>
+            setValue("rememberMe", checked === true)
+          }
           disabled={loading}
         />
         <Label

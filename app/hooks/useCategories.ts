@@ -6,6 +6,7 @@ import { API_ENDPOINTS } from "@/constants";
 export interface Category {
   id: string;
   name: string;
+  questionCount?: number;
 }
 
 interface CategoriesState {
