@@ -1,25 +1,13 @@
 // API utility for backend communication
 import { jwtDecode, type JwtPayload } from "jwt-decode";
-import axios from "axios";
 import { toast } from "sonner";
-import {
-  API_BASE_URL,
-  API_CONFIG,
-  API_ENDPOINTS,
-  ROUTES,
-  SESSION_KEYS,
-  STORAGE_KEYS,
-} from "@/constants";
-import { useAuthStoreInternal } from "@/hooks/useAuth";
+import { API_ENDPOINTS, SESSION_KEYS, STORAGE_KEYS } from "@/constants";
+import { useAuthStoreInternal } from "@/modules/common/auth/hooks/useAuth";
+import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
 import { t } from "@/i18n/utils";
 import type { ApiSuccessResponse } from "@/types";
-import type { AuthResponse } from "@/hooks/useAuth";
+import type { AuthResponse } from "@/modules/common/auth/types";
 import apiClient from "@/lib/axios";
-
-// interface JwtPayload {
-//   exp?: number;
-//   [key: string]: unknown;
-// }
 
 /**
  * Decode JWT token payload
@@ -90,10 +78,13 @@ const processQueue = (error: Error | null, token: string | null = null) => {
  */
 const redirectToLogin = () => {
   const currentPath = window.location.pathname;
-  if (currentPath !== ROUTES.LOGIN && currentPath !== ROUTES.REGISTER) {
+  if (
+    currentPath !== AUTH_ROUTES.LOGIN &&
+    currentPath !== AUTH_ROUTES.REGISTER
+  ) {
     sessionStorage.setItem(SESSION_KEYS.REDIRECT_PATH, currentPath);
   }
-  window.location.href = ROUTES.LOGIN;
+  window.location.href = AUTH_ROUTES.LOGIN;
 };
 
 // Token management
@@ -246,4 +237,3 @@ export const tokenManager = {
     redirectToLogin();
   },
 };
-

@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import apiClient from "@/lib/axios";
 import { tokenManager } from "@/lib/api";
-import { API_ENDPOINTS, STORAGE_KEYS } from "@/constants";
 import type { ApiSuccessResponse } from "@/types";
 import type {
   RegisterFormData,
@@ -11,8 +10,9 @@ import type {
   ChangePasswordFormData,
   AuthResponse,
   User,
-} from "@/types/auth";
-import { AuthMapper } from "@/mappers/auth.mapper";
+} from "../types";
+import { AuthMapper } from "../utils/mapper";
+import { AUTH_API_ENDPOINTS, ME_API_ENDPOINTS, AUTH_STORAGE_KEYS } from "../constants";
 
 interface AuthState {
   user: User | null;
@@ -44,8 +44,8 @@ const fetchUserData = async (
 ): Promise<void> => {
   if (setLoading) setLoading(true);
   try {
-    const response = await apiClient.get<ApiSuccessResponse<User>>(
-      API_ENDPOINTS.ME.GET
+        const response = await apiClient.get<ApiSuccessResponse<User>>(
+      ME_API_ENDPOINTS.GET
     );
     // Data is already converted to camelCase by axios interceptor
     set({ user: response.data.data });
@@ -76,9 +76,9 @@ export const useAuthStoreInternal = create<AuthState>()(
         const payload = AuthMapper.toRegisterPayload(formData);
 
         const response = await apiClient.post<ApiSuccessResponse<AuthResponse>>(
-          API_ENDPOINTS.AUTH.REGISTER,
-          payload
-        );
+      AUTH_API_ENDPOINTS.REGISTER,
+      payload
+    );
 
         // Store token on successful registration
         // Response data is already converted to camelCase by interceptor
@@ -92,9 +92,9 @@ export const useAuthStoreInternal = create<AuthState>()(
         const payload = AuthMapper.toLoginPayload(formData);
 
         const response = await apiClient.post<ApiSuccessResponse<AuthResponse>>(
-          API_ENDPOINTS.AUTH.LOGIN,
-          payload
-        );
+      AUTH_API_ENDPOINTS.LOGIN,
+      payload
+    );
 
         // Store token on successful login
         // Response data is already converted to camelCase by interceptor
@@ -117,7 +117,7 @@ export const useAuthStoreInternal = create<AuthState>()(
           try {
             // Convert to API payload using mapper
             const payload = AuthMapper.toRevokeTokenPayload(refreshToken);
-            await apiClient.post(API_ENDPOINTS.AUTH.REVOKE, payload);
+            await apiClient.post(AUTH_API_ENDPOINTS.REVOKE, payload);
           } catch (error) {
             // Log error but don't block logout
             console.error("Failed to revoke refresh token:", error);
@@ -135,9 +135,9 @@ export const useAuthStoreInternal = create<AuthState>()(
           const payload = AuthMapper.toUpdateUserPayload(formData);
 
           const response = await apiClient.put<ApiSuccessResponse<User>>(
-            API_ENDPOINTS.ME.UPDATE,
-            payload
-          );
+        ME_API_ENDPOINTS.UPDATE,
+        payload
+      );
           // Update user in store
           set({ user: response.data.data });
         } catch (error) {
@@ -153,7 +153,7 @@ export const useAuthStoreInternal = create<AuthState>()(
           // Convert UI form data to API payload using mapper
           const payload = AuthMapper.toChangePasswordPayload(formData);
 
-          await apiClient.put(API_ENDPOINTS.ME.CHANGE_PASSWORD, payload);
+          await apiClient.put(ME_API_ENDPOINTS.CHANGE_PASSWORD, payload);
         } catch (error) {
           console.error("Failed to change password:", error);
           throw error;
@@ -163,7 +163,7 @@ export const useAuthStoreInternal = create<AuthState>()(
       },
     }),
     {
-      name: STORAGE_KEYS.AUTH,
+      name: AUTH_STORAGE_KEYS.AUTH,
       partialize: (state) => ({ user: state.user }),
     }
   )
@@ -200,4 +200,4 @@ export type {
   ChangePasswordFormData,
   User,
   AuthResponse,
-} from "@/types/auth";
+} from "../types";

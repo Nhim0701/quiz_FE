@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "~/modules/common/auth/hooks/useAuth";
 import { ROUTES, SESSION_KEYS } from "@/constants";
 import { LoginHeader, LoginForm, LoginCard, LoginFooter } from "./components";
 

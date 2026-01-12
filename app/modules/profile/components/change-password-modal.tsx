@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "~/modules/common/auth/hooks/useAuth";
 import { useTranslation } from "@/i18n";
 import useApp from "@/hooks/useApp";
 import {

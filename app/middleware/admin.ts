@@ -1,12 +1,13 @@
 import { redirect } from "react-router";
 import type { Route } from "../modules/+types/_layout";
-import { useAuthStoreInternal } from "@/hooks/useAuth";
+import { useAuthStoreInternal } from "~/modules/common/auth/hooks/useAuth";
 import {
   ROUTES,
   PERMISSIONS,
   COMMON_PERMISSIONS,
   RESOURCES,
 } from "@/constants";
+import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
 import {
   hasPermission,
   hasAnyPermission,
@@ -22,7 +23,7 @@ const adminMiddleware: Route.ClientMiddlewareFunction = async () => {
 
   // Check if user is logged in
   if (!user) {
-    throw redirect(ROUTES.LOGIN);
+    throw redirect(AUTH_ROUTES.LOGIN);
   }
 
   // Check if user has full admin access (*::*)

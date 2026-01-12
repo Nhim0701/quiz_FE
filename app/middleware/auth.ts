@@ -1,7 +1,10 @@
 import { createContext, redirect } from "react-router";
 import type { Route } from "../modules/+types/_layout";
-import { ROUTES } from "@/constants";
-import { useAuthStoreInternal, type User } from "@/hooks/useAuth";
+import {
+  useAuthStoreInternal,
+  type User,
+} from "@/modules/common/auth/hooks/useAuth";
+import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
 
 const userContext = createContext<User | null>(null);
 
@@ -9,7 +12,7 @@ const userContext = createContext<User | null>(null);
 const authMiddleware: Route.ClientMiddlewareFunction = async ({ context }) => {
   const user = useAuthStoreInternal.getState().user;
   if (!user) {
-    throw redirect(ROUTES.LOGIN);
+    throw redirect(AUTH_ROUTES.LOGIN);
   }
 
   context.set(userContext, user);

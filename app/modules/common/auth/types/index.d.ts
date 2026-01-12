@@ -76,3 +76,8 @@ export interface User {
   company?: string;
   joinDate?: string;
 }
+
+/**
+ * User role type
+ */
+export type UserRole = "admin" | "user";

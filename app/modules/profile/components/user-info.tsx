@@ -14,7 +14,7 @@ import {
   Lock,
   Loader2,
 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "~/modules/common/auth/hooks/useAuth";
 import { useTranslation } from "@/i18n";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";

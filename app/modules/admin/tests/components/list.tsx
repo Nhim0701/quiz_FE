@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useRef, useCallback } from "react";
-import { useLocation, useSearchParams } from "react-router";
+import { useLocation, useSearchParams, useNavigate } from "react-router";
 import { useTranslation } from "@/i18n";
 import {
   DataTable,
@@ -25,6 +25,7 @@ import {
   MultipleSelectCombobox,
   type ActiveFilter,
 } from "@/components/common/filters";
+import { ROUTES } from "@/constants";
 import {
   useFilterActions,
   useFilterHandlers,
@@ -50,6 +51,7 @@ interface TestsListProps {
 export function TestsList({ roles }: TestsListProps) {
   const { t } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { showError, showSuccess, showDialog, closeDialog } = useApp();
   const {
@@ -358,8 +360,7 @@ export function TestsList({ roles }: TestsListProps) {
   };
 
   const handleViewInfo = (test: TestProps) => {
-    // TODO: Implement view info functionality
-    console.log("View test info:", test);
+    navigate(ROUTES.ADMIN.TEST_INFO(test.id));
   };
 
   const handleDelete = (test: TestProps) => {

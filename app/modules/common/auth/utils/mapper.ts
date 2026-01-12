@@ -7,7 +7,7 @@ import type {
   LoginFormData,
   UpdateUserFormData,
   ChangePasswordFormData,
-} from "@/types/auth";
+} from "../types";
 
 /**
  * Auth Mapper

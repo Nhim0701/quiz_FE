@@ -9,7 +9,7 @@ import {
 } from "react";
 import { useTranslation, type TranslationKey } from "@/i18n";
 import { useBreadcrumb } from "@/hooks/useApp";
-import { useRole } from "@/hooks/useRole";
+import { useRole } from "~/modules/common/auth/hooks/useRole";
 import { ROUTES } from "@/constants";
 import { RESOURCES } from "@/constants/permissions";
 import { PageHeader } from "@/components/page-header";

@@ -5,15 +5,16 @@ import {
   route,
   type RouteConfig,
 } from "@react-router/dev/routes";
-import { ROUTES } from "./constants";
+import { ROUTES } from "@/constants";
+import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
 
 export default [
   index("modules/home.tsx"),
 
   // Auth modules
-  layout("modules/auth/_layout.tsx", [
-    route(ROUTES.LOGIN, "modules/auth/login.tsx"),
-    route(ROUTES.REGISTER, "modules/auth/register.tsx"),
+  layout("modules/common/auth/_layout.tsx", [
+    route(AUTH_ROUTES.LOGIN, "modules/common/auth/login.tsx"),
+    route(AUTH_ROUTES.REGISTER, "modules/common/auth/register.tsx"),
   ]),
 
   layout("modules/_layout.tsx", [
@@ -38,7 +39,12 @@ export default [
 
     layout("modules/admin/_layout.tsx", [
       route(ROUTES.ADMIN.CATEGORIES, "modules/admin/categories/index.tsx"),
-      route(ROUTES.ADMIN.TESTS, "modules/admin/tests/index.tsx"),
+      ...prefix(ROUTES.ADMIN.TESTS, [
+        index("modules/admin/tests/index.tsx"),
+        ...prefix(ROUTES.ADMIN.TEST_ID, [
+          index("modules/admin/tests/$testId/index.tsx"),
+        ]),
+      ]),
     ]),
   ]),
 ] satisfies RouteConfig;

@@ -4,7 +4,7 @@ import {
   hasAnyPermission as checkAnyPermission,
   hasAllPermissions as checkAllPermissions,
   hasResourcePermission as checkResourcePermission,
-} from "@/lib/permissions";
+} from "../utils/permissions";
 import { PERMISSIONS, buildPermission, ACTIONS } from "@/constants/permissions";
 
 /**
@@ -65,7 +65,7 @@ export function useRole() {
    */
   const getNamespaceRoles = (namespace: string) => {
     const permissions = user?.permissions || [];
-    
+
     // If user has full access, return all true
     if (checkPermission(permissions, PERMISSIONS.FULL_ACCESS)) {
       return {
@@ -77,10 +77,22 @@ export function useRole() {
     }
 
     return {
-      read: checkPermission(permissions, buildPermission(namespace, ACTIONS.READ)),
-      create: checkPermission(permissions, buildPermission(namespace, ACTIONS.CREATE)),
-      update: checkPermission(permissions, buildPermission(namespace, ACTIONS.UPDATE)),
-      delete: checkPermission(permissions, buildPermission(namespace, ACTIONS.DELETE)),
+      read: checkPermission(
+        permissions,
+        buildPermission(namespace, ACTIONS.READ)
+      ),
+      create: checkPermission(
+        permissions,
+        buildPermission(namespace, ACTIONS.CREATE)
+      ),
+      update: checkPermission(
+        permissions,
+        buildPermission(namespace, ACTIONS.UPDATE)
+      ),
+      delete: checkPermission(
+        permissions,
+        buildPermission(namespace, ACTIONS.DELETE)
+      ),
     };
   };
 

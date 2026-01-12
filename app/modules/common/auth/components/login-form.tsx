@@ -9,7 +9,7 @@ import { useTranslation } from "@/i18n";
 import { loginSchema, type LoginFormData } from "../schemas/login-schema";
 import useApp from "~/hooks/useApp";
 import { useState } from "react";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/modules/common/auth/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
 interface LoginFormProps {

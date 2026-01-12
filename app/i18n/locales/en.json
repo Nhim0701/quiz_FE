@@ -326,6 +326,24 @@
         "categoryEmpty": "No categories found.",
         "createDatePlaceholder": "Select create date",
         "updateDatePlaceholder": "Select update date"
+      },
+      "info": {
+        "title": "Test Information",
+        "cardTitle": "Test Details",
+        "loading": "Loading test information...",
+        "notFound": "Test not found",
+        "backToList": "Back to Tests List",
+        "fields": {
+          "id": "ID",
+          "name": "Name",
+          "category": "Category",
+          "description": "Description",
+          "timeLimit": "Time Limit",
+          "questionCount": "Question Count",
+          "createdAt": "Created At",
+          "updatedAt": "Updated At"
+        },
+        "noDescription": "No description provided"
       }
     }
   }

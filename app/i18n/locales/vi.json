@@ -311,6 +311,24 @@
         "categoryEmpty": "Không tìm thấy danh mục nào.",
         "createDatePlaceholder": "Chọn ngày tạo",
         "updateDatePlaceholder": "Chọn ngày cập nhật"
+      },
+      "info": {
+        "title": "Thông Tin Bài Kiểm Tra",
+        "cardTitle": "Chi Tiết Bài Kiểm Tra",
+        "loading": "Đang tải thông tin bài kiểm tra...",
+        "notFound": "Không tìm thấy bài kiểm tra",
+        "backToList": "Quay Lại Danh Sách",
+        "fields": {
+          "id": "ID",
+          "name": "Tên",
+          "category": "Danh Mục",
+          "description": "Mô Tả",
+          "timeLimit": "Thời Gian Giới Hạn",
+          "questionCount": "Số Câu Hỏi",
+          "createdAt": "Ngày Tạo",
+          "updatedAt": "Ngày Cập Nhật"
+        },
+        "noDescription": "Không có mô tả"
       }
     }
   },

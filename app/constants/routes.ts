@@ -3,10 +3,6 @@ export const ROUTES = {
   ROOT: "/",
   HOME: "/",
 
-  //Auth routes
-  LOGIN: "/login",
-  REGISTER: "/register",
-
   //Profile routes
   PROFILE: "/profile",
   DASHBOARD: "/dashboard",
@@ -16,6 +12,9 @@ export const ROUTES = {
     INDEX: "/admin",
     CATEGORIES: "/admin/categories",
     TESTS: "/admin/tests",
+    TEST_ID: ":testId",
+    TEST_INFO: (testId?: string) =>
+      testId ? `/admin/tests/${testId}` : `/admin/tests/:testId`,
   },
 
   //Tests routes
@@ -26,10 +25,4 @@ export const ROUTES = {
     RESULT: (testId?: string) =>
       testId ? `/tests/${testId}/result` : `/result`,
   },
-} as const;
-
-// Default redirect routes
-export const DEFAULT_ROUTES = {
-  AUTHENTICATED: ROUTES.DASHBOARD,
-  UNAUTHENTICATED: ROUTES.LOGIN,
 } as const;

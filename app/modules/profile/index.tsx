@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Edit, Lock } from "lucide-react";
 import { useBreadcrumb } from "@/hooks/useApp";
 import { usePageData } from "@/hooks/usePageData";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "~/modules/common/auth/hooks/useAuth";
 import { useTranslation } from "@/i18n";
 import { ROUTES } from "@/constants";
 import { PageHeader } from "@/components/page-header";

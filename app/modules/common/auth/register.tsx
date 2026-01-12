@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { useAuth, type RegisterFormData } from "@/hooks/useAuth";
+import { useAuth, type RegisterFormData } from "~/modules/common/auth/hooks/useAuth";
 import useApp from "@/hooks/useApp";
 import { useTranslation } from "@/i18n";
 import {

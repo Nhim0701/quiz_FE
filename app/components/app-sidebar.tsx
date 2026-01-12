@@ -3,12 +3,11 @@ import {
   FileText,
   User,
   LogOut,
-  Shield,
   FolderTree,
 } from "lucide-react";
 import { useTranslation } from "@/i18n";
-import { useAuth } from "@/hooks/useAuth";
-import { useRole } from "@/hooks/useRole";
+import { useAuth } from "@/modules/common/auth/hooks/useAuth";
+import { useRole } from "@/modules/common/auth/hooks/useRole";
 import { useNavigate, useLocation, Link } from "react-router";
 import { ROUTES } from "@/constants";
 import { COMMON_PERMISSIONS, RESOURCES } from "@/constants/permissions";
@@ -28,6 +27,7 @@ import {
   useSidebar,
 } from "./ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
 
 export function AppSidebar() {
   const { t } = useTranslation();
@@ -45,7 +45,7 @@ export function AppSidebar() {
 
   const handleLogout = async () => {
     await logout();
-    navigate(ROUTES.LOGIN);
+    navigate(AUTH_ROUTES.LOGIN);
   };
 
   const menuItems = [
