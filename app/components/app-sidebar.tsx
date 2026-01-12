@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import { useNavigate, useLocation, Link } from "react-router";
 import { ROUTES } from "@/constants";
-import { COMMON_PERMISSIONS } from "@/constants/permissions";
+import { COMMON_PERMISSIONS, RESOURCES } from "@/constants/permissions";
 import { getInitials } from "@/lib/utils";
 import {
   Sidebar,
@@ -31,7 +31,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 export function AppSidebar() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
-  const { isAdmin, hasPermission } = useRole();
+  const { isAdmin, hasPermission, hasResourcePermission } = useRole();
   const { state } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
@@ -72,18 +72,24 @@ export function AppSidebar() {
       icon: FolderTree,
       url: ROUTES.ADMIN.CATEGORIES,
       permission: COMMON_PERMISSIONS.CATEGORY_READ,
+      resourcePrefix: RESOURCES.CATEGORY,
     },
     {
       title: t("sidebar.admin.tests"),
       icon: FileText,
       url: ROUTES.ADMIN.TESTS,
       permission: COMMON_PERMISSIONS.TEST_READ,
+      resourcePrefix: RESOURCES.TEST,
     },
   ].filter((item) => {
     if (item.permission === null) {
       return isAdmin();
     }
-    return hasPermission(item.permission);
+    // Check if user has the specific permission OR any permission with the resource prefix
+    return (
+      hasPermission(item.permission) ||
+      (item.resourcePrefix ? hasResourcePermission(item.resourcePrefix) : false)
+    );
   });
 
   return (
@@ -161,8 +167,8 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Admin Menu - Only visible to admins */}
-        {isAdmin() && (
+        {/* Admin Menu - Visible to users with admin permissions */}
+        {adminMenuItems.length > 0 && (
           <>
             <SidebarSeparator />
             <SidebarGroup>

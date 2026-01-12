@@ -63,6 +63,8 @@
     "networkError": "Network error: No response received from server",
     "requestError": "Request error",
     "httpError": "HTTP error! status:",
+    "forbidden": "Access forbidden. You don't have permission to access this resource.",
+    "permissionDenied": "Permission denied. You don't have permission to access this resource.",
     "loginFailed": "Login failed. Please check your email or password.",
     "registrationFailed": "Registration failed. Please try again.",
     "fetchUserFailed": "Failed to fetch user:",

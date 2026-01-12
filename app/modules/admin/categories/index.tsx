@@ -5,33 +5,17 @@ import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { COMMON_PERMISSIONS } from "@/constants/permissions";
+import { RESOURCES } from "@/constants/permissions";
 import { CategoriesList, CategoryForm } from "./components";
 import { useCategoriesStore } from "@/hooks/useCategories";
 
 export default function AdminCategories() {
   const { t } = useTranslation();
-  const { hasPermission } = useRole();
+  const { getNamespaceRoles } = useRole();
   const { openSheet } = useCategoriesStore();
 
-  // Check permission
-  const canAccess = hasPermission(COMMON_PERMISSIONS.CATEGORY_READ);
-  const canCreate = hasPermission(COMMON_PERMISSIONS.CATEGORY_CREATE);
-
-  if (!canAccess) {
-    return (
-      <Container>
-        <PageHeader title={t("admin.categories.title")} />
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-muted-foreground">
-              {t("admin.categories.noPermission")}
-            </p>
-          </CardContent>
-        </Card>
-      </Container>
-    );
-  }
+  // Get roles for categories namespace
+  const roles = getNamespaceRoles(RESOURCES.CATEGORY);
 
   return (
     <Container>
@@ -39,7 +23,7 @@ export default function AdminCategories() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <CardTitle>{t("admin.categories.title")}</CardTitle>
-          {canCreate && (
+          {roles.create && (
             <Button
               onClick={() => openSheet()}
               size="sm"
@@ -51,7 +35,7 @@ export default function AdminCategories() {
           )}
         </CardHeader>
         <CardContent>
-          <CategoriesList />
+          <CategoriesList roles={roles} />
         </CardContent>
       </Card>
       <CategoryForm />

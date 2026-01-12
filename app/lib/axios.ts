@@ -190,13 +190,26 @@ apiClient.interceptors.response.use(
         return Promise.reject(apiError);
       }
 
+      // Handle specific HTTP status codes
+      if (error.response.status === 403) {
+        const permissionDeniedError = new Error(
+          t(ERROR.PERMISSION_DENIED.MESSAGE_KEY as TranslationKey)
+        ) as Error & {
+          code: string;
+          status?: number;
+        };
+        permissionDeniedError.code = ERROR.PERMISSION_DENIED.CODE;
+        permissionDeniedError.status = 403;
+        throw permissionDeniedError;
+      }
+
       // Fallback for non-standard error responses
       let errorMessage: string;
 
       if (errorData && typeof errorData === "object") {
         // Try to extract error message from various possible structures
         const data = errorData as unknown as Record<string, unknown>;
-        
+
         // Check for common error message fields
         if (typeof data.message === "string") {
           errorMessage = data.message;

@@ -3,17 +3,17 @@ import { useRole } from "@/hooks/useRole";
 import { PageHeader } from "@/components/page-header";
 import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { COMMON_PERMISSIONS } from "@/constants/permissions";
+import { RESOURCES } from "@/constants/permissions";
 import { TestsList } from "./components";
 
 export default function AdminTests() {
   const { t } = useTranslation();
-  const { hasPermission } = useRole();
+  const { getNamespaceRoles } = useRole();
 
-  // Check permission
-  const canAccess = hasPermission(COMMON_PERMISSIONS.TEST_READ);
+  // Get roles for tests namespace
+  const roles = getNamespaceRoles(RESOURCES.TEST);
 
-  if (!canAccess) {
+  if (!roles.read) {
     return (
       <Container>
         <PageHeader title={t("admin.tests.title")} />
@@ -36,7 +36,7 @@ export default function AdminTests() {
           <CardTitle>{t("admin.tests.title")}</CardTitle>
         </CardHeader>
         <CardContent className="overflow-auto">
-          <TestsList />
+          <TestsList roles={roles} />
         </CardContent>
       </Card>
     </Container>

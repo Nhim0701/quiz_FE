@@ -3,6 +3,7 @@ import {
   hasPermission as checkPermission,
   hasAnyPermission as checkAnyPermission,
   hasAllPermissions as checkAllPermissions,
+  hasResourcePermission as checkResourcePermission,
 } from "@/lib/permissions";
 import { PERMISSIONS, buildPermission, ACTIONS } from "@/constants/permissions";
 
@@ -44,16 +45,43 @@ export function useRole() {
   };
 
   /**
-   * Check if user can access admin pages
-   * @param resource - Resource name (e.g., "category", "test")
+   * Check if user has any permission with the specified resource prefix
+   * Useful for checking namespace roles (e.g., "categories::*", "categories::read", etc.)
+   * @param resourcePrefix - Resource name to check (e.g., "categories", "tests")
    */
-  const canAccessAdmin = (resource?: string): boolean => {
-    if (isAdmin()) return true;
-    if (!resource) return false;
-    return checkPermission(
-      user?.permissions,
-      buildPermission(resource, ACTIONS.READ)
-    );
+  const hasResourcePermission = (resourcePrefix: string): boolean => {
+    return checkResourcePermission(user?.permissions, resourcePrefix);
+  };
+
+  /**
+   * Get roles object for a specific namespace/resource
+   * Returns an object with read, create, update, delete permissions
+   * @param namespace - Resource name (e.g., "categories", "tests")
+   * @returns Object with boolean values for each action
+   *
+   * @example
+   * const roles = getNamespaceRoles("categories");
+   * // Returns: { read: true, create: false, update: true, delete: false }
+   */
+  const getNamespaceRoles = (namespace: string) => {
+    const permissions = user?.permissions || [];
+    
+    // If user has full access, return all true
+    if (checkPermission(permissions, PERMISSIONS.FULL_ACCESS)) {
+      return {
+        read: true,
+        create: true,
+        update: true,
+        delete: true,
+      };
+    }
+
+    return {
+      read: checkPermission(permissions, buildPermission(namespace, ACTIONS.READ)),
+      create: checkPermission(permissions, buildPermission(namespace, ACTIONS.CREATE)),
+      update: checkPermission(permissions, buildPermission(namespace, ACTIONS.UPDATE)),
+      delete: checkPermission(permissions, buildPermission(namespace, ACTIONS.DELETE)),
+    };
   };
 
   return {
@@ -63,6 +91,7 @@ export function useRole() {
     hasAnyPermission,
     hasAllPermissions,
     isAdmin,
-    canAccessAdmin,
+    hasResourcePermission,
+    getNamespaceRoles,
   };
 }

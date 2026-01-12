@@ -18,7 +18,16 @@ import {
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 
-export function CategoriesList() {
+interface CategoriesListProps {
+  roles: {
+    read: boolean;
+    create: boolean;
+    update: boolean;
+    delete: boolean;
+  };
+}
+
+export function CategoriesList({ roles }: CategoriesListProps) {
   const { t } = useTranslation();
   const location = useLocation();
   const { showError, showSuccess, showDialog, closeDialog } = useApp();
@@ -150,17 +159,25 @@ export function CategoriesList() {
   ];
 
   const actions: Action<Category>[] = [
-    {
-      label: t("common.edit"),
-      onClick: handleEdit,
-      icon: <Edit className="h-4 w-4" />,
-    },
-    {
-      label: t("admin.categories.delete"),
-      onClick: handleDelete,
-      variant: "destructive",
-      icon: <Trash2 className="h-4 w-4" />,
-    },
+    ...(roles.update
+      ? [
+          {
+            label: t("common.edit"),
+            onClick: handleEdit,
+            icon: <Edit className="h-4 w-4" />,
+          },
+        ]
+      : []),
+    ...(roles.delete
+      ? [
+          {
+            label: t("admin.categories.delete"),
+            onClick: handleDelete,
+            variant: "destructive" as const,
+            icon: <Trash2 className="h-4 w-4" />,
+          },
+        ]
+      : []),
   ];
 
   return (

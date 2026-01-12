@@ -175,3 +175,44 @@ export function hasAllPermissions(
     hasPermission(userPermissions, permission)
   );
 }
+
+/**
+ * Check if user has any permission with the specified resource prefix
+ * Useful for checking namespace roles (e.g., "categories::*", "categories::read", etc.)
+ *
+ * @param userPermissions - Array of user permissions
+ * @param resourcePrefix - Resource name to check (e.g., "categories", "tests")
+ * @returns true if user has any permission with the resource prefix
+ *
+ * @example
+ * hasResourcePermission(["categories::*"], "categories") // true
+ * hasResourcePermission(["categories::read"], "categories") // true
+ * hasResourcePermission(["tests::read"], "categories") // false
+ */
+export function hasResourcePermission(
+  userPermissions: string[] | undefined,
+  resourcePrefix: string
+): boolean {
+  if (!userPermissions || userPermissions.length === 0) {
+    return false;
+  }
+
+  // Check for full access
+  if (userPermissions.includes(PERMISSIONS.FULL_ACCESS)) {
+    return true;
+  }
+
+  // Check if any permission starts with the resource prefix
+  for (const permission of userPermissions) {
+    const parsed = parsePermission(permission);
+    if (!parsed) continue;
+
+    const [resource] = parsed;
+    // Match exact resource or wildcard resource
+    if (resource === resourcePrefix || resource === WILDCARD_RESOURCE) {
+      return true;
+    }
+  }
+
+  return false;
+}

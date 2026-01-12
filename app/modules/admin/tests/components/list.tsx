@@ -20,7 +20,16 @@ import {
 } from "@/components/ui/alert-dialog";
 import { formatUnixTimestamp } from "@/lib/utils";
 
-export function TestsList() {
+interface TestsListProps {
+  roles: {
+    read: boolean;
+    create: boolean;
+    update: boolean;
+    delete: boolean;
+  };
+}
+
+export function TestsList({ roles }: TestsListProps) {
   const { t } = useTranslation();
   const location = useLocation();
   const { showError, showSuccess, showDialog, closeDialog } = useApp();
@@ -236,17 +245,25 @@ export function TestsList() {
   ];
 
   const actions: Action<TestProps>[] = [
-    {
-      label: t("common.edit"),
-      onClick: handleEdit,
-      icon: <Edit className="h-4 w-4" />,
-    },
-    {
-      label: t("admin.tests.delete"),
-      onClick: handleDelete,
-      variant: "destructive",
-      icon: <Trash2 className="h-4 w-4" />,
-    },
+    ...(roles.update
+      ? [
+          {
+            label: t("common.edit"),
+            onClick: handleEdit,
+            icon: <Edit className="h-4 w-4" />,
+          },
+        ]
+      : []),
+    ...(roles.delete
+      ? [
+          {
+            label: t("admin.tests.delete"),
+            onClick: handleDelete,
+            variant: "destructive" as const,
+            icon: <Trash2 className="h-4 w-4" />,
+          },
+        ]
+      : []),
   ];
 
   return (

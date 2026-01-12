@@ -63,6 +63,8 @@
     "networkError": "Lỗi mạng: Không nhận được phản hồi từ máy chủ",
     "requestError": "Lỗi yêu cầu",
     "httpError": "Lỗi HTTP! mã trạng thái:",
+    "forbidden": "Truy cập bị từ chối. Bạn không có quyền truy cập tài nguyên này.",
+    "permissionDenied": "Quyền truy cập bị từ chối. Bạn không có quyền truy cập tài nguyên này.",
     "loginFailed": "Đăng nhập thất bại. Vui lòng kiểm tra email hoặc mật khẩu của bạn.",
     "registrationFailed": "Đăng ký thất bại. Vui lòng thử lại.",
     "fetchUserFailed": "Không thể lấy thông tin người dùng:",
