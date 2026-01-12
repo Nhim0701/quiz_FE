@@ -27,3 +27,27 @@ export function formatUnixTimestamp(
     return null;
   }
 }
+
+/**
+ * Get initials from a full name
+ * @param fullName The full name to extract initials from
+ * @param maxLength Maximum number of characters to return (default: 2)
+ * @returns Uppercase initials string
+ */
+export function getInitials(
+  fullName: string | null | undefined,
+  maxLength: number = 2
+): string {
+  if (!fullName || !fullName.trim()) {
+    return "";
+  }
+
+  const initials = fullName
+    .trim()
+    .split(/\s+/)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
+
+  return initials.slice(0, maxLength);
+}

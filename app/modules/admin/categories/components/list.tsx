@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useLocation } from "react-router";
 import { useTranslation } from "@/i18n";
 import {
   DataTable,
@@ -19,9 +20,24 @@ import {
 
 export function CategoriesList() {
   const { t } = useTranslation();
+  const location = useLocation();
   const { showError, showSuccess, showDialog, closeDialog } = useApp();
-  const { page, pageSize, total, setPage, setPageSize, setTotal } =
-    usePaginationStore();
+  const {
+    page,
+    pageSize,
+    total,
+    setPage,
+    setPageSize,
+    setTotal,
+    setCurrentRoute,
+  } = usePaginationStore();
+
+  // Reset pagination when route changes (but keep when same route)
+  useEffect(() => {
+    // Get route without query params for comparison
+    const routePath = location.pathname;
+    setCurrentRoute(routePath);
+  }, [location.pathname, setCurrentRoute]);
   const {
     categories,
     loading,
@@ -56,8 +72,8 @@ export function CategoriesList() {
     setPage(newPage);
   };
 
-  const handlePageSizeChange = (newPageSize: number | "all") => {
-    setPageSize(newPageSize); // Store handles "all" conversion
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
   };
 
   const handleEdit = (category: Category) => {

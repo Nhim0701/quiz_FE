@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { ApiSuccessResponse } from "@/types";
+import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
 import apiClient from "@/lib/axios";
 import { API_ENDPOINTS } from "@/constants";
 
@@ -8,6 +8,9 @@ export interface TestProps {
   name: string;
   questionCount: number;
   categoryId: string;
+  categoryName?: string;
+  createdAt?: string | number;
+  updatedAt?: string | number;
 }
 
 interface TestsState {
@@ -18,13 +21,22 @@ interface TestsState {
   loading: Record<string, boolean>;
   error: Record<string, string | null>;
 
+  // Admin tests list state
+  adminTests: TestProps[];
+  adminLoading: boolean;
+  adminError: string | null;
+
   // API methods
-  getTestsByCategory: (
-    categoryId: string
-  ) => Promise<TestProps[]>;
-  getTestById: (
-    testId: string
-  ) => Promise<TestProps | null>;
+  getTestsByCategory: (categoryId: string) => Promise<TestProps[]>;
+  getTestById: (testId: string) => Promise<TestProps | null>;
+
+  // Admin API methods
+  fetchTests: (
+    page?: number,
+    pageSize?: number
+  ) => Promise<{ data: TestProps[]; meta?: ApiResponseMeta } | undefined>;
+  deleteTest: (id: string) => Promise<void>;
+  refreshTests: (page?: number, pageSize?: number) => Promise<void>;
 }
 
 export const useTestsStore = create<TestsState>((set, get) => ({
@@ -33,6 +45,9 @@ export const useTestsStore = create<TestsState>((set, get) => ({
   testsById: {},
   loading: {},
   error: {},
+  adminTests: [],
+  adminLoading: false,
+  adminError: null,
 
   // API methods
   getTestsByCategory: async (categoryId: string) => {
@@ -66,9 +81,7 @@ export const useTestsStore = create<TestsState>((set, get) => ({
       return tests;
     } catch (error) {
       const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch tests";
+        error instanceof Error ? error.message : "Failed to fetch tests";
       set((state) => ({
         error: { ...state.error, [categoryId]: errorMessage },
         loading: { ...state.loading, [categoryId]: false },
@@ -102,9 +115,9 @@ export const useTestsStore = create<TestsState>((set, get) => ({
 
     // If not found in cache, fetch from API
     try {
-      const response = await apiClient.get<
-        ApiSuccessResponse<TestProps>
-      >(API_ENDPOINTS.TESTS.GET(testId));
+      const response = await apiClient.get<ApiSuccessResponse<TestProps>>(
+        API_ENDPOINTS.TESTS.GET(testId)
+      );
 
       const test = response.data.data;
 
@@ -122,11 +135,8 @@ export const useTestsStore = create<TestsState>((set, get) => ({
           const categoryId = parseInt(test.categoryId);
           if (!isNaN(categoryId)) {
             set((state) => {
-              const categoryTests =
-                state.testsByCategory[categoryId] || [];
-              const exists = categoryTests.some(
-                (test) => test.id === testId
-              );
+              const categoryTests = state.testsByCategory[categoryId] || [];
+              const exists = categoryTests.some((test) => test.id === testId);
               if (!exists) {
                 return {
                   testsByCategory: {
@@ -148,5 +158,53 @@ export const useTestsStore = create<TestsState>((set, get) => ({
       console.error("Failed to fetch test:", error);
       return null;
     }
+  },
+
+  // Admin API methods
+  fetchTests: async (page = 1, pageSize = 10) => {
+    set({ adminLoading: true, adminError: null });
+    try {
+      const response = await apiClient.get<ApiSuccessResponse<TestProps[]>>(
+        API_ENDPOINTS.TESTS.LIST,
+        {
+          params: {
+            page,
+            pageSize,
+          },
+        }
+      );
+
+      const data = response.data.data || [];
+      const meta = response.data.meta;
+
+      set({
+        adminTests: data,
+        adminLoading: false,
+      });
+
+      return { data, meta };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch tests";
+      set({ adminError: errorMessage, adminLoading: false });
+      throw error;
+    }
+  },
+
+  deleteTest: async (id) => {
+    set({ adminLoading: true, adminError: null });
+    try {
+      await apiClient.delete(API_ENDPOINTS.TESTS.GET(id));
+      set({ adminLoading: false });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to delete test";
+      set({ adminError: errorMessage, adminLoading: false });
+      throw error;
+    }
+  },
+
+  refreshTests: async (page = 1, pageSize = 10) => {
+    await get().fetchTests(page, pageSize);
   },
 }));

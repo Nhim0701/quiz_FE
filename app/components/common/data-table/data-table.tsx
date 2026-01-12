@@ -89,76 +89,88 @@ export function DataTable<T extends { id: string | number }>({
     );
   }
 
+  const isScrollEnabled = Boolean(scroll);
+  const scrollConfig = typeof scroll === "object" ? scroll : { maxHeight: 500 };
+  const maxHeight = scrollConfig.maxHeight ?? 500;
+
   const tableContent = (
-    <Table>
-      <TableHeader>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id}>
-            {headerGroup.headers.map((header) => {
-              const meta = header.column.columnDef.meta as
-                | { className?: string; center?: boolean }
-                | undefined;
-              return (
-                <TableHead
-                  key={header.id}
-                  className={cn(meta?.center && "text-center", meta?.className)}
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </TableHead>
-              );
-            })}
-          </TableRow>
-        ))}
-      </TableHeader>
-      <TableBody>
-        {table.getRowModel().rows?.length ? (
-          table.getRowModel().rows.map((row) => (
-            <TableRow
-              key={row.id}
-              data-state={row.getIsSelected() && "selected"}
-            >
-              {row.getVisibleCells().map((cell) => {
-                const meta = cell.column.columnDef.meta as
+    <div>
+      <table className="w-full caption-bottom text-sm">
+        <TableHeader
+          className={cn(
+            isScrollEnabled && "sticky top-0 z-10 bg-card shadow-sm"
+          )}
+        >
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                const meta = header.column.columnDef.meta as
                   | { className?: string; center?: boolean }
                   | undefined;
                 return (
-                  <TableCell
-                    key={cell.id}
+                  <TableHead
+                    key={header.id}
                     className={cn(
                       meta?.center && "text-center",
                       meta?.className
                     )}
                   >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
                 );
               })}
             </TableRow>
-          ))
-        ) : (
-          <TableRow>
-            <TableCell
-              colSpan={tableColumns.length}
-              className="h-24 text-center text-sm text-muted-foreground"
-            >
-              {emptyMessage}
-            </TableCell>
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+              >
+                {row.getVisibleCells().map((cell) => {
+                  const meta = cell.column.columnDef.meta as
+                    | { className?: string; center?: boolean }
+                    | undefined;
+                  return (
+                    <TableCell
+                      key={cell.id}
+                      className={cn(
+                        meta?.center && "text-center",
+                        meta?.className
+                      )}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan={tableColumns.length}
+                className="h-24 text-center text-sm text-muted-foreground"
+              >
+                {emptyMessage}
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </table>
+    </div>
   );
 
-  if (scroll) {
-    const scrollConfig =
-      typeof scroll === "object" ? scroll : { maxHeight: 500 };
-    const maxHeight = scrollConfig.maxHeight ?? 500;
-
+  if (isScrollEnabled) {
     return (
       <div className={cn("w-full", className)}>
         <div className="rounded-lg border border-border bg-card shadow-sm">
@@ -186,7 +198,7 @@ export function DataTable<T extends { id: string | number }>({
   return (
     <div className={cn("w-full", className)}>
       <div className="rounded-lg border border-border bg-card shadow-sm">
-        <div className="overflow-x-auto">{tableContent}</div>
+        {tableContent}
         {pagination && (
           <Pagination
             page={pagination.page}

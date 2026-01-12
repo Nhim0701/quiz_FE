@@ -13,6 +13,8 @@
     "switchToDarkMode": "Switch to dark mode",
     "edit": "Edit",
     "cancel": "Cancel",
+    "take": "Take Test",
+    "result": "Result",
     "pagination": {
       "itemsPerPage": "Items per page:",
       "all": "All",
@@ -188,7 +190,8 @@
     "toggleSidebar": "Toggle Sidebar",
     "admin": {
       "content": "Content Management",
-      "categories": "Categories"
+      "categories": "Categories",
+      "tests": "Tests"
     }
   },
   "breadcrumb": {
@@ -262,6 +265,22 @@
         "id": "ID",
         "name": "Name",
         "questionCount": "Questions"
+      }
+    },
+    "tests": {
+      "title": "Tests Management",
+      "empty": "No tests found",
+      "noPermission": "You don't have permission to access this page",
+      "delete": "Delete",
+      "deleteSuccess": "Test deleted successfully",
+      "confirmDelete": "Are you sure you want to delete test \"{{name}}\"?",
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "category": "Category",
+        "questionCount": "Questions",
+        "createdAt": "Created At",
+        "updatedAt": "Updated At"
       }
     }
   }

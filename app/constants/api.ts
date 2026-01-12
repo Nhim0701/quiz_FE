@@ -20,7 +20,7 @@ export const API_ENDPOINTS = {
 
   // Tests endpoints
   TESTS: {
-    LIST: "/api/v1/tests/",
+    LIST: "/api/v1/tests",
     GET: (testId: string) => `/api/v1/tests/${testId}`,
     QUESTIONS: (testId: string) => `/api/v1/tests/${testId}/questions`,
     QUESTION: (testId: string, questionId: string) =>

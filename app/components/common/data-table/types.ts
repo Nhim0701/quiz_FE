@@ -67,6 +67,6 @@ export interface PaginationProps {
   pageSize: number;
   total: number;
   onPageChange: (page: number) => void;
-  onPageSizeChange: (pageSize: number | "all") => void;
-  pageSizeOptions?: readonly (number | "all")[];
+  onPageSizeChange: (pageSize: number) => void;
+  pageSizeOptions?: readonly number[];
 }

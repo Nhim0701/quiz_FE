@@ -15,6 +15,7 @@ export const ROUTES = {
   ADMIN: {
     INDEX: "/admin",
     CATEGORIES: "/admin/categories",
+    TESTS: "/admin/tests",
   },
 
   //Tests routes

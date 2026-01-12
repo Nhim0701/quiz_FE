@@ -12,6 +12,7 @@ import { useRole } from "@/hooks/useRole";
 import { useNavigate, useLocation, Link } from "react-router";
 import { ROUTES } from "@/constants";
 import { COMMON_PERMISSIONS } from "@/constants/permissions";
+import { getInitials } from "@/lib/utils";
 import {
   Sidebar,
   SidebarContent,
@@ -35,18 +36,9 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const getInitials = (fullName: string) => {
-    return fullName
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   const initials = user
     ? user.fullName
-      ? getInitials(user.fullName)
+      ? getInitials(user.fullName, state === "collapsed" ? 1 : 2)
       : user.email[0]?.toUpperCase() || ""
     : "";
 
@@ -81,6 +73,12 @@ export function AppSidebar() {
       url: ROUTES.ADMIN.CATEGORIES,
       permission: COMMON_PERMISSIONS.CATEGORY_READ,
     },
+    {
+      title: t("sidebar.admin.tests"),
+      icon: FileText,
+      url: ROUTES.ADMIN.TESTS,
+      permission: COMMON_PERMISSIONS.TEST_READ,
+    },
   ].filter((item) => {
     if (item.permission === null) {
       return isAdmin();
@@ -97,7 +95,13 @@ export function AppSidebar() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-2 px-2 py-1">
-                  <div className="w-8 h-8 shrink-0 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center text-white text-sm font-bold shadow-lg">
+                  <div
+                    className={`shrink-0 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center text-white font-bold shadow-lg transition-all duration-200 ease-linear ${
+                      state === "collapsed"
+                        ? "w-6 h-6 text-xs"
+                        : "w-8 h-8 text-sm"
+                    }`}
+                  >
                     {initials}
                   </div>
                   <div

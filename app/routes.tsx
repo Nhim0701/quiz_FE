@@ -38,6 +38,7 @@ export default [
 
     layout("modules/admin/_layout.tsx", [
       route(ROUTES.ADMIN.CATEGORIES, "modules/admin/categories/index.tsx"),
+      route(ROUTES.ADMIN.TESTS, "modules/admin/tests/index.tsx"),
     ]),
   ]),
 ] satisfies RouteConfig;

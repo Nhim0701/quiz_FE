@@ -13,6 +13,8 @@
     "switchToDarkMode": "Chuyển sang chế độ tối",
     "edit": "Sửa",
     "cancel": "Hủy",
+    "take": "Làm bài",
+    "result": "Kết quả",
     "pagination": {
       "itemsPerPage": "Số mục mỗi trang:",
       "all": "Tất cả",
@@ -179,18 +181,6 @@
       "answer": "Câu trả lời"
     }
   },
-  "sidebar": {
-    "dashboard": "Bảng Điều Khiển",
-    "tests": "Bài Kiểm Tra",
-    "profile": "Hồ Sơ",
-    "expand": "Mở rộng",
-    "collapse": "Thu gọn",
-    "toggleSidebar": "Bật/Tắt Thanh Bên",
-    "admin": {
-      "content": "Quản Lý Nội Dung",
-      "categories": "Danh Mục"
-    }
-  },
   "breadcrumb": {
     "home": "Trang chủ"
   },
@@ -263,6 +253,35 @@
         "name": "Tên",
         "questionCount": "Câu Hỏi"
       }
+    },
+    "tests": {
+      "title": "Quản Lý Bài Kiểm Tra",
+      "empty": "Không tìm thấy bài kiểm tra nào",
+      "noPermission": "Bạn không có quyền truy cập trang này",
+      "delete": "Xóa",
+      "deleteSuccess": "Xóa bài kiểm tra thành công",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa bài kiểm tra \"{{name}}\"?",
+      "columns": {
+        "id": "ID",
+        "name": "Tên",
+        "category": "Danh Mục",
+        "questionCount": "Câu Hỏi",
+        "createdAt": "Ngày Tạo",
+        "updatedAt": "Ngày Cập Nhật"
+      }
+    }
+  },
+  "sidebar": {
+    "dashboard": "Bảng Điều Khiển",
+    "tests": "Bài Kiểm Tra",
+    "profile": "Hồ Sơ",
+    "expand": "Mở rộng",
+    "collapse": "Thu gọn",
+    "toggleSidebar": "Bật/Tắt Thanh Bên",
+    "admin": {
+      "content": "Quản Lý Nội Dung",
+      "categories": "Danh Mục",
+      "tests": "Bài Kiểm Tra"
     }
   }
 }
