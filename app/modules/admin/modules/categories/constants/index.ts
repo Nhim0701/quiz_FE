@@ -8,4 +8,6 @@ export const ENDPOINTS = {
   CREATE: "/api/v1/categories",
   UPDATE: (id: string) => `/api/v1/categories/${id}`,
   DELETE: (id: string) => `/api/v1/categories/${id}`,
+
+  TESTS: (categoryId: string) => `/api/v1/categories/${categoryId}/tests`,
 };

@@ -2,7 +2,11 @@ import { create } from "zustand";
 import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
 import { apiClient } from "@/lib";
 import { ENDPOINTS } from "../constants";
+import { ENDPOINTS as QUESTIONS_ENDPOINTS } from "../../questions/constants";
+import { ENDPOINTS as CATEGORIES_ENDPOINTS } from "../../categories/constants";
 import type { TestProps } from "../types";
+import type { QuestionProps } from "../../questions/types";
+import { PAGINATION } from "@/constants";
 
 interface TestsState {
   // Tests by category ID
@@ -60,6 +64,51 @@ interface TestsState {
     pageSize?: number,
     filters?: Record<string, string>
   ) => Promise<void>;
+
+  // Questions state and methods (merged from useQuestionsStore)
+  questions: QuestionProps[];
+  questionsLoading: boolean;
+  questionsError: string | null;
+  questionsTotal: number;
+  questionsMeta?: ApiResponseMeta;
+  isQuestionsDialogOpen: boolean;
+  openQuestionsDialog: () => void;
+  closeQuestionsDialog: () => void;
+  fetchQuestions: (
+    page?: number,
+    pageSize?: number,
+    filters?: Record<string, string>
+  ) => Promise<void>;
+  createQuestion: (data: {
+    testId: string;
+    content: string;
+    isMultipleChoice: boolean;
+    categoryId?: string;
+  }) => Promise<QuestionProps>;
+  updateQuestion: (
+    testId: string,
+    questionId: string,
+    data: {
+      content: string;
+      isMultipleChoice: boolean;
+      testId?: string;
+      categoryId?: string;
+    }
+  ) => Promise<QuestionProps>;
+  getQuestion: (testId: string, questionId: string) => Promise<QuestionProps>;
+  deleteQuestion: (
+    testId: string,
+    questionId: string,
+    page?: number,
+    pageSize?: number,
+    filters?: Record<string, string>
+  ) => Promise<void>;
+  refreshQuestions: (
+    testId: string,
+    page?: number,
+    pageSize?: number,
+    filters?: Record<string, string>
+  ) => Promise<void>;
 }
 
 export const useTestsStore = create<TestsState>((set, get) => ({
@@ -75,6 +124,14 @@ export const useTestsStore = create<TestsState>((set, get) => ({
   editingTest: null,
   viewingTest: null,
   isEditMode: false,
+
+  // Questions initial state
+  questions: [],
+  questionsLoading: false,
+  questionsError: null,
+  questionsTotal: 0,
+  questionsMeta: undefined,
+  isQuestionsDialogOpen: false,
 
   // Form actions
   openDialog: (test = null) => {
@@ -115,9 +172,14 @@ export const useTestsStore = create<TestsState>((set, get) => ({
     }));
 
     try {
+      const params: Record<string, any> = {
+        page: 1,
+        pageSize: PAGINATION.MAX_PAGE_SIZE_FOR_ALL,
+      };
+
       const response = await apiClient.get<
         ApiSuccessResponse<Array<TestProps>>
-      >(ENDPOINTS.TESTS.LIST);
+      >(CATEGORIES_ENDPOINTS.TESTS(categoryId), { params });
 
       const tests = response.data.data || [];
 
@@ -353,4 +415,228 @@ export const useTestsStore = create<TestsState>((set, get) => ({
       }
     }
   },
+
+  // Questions dialog actions
+  openQuestionsDialog: () => set({ isQuestionsDialogOpen: true }),
+  closeQuestionsDialog: () => set({ isQuestionsDialogOpen: false }),
+
+  // Questions API methods
+  fetchQuestions: async (
+    page = 1,
+    pageSize = 10,
+    filters?: Record<string, string>
+  ) => {
+    set({ questionsLoading: true, questionsError: null });
+    try {
+      const params: Record<string, any> = {
+        page,
+        pageSize,
+      };
+
+      // Add filter params if provided
+      if (filters) {
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value && typeof value === "string" && value.trim()) {
+            params[key] = value;
+          }
+        });
+      }
+
+      const response = await apiClient.get<ApiSuccessResponse<QuestionProps[]>>(
+        QUESTIONS_ENDPOINTS.QUESTIONS.LIST,
+        {
+          params,
+        }
+      );
+      set({
+        questions: response.data.data || [],
+        questionsLoading: false,
+        questionsTotal:
+          response.data.meta?.total || response.data.data?.length || 0,
+        questionsMeta: response.data.meta,
+      });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch questions";
+      set({
+        questionsError: errorMessage,
+        questionsLoading: false,
+        questions: [],
+        questionsTotal: 0,
+      });
+      throw error;
+    }
+  },
+
+  createQuestion: async (data: {
+    testId: string;
+    content: string;
+    isMultipleChoice: boolean;
+    categoryId?: string;
+  }) => {
+    set({ questionsLoading: true, questionsError: null });
+    try {
+      const response = await apiClient.post<ApiSuccessResponse<QuestionProps>>(
+        QUESTIONS_ENDPOINTS.QUESTIONS.CREATE,
+        data
+      );
+      set({ questionsLoading: false });
+      return response.data.data;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create question";
+      set({ questionsError: errorMessage, questionsLoading: false });
+      throw error;
+    }
+  },
+
+  updateQuestion: async (
+    testId: string,
+    questionId: string,
+    data: {
+      content: string;
+      isMultipleChoice: boolean;
+      testId?: string;
+      categoryId?: string;
+    }
+  ) => {
+    set({ questionsLoading: true, questionsError: null });
+    try {
+      const response = await apiClient.put<ApiSuccessResponse<QuestionProps>>(
+        QUESTIONS_ENDPOINTS.QUESTIONS.UPDATE(questionId),
+        data
+      );
+      set({ questionsLoading: false });
+      return response.data.data;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update question";
+      set({ questionsError: errorMessage, questionsLoading: false });
+      throw error;
+    }
+  },
+
+  getQuestion: async (testId: string, questionId: string) => {
+    set({ questionsLoading: true, questionsError: null });
+    try {
+      const response = await apiClient.get<ApiSuccessResponse<QuestionProps>>(
+        QUESTIONS_ENDPOINTS.QUESTIONS.GET(questionId)
+      );
+      set({ questionsLoading: false });
+      return response.data.data;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch question";
+      set({ questionsError: errorMessage, questionsLoading: false });
+      throw error;
+    }
+  },
+
+  deleteQuestion: async (
+    testId: string,
+    questionId: string,
+    page = 1,
+    pageSize = 10,
+    filters?: Record<string, string>
+  ) => {
+    set({ questionsLoading: true, questionsError: null });
+    try {
+      await apiClient.delete(QUESTIONS_ENDPOINTS.QUESTIONS.DELETE(questionId));
+      // Refresh questions after delete
+      await get().fetchQuestions(page, pageSize, filters);
+      set({ questionsLoading: false });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to delete question";
+      set({ questionsError: errorMessage, questionsLoading: false });
+      throw error;
+    }
+  },
+
+  refreshQuestions: async (
+    testId: string,
+    page = 1,
+    pageSize = 10,
+    filters?: Record<string, string>
+  ) => {
+    await get().fetchQuestions(page, pageSize, filters);
+  },
 }));
+
+// Adapter hook to provide useQuestionsStore interface from useTestsStore
+const useQuestionsStoreHook = () => {
+  const store = useTestsStore();
+  return {
+    questions: store.questions,
+    loading: store.questionsLoading,
+    error: store.questionsError,
+    total: store.questionsTotal,
+    meta: store.questionsMeta,
+    isDialogOpen: store.isQuestionsDialogOpen,
+    openDialog: store.openQuestionsDialog,
+    closeDialog: store.closeQuestionsDialog,
+    fetchQuestions: store.fetchQuestions,
+    createQuestion: store.createQuestion,
+    updateQuestion: store.updateQuestion,
+    getQuestion: store.getQuestion,
+    deleteQuestion: store.deleteQuestion,
+    refreshQuestions: store.refreshQuestions,
+  };
+};
+
+// Add store methods for direct access (like getState, setState, subscribe)
+(useQuestionsStoreHook as any).getState = () => {
+  const state = useTestsStore.getState();
+  return {
+    questions: state.questions,
+    loading: state.questionsLoading,
+    error: state.questionsError,
+    total: state.questionsTotal,
+    meta: state.questionsMeta,
+    isDialogOpen: state.isQuestionsDialogOpen,
+    openDialog: state.openQuestionsDialog,
+    closeDialog: state.closeQuestionsDialog,
+    fetchQuestions: state.fetchQuestions,
+    createQuestion: state.createQuestion,
+    updateQuestion: state.updateQuestion,
+    getQuestion: state.getQuestion,
+    deleteQuestion: state.deleteQuestion,
+    refreshQuestions: state.refreshQuestions,
+  };
+};
+
+(useQuestionsStoreHook as any).setState = (partial: any) => {
+  const updates: any = {};
+  if (partial.questions !== undefined) updates.questions = partial.questions;
+  if (partial.loading !== undefined) updates.questionsLoading = partial.loading;
+  if (partial.error !== undefined) updates.questionsError = partial.error;
+  if (partial.total !== undefined) updates.questionsTotal = partial.total;
+  if (partial.meta !== undefined) updates.questionsMeta = partial.meta;
+  if (partial.isDialogOpen !== undefined)
+    updates.isQuestionsDialogOpen = partial.isDialogOpen;
+  useTestsStore.setState(updates);
+};
+
+(useQuestionsStoreHook as any).subscribe = (listener: (state: any) => void) => {
+  return useTestsStore.subscribe((state) => {
+    const questionsState = {
+      questions: state.questions,
+      loading: state.questionsLoading,
+      error: state.questionsError,
+      total: state.questionsTotal,
+      meta: state.questionsMeta,
+      isDialogOpen: state.isQuestionsDialogOpen,
+      openDialog: state.openQuestionsDialog,
+      closeDialog: state.closeQuestionsDialog,
+      fetchQuestions: state.fetchQuestions,
+      createQuestion: state.createQuestion,
+      updateQuestion: state.updateQuestion,
+      getQuestion: state.getQuestion,
+      deleteQuestion: state.deleteQuestion,
+      refreshQuestions: state.refreshQuestions,
+    };
+    listener(questionsState);
+  });
+};
+
+export const useQuestionsStore = useQuestionsStoreHook as any;
