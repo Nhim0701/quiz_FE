@@ -4,7 +4,7 @@ import { useTestStore, useTestStoreState } from "../../hooks";
 import { TIME_CONSTANTS, ROUTES } from "../../constants";
 import { useTranslation } from "@/i18n";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
-import { useTestsStore, type TestProps } from "@/hooks/use-tests";
+import { useTestsStore, type TestProps } from "@/modules/admin/tests/hooks";
 import {
   TestHeader,
   TestQuestion,

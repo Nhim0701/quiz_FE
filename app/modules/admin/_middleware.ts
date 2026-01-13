@@ -1,18 +1,9 @@
 import { redirect } from "react-router";
-import type { Route } from "../modules/+types/_layout";
+import type { Route } from "../+types/_layout";
 import { useAuthStoreInternal } from "@/modules/common/auth/hooks/use-auth";
-import {
-  ROUTES,
-  PERMISSIONS,
-  COMMON_PERMISSIONS,
-  RESOURCES,
-} from "@/constants";
+import { ROUTES, PERMISSIONS, RESOURCES } from "@/constants";
 import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
-import {
-  hasPermission,
-  hasAnyPermission,
-  hasResourcePermission,
-} from "@/lib/permissions";
+import { hasPermission, hasResourcePermission } from "@/lib/permissions";
 
 /**
  * Middleware to protect admin-only routes

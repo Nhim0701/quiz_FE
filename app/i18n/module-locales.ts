@@ -9,6 +9,8 @@ import authEnLocales from "../modules/common/auth/locales/en.json";
 import dashboardEnLocales from "../modules/user/dashboard/locales/en.json";
 import profileEnLocales from "../modules/user/profile/locales/en.json";
 import testsEnLocales from "../modules/user/tests/locales/en.json";
+import adminCategoriesEnLocales from "../modules/admin/categories/locales/en.json";
+import adminTestsEnLocales from "../modules/admin/tests/locales/en.json";
 
 /**
  * Type definition for all module locales
@@ -19,6 +21,10 @@ export type ModuleLocales = {
   dashboard: typeof dashboardEnLocales;
   profile: typeof profileEnLocales;
   tests: typeof testsEnLocales;
+  admin: {
+    categories: typeof adminCategoriesEnLocales;
+    tests: typeof adminTestsEnLocales;
+  };
 };
 
 /**
@@ -66,9 +72,16 @@ const extractModuleName = (path: string): string => {
 };
 
 /**
+ * Check if module is an admin module (categories, tests)
+ */
+const isAdminModule = (path: string): boolean => {
+  return path.includes("/admin/");
+};
+
+/**
  * Merge all module locales into a single object
  * @param localeFiles - Object with paths as keys and locale data as values
- * @returns Merged locales object with module names as keys, or flattened for tests module
+ * @returns Merged locales object with module names as keys, or flattened for tests/admin modules
  */
 const mergeModuleLocales = (
   localeFiles: Record<string, Record<string, any>>
@@ -78,13 +91,25 @@ const mergeModuleLocales = (
   for (const [path, localeData] of Object.entries(localeFiles)) {
     const moduleName = extractModuleName(path);
     if (moduleName) {
-      // For tests module, flatten the locales (spread contents directly)
+      // For tests module (user/tests), flatten the locales (spread contents directly)
       // because the JSON already has nested structure (test, tests, ui, result)
-      // Other modules keep their namespace structure
-      if (moduleName === "tests") {
+      if (moduleName === "tests" && !isAdminModule(path)) {
         // Spread the contents of tests locale directly into merged object
         Object.assign(merged, localeData);
-      } else {
+      }
+      // For admin modules (categories, tests), merge into admin namespace
+      // because they already have "admin" structure in JSON
+      else if (isAdminModule(path)) {
+        // Deep merge admin namespace to combine categories and tests
+        if (localeData.admin) {
+          if (!merged.admin) {
+            merged.admin = {};
+          }
+          Object.assign(merged.admin, localeData.admin);
+        }
+      }
+      // Other modules keep their namespace structure
+      else {
         merged[moduleName] = localeData;
       }
     }

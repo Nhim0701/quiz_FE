@@ -1,7 +1,7 @@
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 import { usePageData } from "@/hooks/use-page-data";
 import { useCategoriesStore } from "../../admin/categories/hooks";
-import { useTestsStore } from "@/hooks/use-tests";
+import { useTestsStore } from "@/modules/admin/tests/hooks";
 import { useTranslation } from "@/i18n";
 import { ROUTES } from "./constants";
 import { PageHeader } from "@/components/page-header";

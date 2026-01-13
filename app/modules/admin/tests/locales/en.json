@@ -1,0 +1,69 @@
+{
+  "admin": {
+    "tests": {
+      "title": "Test management",
+      "cardTitle": "List tests",
+      "empty": "No tests found",
+      "noPermission": "You don't have permission to access this page",
+      "delete": "Delete",
+      "create": "Create Test",
+      "createTitle": "Create New Test",
+      "createDescription": "Fill in the information to create a new test",
+      "createSuccess": "Test created successfully",
+      "deleteSuccess": "Test deleted successfully",
+      "confirmDelete": "Are you sure you want to delete test \"{{name}}\"?",
+      "form": {
+        "nameLabel": "Test Name",
+        "namePlaceholder": "Enter test name",
+        "categoryLabel": "Category",
+        "selectCategory": "Select category...",
+        "searchCategory": "Search category...",
+        "noCategoryFound": "No category found.",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Enter test description (optional)",
+        "timeLimitLabel": "Time Limit (minutes)",
+        "timeLimitPlaceholder": "Enter time limit in minutes"
+      },
+      "validation": {
+        "nameRequired": "Test name is required",
+        "categoryRequired": "Category is required",
+        "timeLimitRequired": "Time limit is required",
+        "timeLimitMin": "Time limit must be at least 1 minute"
+      },
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "category": "Category",
+        "questionCount": "Questions",
+        "description": "Description",
+        "timeLimit": "Time Limit"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by name...",
+        "categoryPlaceholder": "Select categories...",
+        "categorySearch": "Search categories...",
+        "categoryEmpty": "No categories found.",
+        "createDatePlaceholder": "Select create date",
+        "updateDatePlaceholder": "Select update date"
+      },
+      "info": {
+        "title": "Test Information",
+        "cardTitle": "Test Details",
+        "loading": "Loading test information...",
+        "notFound": "Test not found",
+        "backToList": "Back to Tests List",
+        "fields": {
+          "id": "ID",
+          "name": "Name",
+          "category": "Category",
+          "description": "Description",
+          "timeLimit": "Time Limit",
+          "questionCount": "Question Count",
+          "createdAt": "Created At",
+          "updatedAt": "Updated At"
+        },
+        "noDescription": "No description provided"
+      }
+    }
+  }
+}

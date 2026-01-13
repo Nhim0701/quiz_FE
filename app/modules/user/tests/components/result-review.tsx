@@ -1,7 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import { Check, X, Info } from "lucide-react";
 import { useState } from "react";
-import { useResultStore } from "@/hooks/use-result";
+import { useResultStore } from "../hooks/use-result";
 import { useTranslation } from "@/i18n";
 import {
   Accordion,

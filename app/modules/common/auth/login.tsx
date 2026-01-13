@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "@/modules/common/auth/hooks/use-auth";
-import { ROUTES, SESSION_KEYS } from "@/constants";
+import { SESSION_KEYS } from "@/constants";
+import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/dashboard/constants";
 import { LoginHeader, LoginForm, LoginCard, LoginFooter } from "./components";
 
 export default function Login() {
@@ -9,7 +10,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get destination page from location.state, sessionStorage, or default to /profile
+  // Get destination page from location.state, sessionStorage, or default to /dashboard
   const getRedirectPath = () => {
     // Priority 1: location.state (from ProtectedRoute)
     const fromState = (location.state as { from?: { pathname: string } })?.from
@@ -24,7 +25,7 @@ export default function Login() {
     }
 
     // Priority 3: default
-    return ROUTES.DASHBOARD;
+    return DASHBOARD_ROUTES.INDEX;
   };
 
   const from = getRedirectPath();

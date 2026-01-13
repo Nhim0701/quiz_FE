@@ -5,7 +5,7 @@ import { useRole } from "@/modules/common/auth/hooks/use-role";
 import { RESOURCES } from "@/constants/permissions";
 import { ROUTES } from "@/constants";
 import { useAdminLayout } from "../../_layout";
-import { useTestsStore, type TestProps } from "@/hooks/use-tests";
+import { useTestsStore, type TestProps } from "../hooks";
 import { useCategoriesStore } from "../../categories/hooks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

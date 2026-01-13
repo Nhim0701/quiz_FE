@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "@/i18n";
-import { useResultStore } from "@/hooks/use-result";
+import { useResultStore } from "../hooks/use-result";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -66,19 +66,24 @@ function ResultSidebarContent({ onQuestionClick }: ResultSidebarProps) {
             const correctAnswers = question.answers.filter((a) => a.isCorrect);
             const userSelectedCorrect = userAnswers.every((a) => a.isCorrect);
             const userSelectedAllCorrect =
-              userAnswers.length === correctAnswers.length && userSelectedCorrect;
+              userAnswers.length === correctAnswers.length &&
+              userSelectedCorrect;
 
             let variant: "default" | "secondary" | "outline" = "outline";
-            let className = "bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300";
+            let className =
+              "bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300";
 
             if (userSelectedAllCorrect) {
               variant = "secondary";
-              className = "bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/70 border-green-300 dark:border-green-700";
+              className =
+                "bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/70 border-green-300 dark:border-green-700";
             } else if (userAnswers.length > 0) {
               variant = "secondary";
-              className = "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/70 border-red-300 dark:border-red-700";
+              className =
+                "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/70 border-red-300 dark:border-red-700";
             } else {
-              className = "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/70 border-amber-300 dark:border-amber-700";
+              className =
+                "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/70 border-amber-300 dark:border-amber-700";
             }
 
             return (
@@ -135,7 +140,10 @@ export function ResultSidebar({ onQuestionClick }: ResultSidebarProps) {
               <Menu className="h-6 w-6" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-full sm:max-w-sm overflow-y-auto">
+          <SheetContent
+            side="right"
+            className="w-full sm:max-w-sm overflow-y-auto"
+          >
             <SheetHeader>
               <SheetTitle>{t("ui.headers.questions")}</SheetTitle>
             </SheetHeader>

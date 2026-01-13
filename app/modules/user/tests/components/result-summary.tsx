@@ -1,6 +1,6 @@
 import { CheckCircle } from "lucide-react";
 import { useTranslation } from "@/i18n";
-import { useResultStore } from "@/hooks/use-result";
+import { useResultStore } from "../hooks/use-result";
 import { useNavigate } from "react-router";
 import { ROUTES as TESTS_ROUTES } from "../constants";
 import { Card } from "@/components/ui/card";

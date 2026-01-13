@@ -18,7 +18,7 @@ import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import adminMiddleware from "@/middleware/admin";
+import adminMiddleware from "@/modules/admin/_middleware";
 
 export const clientMiddleware: Route.ClientMiddlewareFunction[] = [
   adminMiddleware,

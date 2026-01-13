@@ -2,10 +2,7 @@ import { useEffect, useState } from "react";
 import { Clock, X } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { useTestStore } from "../hooks";
-import {
-  useTestsStore,
-  type TestProps,
-} from "@/hooks/use-tests";
+import { useTestsStore, type TestProps } from "@/modules/admin/tests/hooks";
 import { useNavigate, useParams } from "react-router";
 import { ROUTES } from "../constants";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,9 +15,7 @@ export function TestHeader() {
   const navigate = useNavigate();
   const { testId } = useParams<{ testId: string }>();
   const { currentIndex, questions, timeRemaining } = useTestStore();
-  const getTestById = useTestsStore(
-    (state) => state.getTestById
-  );
+  const getTestById = useTestsStore((state) => state.getTestById);
 
   const [test, setTest] = useState<TestProps | null>(null);
 
@@ -47,9 +42,8 @@ export function TestHeader() {
 
   const isTimeLow = timeRemaining <= 5 * 60;
 
-  const progressValue = questions.length > 0
-    ? ((currentIndex + 1) / questions.length) * 100
-    : 0;
+  const progressValue =
+    questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0;
 
   return (
     <Card className="p-4 sm:p-6">

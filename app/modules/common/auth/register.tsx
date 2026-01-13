@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { useAuth, type RegisterFormData } from "@/modules/common/auth/hooks/use-auth";
+import {
+  useAuth,
+  type RegisterFormData,
+} from "@/modules/common/auth/hooks/use-auth";
 import useApp from "@/hooks/use-app";
 import { useTranslation } from "@/i18n";
+import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/dashboard/constants";
 import {
   RegisterHeader,
   RegisterForm,
@@ -24,8 +28,8 @@ export default function Register() {
     try {
       // Pass form data directly - useAuth will handle mapping to API payload
       await register(formData, setLoading);
-      // Navigate to profile page after successful registration (user is already logged in with token)
-      navigate("/profile");
+      // Navigate to dashboard after successful registration (user is already logged in with token)
+      navigate(DASHBOARD_ROUTES.INDEX, { replace: true });
     } catch (err) {
       const error = err as Error;
       const errorMessage = error.message || t("errors.registrationFailed");

@@ -35,8 +35,9 @@ export function FormField({
   const errorMessage = error?.message;
 
   const inputClassName = cn(
-    hasError && "border-red-500 dark:border-red-600",
-    className
+    className,
+    hasError &&
+      "!ring-1 !ring-red-500 dark:!ring-red-600 focus-visible:!ring-red-500 dark:focus-visible:!ring-red-600 !text-red-600 dark:!text-red-400"
   );
 
   const labelClasses = cn(

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { QuestionProps } from "./use-questions";
+import type { QuestionProps } from "@/hooks/use-questions";
 
 interface ResultSummary {
   total: number;
