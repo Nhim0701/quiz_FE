@@ -15,6 +15,7 @@
       "viewTitle": "Test Information",
       "viewDescription": "View and edit test information",
       "viewInfo": "View Info",
+      "viewQuestions": "View Questions",
       "deleteSuccess": "Test deleted successfully",
       "confirmDelete": "Are you sure you want to delete test \"{{name}}\"?",
       "edit": "Edit",

@@ -19,6 +19,7 @@
       "viewTitle": "Thông tin danh mục",
       "viewDescription": "Xem và chỉnh sửa thông tin danh mục",
       "viewInfo": "Xem thông tin",
+      "viewTests": "Xem bài kiểm tra",
       "form": {
         "nameLabel": "Tên danh mục",
         "namePlaceholder": "Nhập tên danh mục"

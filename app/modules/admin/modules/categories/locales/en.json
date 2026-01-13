@@ -19,6 +19,7 @@
       "viewTitle": "Category Information",
       "viewDescription": "View and edit category information",
       "viewInfo": "View Info",
+      "viewTests": "View Tests",
       "form": {
         "nameLabel": "Category Name",
         "namePlaceholder": "Enter category name"

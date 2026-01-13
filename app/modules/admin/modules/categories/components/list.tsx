@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from "react";
-import { useSearchParams } from "react-router";
+import { useSearchParams, useNavigate } from "react-router";
 import { useTranslation } from "@/i18n";
 import {
   DataTable,
@@ -19,7 +19,7 @@ import {
   FilterManager,
 } from "@/hooks";
 import { useCategoriesStore, type Category } from "../hooks";
-import { Edit, Trash2, Eye } from "lucide-react";
+import { Edit, Trash2, Eye, List } from "lucide-react";
 import { CategoryViewDialog } from "./category-dialog";
 import {
   AlertDialogAction,
@@ -33,6 +33,8 @@ import {
   FilterActions,
   type ActiveFilter,
 } from "@/components/common/filters";
+import { ROUTES as TESTS_ROUTES } from "../../tests/constants";
+import { FILTER_QUERY_PARAMS } from "@/constants/filters";
 
 interface CategoriesListProps {
   roles: {
@@ -49,6 +51,7 @@ export function CategoriesList({
   onClearFiltersReady,
 }: CategoriesListProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { showError, showSuccess, showDialog, closeDialog } = useApp();
   const { page, pageSize, total, setPage, setPageSize, setTotal } =
@@ -270,6 +273,14 @@ export function CategoriesList({
     openViewDialog(category);
   };
 
+  const handleViewTests = (category: Category) => {
+    // Navigate to tests page with categoryId filter
+    const searchParams = new URLSearchParams();
+    searchParams.set(FILTER_QUERY_PARAMS.FILTER_KEY(1), "categoryId");
+    searchParams.set(FILTER_QUERY_PARAMS.FILTER_VALUE(1), category.id);
+    navigate(`${TESTS_ROUTES.TESTS.INDEX}?${searchParams.toString()}`);
+  };
+
   const handleDelete = (category: Category) => {
     const confirmDelete = async () => {
       try {
@@ -373,6 +384,18 @@ export function CategoriesList({
             variant: "destructive" as const,
             icon: <Trash2 className="h-4 w-4" />,
             actionType: "delete" as const,
+          },
+        ]
+      : []),
+    ...(roles.read
+      ? [
+          {
+            label: t("admin.categories.viewTests"),
+            onClick: handleViewTests,
+            icon: <List className="h-4 w-4" />,
+            className:
+              "border-purple-500/50 text-purple-600 hover:bg-gradient-to-br hover:from-purple-500 hover:to-violet-600 hover:text-white hover:border-purple-600 dark:border-purple-400/50 dark:text-purple-400 dark:hover:from-purple-600 dark:hover:to-violet-700 dark:hover:border-purple-500",
+            actionType: "default" as const,
           },
         ]
       : []),

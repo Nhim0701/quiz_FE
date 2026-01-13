@@ -15,6 +15,7 @@
       "viewTitle": "Thông tin bài kiểm tra",
       "viewDescription": "Xem và chỉnh sửa thông tin bài kiểm tra",
       "viewInfo": "Xem thông tin",
+      "viewQuestions": "Xem câu hỏi",
       "deleteSuccess": "Xóa bài kiểm tra thành công",
       "confirmDelete": "Bạn có chắc chắn muốn xóa bài kiểm tra \"{{name}}\"?",
       "edit": "Chỉnh Sửa",

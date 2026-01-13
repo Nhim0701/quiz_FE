@@ -24,7 +24,7 @@ import {
 import { useTestsStore } from "../hooks";
 import type { TestProps } from "../types";
 import { useCategoriesStore } from "../../categories/hooks";
-import { Eye, Trash2, Edit } from "lucide-react";
+import { Eye, Trash2, Edit, FileQuestion } from "lucide-react";
 import { TestViewDialog } from "./test-dialog";
 import {
   AlertDialogAction,
@@ -41,6 +41,8 @@ import {
 } from "@/components/common/filters";
 import { ROUTES } from "../constants";
 import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants";
+import { ROUTES as QUESTIONS_ROUTES } from "../../questions/constants";
+import { FILTER_QUERY_PARAMS } from "@/constants/filters";
 
 interface TestsListProps {
   roles: {
@@ -385,6 +387,14 @@ export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
     openDialog(test);
   };
 
+  const handleViewQuestions = (test: TestProps) => {
+    // Navigate to questions page with testId filter
+    const searchParams = new URLSearchParams();
+    searchParams.set(FILTER_QUERY_PARAMS.FILTER_KEY(1), "testId");
+    searchParams.set(FILTER_QUERY_PARAMS.FILTER_VALUE(1), test.id);
+    navigate(`${QUESTIONS_ROUTES.QUESTIONS.INDEX}?${searchParams.toString()}`);
+  };
+
   const handleDelete = (test: TestProps) => {
     const confirmDelete = async () => {
       try {
@@ -506,6 +516,18 @@ export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
             variant: "destructive" as const,
             icon: <Trash2 className="h-4 w-4" />,
             actionType: "delete" as const,
+          },
+        ]
+      : []),
+    ...(roles.read
+      ? [
+          {
+            label: t("admin.tests.viewQuestions"),
+            onClick: handleViewQuestions,
+            icon: <FileQuestion className="h-4 w-4" />,
+            className:
+              "border-orange-500/50 text-orange-600 hover:bg-gradient-to-br hover:from-orange-500 hover:to-amber-600 hover:text-white hover:border-orange-600 dark:border-orange-400/50 dark:text-orange-400 dark:hover:from-orange-600 dark:hover:to-amber-700 dark:hover:border-orange-500",
+            actionType: "default" as const,
           },
         ]
       : []),
