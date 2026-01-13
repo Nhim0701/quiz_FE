@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ROUTES } from "../constants";
 import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants/app";
+import { QuestionDialog } from "./question-dialog";
 
 interface QuestionsListProps {
   roles: {
@@ -675,7 +676,7 @@ export function QuestionsList({ roles }: QuestionsListProps) {
               },
             ]}
             selectedValue={selectedQuestionType}
-            buttonClassName="w-full sm:w-[200px]"
+            buttonClassName="w-full sm:w-[200px] justify-between"
             filterColor="yellow"
             onSelect={(value) => {
               setSelectedQuestionType(
@@ -713,6 +714,7 @@ export function QuestionsList({ roles }: QuestionsListProps) {
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
       />
+      <QuestionDialog />
     </>
   );
 }

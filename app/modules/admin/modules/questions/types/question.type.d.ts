@@ -8,16 +8,22 @@ export interface QuestionState {
   total: number;
   meta?: ApiResponseMeta;
 
+  // Dialog state
+  isDialogOpen: boolean;
+  openDialog: () => void;
+  closeDialog: () => void;
+
   // API methods
   fetchQuestions: (
     page?: number,
     pageSize?: number,
     filters?: Record<string, string>
   ) => Promise<void>;
-  createQuestion: (
-    testId: string,
-    data: { content: string; isMultipleChoice: boolean }
-  ) => Promise<QuestionProps>;
+  createQuestion: (data: {
+    testId: string;
+    content: string;
+    isMultipleChoice: boolean;
+  }) => Promise<QuestionProps>;
   updateQuestion: (
     testId: string,
     questionId: string,

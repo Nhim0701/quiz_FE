@@ -24,8 +24,10 @@
       "form": {
         "contentPlaceholder": "Enter question content..."
       },
+      "createDescription": "Create a new question for the test",
       "validation": {
-        "contentRequired": "Question content is required"
+        "contentRequired": "Question content is required",
+        "testRequired": "Test is required"
       },
       "columns": {
         "id": "ID",

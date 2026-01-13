@@ -24,8 +24,10 @@
       "form": {
         "contentPlaceholder": "Nhập nội dung câu hỏi..."
       },
+      "createDescription": "Tạo câu hỏi mới cho bài kiểm tra",
       "validation": {
-        "contentRequired": "Nội dung câu hỏi là bắt buộc"
+        "contentRequired": "Nội dung câu hỏi là bắt buộc",
+        "testRequired": "Bài kiểm tra là bắt buộc"
       },
       "columns": {
         "id": "ID",

@@ -11,6 +11,11 @@ export const useQuestionsStore = create<QuestionState>((set, get) => ({
   error: null,
   total: 0,
   meta: undefined,
+  isDialogOpen: false,
+
+  // Dialog actions
+  openDialog: () => set({ isDialogOpen: true }),
+  closeDialog: () => set({ isDialogOpen: false }),
 
   // Fetch questions for a test
   fetchQuestions: async (
@@ -60,10 +65,11 @@ export const useQuestionsStore = create<QuestionState>((set, get) => ({
   },
 
   // Create a question
-  createQuestion: async (
-    testId: string,
-    data: { content: string; isMultipleChoice: boolean }
-  ) => {
+  createQuestion: async (data: {
+    testId: string;
+    content: string;
+    isMultipleChoice: boolean;
+  }) => {
     set({ loading: true, error: null });
     try {
       const response = await apiClient.post<ApiSuccessResponse<QuestionProps>>(

@@ -4,17 +4,16 @@ import { useRole } from "@/modules/common/auth/hooks/use-role";
 import { RESOURCES } from "@/modules/admin/constants/permissions";
 import { ROUTES } from "./constants";
 import { useBreadcrumb } from "@/hooks";
-import { useNavigate } from "react-router";
 import { PageHeader } from "@/components/page-header";
 import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { QuestionsList } from "./components";
+import { useQuestionsStore } from "./hooks";
 
 export default function AdminQuestions() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { getNamespaceRoles } = useRole();
   const [clearFilters, setClearFilters] = useState<(() => void) | null>(null);
 
@@ -38,8 +37,10 @@ export default function AdminQuestions() {
     setClearFilters(() => clearFiltersFn);
   }, []);
 
+  const { openDialog } = useQuestionsStore();
+
   const handleCreateQuestion = () => {
-    navigate(ROUTES.QUESTIONS.NEW);
+    openDialog();
   };
 
   if (!roles.read) {

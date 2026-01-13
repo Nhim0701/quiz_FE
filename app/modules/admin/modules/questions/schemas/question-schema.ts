@@ -7,6 +7,7 @@ export const questionSchema = createZodSchema((t) =>
       t,
       "admin.questions.validation.contentRequired"
     ),
+    testId: createRequiredString(t, "admin.questions.validation.testRequired"),
     isMultipleChoice: z.boolean().default(false),
   })
 );
