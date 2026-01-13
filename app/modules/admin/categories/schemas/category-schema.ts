@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createZodSchema, createRequiredString } from "@/lib/zod-schema";
+import { createZodSchema, createRequiredString } from "@/lib";
 
 // Using the utility function
 export const categorySchema = createZodSchema((t) =>

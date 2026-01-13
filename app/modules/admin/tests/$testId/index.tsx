@@ -20,9 +20,8 @@ import {
   ArrowLeft,
   List,
 } from "lucide-react";
-import { formatUnixTimestamp } from "@/lib/utils";
-import useApp from "@/hooks/use-app";
-import { useBreadcrumb } from "@/hooks/use-breadcrumb";
+import { formatUnixTimestamp } from "@/lib";
+import { useApp, useBreadcrumb } from "@/hooks";
 
 export default function AdminTestInfo() {
   const { t } = useTranslation();

@@ -2,8 +2,7 @@
 // PROFILE MAPPER - Data transformation for profile module
 // ============================================
 
-import type { UpdateUserFormData } from "../schemas/update-user-schema";
-import type { ChangePasswordFormData } from "../schemas/change-password-schema";
+import type { UpdateUserFormData, ChangePasswordFormData } from "../schemas";
 
 /**
  * Profile Mapper

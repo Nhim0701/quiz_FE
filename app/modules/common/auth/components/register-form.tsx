@@ -4,10 +4,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/common/form-field";
 import { useTranslation } from "@/i18n";
-import {
-  registerSchema,
-  type RegisterFormData,
-} from "../schemas/register-schema";
+import { registerSchema, type RegisterFormData } from "../schemas";
 
 interface RegisterFormProps {
   onSubmit: (data: RegisterFormData) => Promise<void>;

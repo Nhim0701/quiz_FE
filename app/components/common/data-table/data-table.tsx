@@ -7,7 +7,7 @@ import {
   useReactTable,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib";
 import {
   Table,
   TableBody,

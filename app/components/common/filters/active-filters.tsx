@@ -1,11 +1,11 @@
 import { XIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib";
 import type {
   ActiveFilter,
   FilterIdsConfig,
   FilterColorKey,
-} from "@/hooks/use-filter";
+} from "@/hooks";
 import { FILTER_PATTERNS, FILTER_COLOR_PALETTE } from "@/constants/filters";
 
 interface ActiveFiltersProps {

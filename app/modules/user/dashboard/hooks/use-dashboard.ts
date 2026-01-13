@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { ApiSuccessResponse } from "@/types";
-import apiClient from "@/lib/axios";
+import { apiClient } from "@/lib";
 import { DASHBOARD_API_ENDPOINTS } from "../constants";
 import type { DashboardProps } from "../types";
 

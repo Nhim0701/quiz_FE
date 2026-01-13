@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import type { ApiSuccessResponse, PaginationMeta } from "@/types";
-import type { QuestionProps } from "@/hooks/use-questions";
-import apiClient from "@/lib/axios";
+import type { QuestionProps } from "@/hooks";
+import { apiClient } from "@/lib";
 import { TESTS_API_ENDPOINTS, TIME_CONSTANTS } from "../constants";
 import { useTestNavigationStore } from "./use-test-navigation";
 import { useTestAnswersStore } from "./use-test-answers";

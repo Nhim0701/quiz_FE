@@ -4,7 +4,7 @@ import { Container } from "@/components/ui/container";
 import { ResultEmpty, ResultSummary, ResultReview } from "../../components";
 import { useResultStore } from "../../hooks/use-result";
 import { useTranslation } from "@/i18n";
-import { useBreadcrumb } from "@/hooks/use-breadcrumb";
+import { useBreadcrumb } from "@/hooks";
 import { useTestsStore, type TestProps } from "@/modules/admin/tests/hooks";
 import { ROUTES } from "../../constants";
 import type { TestResultLocationState } from "../../types";

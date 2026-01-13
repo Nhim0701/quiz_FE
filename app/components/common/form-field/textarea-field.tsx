@@ -1,6 +1,6 @@
 import type { UseFormRegisterReturn, FieldError } from "react-hook-form";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib";
 
 export interface TextareaFieldProps {
   id: string;

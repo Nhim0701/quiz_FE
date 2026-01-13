@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
-import apiClient from "@/lib/axios";
+import { apiClient } from "@/lib";
 import { API_ENDPOINTS } from "@/constants";
 
 export interface Category {

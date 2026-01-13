@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib";
 import { Input, type InputProps } from "./input";
 
 export interface InputGroupProps extends React.HTMLAttributes<HTMLDivElement> {

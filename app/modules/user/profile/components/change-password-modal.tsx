@@ -13,10 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/common/form-field";
 import { useProfile } from "../hooks";
-import {
-  changePasswordSchema,
-  type ChangePasswordFormData,
-} from "../schemas/change-password-schema";
+import { changePasswordSchema, type ChangePasswordFormData } from "../schemas";
 
 interface ChangePasswordModalProps {
   open: boolean;

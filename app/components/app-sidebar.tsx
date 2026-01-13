@@ -11,7 +11,7 @@ import { useRole } from "@/modules/common/auth/hooks/use-role";
 import { useNavigate, useLocation, Link } from "react-router";
 import { ROUTES } from "@/constants";
 import { COMMON_PERMISSIONS, RESOURCES } from "@/constants/permissions";
-import { getInitials } from "@/lib/utils";
+import { getInitials } from "@/lib";
 import {
   Sidebar,
   SidebarContent,

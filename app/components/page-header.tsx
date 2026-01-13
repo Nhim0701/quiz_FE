@@ -1,5 +1,5 @@
 import { Breadcrumb } from "./ui/breadcrumb";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib";
 
 interface PageHeaderProps {
   title: string;

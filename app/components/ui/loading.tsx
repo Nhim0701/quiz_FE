@@ -1,4 +1,4 @@
-import useApp from "@/hooks/use-app";
+import { useApp } from "@/hooks";
 
 interface LoadingProps {
   message?: string;

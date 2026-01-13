@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import useApp from "@/hooks/use-app";
+import { useApp } from "@/hooks";
 import { useTranslation, type TranslationKey } from "@/i18n";
 
 /**

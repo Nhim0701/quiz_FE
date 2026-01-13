@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Edit, Lock } from "lucide-react";
-import { useBreadcrumb } from "@/hooks/use-breadcrumb";
-import { usePageData } from "@/hooks/use-page-data";
+import { useBreadcrumb, usePageData } from "@/hooks";
 import { PageHeader } from "@/components/page-header";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";

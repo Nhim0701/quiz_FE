@@ -7,11 +7,23 @@ import {
   type Column,
   type Action,
 } from "@/components/common/data-table";
-import { usePaginationStore } from "@/hooks/use-pagination";
+import {
+  usePaginationStore,
+  useApp,
+  useFilterActions,
+  useFilterHandlers,
+  useFilterIdsConfig,
+  createStringConverter,
+  createArrayConverter,
+  useSyncFilterToUrl,
+  useApplyFilterFromUrl,
+  FilterManager,
+  createStringFilterHandler,
+  createArrayFilterHandler,
+} from "@/hooks";
 import { useTestsStore, type TestProps } from "../hooks";
 import { useCategoriesStore } from "../../categories/hooks";
 import { Eye, Trash2 } from "lucide-react";
-import useApp from "@/hooks/use-app";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -26,18 +38,6 @@ import {
   type ActiveFilter,
 } from "@/components/common/filters";
 import { ROUTES } from "@/constants";
-import {
-  useFilterActions,
-  useFilterHandlers,
-  useFilterIdsConfig,
-  createStringConverter,
-  createArrayConverter,
-  useSyncFilterToUrl,
-  useApplyFilterFromUrl,
-  FilterManager,
-  createStringFilterHandler,
-  createArrayFilterHandler,
-} from "@/hooks/use-filter";
 
 interface TestsListProps {
   roles: {

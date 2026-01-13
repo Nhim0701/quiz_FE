@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import apiClient from "@/lib/axios";
-import { tokenManager } from "@/lib/api";
+import { apiClient, tokenManager } from "@/lib";
 import type { ApiSuccessResponse } from "@/types";
 import type {
   RegisterFormData,
@@ -11,7 +10,7 @@ import type {
   AuthResponse,
   User,
 } from "../types";
-import { AuthMapper } from "../utils/mapper";
+import { AuthMapper } from "../utils";
 import { AUTH_API_ENDPOINTS, ME_API_ENDPOINTS, AUTH_STORAGE_KEYS } from "../constants";
 
 interface AuthState {

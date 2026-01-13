@@ -1,6 +1,6 @@
 import { FileText, Check, X } from "lucide-react";
 import { useTranslation } from "@/i18n";
-import { formatUnixTimestamp } from "@/lib/utils";
+import { formatUnixTimestamp } from "@/lib";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useDashboard } from "../hooks";

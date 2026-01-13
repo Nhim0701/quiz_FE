@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/input-group";
 import { useTranslation, type TranslationKey } from "@/i18n";
 import { KEYBOARD_KEYS } from "@/constants/filters";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib";
 
 interface SearchInputProps {
   value: string;

@@ -5,7 +5,7 @@ import { useTestStore } from "../hooks";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib";
 
 export function TestQuestion() {
   const { t } = useTranslation();

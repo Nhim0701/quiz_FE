@@ -3,7 +3,7 @@ import type { Route } from "../+types/_layout";
 import { useAuthStoreInternal } from "@/modules/common/auth/hooks/use-auth";
 import { ROUTES, PERMISSIONS, RESOURCES } from "@/constants";
 import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
-import { hasPermission, hasResourcePermission } from "@/lib/permissions";
+import { hasPermission, hasResourcePermission } from "@/lib";
 
 /**
  * Middleware to protect admin-only routes

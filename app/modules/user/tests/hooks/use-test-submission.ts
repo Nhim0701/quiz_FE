@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import type { ApiSuccessResponse } from "@/types";
 import type { SubmissionItem } from "@/types";
-import apiClient from "@/lib/axios";
+import { apiClient } from "@/lib";
 import { TESTS_API_ENDPOINTS, TIME_CONSTANTS } from "../constants";
 import { useTestQuestionsStore } from "./use-test-questions";
 import { useTestAnswersStore } from "./use-test-answers";

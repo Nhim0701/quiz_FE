@@ -1,13 +1,12 @@
 import { create } from "zustand";
 import { useTranslation } from "@/i18n";
-import useApp from "@/hooks/use-app";
+import { useApp } from "@/hooks";
 import type { ApiSuccessResponse } from "@/types";
-import apiClient from "@/lib/axios";
+import { apiClient } from "@/lib";
 import { PROFILE_API_ENDPOINTS } from "../constants";
 import { ProfileMapper } from "../utils/mapper";
 import type { User } from "../types";
-import type { UpdateUserFormData } from "../schemas/update-user-schema";
-import type { ChangePasswordFormData } from "../schemas/change-password-schema";
+import type { UpdateUserFormData, ChangePasswordFormData } from "../schemas";
 
 interface ProfileState {
   // Profile data

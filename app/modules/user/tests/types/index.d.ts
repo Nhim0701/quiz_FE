@@ -2,7 +2,7 @@
 // TESTS TYPES
 // ============================================
 
-import type { QuestionProps } from "@/hooks/use-questions";
+import type { QuestionProps } from "@/hooks";
 
 /**
  * Location state for test result page

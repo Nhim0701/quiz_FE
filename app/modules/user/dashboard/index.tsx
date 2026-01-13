@@ -1,5 +1,4 @@
-import { useBreadcrumb } from "@/hooks/use-breadcrumb";
-import { usePageData } from "@/hooks/use-page-data";
+import { useBreadcrumb, usePageData } from "@/hooks";
 import { useTranslation } from "@/i18n";
 import { ROUTES } from "./constants";
 import { PageHeader } from "@/components/page-header";

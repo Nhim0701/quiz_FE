@@ -7,7 +7,7 @@ import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
 import { t } from "@/i18n/utils";
 import type { ApiSuccessResponse } from "@/types";
 import type { AuthResponse } from "@/modules/common/auth/types";
-import apiClient from "@/lib/axios";
+import { apiClient } from "@/lib";
 
 /**
  * Decode JWT token payload

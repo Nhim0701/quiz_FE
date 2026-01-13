@@ -1,4 +1,4 @@
-import { tokenManager } from "@/lib/api";
+import { tokenManager, toCamelCase, toSnakeCase } from "@/lib";
 import axios, {
   type AxiosError,
   type AxiosInstance,
@@ -9,7 +9,6 @@ import { API_BASE_URL, API_CONFIG, API_ENDPOINTS, ERROR } from "@/constants";
 import { t } from "@/i18n/utils";
 import type { ApiErrorResponse, ApiSuccessResponse } from "@/types";
 import type { TranslationKey } from "@/i18n";
-import { toCamelCase, toSnakeCase } from "@/lib/case-converter";
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({

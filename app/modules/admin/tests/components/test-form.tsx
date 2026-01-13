@@ -27,12 +27,11 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import useApp from "@/hooks/use-app";
-import { testSchema, type TestFormData } from "../schemas/test-schema";
+import { cn } from "@/lib";
+import { useApp, usePaginationStore } from "@/hooks";
+import { testSchema, type TestFormData } from "../schemas";
 import { useTestsStore } from "../hooks";
 import { useCategoriesStore } from "../../categories/hooks";
-import { usePaginationStore } from "@/hooks/use-pagination";
 
 interface TestFormProps {
   isOpen: boolean;

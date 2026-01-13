@@ -12,7 +12,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "./ui/breadcrumb";
-import useBreadcrumbStore from "@/hooks/use-breadcrumb";
+import { useBreadcrumbStore } from "@/hooks";
 
 const SidebarTriggerIcon = ({
   state,

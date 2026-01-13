@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { useTranslation, type TranslationKey } from "@/i18n";
-import { useBreadcrumb } from "@/hooks/use-breadcrumb";
+import { useBreadcrumb } from "@/hooks";
 import { useRole } from "@/modules/common/auth/hooks/use-role";
 import { ROUTES } from "@/constants";
 import { RESOURCES } from "@/constants/permissions";

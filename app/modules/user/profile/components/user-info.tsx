@@ -18,10 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { FormField, DatePickerField } from "@/components/common/form-field";
 import { useProfile } from "../hooks";
-import {
-  updateUserSchema,
-  type UpdateUserFormData,
-} from "../schemas/update-user-schema";
+import { updateUserSchema, type UpdateUserFormData } from "../schemas";
 
 interface UserInfoProps {
   isEditMode?: boolean;

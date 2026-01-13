@@ -4,7 +4,7 @@ import {
   createRequiredString,
   createOptionalString,
   createNumberField,
-} from "@/lib/zod-schema";
+} from "@/lib";
 
 export const testSchema = createZodSchema((t) =>
   z.object({

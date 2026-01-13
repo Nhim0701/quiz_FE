@@ -7,7 +7,7 @@ import {
 import type { FieldError } from "react-hook-form";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib";
 
 export interface DatePickerFieldProps<T extends FieldValues> {
   id: string;

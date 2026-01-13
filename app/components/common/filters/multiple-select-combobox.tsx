@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import { useTranslation } from "@/i18n";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { FILTER_COLOR_PALETTE } from "@/constants/filters";
-import type { FilterColorKey } from "@/hooks/use-filter";
+import type { FilterColorKey } from "@/hooks";
 
 // Darker color palette for badges inside combobox
 const BADGE_COLOR_PALETTE: Record<string, string> = {

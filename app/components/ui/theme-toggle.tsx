@@ -1,4 +1,4 @@
-import useApp from "@/hooks/use-app";
+import { useApp } from "@/hooks";
 import { useTranslation } from "@/i18n";
 
 interface ThemeToggleProps {

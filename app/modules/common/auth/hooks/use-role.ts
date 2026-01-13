@@ -4,7 +4,7 @@ import {
   hasAnyPermission as checkAnyPermission,
   hasAllPermissions as checkAllPermissions,
   hasResourcePermission as checkResourcePermission,
-} from "../utils/permissions";
+} from "../utils";
 import { PERMISSIONS, buildPermission, ACTIONS } from "@/constants/permissions";
 
 /**

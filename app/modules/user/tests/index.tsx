@@ -1,5 +1,4 @@
-import { useBreadcrumb } from "@/hooks/use-breadcrumb";
-import { usePageData } from "@/hooks/use-page-data";
+import { useBreadcrumb, usePageData } from "@/hooks";
 import { useCategoriesStore } from "../../admin/categories/hooks";
 import { useTestsStore } from "@/modules/admin/tests/hooks";
 import { useTranslation } from "@/i18n";
