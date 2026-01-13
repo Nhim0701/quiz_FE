@@ -45,6 +45,31 @@
         "fullName": "Full Name",
         "email": "Email",
         "phone": "Phone"
+      },
+      "changePassword": {
+        "title": "Change Password",
+        "description": "Change password for user \"{{name}}\"",
+        "success": "Password changed successfully",
+        "submit": "Change Password",
+        "form": {
+          "newPasswordLabel": "New Password",
+          "newPasswordPlaceholder": "Enter new password",
+          "confirmPasswordLabel": "Confirm Password",
+          "confirmPasswordPlaceholder": "Re-enter new password"
+        },
+        "validation": {
+          "newPasswordRequired": "New password is required",
+          "confirmPasswordRequired": "Confirm password is required",
+          "minLength": "Password must be at least 6 characters",
+          "passwordMismatch": "Passwords do not match"
+        }
+      },
+      "assignRoles": {
+        "title": "Assign Roles",
+        "description": "Assign roles to user \"{{name}}\"",
+        "success": "Roles assigned successfully",
+        "submit": "Save",
+        "noRoles": "No roles available"
       }
     }
   }

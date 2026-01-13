@@ -68,6 +68,8 @@ interface UsersState {
     pageSize?: number,
     filters?: Record<string, string>
   ) => Promise<void>;
+  changePassword: (id: string, newPassword: string) => Promise<void>;
+  assignRoles: (id: string, roleIds: string[]) => Promise<void>;
 }
 
 export const useUsersStore = create<UsersState>((set, get) => ({
@@ -212,6 +214,36 @@ export const useUsersStore = create<UsersState>((set, get) => ({
       if (updatedUser) {
         set({ viewingUser: updatedUser });
       }
+    }
+  },
+
+  changePassword: async (id, newPassword) => {
+    set({ loading: true, error: null });
+    try {
+      await apiClient.put(ENDPOINTS.CHANGE_PASSWORD(id), {
+        newPassword,
+      });
+      set({ loading: false });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to change password";
+      set({ error: errorMessage, loading: false });
+      throw error;
+    }
+  },
+
+  assignRoles: async (id, roleIds) => {
+    set({ loading: true, error: null });
+    try {
+      await apiClient.put(ENDPOINTS.ASSIGN_ROLES(id), {
+        roleIds,
+      });
+      set({ loading: false });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to assign roles";
+      set({ error: errorMessage, loading: false });
+      throw error;
     }
   },
 }));

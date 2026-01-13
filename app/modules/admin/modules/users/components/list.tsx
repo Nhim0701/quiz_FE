@@ -19,8 +19,10 @@ import {
   FilterManager,
 } from "@/hooks";
 import { useUsersStore, type User } from "../hooks";
-import { Edit, Trash2, Eye } from "lucide-react";
+import { Edit, Trash2, Eye, Lock, Shield } from "lucide-react";
 import { UserViewDialog } from "./user-dialog";
+import { ChangePasswordDialog } from "./change-password-dialog";
+import { AssignRolesDialog } from "./assign-roles-dialog";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -69,6 +71,11 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
     refreshUsers,
     viewingUser,
   } = useUsersStore();
+
+  const [changePasswordUser, setChangePasswordUser] = useState<User | null>(
+    null
+  );
+  const [assignRolesUser, setAssignRolesUser] = useState<User | null>(null);
 
   const filterHandlers = useMemo(
     () => [
@@ -267,6 +274,14 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
     openViewDialog(user);
   };
 
+  const handleChangePassword = (user: User) => {
+    setChangePasswordUser(user);
+  };
+
+  const handleAssignRoles = (user: User) => {
+    setAssignRolesUser(user);
+  };
+
   const handleDelete = (user: User) => {
     const confirmDelete = async () => {
       try {
@@ -375,6 +390,26 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
           },
         ]
       : []),
+    ...(roles.update
+      ? [
+          {
+            label: t("admin.users.changePassword.title"),
+            onClick: handleChangePassword,
+            icon: <Lock className="h-4 w-4" />,
+            className:
+              "border-purple-500/50 text-purple-600 hover:bg-gradient-to-br hover:from-purple-500 hover:to-indigo-600 hover:text-white hover:border-purple-600 dark:border-purple-400/50 dark:text-purple-400 dark:hover:from-purple-600 dark:hover:to-indigo-700 dark:hover:border-purple-500",
+            actionType: "default" as const,
+          },
+          {
+            label: t("admin.users.assignRoles.title"),
+            onClick: handleAssignRoles,
+            icon: <Shield className="h-4 w-4" />,
+            className:
+              "border-amber-500/50 text-amber-600 hover:bg-gradient-to-br hover:from-amber-500 hover:to-orange-600 hover:text-white hover:border-amber-600 dark:border-amber-400/50 dark:text-amber-400 dark:hover:from-amber-600 dark:hover:to-orange-700 dark:hover:border-amber-500",
+            actionType: "default" as const,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -420,6 +455,16 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
         onPageSizeChange={handlePageSizeChange}
       />
       <UserViewDialog user={viewingUser} onDelete={handleDelete} />
+      <ChangePasswordDialog
+        user={changePasswordUser}
+        open={!!changePasswordUser}
+        onOpenChange={(open) => !open && setChangePasswordUser(null)}
+      />
+      <AssignRolesDialog
+        user={assignRolesUser}
+        open={!!assignRolesUser}
+        onOpenChange={(open) => !open && setAssignRolesUser(null)}
+      />
     </>
   );
 }

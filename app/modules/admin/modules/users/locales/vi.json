@@ -45,6 +45,31 @@
         "fullName": "Họ và tên",
         "email": "Email",
         "phone": "Số điện thoại"
+      },
+      "changePassword": {
+        "title": "Đổi mật khẩu",
+        "description": "Đổi mật khẩu cho người dùng \"{{name}}\"",
+        "success": "Đổi mật khẩu thành công",
+        "submit": "Đổi mật khẩu",
+        "form": {
+          "newPasswordLabel": "Mật khẩu mới",
+          "newPasswordPlaceholder": "Nhập mật khẩu mới",
+          "confirmPasswordLabel": "Xác nhận mật khẩu",
+          "confirmPasswordPlaceholder": "Nhập lại mật khẩu mới"
+        },
+        "validation": {
+          "newPasswordRequired": "Mật khẩu mới là bắt buộc",
+          "confirmPasswordRequired": "Xác nhận mật khẩu là bắt buộc",
+          "minLength": "Mật khẩu phải có ít nhất 6 ký tự",
+          "passwordMismatch": "Mật khẩu xác nhận không khớp"
+        }
+      },
+      "assignRoles": {
+        "title": "Gán vai trò",
+        "description": "Gán vai trò cho người dùng \"{{name}}\"",
+        "success": "Gán vai trò thành công",
+        "submit": "Lưu",
+        "noRoles": "Không có vai trò nào"
       }
     }
   }
