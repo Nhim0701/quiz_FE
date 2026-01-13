@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { tokenManager } from "@/lib";
 import { useAuthStoreInternal } from "@/modules/common/auth/hooks/use-auth";
 import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
-import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/dashboard/constants";
+import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/modules/dashboard/constants";
 
 /**
  * Root component to check auth on app startup and redirect appropriately

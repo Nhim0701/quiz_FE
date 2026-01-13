@@ -1,15 +1,11 @@
 import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
-import { ROUTES } from "@/constants";
+import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/modules/dashboard/constants";
 import { useTranslation } from "@/i18n";
 
 export function NotFound() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-
-  const handleBackToDashboard = () => {
-    navigate(ROUTES.DASHBOARD);
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
@@ -36,7 +32,7 @@ export function NotFound() {
         {/* Action button */}
         <div className="pt-4">
           <Button
-            onClick={handleBackToDashboard}
+            onClick={() => navigate(DASHBOARD_ROUTES.INDEX)}
             size="lg"
             className="px-8"
           >

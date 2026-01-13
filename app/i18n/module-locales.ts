@@ -6,11 +6,11 @@
 
 // Import module locales directly for type-safety
 import authEnLocales from "../modules/common/auth/locales/en.json";
-import dashboardEnLocales from "../modules/user/dashboard/locales/en.json";
-import profileEnLocales from "../modules/user/profile/locales/en.json";
-import testsEnLocales from "../modules/user/tests/locales/en.json";
-import adminCategoriesEnLocales from "../modules/admin/categories/locales/en.json";
-import adminTestsEnLocales from "../modules/admin/tests/locales/en.json";
+import dashboardEnLocales from "../modules/user/modules/dashboard/locales/en.json";
+import profileEnLocales from "../modules/user/modules/profile/locales/en.json";
+import testsEnLocales from "../modules/user/modules/tests/locales/en.json";
+import adminCategoriesEnLocales from "../modules/admin/modules/categories/locales/en.json";
+import adminTestsEnLocales from "../modules/admin/modules/tests/locales/en.json";
 
 /**
  * Type definition for all module locales

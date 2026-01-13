@@ -1,0 +1,119 @@
+{
+  "admin": {
+    "tests": {
+      "title": "Quản lý bài kiểm tra",
+      "cardTitle": "Danh sách bài kiểm tra",
+      "empty": "Không tìm thấy bài kiểm tra nào",
+      "noPermission": "Bạn không có quyền truy cập trang này",
+      "delete": "Xóa",
+      "create": "Tạo bài kiểm tra",
+      "createTitle": "Tạo bài kiểm tra mới",
+      "createDescription": "Điền thông tin để tạo bài kiểm tra mới",
+      "createSuccess": "Tạo bài kiểm tra thành công",
+      "updateSuccess": "Cập nhật bài kiểm tra thành công",
+      "deleteSuccess": "Xóa bài kiểm tra thành công",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa bài kiểm tra \"{{name}}\"?",
+      "edit": "Chỉnh Sửa",
+      "editTitle": "Chỉnh Sửa Bài Kiểm Tra",
+      "editDescription": "Cập nhật thông tin bài kiểm tra",
+      "form": {
+        "nameLabel": "Tên Bài Kiểm Tra",
+        "namePlaceholder": "Nhập tên bài kiểm tra",
+        "categoryLabel": "Danh Mục",
+        "selectCategory": "Chọn danh mục...",
+        "searchCategory": "Tìm kiếm danh mục...",
+        "noCategoryFound": "Không tìm thấy danh mục nào.",
+        "descriptionLabel": "Mô Tả",
+        "descriptionPlaceholder": "Nhập mô tả bài kiểm tra (tùy chọn)",
+        "timeLimitLabel": "Thời Gian Giới Hạn (phút)",
+        "timeLimitPlaceholder": "Nhập thời gian giới hạn bằng phút"
+      },
+      "validation": {
+        "nameRequired": "Tên bài kiểm tra là bắt buộc",
+        "categoryRequired": "Danh mục là bắt buộc",
+        "timeLimitRequired": "Thời gian giới hạn là bắt buộc",
+        "timeLimitMin": "Thời gian giới hạn phải ít nhất 1 phút"
+      },
+      "columns": {
+        "id": "ID",
+        "name": "Tên",
+        "category": "Danh Mục",
+        "questionCount": "Câu Hỏi",
+        "description": "Mô Tả",
+        "timeLimit": "Thời Gian Giới Hạn"
+      },
+      "filters": {
+        "searchPlaceholder": "Tìm kiếm theo tên...",
+        "categoryPlaceholder": "Chọn danh mục...",
+        "categorySearch": "Tìm kiếm danh mục...",
+        "categoryEmpty": "Không tìm thấy danh mục nào.",
+        "createDatePlaceholder": "Chọn ngày tạo",
+        "updateDatePlaceholder": "Chọn ngày cập nhật"
+      },
+      "info": {
+        "title": "Thông Tin Bài Kiểm Tra",
+        "cardTitle": "Chi Tiết Bài Kiểm Tra",
+        "loading": "Đang tải thông tin bài kiểm tra...",
+        "notFound": "Không tìm thấy bài kiểm tra",
+        "backToList": "Quay Lại Danh Sách",
+        "fields": {
+          "id": "ID",
+          "name": "Tên",
+          "category": "Danh Mục",
+          "description": "Mô Tả",
+          "timeLimit": "Thời Gian Giới Hạn",
+          "questionCount": "Số Câu Hỏi",
+          "createdAt": "Ngày Tạo",
+          "updatedAt": "Ngày Cập Nhật"
+        },
+        "noDescription": "Không có mô tả"
+      },
+      "questions": {
+        "title": "Câu Hỏi",
+        "create": "Tạo Câu Hỏi",
+        "createTitle": "Tạo Câu Hỏi Mới",
+        "createSuccess": "Tạo câu hỏi thành công",
+        "edit": "Chỉnh Sửa",
+        "editTitle": "Chỉnh Sửa Câu Hỏi",
+        "updateSuccess": "Cập nhật câu hỏi thành công",
+        "delete": "Xóa",
+        "deleteSuccess": "Xóa câu hỏi thành công",
+        "confirmDelete": "Bạn có chắc chắn muốn xóa câu hỏi này?",
+        "info": "Thông Tin Câu Hỏi",
+        "empty": "Không tìm thấy câu hỏi nào",
+        "notFound": "Không tìm thấy câu hỏi",
+        "noPermission": "Bạn không có quyền truy cập trang này",
+        "createNotImplemented": "Tính năng tạo câu hỏi chưa được triển khai",
+        "fields": {
+          "content": "Nội Dung",
+          "type": "Loại Câu Hỏi",
+          "image": "Hình Ảnh",
+          "answers": "Câu Trả Lời"
+        },
+        "form": {
+          "contentPlaceholder": "Nhập nội dung câu hỏi..."
+        },
+        "validation": {
+          "contentRequired": "Nội dung câu hỏi là bắt buộc"
+        },
+        "columns": {
+          "id": "ID",
+          "content": "Nội Dung",
+          "isMultipleChoice": "Loại",
+          "answers": "Câu Trả Lời"
+        },
+        "multipleChoice": "Nhiều Lựa Chọn",
+        "singleChoice": "Một Lựa Chọn",
+        "filters": {
+          "searchPlaceholder": "Tìm kiếm theo nội dung...",
+          "multipleChoice": "Nhiều Lựa Chọn",
+          "singleChoice": "Một Lựa Chọn",
+          "multipleChoicePlaceholder": "Chọn loại...",
+          "multipleChoiceSearch": "Tìm kiếm loại...",
+          "multipleChoiceEmpty": "Không tìm thấy loại nào.",
+          "clear": "Xóa Bộ Lọc"
+        }
+      }
+    }
+  }
+}

@@ -1,7 +1,8 @@
 import { Outlet, redirect } from "react-router";
 import type { Route } from "../+types/_layout";
 import { useAuthStoreInternal } from "@/modules/common/auth/hooks/use-auth";
-import { ROUTES, PERMISSIONS, RESOURCES } from "@/constants";
+import { ROUTES } from "@/constants";
+import { PERMISSIONS, RESOURCES } from "@/modules/admin/constants/permissions";
 import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
 import { hasPermission, hasResourcePermission } from "@/lib";
 

@@ -1,9 +1,3 @@
-export interface SubmissionItem {
-  questionId: string;
-  answerId: string;
-  isCorrect: boolean;
-}
-
 // API Response Types
 export interface PaginationMeta {
   total: number;
@@ -34,18 +28,18 @@ export interface ApiErrorResponse {
 /**
  * Type helper to mark that a type represents API response data (snake_case)
  * This is used for documentation purposes - runtime conversion handles the actual mapping
- * 
+ *
  * Usage:
  * - Define your frontend types in camelCase
  * - API responses will be automatically converted from snake_case to camelCase
- * 
+ *
  * Example:
  * ```ts
  * interface User {
  *   fullName: string;  // camelCase for frontend
  *   email: string;
  * }
- * 
+ *
  * // API returns { full_name: string, email: string }
  * // Auto-converted to { fullName: string, email: string }
  * ```

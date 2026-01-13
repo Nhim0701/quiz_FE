@@ -5,7 +5,8 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
-import { API_BASE_URL, API_CONFIG, API_ENDPOINTS, ERROR } from "@/constants";
+import { API_BASE_URL, API_CONFIG, ERROR } from "@/constants";
+import { ENDPOINTS as AUTH_ENDPOINTS } from "@/modules/common/auth/constants";
 import { t } from "@/i18n/utils";
 import type { ApiErrorResponse, ApiSuccessResponse } from "@/types";
 import type { TranslationKey } from "@/i18n";
@@ -20,9 +21,9 @@ const apiClient: AxiosInstance = axios.create({
 
 // Auth endpoints that don't require token refresh
 const authEndpoints = [
-  API_ENDPOINTS.AUTH.LOGIN,
-  API_ENDPOINTS.AUTH.REGISTER,
-  API_ENDPOINTS.AUTH.REFRESH,
+  AUTH_ENDPOINTS.LOGIN,
+  AUTH_ENDPOINTS.REGISTER,
+  AUTH_ENDPOINTS.REFRESH,
 ];
 
 // Check if request is to an auth endpoint

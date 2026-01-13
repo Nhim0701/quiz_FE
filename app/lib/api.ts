@@ -1,9 +1,13 @@
 // API utility for backend communication
 import { jwtDecode, type JwtPayload } from "jwt-decode";
 import { toast } from "sonner";
-import { API_ENDPOINTS, SESSION_KEYS, STORAGE_KEYS } from "@/constants";
+import { SESSION_KEYS } from "@/constants";
 import { useAuthStoreInternal } from "@/modules/common/auth/hooks/use-auth";
-import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
+import {
+  ROUTES as AUTH_ROUTES,
+  STORAGE_KEYS as AUTH_STORAGE_KEYS,
+  ENDPOINTS as AUTH_ENDPOINTS,
+} from "@/modules/common/auth/constants";
 import { t } from "@/i18n/utils";
 import type { ApiSuccessResponse } from "@/types";
 import type { AuthResponse } from "@/modules/common/auth/types";
@@ -91,34 +95,34 @@ const redirectToLogin = () => {
 export const tokenManager = {
   getToken: (): string | null => {
     return (
-      localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN) ||
-      sessionStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+      localStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN) ||
+      sessionStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN)
     );
   },
   setToken: (token: string, rememberMe: boolean = false): void => {
     if (rememberMe) {
-      localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
-      sessionStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+      localStorage.setItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN, token);
+      sessionStorage.removeItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
     } else {
-      sessionStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
-      localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+      sessionStorage.setItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN, token);
+      localStorage.removeItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
     }
   },
   getRefreshToken: (): string | null => {
-    return localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+    return localStorage.getItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
   },
   setRefreshToken: (token: string): void => {
-    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, token);
+    localStorage.setItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN, token);
   },
   removeToken: (): void => {
-    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-    sessionStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+    localStorage.removeItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
+    sessionStorage.removeItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
+    localStorage.removeItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
   },
   hasToken: (): boolean => {
     return !!(
-      localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN) ||
-      sessionStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+      localStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN) ||
+      sessionStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN)
     );
   },
   /**
@@ -169,7 +173,7 @@ export const tokenManager = {
 
     // Use apiClient to get automatic case conversion
     const response = await apiClient.post<ApiSuccessResponse<AuthResponse>>(
-      API_ENDPOINTS.AUTH.REFRESH,
+      AUTH_ENDPOINTS.REFRESH,
       {
         // Request data in camelCase - will be converted to snake_case by interceptor
         refreshToken: refreshToken,

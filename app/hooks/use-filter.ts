@@ -471,9 +471,7 @@ export const FilterManager = {
    * Example: [{key: "name", value: "C02"}, {key: "categoryId", value: "1,2"}]
    * -> {filter-key-1: "name", filter-value-1: "C02", filter-key-2: "category_id", filter-value-2: "1,2"}
    */
-  convertFiltersToApiParams(
-    filters: FilterEntry[]
-  ): Record<string, string> {
+  convertFiltersToApiParams(filters: FilterEntry[]): Record<string, string> {
     const apiParams: Record<string, string> = {};
 
     filters.forEach((filter, index) => {

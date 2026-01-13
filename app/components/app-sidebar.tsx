@@ -9,8 +9,10 @@ import { useTranslation } from "@/i18n";
 import { useAuth } from "@/modules/common/auth/hooks/use-auth";
 import { useRole } from "@/modules/common/auth/hooks/use-role";
 import { useNavigate, useLocation, Link } from "react-router";
-import { ROUTES } from "@/constants";
-import { COMMON_PERMISSIONS, RESOURCES } from "@/constants/permissions";
+import {
+  COMMON_PERMISSIONS,
+  RESOURCES,
+} from "@/modules/admin/constants/permissions";
 import { getInitials } from "@/lib";
 import {
   Sidebar,
@@ -28,8 +30,11 @@ import {
 } from "./ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
-import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/dashboard/constants";
-import { ROUTES as PROFILE_ROUTES } from "@/modules/user/profile/constants";
+import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/modules/dashboard/constants";
+import { ROUTES as PROFILE_ROUTES } from "@/modules/user/modules/profile/constants";
+import { ROUTES as TESTS_ROUTES } from "@/modules/user/modules/tests/constants";
+import { ROUTES as ADMIN_CATEGORIES_ROUTES } from "@/modules/admin/modules/categories/constants";
+import { ROUTES as ADMIN_TESTS_ROUTES } from "@/modules/admin/modules/tests/constants";
 
 export function AppSidebar() {
   const { t } = useTranslation();
@@ -59,7 +64,7 @@ export function AppSidebar() {
     {
       title: t("sidebar.tests"),
       icon: FileText,
-      url: ROUTES.TESTS.INDEX,
+      url: TESTS_ROUTES.INDEX,
     },
     {
       title: t("sidebar.profile"),
@@ -73,14 +78,14 @@ export function AppSidebar() {
     {
       title: t("sidebar.admin.categories"),
       icon: FolderTree,
-      url: ROUTES.ADMIN.CATEGORIES,
+      url: ADMIN_CATEGORIES_ROUTES.INDEX,
       permission: COMMON_PERMISSIONS.CATEGORY_READ,
       resourcePrefix: RESOURCES.CATEGORY,
     },
     {
       title: t("sidebar.admin.tests"),
       icon: FileText,
-      url: ROUTES.ADMIN.TESTS,
+      url: ADMIN_TESTS_ROUTES.TESTS.INDEX,
       permission: COMMON_PERMISSIONS.TEST_READ,
       resourcePrefix: RESOURCES.TEST,
     },
@@ -196,7 +201,7 @@ export function AppSidebar() {
                       location.pathname === item.url ||
                       location.pathname.startsWith(item.url + "/");
                     return (
-                      <SidebarMenuItem key={item.url}>
+                      <SidebarMenuItem key={item.url as string}>
                         <SidebarMenuButton
                           asChild
                           isActive={isActive}
@@ -207,7 +212,7 @@ export function AppSidebar() {
                               : ""
                           }
                         >
-                          <Link to={item.url}>
+                          <Link to={item.url as string}>
                             <Icon />
                             <span>{item.title}</span>
                           </Link>

@@ -1,4 +1,4 @@
-export type { AnswerProps } from "../modules/admin/tests/hooks/use-answers";
+export type { AnswerProps } from "../modules/admin/modules/tests/types";
 export { default as useApp, useTheme } from "./use-app";
 export {
   useBreadcrumb,

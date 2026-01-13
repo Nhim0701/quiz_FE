@@ -6,7 +6,7 @@ import {
 } from "@/modules/common/auth/hooks/use-auth";
 import { useApp } from "@/hooks";
 import { useTranslation } from "@/i18n";
-import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/dashboard/constants";
+import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/modules/dashboard/constants";
 import {
   RegisterHeader,
   RegisterForm,

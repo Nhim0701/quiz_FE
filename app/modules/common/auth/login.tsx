@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "@/modules/common/auth/hooks/use-auth";
 import { SESSION_KEYS } from "@/constants";
-import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/dashboard/constants";
+import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/modules/dashboard/constants";
 import { LoginHeader, LoginForm, LoginCard, LoginFooter } from "./components";
 
 export default function Login() {

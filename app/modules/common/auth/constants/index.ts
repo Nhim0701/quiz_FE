@@ -1,7 +1,7 @@
 /**
  * Auth-specific API endpoints
  */
-export const AUTH_API_ENDPOINTS = {
+export const ENDPOINTS = {
   LOGIN: "/api/v1/auth/login",
   REGISTER: "/api/v1/auth/register",
   REFRESH: "/api/v1/auth/token/refresh",
@@ -11,7 +11,7 @@ export const AUTH_API_ENDPOINTS = {
 /**
  * Me endpoints (user profile)
  */
-export const ME_API_ENDPOINTS = {
+export const ME_ENDPOINTS = {
   GET: "/api/v1/me",
   UPDATE: "/api/v1/me",
   CHANGE_PASSWORD: "/api/v1/me/password",
@@ -21,7 +21,7 @@ export const ME_API_ENDPOINTS = {
 /**
  * Auth storage keys
  */
-export const AUTH_STORAGE_KEYS = {
+export const STORAGE_KEYS = {
   AUTH: "auth-storage",
   ACCESS_TOKEN: "access_token",
   REFRESH_TOKEN: "refresh_token",

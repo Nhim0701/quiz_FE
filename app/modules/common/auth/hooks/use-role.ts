@@ -5,7 +5,11 @@ import {
   hasAllPermissions as checkAllPermissions,
   hasResourcePermission as checkResourcePermission,
 } from "../utils";
-import { PERMISSIONS, buildPermission, ACTIONS } from "@/constants/permissions";
+import {
+  PERMISSIONS,
+  buildPermission,
+  ACTIONS,
+} from "@/modules/admin/constants/permissions";
 
 /**
  * Hook to check user permissions (RBAC)
