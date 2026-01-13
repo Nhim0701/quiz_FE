@@ -26,7 +26,10 @@ export const FilterActions = ({
             size="sm"
             onClick={button.onClick}
             disabled={!button.onClick}
-            className={cn("h-10", button.className)}
+            className={cn(
+              "h-10 shadow-sm hover:shadow-md transition-all duration-200",
+              button.className
+            )}
           >
             <Icon className="size-4" />
           </Button>

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { PAGINATION } from "@/constants";
 import { useTranslation } from "@/i18n";
+import { cn } from "@/lib";
 import type { PaginationProps } from "./types";
 
 export function Pagination({
@@ -115,7 +116,7 @@ export function Pagination({
           size="sm"
           onClick={() => onPageChange(1)}
           disabled={page === 1 || totalPages === 0}
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 shadow-sm hover:shadow-md transition-all duration-200"
           aria-label={t("common.pagination.firstPage")}
         >
           <ChevronsLeft className="h-4 w-4" />
@@ -126,7 +127,7 @@ export function Pagination({
           size="sm"
           onClick={() => onPageChange(page - 1)}
           disabled={page === 1 || totalPages === 0}
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 shadow-sm hover:shadow-md transition-all duration-200"
           aria-label={t("common.pagination.previousPage")}
         >
           <ChevronLeft className="h-4 w-4" />
@@ -151,7 +152,12 @@ export function Pagination({
               variant={pageNum === page ? "default" : "outline"}
               size="sm"
               onClick={() => onPageChange(pageNum)}
-              className="h-8 w-8 p-0"
+              className={cn(
+                "h-8 w-8 p-0 transition-all duration-200",
+                pageNum === page
+                  ? "shadow-md hover:shadow-lg"
+                  : "shadow-sm hover:shadow-md"
+              )}
               aria-label={(t as any)("common.pagination.page", {
                 page: pageNum,
               })}
@@ -166,7 +172,7 @@ export function Pagination({
           size="sm"
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages || totalPages === 0}
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 shadow-sm hover:shadow-md transition-all duration-200"
           aria-label={t("common.pagination.nextPage")}
         >
           <ChevronRight className="h-4 w-4" />
@@ -177,7 +183,7 @@ export function Pagination({
           size="sm"
           onClick={() => onPageChange(totalPages)}
           disabled={page >= totalPages || totalPages === 0}
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 shadow-sm hover:shadow-md transition-all duration-200"
           aria-label={t("common.pagination.lastPage")}
         >
           <ChevronsRight className="h-4 w-4" />

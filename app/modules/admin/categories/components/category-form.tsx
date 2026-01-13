@@ -125,7 +125,7 @@ export function CategoryForm({ onClearFilters }: CategoryFormProps) {
               type="submit"
               size="sm"
               disabled={loading || isSubmitting}
-              className="bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white"
+              className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 dark:from-emerald-600 dark:to-green-700 dark:hover:from-emerald-700 dark:hover:to-green-800 text-white shadow-md hover:shadow-lg transition-all duration-200 font-medium"
             >
               {(loading || isSubmitting) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
