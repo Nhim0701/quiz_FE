@@ -1,39 +1,5 @@
 {
   "admin": {
-    "roles": {
-      "title": "Quản Lý Vai Trò",
-      "cardTitle": "Danh Sách Vai Trò",
-      "createTitle": "Tạo Vai Trò",
-      "createDescription": "Tạo một vai trò mới trong hệ thống",
-      "editTitle": "Chỉnh Sửa Vai Trò",
-      "editDescription": "Cập nhật thông tin vai trò",
-      "viewTitle": "Thông Tin Vai Trò",
-      "viewDescription": "Xem chi tiết thông tin vai trò",
-      "create": "Tạo",
-      "update": "Cập nhật",
-      "delete": "Xóa",
-      "createSuccess": "Tạo vai trò thành công",
-      "updateSuccess": "Cập nhật vai trò thành công",
-      "deleteSuccess": "Xóa vai trò thành công",
-      "confirmDelete": "Bạn có chắc chắn muốn xóa vai trò {{name}}?",
-      "searchPlaceholder": "Tìm kiếm theo tên vai trò...",
-      "empty": "Không có vai trò nào",
-      "noPermission": "Bạn không có quyền truy cập trang này",
-      "columns": {
-        "id": "ID",
-        "name": "Tên Vai Trò",
-        "description": "Mô Tả"
-      },
-      "form": {
-        "nameLabel": "Tên Vai Trò",
-        "namePlaceholder": "Nhập tên vai trò",
-        "descriptionLabel": "Mô Tả",
-        "descriptionPlaceholder": "Nhập mô tả vai trò"
-      },
-      "validation": {
-        "nameRequired": "Tên vai trò là bắt buộc"
-      }
-    },
     "permissions": {
       "title": "Quản Lý Quyền",
       "cardTitle": "Danh Sách Quyền",

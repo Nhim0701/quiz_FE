@@ -9,16 +9,16 @@ import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { PermissionsList, PermissionForm } from "./components";
-import { usePermissionsStore } from "./hooks";
+import { RolesList, RoleForm } from "./components";
+import { useRolesStore } from "./hooks";
 
-export default function AdminPermissions() {
+export default function AdminRoles() {
   const { t } = useTranslation();
   const { getNamespaceRoles } = useRole();
-  const { openDialog } = usePermissionsStore();
+  const { openDialog } = useRolesStore();
   const [clearFilters, setClearFilters] = useState<(() => void) | null>(null);
 
-  const permissions = getNamespaceRoles(RESOURCES.ROLES);
+  const roles = getNamespaceRoles(RESOURCES.ROLES);
 
   useBreadcrumb(
     [
@@ -27,12 +27,8 @@ export default function AdminPermissions() {
         href: "",
       },
       {
-        label: t("sidebar.admin.rolesPermissions"),
-        href: "",
-      },
-      {
-        label: t("sidebar.admin.permissions"),
-        href: ROUTES.PERMISSIONS.INDEX,
+        label: t("sidebar.admin.roles"),
+        href: ROUTES.INDEX,
       },
     ],
     [t]
@@ -42,10 +38,10 @@ export default function AdminPermissions() {
     setClearFilters(() => clearFiltersFn);
   }, []);
 
-  if (!permissions.read) {
+  if (!roles.read) {
     return (
       <Container>
-        <PageHeader title={t("admin.permissions.title")} />
+        <PageHeader title={t("admin.roles.title")} />
         <Card>
           <CardContent className="p-6">
             <p className="text-muted-foreground">
@@ -59,30 +55,30 @@ export default function AdminPermissions() {
 
   return (
     <Container className="p-2">
-      <PageHeader title={t("admin.permissions.title")} />
+      <PageHeader title={t("admin.roles.title")} />
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle>{t("admin.permissions.cardTitle")}</CardTitle>
-          {permissions.create && (
+          <CardTitle>{t("admin.roles.cardTitle")}</CardTitle>
+          {roles.create && (
             <Button
               onClick={() => openDialog()}
               size="sm"
               className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 dark:from-emerald-600 dark:to-green-700 dark:hover:from-emerald-700 dark:hover:to-green-800 text-white shadow-md hover:shadow-lg transition-all duration-200 font-medium"
             >
               <Plus className="mr-2 h-4 w-4" />
-              {t("admin.permissions.createTitle")}
+              {t("admin.roles.createTitle")}
             </Button>
           )}
         </CardHeader>
         <CardContent>
-          <PermissionsList
-            permissions={permissions}
+          <RolesList
+            roles={roles}
             onClearFiltersReady={handleClearFiltersReady}
           />
         </CardContent>
       </Card>
       <div className="mt-4">
-        <PermissionForm onClearFilters={clearFilters} />
+        <RoleForm onClearFilters={clearFilters} />
       </div>
     </Container>
   );

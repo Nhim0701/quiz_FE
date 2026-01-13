@@ -48,7 +48,9 @@ import { ROUTES as ADMIN_CATEGORIES_ROUTES } from "@/modules/admin/modules/categ
 import { ROUTES as ADMIN_TESTS_ROUTES } from "@/modules/admin/modules/tests/constants";
 import { ROUTES as ADMIN_QUESTIONS_ROUTES } from "@/modules/admin/modules/questions/constants";
 import { ROUTES as ADMIN_USERS_ROUTES } from "@/modules/admin/modules/users/constants";
-import { ROUTES as ADMIN_ROLES_PERMISSIONS_ROUTES } from "@/modules/admin/modules/roles-permissions/constants";
+import { ROUTES as ADMIN_ROLES_ROUTES } from "@/modules/admin/modules/roles/constants";
+import { ROUTES as ADMIN_PERMISSIONS_ROUTES } from "@/modules/admin/modules/permissions/constants";
+import { ROUTES as ADMIN_NAMESPACES_ROUTES } from "@/modules/admin/modules/namespaces/constants";
 
 export function AppSidebar() {
   const { t } = useTranslation();
@@ -266,7 +268,10 @@ export function AppSidebar() {
                             tooltip={t("sidebar.admin.rolesPermissions")}
                             className={
                               location.pathname.startsWith(
-                                ADMIN_ROLES_PERMISSIONS_ROUTES.ROLES.INDEX
+                                ADMIN_ROLES_ROUTES.INDEX
+                              ) ||
+                              location.pathname.startsWith(
+                                ADMIN_PERMISSIONS_ROUTES.INDEX
                               )
                                 ? "bg-gradient-to-r from-indigo-500/15 to-purple-500/15 dark:from-indigo-500/20 dark:to-purple-500/20 text-indigo-600 dark:text-indigo-400 font-semibold border-l-2 border-indigo-500 dark:border-indigo-400 shadow-sm"
                                 : ""
@@ -284,19 +289,13 @@ export function AppSidebar() {
                                 asChild
                                 isActive={
                                   location.pathname ===
-                                    ADMIN_ROLES_PERMISSIONS_ROUTES.ROLES
-                                      .INDEX ||
+                                    ADMIN_ROLES_ROUTES.INDEX ||
                                   location.pathname.startsWith(
-                                    ADMIN_ROLES_PERMISSIONS_ROUTES.ROLES.INDEX +
-                                      "/"
+                                    ADMIN_ROLES_ROUTES.INDEX + "/"
                                   )
                                 }
                               >
-                                <Link
-                                  to={
-                                    ADMIN_ROLES_PERMISSIONS_ROUTES.ROLES.INDEX
-                                  }
-                                >
+                                <Link to={ADMIN_ROLES_ROUTES.INDEX}>
                                   <span>{t("sidebar.admin.roles")}</span>
                                 </Link>
                               </SidebarMenuSubButton>
@@ -306,21 +305,30 @@ export function AppSidebar() {
                                 asChild
                                 isActive={
                                   location.pathname ===
-                                    ADMIN_ROLES_PERMISSIONS_ROUTES.PERMISSIONS
-                                      .INDEX ||
+                                    ADMIN_PERMISSIONS_ROUTES.INDEX ||
                                   location.pathname.startsWith(
-                                    ADMIN_ROLES_PERMISSIONS_ROUTES.PERMISSIONS
-                                      .INDEX + "/"
+                                    ADMIN_PERMISSIONS_ROUTES.INDEX + "/"
                                   )
                                 }
                               >
-                                <Link
-                                  to={
-                                    ADMIN_ROLES_PERMISSIONS_ROUTES.PERMISSIONS
-                                      .INDEX
-                                  }
-                                >
+                                <Link to={ADMIN_PERMISSIONS_ROUTES.INDEX}>
                                   <span>{t("sidebar.admin.permissions")}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                            <SidebarMenuSubItem>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={
+                                  location.pathname ===
+                                    ADMIN_NAMESPACES_ROUTES.INDEX ||
+                                  location.pathname.startsWith(
+                                    ADMIN_NAMESPACES_ROUTES.INDEX + "/"
+                                  )
+                                }
+                              >
+                                <Link to={ADMIN_NAMESPACES_ROUTES.INDEX}>
+                                  <span>{t("sidebar.admin.namespaces")}</span>
                                 </Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>

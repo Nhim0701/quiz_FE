@@ -6,8 +6,10 @@ import { ROUTES as TESTS_ROUTES } from "./modules/user/modules/tests/constants";
 import { ROUTES as ADMIN_TESTS_ROUTES } from "./modules/admin/modules/tests/constants/";
 import { ROUTES as ADMIN_CATEGORIES_ROUTES } from "./modules/admin/modules/categories/constants";
 import { ROUTES as ADMIN_QUESTIONS_ROUTES } from "./modules/admin/modules/questions/constants";
-import { ROUTES as ADMIN_ROLES_PERMISSIONS_ROUTES } from "./modules/admin/modules/roles-permissions/constants";
+import { ROUTES as ADMIN_ROLES_ROUTES } from "./modules/admin/modules/roles/constants";
+import { ROUTES as ADMIN_PERMISSIONS_ROUTES } from "./modules/admin/modules/permissions/constants";
 import { ROUTES as ADMIN_USERS_ROUTES } from "./modules/admin/modules/users/constants";
+import { ROUTES as ADMIN_NAMESPACES_ROUTES } from "./modules/admin/modules/namespaces/constants";
 
 export default [
   index("modules/home.tsx"),
@@ -68,14 +70,18 @@ export default [
       // Users routes
       route(ADMIN_USERS_ROUTES.INDEX, "modules/admin/modules/users/index.tsx"),
 
-      // Roles & Permissions routes
+      // Roles routes
+      route(ADMIN_ROLES_ROUTES.INDEX, "modules/admin/modules/roles/index.tsx"),
+      // Permissions routes
       route(
-        ADMIN_ROLES_PERMISSIONS_ROUTES.ROLES.INDEX,
-        "modules/admin/modules/roles-permissions/roles.tsx"
+        ADMIN_PERMISSIONS_ROUTES.INDEX,
+        "modules/admin/modules/permissions/index.tsx"
       ),
+
+      // Namespaces routes
       route(
-        ADMIN_ROLES_PERMISSIONS_ROUTES.PERMISSIONS.INDEX,
-        "modules/admin/modules/roles-permissions/permissions.tsx"
+        ADMIN_NAMESPACES_ROUTES.INDEX,
+        "modules/admin/modules/namespaces/index.tsx"
       ),
     ]),
   ]),

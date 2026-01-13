@@ -3,8 +3,6 @@ import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
 import { apiClient } from "@/lib";
 import { ENDPOINTS } from "../constants";
 
-const ROLES_ENDPOINTS = ENDPOINTS.ROLES;
-
 export interface Role {
   id: string;
   name: string;
@@ -111,7 +109,7 @@ export const useRolesStore = create<RolesState>((set, get) => ({
       }
 
       const response = await apiClient.get<ApiSuccessResponse<Role[]>>(
-        ROLES_ENDPOINTS.LIST,
+        ENDPOINTS.LIST,
         {
           params,
         }
@@ -138,7 +136,7 @@ export const useRolesStore = create<RolesState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await apiClient.post<ApiSuccessResponse<Role>>(
-        ROLES_ENDPOINTS.CREATE,
+        ENDPOINTS.CREATE,
         data
       );
       set({ loading: false });
@@ -155,7 +153,7 @@ export const useRolesStore = create<RolesState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await apiClient.put<ApiSuccessResponse<Role>>(
-        ROLES_ENDPOINTS.UPDATE(id),
+        ENDPOINTS.UPDATE(id),
         data
       );
       set({ loading: false });
@@ -171,7 +169,7 @@ export const useRolesStore = create<RolesState>((set, get) => ({
   deleteRole: async (id) => {
     set({ loading: true, error: null });
     try {
-      await apiClient.delete(ROLES_ENDPOINTS.DELETE(id));
+      await apiClient.delete(ENDPOINTS.DELETE(id));
       set({ loading: false });
     } catch (error) {
       const errorMessage =

@@ -77,7 +77,8 @@
       "users": "Users",
       "rolesPermissions": "Roles & Permissions",
       "roles": "Roles",
-      "permissions": "Permissions"
+      "permissions": "Permissions",
+      "namespaces": "Namespaces"
     }
   },
   "breadcrumb": {

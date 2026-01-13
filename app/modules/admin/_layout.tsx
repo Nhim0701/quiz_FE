@@ -30,6 +30,7 @@ const adminMiddleware: Route.ClientMiddlewareFunction = async () => {
     RESOURCES.QUESTION,
     RESOURCES.USER,
     RESOURCES.ROLES,
+    RESOURCES.NAMESPACE,
   ];
 
   const hasAnyResourcePermission = adminResources.some((resource) =>

@@ -3,94 +3,81 @@ import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
 import { apiClient } from "@/lib";
 import { ENDPOINTS } from "../constants";
 
-export interface Permission {
+export interface Namespace {
   id: string;
   name: string;
   description?: string;
-  resource?: string;
-  action?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  prefix: string;
 }
 
-interface PermissionsState {
-  // Permissions list
-  permissions: Permission[];
+interface NamespacesState {
+  // Namespaces list
+  namespaces: Namespace[];
   loading: boolean;
   error: string | null;
 
   // Form state
   isDialogOpen: boolean;
-  editingPermission: Permission | null;
-  viewingPermission: Permission | null;
+  editingNamespace: Namespace | null;
+  viewingNamespace: Namespace | null;
   isEditMode: boolean;
 
   // Actions
-  openDialog: (permission?: Permission | null) => void;
+  openDialog: (namespace?: Namespace | null) => void;
   closeDialog: () => void;
-  openViewDialog: (permission: Permission) => void;
+  openViewDialog: (namespace: Namespace) => void;
   setEditMode: (isEdit: boolean) => void;
 
   // API methods
-  fetchPermissions: (
+  fetchNamespaces: (
     page?: number,
     pageSize?: number,
     filters?: Record<string, string>
-  ) => Promise<{ data: Permission[]; meta?: ApiResponseMeta } | undefined>;
-  createPermission: (data: {
+  ) => Promise<{ data: Namespace[]; meta?: ApiResponseMeta } | undefined>;
+  createNamespace: (data: {
     name: string;
+    prefix: string;
     description?: string;
-    resource: string;
-    action: string;
-  }) => Promise<Permission>;
-  updatePermission: (
+  }) => Promise<Namespace>;
+  updateNamespace: (
     id: string,
-    data: {
-      name: string;
-      description?: string;
-      resource: string;
-      action: string;
-    }
-  ) => Promise<Permission>;
-  deletePermission: (id: string) => Promise<void>;
-  refreshPermissions: (
+    data: { name: string; prefix: string; description?: string }
+  ) => Promise<Namespace>;
+  deleteNamespace: (id: string) => Promise<void>;
+  refreshNamespaces: (
     page?: number,
     pageSize?: number,
     filters?: Record<string, string>
   ) => Promise<void>;
 }
 
-export const usePermissionsStore = create<PermissionsState>((set, get) => ({
+export const useNamespacesStore = create<NamespacesState>((set, get) => ({
   // Initial state
-  permissions: [],
+  namespaces: [],
   loading: false,
   error: null,
   isDialogOpen: false,
-  editingPermission: null,
-  viewingPermission: null,
+  editingNamespace: null,
+  viewingNamespace: null,
   isEditMode: false,
 
   // Form actions
-  openDialog: (permission = null) => {
-    set({
-      isDialogOpen: true,
-      editingPermission: permission,
-      isEditMode: false,
-    });
+  openDialog: (namespace = null) => {
+    set({ isDialogOpen: true, editingNamespace: namespace, isEditMode: false });
   },
   closeDialog: () => {
     set({
       isDialogOpen: false,
-      editingPermission: null,
-      viewingPermission: null,
+      editingNamespace: null,
+      viewingNamespace: null,
       isEditMode: false,
     });
   },
-  openViewDialog: (permission) => {
+  openViewDialog: (namespace) => {
     set({
       isDialogOpen: true,
-      viewingPermission: permission,
-      editingPermission: null,
+      viewingNamespace: namespace,
+      editingNamespace: null,
       isEditMode: false,
     });
   },
@@ -99,7 +86,7 @@ export const usePermissionsStore = create<PermissionsState>((set, get) => ({
   },
 
   // API methods
-  fetchPermissions: async (
+  fetchNamespaces: async (
     page = 1,
     pageSize = 10,
     filters?: Record<string, string>
@@ -120,8 +107,8 @@ export const usePermissionsStore = create<PermissionsState>((set, get) => ({
         });
       }
 
-      const response = await apiClient.get<ApiSuccessResponse<Permission[]>>(
-        ENDPOINTS.PERMISSIONS.LIST,
+      const response = await apiClient.get<ApiSuccessResponse<Namespace[]>>(
+        ENDPOINTS.LIST,
         {
           params,
         }
@@ -131,82 +118,82 @@ export const usePermissionsStore = create<PermissionsState>((set, get) => ({
       const meta = response.data.meta;
 
       set({
-        permissions: data,
+        namespaces: data,
         loading: false,
       });
 
       return { data, meta };
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch permissions";
+        error instanceof Error ? error.message : "Failed to fetch namespaces";
       set({ error: errorMessage, loading: false });
       throw error;
     }
   },
 
-  createPermission: async (data) => {
+  createNamespace: async (data) => {
     set({ loading: true, error: null });
     try {
-      const response = await apiClient.post<ApiSuccessResponse<Permission>>(
-        ENDPOINTS.PERMISSIONS.CREATE,
+      const response = await apiClient.post<ApiSuccessResponse<Namespace>>(
+        ENDPOINTS.CREATE,
         data
       );
       set({ loading: false });
       return response.data.data;
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to create permission";
+        error instanceof Error ? error.message : "Failed to create namespace";
       set({ error: errorMessage, loading: false });
       throw error;
     }
   },
 
-  updatePermission: async (id, data) => {
+  updateNamespace: async (id, data) => {
     set({ loading: true, error: null });
     try {
-      const response = await apiClient.put<ApiSuccessResponse<Permission>>(
-        ENDPOINTS.PERMISSIONS.UPDATE(id),
+      const response = await apiClient.put<ApiSuccessResponse<Namespace>>(
+        ENDPOINTS.UPDATE(id),
         data
       );
       set({ loading: false });
       return response.data.data;
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to update permission";
+        error instanceof Error ? error.message : "Failed to update namespace";
       set({ error: errorMessage, loading: false });
       throw error;
     }
   },
 
-  deletePermission: async (id) => {
+  deleteNamespace: async (id) => {
     set({ loading: true, error: null });
     try {
-      await apiClient.delete(ENDPOINTS.PERMISSIONS.DELETE(id));
+      await apiClient.delete(ENDPOINTS.DELETE(id));
       set({ loading: false });
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to delete permission";
+        error instanceof Error ? error.message : "Failed to delete namespace";
       set({ error: errorMessage, loading: false });
       throw error;
     }
   },
 
-  refreshPermissions: async (
+  refreshNamespaces: async (
     page = 1,
     pageSize = 10,
     filters?: Record<string, string>
   ) => {
-    const { viewingPermission } = get();
-    await get().fetchPermissions(page, pageSize, filters);
+    const { viewingNamespace } = get();
+    await get().fetchNamespaces(page, pageSize, filters);
 
-    // Update viewingPermission if it exists and dialog is still open
-    if (viewingPermission) {
-      const { permissions } = get();
-      const updatedPermission = permissions.find(
-        (p) => p.id === viewingPermission.id
+    // Update viewingNamespace if it exists and dialog is still open
+    if (viewingNamespace) {
+      const { namespaces } = get();
+      const updatedNamespace = namespaces.find(
+        (n) => n.id === viewingNamespace.id
       );
-      if (updatedPermission) {
-        set({ viewingPermission: updatedPermission });
+      if (updatedNamespace) {
+        set({ viewingNamespace: updatedNamespace });
       }
     }
   },

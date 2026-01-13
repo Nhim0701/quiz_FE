@@ -25,7 +25,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { useApp } from "@/hooks";
 import { useUsersStore, type User } from "../hooks";
-import { useRolesStore } from "@/modules/admin/modules/roles-permissions/hooks";
+import { useRolesStore } from "@/modules/admin/modules/roles/hooks";
 import { Check, ChevronsUpDown, Loader2, X } from "lucide-react";
 import { cn } from "@/lib";
 import { ScrollArea } from "@/components/ui/scroll-area";
