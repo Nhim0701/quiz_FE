@@ -1,0 +1,38 @@
+{
+  "admin": {
+    "roles": {
+      "title": "Role Management",
+      "cardTitle": "Roles List",
+      "createTitle": "Create Role",
+      "createDescription": "Create a new role in the system",
+      "editTitle": "Edit Role",
+      "editDescription": "Update role information",
+      "viewTitle": "Role Information",
+      "viewDescription": "View role details",
+      "create": "Create",
+      "update": "Update",
+      "delete": "Delete",
+      "createSuccess": "Role created successfully",
+      "updateSuccess": "Role updated successfully",
+      "deleteSuccess": "Role deleted successfully",
+      "confirmDelete": "Are you sure you want to delete role {{name}}?",
+      "searchPlaceholder": "Search by role name...",
+      "empty": "No roles found",
+      "noPermission": "You don't have permission to access this page",
+      "columns": {
+        "id": "ID",
+        "name": "Role Name",
+        "description": "Description"
+      },
+      "form": {
+        "nameLabel": "Role Name",
+        "namePlaceholder": "Enter role name",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Enter role description"
+      },
+      "validation": {
+        "nameRequired": "Role name is required"
+      }
+    }
+  }
+}

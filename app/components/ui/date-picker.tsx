@@ -47,13 +47,16 @@ export function DatePicker({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto p-0" align="center">
         <Calendar
           mode="single"
           selected={date || undefined}
           onSelect={onSelect}
-          initialFocus
+          autoFocus
           locale={vi}
+          captionLayout="dropdown"
+          startMonth={new Date(1900, 0, 1)}
+          endMonth={new Date(new Date().getFullYear() + 10, 11, 31)}
         />
       </PopoverContent>
     </Popover>

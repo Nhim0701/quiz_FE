@@ -5,6 +5,8 @@ import {
   LogOut,
   FolderTree,
   HelpCircle,
+  Shield,
+  ChevronDown,
 } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { useAuth } from "@/modules/common/auth/hooks/use-auth";
@@ -25,10 +27,18 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   SidebarRail,
   SidebarSeparator,
   useSidebar,
 } from "./ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "./ui/collapsible";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
 import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/modules/dashboard/constants";
@@ -37,6 +47,8 @@ import { ROUTES as TESTS_ROUTES } from "@/modules/user/modules/tests/constants";
 import { ROUTES as ADMIN_CATEGORIES_ROUTES } from "@/modules/admin/modules/categories/constants";
 import { ROUTES as ADMIN_TESTS_ROUTES } from "@/modules/admin/modules/tests/constants";
 import { ROUTES as ADMIN_QUESTIONS_ROUTES } from "@/modules/admin/modules/questions/constants";
+import { ROUTES as ADMIN_USERS_ROUTES } from "@/modules/admin/modules/users/constants";
+import { ROUTES as ADMIN_ROLES_PERMISSIONS_ROUTES } from "@/modules/admin/modules/roles-permissions/constants";
 
 export function AppSidebar() {
   const { t } = useTranslation();
@@ -75,6 +87,11 @@ export function AppSidebar() {
     },
   ];
 
+  // Check if user has roles permission
+  const hasRolesPermission =
+    hasPermission(COMMON_PERMISSIONS.ROLE_READ) ||
+    hasResourcePermission(RESOURCES.ROLES);
+
   // Admin-only menu items with permission checks
   const adminMenuItems = [
     {
@@ -97,6 +114,13 @@ export function AppSidebar() {
       url: ADMIN_QUESTIONS_ROUTES.QUESTIONS.INDEX,
       permission: COMMON_PERMISSIONS.QUESTION_READ,
       resourcePrefix: RESOURCES.QUESTION,
+    },
+    {
+      title: t("sidebar.admin.users"),
+      icon: User,
+      url: ADMIN_USERS_ROUTES.INDEX,
+      permission: COMMON_PERMISSIONS.USER_READ,
+      resourcePrefix: RESOURCES.USER,
     },
   ].filter((item) => {
     if (item.permission === null) {
@@ -195,7 +219,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {/* Admin Menu - Visible to users with admin permissions */}
-        {adminMenuItems.length > 0 && (
+        {(adminMenuItems.length > 0 || hasRolesPermission) && (
           <>
             <SidebarSeparator />
             <SidebarGroup>
@@ -229,6 +253,59 @@ export function AppSidebar() {
                       </SidebarMenuItem>
                     );
                   })}
+                  {/* Roles & Permission with sub items */}
+                  {hasRolesPermission && (
+                    <Collapsible
+                      asChild
+                      defaultOpen
+                      className="group/collapsible"
+                    >
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton
+                            tooltip={t("sidebar.admin.rolesPermissions")}
+                            className={
+                              location.pathname.startsWith(
+                                ADMIN_ROLES_PERMISSIONS_ROUTES.ROLES.INDEX
+                              )
+                                ? "bg-gradient-to-r from-indigo-500/15 to-purple-500/15 dark:from-indigo-500/20 dark:to-purple-500/20 text-indigo-600 dark:text-indigo-400 font-semibold border-l-2 border-indigo-500 dark:border-indigo-400 shadow-sm"
+                                : ""
+                            }
+                          >
+                            <Shield />
+                            <span>{t("sidebar.admin.rolesPermissions")}</span>
+                            <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            <SidebarMenuSubItem>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={
+                                  location.pathname ===
+                                    ADMIN_ROLES_PERMISSIONS_ROUTES.ROLES
+                                      .INDEX ||
+                                  location.pathname.startsWith(
+                                    ADMIN_ROLES_PERMISSIONS_ROUTES.ROLES.INDEX +
+                                      "/"
+                                  )
+                                }
+                              >
+                                <Link
+                                  to={
+                                    ADMIN_ROLES_PERMISSIONS_ROUTES.ROLES.INDEX
+                                  }
+                                >
+                                  <span>{t("sidebar.admin.roles")}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  )}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>

@@ -1,0 +1,51 @@
+{
+  "admin": {
+    "users": {
+      "title": "Quản lý người dùng",
+      "cardTitle": "Danh sách người dùng",
+      "empty": "Không tìm thấy người dùng nào",
+      "noPermission": "Bạn không có quyền truy cập trang này",
+      "delete": "Xóa",
+      "deleteSuccess": "Xóa người dùng thành công",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa người dùng \"{{name}}\"?",
+      "createTitle": "Tạo người dùng mới",
+      "editTitle": "Sửa người dùng",
+      "createDescription": "Điền thông tin để tạo người dùng mới",
+      "editDescription": "Cập nhật thông tin người dùng",
+      "create": "Tạo người dùng",
+      "update": "Cập nhật người dùng",
+      "createSuccess": "Tạo người dùng thành công",
+      "updateSuccess": "Cập nhật người dùng thành công",
+      "viewTitle": "Thông tin người dùng",
+      "viewDescription": "Xem và chỉnh sửa thông tin người dùng",
+      "searchPlaceholder": "Tìm kiếm theo tên hoặc email...",
+      "form": {
+        "fullNameLabel": "Họ và tên",
+        "fullNamePlaceholder": "Nhập họ và tên",
+        "emailLabel": "Email",
+        "emailPlaceholder": "Nhập email",
+        "phoneLabel": "Số điện thoại",
+        "phonePlaceholder": "Nhập số điện thoại",
+        "birthdayLabel": "Ngày sinh",
+        "birthdayPlaceholder": "Chọn ngày sinh",
+        "addressLabel": "Địa chỉ",
+        "addressPlaceholder": "Nhập địa chỉ",
+        "jobTitleLabel": "Chức vụ",
+        "jobTitlePlaceholder": "Nhập chức vụ",
+        "companyLabel": "Công ty",
+        "companyPlaceholder": "Nhập tên công ty"
+      },
+      "validation": {
+        "fullNameRequired": "Họ và tên là bắt buộc",
+        "emailRequired": "Email là bắt buộc",
+        "emailInvalid": "Email không hợp lệ"
+      },
+      "columns": {
+        "id": "ID",
+        "fullName": "Họ và tên",
+        "email": "Email",
+        "phone": "Số điện thoại"
+      }
+    }
+  }
+}

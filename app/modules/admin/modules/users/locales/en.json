@@ -1,0 +1,51 @@
+{
+  "admin": {
+    "users": {
+      "title": "User Management",
+      "cardTitle": "Users List",
+      "empty": "No users found",
+      "noPermission": "You don't have permission to access this page",
+      "delete": "Delete",
+      "deleteSuccess": "User deleted successfully",
+      "confirmDelete": "Are you sure you want to delete user \"{{name}}\"?",
+      "createTitle": "Create New User",
+      "editTitle": "Edit User",
+      "createDescription": "Fill in the information to create a new user",
+      "editDescription": "Update user information",
+      "create": "Create User",
+      "update": "Update User",
+      "createSuccess": "User created successfully",
+      "updateSuccess": "User updated successfully",
+      "viewTitle": "User Information",
+      "viewDescription": "View and edit user information",
+      "searchPlaceholder": "Search by name or email...",
+      "form": {
+        "fullNameLabel": "Full Name",
+        "fullNamePlaceholder": "Enter full name",
+        "emailLabel": "Email",
+        "emailPlaceholder": "Enter email",
+        "phoneLabel": "Phone",
+        "phonePlaceholder": "Enter phone number",
+        "birthdayLabel": "Birthday",
+        "birthdayPlaceholder": "Select birthday",
+        "addressLabel": "Address",
+        "addressPlaceholder": "Enter address",
+        "jobTitleLabel": "Job Title",
+        "jobTitlePlaceholder": "Enter job title",
+        "companyLabel": "Company",
+        "companyPlaceholder": "Enter company name"
+      },
+      "validation": {
+        "fullNameRequired": "Full name is required",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Invalid email"
+      },
+      "columns": {
+        "id": "ID",
+        "fullName": "Full Name",
+        "email": "Email",
+        "phone": "Phone"
+      }
+    }
+  }
+}

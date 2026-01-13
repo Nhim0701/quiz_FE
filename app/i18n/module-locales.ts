@@ -12,6 +12,8 @@ import testsEnLocales from "../modules/user/modules/tests/locales/en.json";
 import adminCategoriesEnLocales from "../modules/admin/modules/categories/locales/en.json";
 import adminTestsEnLocales from "../modules/admin/modules/tests/locales/en.json";
 import adminQuestionsEnLocales from "../modules/admin/modules/questions/locales/en.json";
+import adminUsersEnLocales from "../modules/admin/modules/users/locales/en.json";
+import adminRolesEnLocales from "../modules/admin/modules/roles-permissions/locales/en.json";
 
 /**
  * Type definition for all module locales
@@ -33,6 +35,8 @@ export type ModuleLocales = {
     categories: typeof adminCategoriesEnLocales.admin.categories;
     tests: typeof adminTestsEnLocales.admin.tests;
     questions: typeof adminQuestionsEnLocales.admin.questions;
+    users: typeof adminUsersEnLocales.admin.users;
+    roles: typeof adminRolesEnLocales.admin.roles;
   };
 };
 
