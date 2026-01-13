@@ -1,107 +1,25 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useState, useCallback } from "react";
 import { useTranslation } from "@/i18n";
 import { useRole } from "@/modules/common/auth/hooks/use-role";
 import { RESOURCES } from "@/modules/admin/constants/permissions";
-import { ROUTES as QUESTIONS_ROUTES } from "./constants";
-import { ROUTES as TESTS_ROUTES } from "../tests/constants";
-import { useBreadcrumb, useApp } from "@/hooks";
-import { useTestsStore } from "../tests/hooks";
-import { useQuestionsStore } from "./hooks";
-import { questionSchema, type QuestionFormData } from "./schemas";
+import { ROUTES } from "./constants";
+import { useBreadcrumb } from "@/hooks";
+import { useNavigate } from "react-router";
+import { PageHeader } from "@/components/page-header";
 import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { PageHeader } from "@/components/page-header";
-import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Loader2, FileText, CheckSquare, Save } from "lucide-react";
-import { cn } from "@/lib";
+import { Plus } from "lucide-react";
+import { QuestionsList } from "./components";
 
-export default function AdminQuestionForm() {
+export default function AdminQuestions() {
   const { t } = useTranslation();
-  const { testId, questionId } = useParams<{
-    testId: string;
-    questionId?: string;
-  }>();
   const navigate = useNavigate();
   const { getNamespaceRoles } = useRole();
-  const { showSuccess, showError } = useApp();
-  const { getTestById } = useTestsStore();
-  const { createQuestion, updateQuestion, getQuestion, loading } =
-    useQuestionsStore();
+  const [clearFilters, setClearFilters] = useState<(() => void) | null>(null);
 
   const roles = getNamespaceRoles(RESOURCES.QUESTION);
-  const isEditMode = !!questionId;
 
-  const [test, setTest] = useState<any>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [testLoading, setTestLoading] = useState(true);
-
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<QuestionFormData>({
-    resolver: zodResolver(questionSchema(t)),
-    defaultValues: {
-      content: "",
-      isMultipleChoice: false,
-    },
-  });
-
-  // Load test data
-  useEffect(() => {
-    const loadTest = async () => {
-      if (!testId) return;
-      try {
-        setTestLoading(true);
-        const testData = await getTestById(testId);
-        if (testData) {
-          setTest(testData);
-        }
-      } catch (error) {
-        showError(t("admin.tests.info.notFound"));
-        navigate(TESTS_ROUTES.TESTS.INDEX);
-      } finally {
-        setTestLoading(false);
-      }
-    };
-    loadTest();
-  }, [testId, getTestById, showError, t, navigate]);
-
-  // Load question data for edit mode
-  useEffect(() => {
-    const loadQuestion = async () => {
-      if (!isEditMode || !testId || !questionId) return;
-      try {
-        const question = await getQuestion(testId, questionId);
-        reset({
-          content: question.content || "",
-          isMultipleChoice: question.isMultipleChoice || false,
-        });
-      } catch (error) {
-        showError(t("admin.questions.notFound"));
-        navigate(TESTS_ROUTES.TESTS.INFO(testId));
-      }
-    };
-    loadQuestion();
-  }, [
-    isEditMode,
-    testId,
-    questionId,
-    getQuestion,
-    reset,
-    showError,
-    t,
-    navigate,
-  ]);
-
-  // Set breadcrumbs
   useBreadcrumb(
     [
       {
@@ -109,110 +27,30 @@ export default function AdminQuestionForm() {
         href: "",
       },
       {
-        label: t("sidebar.admin.tests"),
-        href: TESTS_ROUTES.TESTS.INDEX,
-      },
-      {
-        label: test?.name || t("admin.tests.info.title"),
-        href: testId
-          ? TESTS_ROUTES.TESTS.INFO(testId)
-          : TESTS_ROUTES.TESTS.INDEX,
-      },
-      {
-        label: isEditMode
-          ? t("admin.questions.edit")
-          : t("admin.questions.create"),
-        href: questionId
-          ? testId && questionId
-            ? QUESTIONS_ROUTES.QUESTIONS.EDIT(testId, questionId)
-            : ""
-          : testId
-            ? QUESTIONS_ROUTES.QUESTIONS.NEW(testId)
-            : "",
+        label: t("sidebar.admin.questions"),
+        href: ROUTES.QUESTIONS.INDEX,
       },
     ],
-    [test, testId, questionId, isEditMode, t]
+    [t]
   );
 
-  const onSubmit = async (data: QuestionFormData) => {
-    if (!testId) return;
+  const handleClearFiltersReady = useCallback((clearFiltersFn: () => void) => {
+    setClearFilters(() => clearFiltersFn);
+  }, []);
 
-    setIsSubmitting(true);
-    try {
-      const questionData = {
-        content: data.content,
-        isMultipleChoice: data.isMultipleChoice ?? false,
-      };
-      if (isEditMode && questionId) {
-        await updateQuestion(testId, questionId, questionData);
-        showSuccess(t("admin.questions.updateSuccess"));
-      } else {
-        await createQuestion(testId, questionData);
-        showSuccess(t("admin.questions.createSuccess"));
-      }
-      navigate(TESTS_ROUTES.TESTS.INFO(testId));
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : t("errors.genericError");
-      showError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleCreateQuestion = () => {
+    navigate(ROUTES.QUESTIONS.NEW);
   };
 
-  const handleCancel = () => {
-    if (testId) {
-      navigate(TESTS_ROUTES.TESTS.INFO(testId));
-    }
-  };
-
-  if (!roles.create && !isEditMode) {
+  if (!roles.read) {
     return (
       <Container>
-        <PageHeader
-          title={
-            isEditMode ? t("admin.questions.edit") : t("admin.questions.create")
-          }
-        />
+        <PageHeader title={t("admin.questions.title")} />
         <Card>
           <CardContent className="p-6">
             <p className="text-muted-foreground">
               {t("admin.questions.noPermission")}
             </p>
-          </CardContent>
-        </Card>
-      </Container>
-    );
-  }
-
-  if (!roles.update && isEditMode) {
-    return (
-      <Container>
-        <PageHeader title={t("admin.questions.edit")} />
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-muted-foreground">
-              {t("admin.questions.noPermission")}
-            </p>
-          </CardContent>
-        </Card>
-      </Container>
-    );
-  }
-
-  if (testLoading) {
-    return (
-      <Container>
-        <PageHeader
-          title={
-            isEditMode ? t("admin.questions.edit") : t("admin.questions.create")
-          }
-        />
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-            </div>
           </CardContent>
         </Card>
       </Container>
@@ -221,109 +59,23 @@ export default function AdminQuestionForm() {
 
   return (
     <Container className="p-2">
-      <PageHeader
-        title={
-          isEditMode ? t("admin.questions.edit") : t("admin.questions.create")
-        }
-      />
+      <PageHeader title={t("admin.questions.title")} />
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-            {isEditMode
-              ? t("admin.questions.editTitle")
-              : t("admin.questions.createTitle")}
-          </CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle>{t("admin.questions.title")}</CardTitle>
+          {roles.create && (
+            <Button
+              onClick={handleCreateQuestion}
+              size="sm"
+              className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 dark:from-emerald-600 dark:to-green-700 dark:hover:from-emerald-700 dark:hover:to-green-800 text-white shadow-md hover:shadow-lg transition-all duration-200 font-medium"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              {t("admin.questions.create")}
+            </Button>
+          )}
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Content Field */}
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                {t("admin.questions.fields.content")}
-                <span className="text-red-500 dark:text-red-400 ml-1">*</span>
-              </Label>
-              <Controller
-                name="content"
-                control={control}
-                render={({ field }) => (
-                  <div>
-                    <Textarea
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder={t("admin.questions.form.contentPlaceholder")}
-                      disabled={isSubmitting}
-                      className={cn(
-                        "min-h-[200px]",
-                        errors.content &&
-                          "border-red-500 dark:border-red-600 ring-1 ring-red-500 dark:ring-red-600"
-                      )}
-                    />
-                    {errors.content && (
-                      <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-                        {errors.content.message}
-                      </p>
-                    )}
-                  </div>
-                )}
-              />
-            </div>
-
-            {/* Type Field (Checkbox) */}
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                {t("admin.questions.fields.type")}
-              </Label>
-              <Controller
-                name="isMultipleChoice"
-                control={control}
-                render={({ field }) => (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="isMultipleChoice"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      disabled={isSubmitting}
-                      className="border-2 border-blue-500 data-[state=checked]:bg-blue-500 data-[state=checked]:text-white"
-                    />
-                    <Label
-                      htmlFor="isMultipleChoice"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2 cursor-pointer"
-                    >
-                      <CheckSquare className="h-4 w-4 text-blue-500 dark:text-blue-400" />
-                      {t("admin.questions.multipleChoice")}
-                    </Label>
-                  </div>
-                )}
-              />
-            </div>
-
-            {/* Form Actions */}
-            <div className="flex items-center justify-end gap-2 pt-4 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleCancel}
-                disabled={isSubmitting}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                {t("common.cancel")}
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 dark:from-blue-600 dark:to-indigo-700 dark:hover:from-blue-700 dark:hover:to-indigo-800 text-white shadow-md hover:shadow-lg transition-all duration-200"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
-                {t("common.save")}
-              </Button>
-            </div>
-          </form>
+        <CardContent className="overflow-auto">
+          <QuestionsList roles={roles} />
         </CardContent>
       </Card>
     </Container>

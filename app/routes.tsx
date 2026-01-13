@@ -45,26 +45,25 @@ export default [
     // Profile routes
     route(PROFILE_ROUTES.INDEX, "modules/user/modules/profile/index.tsx"),
 
+    // Admin routes
     layout("modules/admin/_layout.tsx", [
+      // Categories routes
       route(
         ADMIN_CATEGORIES_ROUTES.INDEX,
         "modules/admin/modules/categories/index.tsx"
       ),
-      ...prefix(ADMIN_TESTS_ROUTES.TESTS.INDEX, [
-        index("modules/admin/modules/tests/index.tsx"),
-        ...prefix(ADMIN_TESTS_ROUTES.TESTS.INFO(), [
-          index("modules/admin/modules/tests/routes/index.tsx"),
 
-          route(
-            ADMIN_QUESTIONS_ROUTES.QUESTIONS.NEW(),
-            "modules/admin/modules/questions/routes/index.tsx"
-          ),
-          route(
-            ADMIN_QUESTIONS_ROUTES.QUESTIONS.EDIT(),
-            "modules/admin/modules/questions/routes/index.tsx"
-          ),
-        ]),
-      ]),
+      // Tests routes
+      route(
+        ADMIN_TESTS_ROUTES.TESTS.INDEX,
+        "modules/admin/modules/tests/index.tsx"
+      ),
+
+      // Questions routes
+      route(
+        ADMIN_QUESTIONS_ROUTES.QUESTIONS.INDEX,
+        "modules/admin/modules/questions/index.tsx"
+      ),
     ]),
   ]),
 ] satisfies RouteConfig;

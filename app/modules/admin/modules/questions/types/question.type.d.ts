@@ -10,7 +10,6 @@ export interface QuestionState {
 
   // API methods
   fetchQuestions: (
-    testId: string,
     page?: number,
     pageSize?: number,
     filters?: Record<string, string>
@@ -45,6 +44,7 @@ export interface QuestionProps {
   content: string;
   imageUrl: string | null;
   category: string;
+  test: string;
   isMultipleChoice: boolean;
   answers: AnswerProps[];
 }

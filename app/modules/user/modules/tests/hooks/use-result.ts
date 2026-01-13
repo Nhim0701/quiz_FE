@@ -1,5 +1,8 @@
 import { create } from "zustand";
-import type { QuestionProps } from "@/modules/admin/modules/tests/types";
+import type {
+  QuestionProps,
+  AnswerProps,
+} from "@/modules/admin/modules/questions/types";
 
 interface ResultSummary {
   total: number;
@@ -47,13 +50,13 @@ export const useResultStore = create<ResultState>((set, get) => ({
       if (userAnswerIds.length === 0) return count;
 
       const correctAnswerIds = question.answers
-        .filter((a) => a.isCorrect)
-        .map((a) => a.id);
+        .filter((a: AnswerProps) => a.isCorrect)
+        .map((a: AnswerProps) => a.id);
 
       // Check if user selected all correct answers and no incorrect ones
       const isCorrect =
         correctAnswerIds.length === userAnswerIds.length &&
-        correctAnswerIds.every((id) => userAnswerIds.includes(id));
+        correctAnswerIds.every((id: string) => userAnswerIds.includes(id));
 
       return isCorrect ? count + 1 : count;
     }, 0);

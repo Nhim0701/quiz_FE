@@ -39,6 +39,7 @@ import {
   type ActiveFilter,
 } from "@/components/common/filters";
 import { ROUTES } from "../constants";
+import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants";
 
 interface TestsListProps {
   roles: {
@@ -93,7 +94,7 @@ export function TestsList({ roles }: TestsListProps) {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        await fetchCategories(1, 1000); // Fetch all categories
+        await fetchCategories(1, MAX_PAGE_SIZE_FOR_ALL); // Fetch all categories
       } catch (error) {
         // Silently fail - category names are optional
         console.error("Failed to fetch categories:", error);

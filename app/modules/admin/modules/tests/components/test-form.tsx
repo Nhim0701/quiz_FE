@@ -32,6 +32,7 @@ import { useApp, usePaginationStore } from "@/hooks";
 import { testSchema, type TestFormData } from "../schemas";
 import { useTestsStore } from "../hooks";
 import { useCategoriesStore } from "../../categories/hooks";
+import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants";
 
 interface TestFormProps {
   isOpen: boolean;
@@ -71,7 +72,7 @@ export function TestForm({ isOpen, onClose }: TestFormProps) {
         timeLimit: undefined,
       });
       // Fetch categories when form opens
-      fetchCategories(1, 1000).catch((error) => {
+      fetchCategories(1, MAX_PAGE_SIZE_FOR_ALL).catch((error) => {
         console.error("Failed to fetch categories:", error);
       });
     }

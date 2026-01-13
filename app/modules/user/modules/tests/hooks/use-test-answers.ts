@@ -3,7 +3,7 @@ import { useTestQuestionsStore } from "./use-test-questions";
 import type {
   AnswerProps,
   QuestionProps,
-} from "@/modules/admin/modules/tests/types";
+} from "@/modules/admin/modules/questions/types";
 
 interface TestAnswersState {
   // Answers

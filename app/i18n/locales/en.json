@@ -30,6 +30,9 @@
     },
     "search": "Search",
     "searchPlaceholder": "Search by category name...",
+    "selectPlaceholder": "Select...",
+    "comboboxSearchPlaceholder": "Search...",
+    "noResultsFound": "No results found.",
     "seconds": "seconds",
     "minutes": "minutes"
   },
@@ -69,7 +72,8 @@
     "admin": {
       "index": "Admin",
       "categories": "Categories",
-      "tests": "Tests"
+      "tests": "Tests",
+      "questions": "Questions"
     }
   },
   "breadcrumb": {

@@ -30,6 +30,9 @@
     },
     "search": "Tìm kiếm",
     "searchPlaceholder": "Tìm kiếm theo tên danh mục...",
+    "selectPlaceholder": "Chọn...",
+    "comboboxSearchPlaceholder": "Tìm kiếm...",
+    "noResultsFound": "Không tìm thấy.",
     "seconds": "giây",
     "minutes": "phút"
   },
@@ -108,7 +111,8 @@
     "admin": {
       "index": "Admin",
       "categories": "Danh Mục",
-      "tests": "Bài Kiểm Tra"
+      "tests": "Bài Kiểm Tra",
+      "questions": "Câu Hỏi"
     }
   }
 }

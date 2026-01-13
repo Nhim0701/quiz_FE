@@ -14,7 +14,6 @@ export const useQuestionsStore = create<QuestionState>((set, get) => ({
 
   // Fetch questions for a test
   fetchQuestions: async (
-    testId: string,
     page = 1,
     pageSize = 10,
     filters?: Record<string, string>
@@ -36,7 +35,7 @@ export const useQuestionsStore = create<QuestionState>((set, get) => ({
       }
 
       const response = await apiClient.get<ApiSuccessResponse<QuestionProps[]>>(
-        ENDPOINTS.QUESTIONS.LIST(testId),
+        ENDPOINTS.QUESTIONS.LIST,
         {
           params,
         }
@@ -132,7 +131,7 @@ export const useQuestionsStore = create<QuestionState>((set, get) => ({
     try {
       await apiClient.delete(ENDPOINTS.QUESTIONS.DELETE(questionId));
       // Refresh questions after delete
-      await get().fetchQuestions(testId, page, pageSize, filters);
+      await get().fetchQuestions(page, pageSize, filters);
       set({ loading: false });
     } catch (error) {
       const errorMessage =
@@ -149,6 +148,6 @@ export const useQuestionsStore = create<QuestionState>((set, get) => ({
     pageSize = 10,
     filters?: Record<string, string>
   ) => {
-    await get().fetchQuestions(testId, page, pageSize, filters);
+    await get().fetchQuestions(page, pageSize, filters);
   },
 }));

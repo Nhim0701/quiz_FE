@@ -4,6 +4,7 @@ import {
   User,
   LogOut,
   FolderTree,
+  HelpCircle,
 } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { useAuth } from "@/modules/common/auth/hooks/use-auth";
@@ -35,6 +36,7 @@ import { ROUTES as PROFILE_ROUTES } from "@/modules/user/modules/profile/constan
 import { ROUTES as TESTS_ROUTES } from "@/modules/user/modules/tests/constants";
 import { ROUTES as ADMIN_CATEGORIES_ROUTES } from "@/modules/admin/modules/categories/constants";
 import { ROUTES as ADMIN_TESTS_ROUTES } from "@/modules/admin/modules/tests/constants";
+import { ROUTES as ADMIN_QUESTIONS_ROUTES } from "@/modules/admin/modules/questions/constants";
 
 export function AppSidebar() {
   const { t } = useTranslation();
@@ -88,6 +90,13 @@ export function AppSidebar() {
       url: ADMIN_TESTS_ROUTES.TESTS.INDEX,
       permission: COMMON_PERMISSIONS.TEST_READ,
       resourcePrefix: RESOURCES.TEST,
+    },
+    {
+      title: t("sidebar.admin.questions"),
+      icon: HelpCircle,
+      url: ADMIN_QUESTIONS_ROUTES.QUESTIONS.INDEX,
+      permission: COMMON_PERMISSIONS.QUESTION_READ,
+      resourcePrefix: RESOURCES.QUESTION,
     },
   ].filter((item) => {
     if (item.permission === null) {

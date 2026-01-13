@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "@/i18n";
 import { useResultStore } from "../hooks/use-result";
+import type { AnswerProps } from "@/modules/admin/modules/questions/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,13 +59,17 @@ function ResultSidebarContent({ onQuestionClick }: ResultSidebarProps) {
         <div className="grid grid-cols-5 gap-2">
           {questions.map((question, idx) => {
             const userAnswerIds = answers[question.id] || [];
-            const userAnswers = question.answers.filter((a) =>
+            const userAnswers = question.answers.filter((a: AnswerProps) =>
               userAnswerIds.includes(a.id)
             );
 
             // Check if answer is correct
-            const correctAnswers = question.answers.filter((a) => a.isCorrect);
-            const userSelectedCorrect = userAnswers.every((a) => a.isCorrect);
+            const correctAnswers = question.answers.filter(
+              (a: AnswerProps) => a.isCorrect
+            );
+            const userSelectedCorrect = userAnswers.every(
+              (a: AnswerProps) => a.isCorrect
+            );
             const userSelectedAllCorrect =
               userAnswers.length === correctAnswers.length &&
               userSelectedCorrect;

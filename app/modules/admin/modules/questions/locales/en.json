@@ -30,6 +30,8 @@
       "columns": {
         "id": "ID",
         "content": "Content",
+        "category": "Category",
+        "test": "Test",
         "isMultipleChoice": "Type",
         "answers": "Answers"
       },
@@ -42,7 +44,15 @@
         "multipleChoicePlaceholder": "Select type...",
         "multipleChoiceSearch": "Search type...",
         "multipleChoiceEmpty": "No types found.",
-        "clear": "Clear"
+        "clear": "Clear",
+        "category": "Category",
+        "categoryPlaceholder": "Select categories...",
+        "categorySearch": "Search categories...",
+        "categoryEmpty": "No categories found.",
+        "test": "Test",
+        "testPlaceholder": "Select tests...",
+        "testSearch": "Search tests...",
+        "testEmpty": "No tests found."
       }
     }
   }

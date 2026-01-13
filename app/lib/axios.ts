@@ -41,6 +41,10 @@ apiClient.interceptors.request.use(
       if (config.data && typeof config.data === "object") {
         config.data = toSnakeCase(config.data);
       }
+      // Convert request params from camelCase to snake_case
+      if (config.params && typeof config.params === "object") {
+        config.params = toSnakeCase(config.params);
+      }
       return config;
     }
 
@@ -75,6 +79,11 @@ apiClient.interceptors.request.use(
     // Convert request data from camelCase to snake_case
     if (config.data && typeof config.data === "object") {
       config.data = toSnakeCase(config.data);
+    }
+
+    // Convert request params from camelCase to snake_case
+    if (config.params && typeof config.params === "object") {
+      config.params = toSnakeCase(config.params);
     }
 
     return config;

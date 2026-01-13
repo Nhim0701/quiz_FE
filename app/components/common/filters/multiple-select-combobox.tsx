@@ -56,15 +56,20 @@ export function MultipleSelectCombobox({
   options,
   selectedValues,
   onSelect,
-  placeholder = "Chọn...",
-  searchPlaceholder = "Tìm kiếm...",
-  emptyMessage = "Không tìm thấy.",
+  placeholder,
+  searchPlaceholder,
+  emptyMessage,
   className,
   disabled = false,
   filterColor,
 }: MultipleSelectComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const { t } = useTranslation();
+
+  const defaultPlaceholder = placeholder ?? t("common.selectPlaceholder");
+  const defaultSearchPlaceholder =
+    searchPlaceholder ?? t("common.comboboxSearchPlaceholder");
+  const defaultEmptyMessage = emptyMessage ?? t("common.noResultsFound");
 
   // Get color classes based on filterColor prop
   const colorClasses = React.useMemo(() => {
@@ -117,7 +122,9 @@ export function MultipleSelectCombobox({
         >
           <div className="flex flex-1 flex-wrap gap-1 overflow-hidden">
             {selectedValues.length === 0 ? (
-              <span className="text-muted-foreground">{placeholder}</span>
+              <span className="text-muted-foreground">
+                {defaultPlaceholder}
+              </span>
             ) : (
               selectedValues.length && (
                 <Badge
@@ -134,15 +141,18 @@ export function MultipleSelectCombobox({
       </PopoverTrigger>
       <PopoverContent className="w-full p-0" align="start">
         <Command>
-          <CommandInput placeholder={searchPlaceholder} />
+          <CommandInput placeholder={defaultSearchPlaceholder} />
           <CommandList>
-            <CommandEmpty>{emptyMessage}</CommandEmpty>
+            <CommandEmpty className="p-4 text-center overflow-ellipsis">
+              {defaultEmptyMessage}
+            </CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem
                   key={option.value}
                   value={option.value}
                   onSelect={() => handleSelect(option.value)}
+                  keywords={[option.label]}
                 >
                   <Check
                     className={cn(

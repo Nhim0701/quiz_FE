@@ -30,6 +30,8 @@
       "columns": {
         "id": "ID",
         "content": "Nội Dung",
+        "category": "Danh Mục",
+        "test": "Bài Kiểm Tra",
         "isMultipleChoice": "Loại",
         "answers": "Câu Trả Lời"
       },
@@ -42,7 +44,15 @@
         "multipleChoicePlaceholder": "Chọn loại...",
         "multipleChoiceSearch": "Tìm kiếm loại...",
         "multipleChoiceEmpty": "Không tìm thấy loại nào.",
-        "clear": "Xóa Bộ Lọc"
+        "clear": "Xóa Bộ Lọc",
+        "category": "Danh Mục",
+        "categoryPlaceholder": "Chọn danh mục...",
+        "categorySearch": "Tìm kiếm danh mục...",
+        "categoryEmpty": "Không tìm thấy danh mục nào.",
+        "test": "Bài Kiểm Tra",
+        "testPlaceholder": "Chọn bài kiểm tra...",
+        "testSearch": "Tìm kiếm bài kiểm tra...",
+        "testEmpty": "Không tìm thấy bài kiểm tra nào."
       }
     }
   }
