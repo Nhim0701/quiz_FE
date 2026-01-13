@@ -9,11 +9,26 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Label } from "@/components/ui/label";
 import { useApp } from "@/hooks";
 import { useUsersStore, type User } from "../hooks";
 import { useRolesStore } from "@/modules/admin/modules/roles-permissions/hooks";
-import { Loader2, X } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2, X } from "lucide-react";
+import { cn } from "@/lib";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AssignRolesDialogProps {
   user: User | null;
@@ -30,40 +45,28 @@ export function AssignRolesDialog({
   const { showSuccess, showError } = useApp();
   const { assignRoles, loading } = useUsersStore();
   const { fetchRoles, roles, loading: rolesLoading } = useRolesStore();
-  const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
+  const [selectedRoleId, setSelectedRoleId] = useState<string>("");
+  const [comboboxOpen, setComboboxOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
       fetchRoles(1, 100);
-      // Initialize with user's current roles if available
-      if (user?.permissions) {
-        // Assuming permissions contains role IDs or we need to map them
-        // This might need adjustment based on actual API response structure
-        setSelectedRoleIds(user.permissions || []);
-      } else {
-        setSelectedRoleIds([]);
-      }
+      // Initialize with user's current roleId if available
+      setSelectedRoleId(user?.roleId || "");
     }
   }, [open, user, fetchRoles]);
 
   const handleClose = () => {
-    setSelectedRoleIds([]);
+    setSelectedRoleId("");
+    setComboboxOpen(false);
     onOpenChange(false);
-  };
-
-  const handleToggleRole = (roleId: string) => {
-    setSelectedRoleIds((prev) =>
-      prev.includes(roleId)
-        ? prev.filter((id) => id !== roleId)
-        : [...prev, roleId]
-    );
   };
 
   const handleSubmit = async () => {
     if (!user) return;
 
     try {
-      await assignRoles(user.id, selectedRoleIds);
+      await assignRoles(user.id, selectedRoleId);
       showSuccess(t("admin.users.assignRoles.success"));
       handleClose();
     } catch (error) {
@@ -73,9 +76,17 @@ export function AssignRolesDialog({
     }
   };
 
+  const roleOptions = roles.map((role) => ({
+    value: role.id,
+    label: role.name,
+  }));
+
+  const selectedRole = roles.find((role) => role.id === selectedRoleId);
+  const displayValue = selectedRole?.name || t("common.selectPlaceholder");
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{t("admin.users.assignRoles.title")}</DialogTitle>
           <DialogDescription>
@@ -94,31 +105,79 @@ export function AssignRolesDialog({
               {t("admin.users.assignRoles.noRoles")}
             </p>
           ) : (
-            <div className="space-y-3">
-              {roles.map((role) => (
-                <div
-                  key={role.id}
-                  className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent transition-colors"
-                >
-                  <Checkbox
-                    id={role.id}
-                    checked={selectedRoleIds.includes(role.id)}
-                    onCheckedChange={() => handleToggleRole(role.id)}
-                    disabled={loading}
-                  />
-                  <label
-                    htmlFor={role.id}
-                    className="flex-1 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                  >
-                    {role.name}
-                    {role.description && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {role.description}
-                      </p>
+            <div className="space-y-2">
+              <Label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                {t("admin.users.assignRoles.roleLabel")}
+              </Label>
+              <Popover
+                open={comboboxOpen}
+                onOpenChange={setComboboxOpen}
+                modal={true}
+              >
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={comboboxOpen}
+                    className={cn(
+                      "w-full justify-between",
+                      !selectedRoleId && "text-muted-foreground"
                     )}
-                  </label>
-                </div>
-              ))}
+                    disabled={loading || rolesLoading}
+                    type="button"
+                  >
+                    <span className="truncate flex-1 text-left">
+                      {displayValue}
+                    </span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-[var(--radix-popover-trigger-width)] p-0"
+                  align="start"
+                  sideOffset={4}
+                >
+                  <Command className="overflow-hidden">
+                    <CommandInput
+                      placeholder={t("common.comboboxSearchPlaceholder")}
+                    />
+                    <ScrollArea>
+                      <CommandList>
+                        <CommandEmpty className="p-4 text-center">
+                          {t("common.noResultsFound")}
+                        </CommandEmpty>
+                        <CommandGroup>
+                          {roleOptions.map((option) => (
+                            <CommandItem
+                              key={option.value}
+                              value={option.value}
+                              onSelect={() => {
+                                setSelectedRoleId(
+                                  option.value === selectedRoleId
+                                    ? ""
+                                    : option.value
+                                );
+                                setComboboxOpen(false);
+                              }}
+                              keywords={[option.label]}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  selectedRoleId === option.value
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {option.label}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </ScrollArea>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
           )}
         </div>
@@ -137,7 +196,7 @@ export function AssignRolesDialog({
             type="button"
             size="sm"
             onClick={handleSubmit}
-            disabled={loading || rolesLoading}
+            disabled={loading || rolesLoading || !selectedRoleId}
             className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 dark:from-emerald-600 dark:to-green-700 dark:hover:from-emerald-700 dark:hover:to-green-800 text-white shadow-md hover:shadow-lg transition-all duration-200 font-medium"
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

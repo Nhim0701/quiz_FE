@@ -9,6 +9,7 @@ export interface User {
   fullName: string;
   email: string;
   permissions?: string[];
+  roleId?: string;
   phone?: string;
   birthday?: string;
   address?: string;
@@ -69,7 +70,7 @@ interface UsersState {
     filters?: Record<string, string>
   ) => Promise<void>;
   changePassword: (id: string, newPassword: string) => Promise<void>;
-  assignRoles: (id: string, roleIds: string[]) => Promise<void>;
+  assignRoles: (id: string, roleId: string) => Promise<void>;
 }
 
 export const useUsersStore = create<UsersState>((set, get) => ({
@@ -232,11 +233,11 @@ export const useUsersStore = create<UsersState>((set, get) => ({
     }
   },
 
-  assignRoles: async (id, roleIds) => {
+  assignRoles: async (id, roleId) => {
     set({ loading: true, error: null });
     try {
       await apiClient.put(ENDPOINTS.ASSIGN_ROLES(id), {
-        roleIds,
+        roleId,
       });
       set({ loading: false });
     } catch (error) {

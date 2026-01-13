@@ -69,7 +69,8 @@
         "description": "Gán vai trò cho người dùng \"{{name}}\"",
         "success": "Gán vai trò thành công",
         "submit": "Lưu",
-        "noRoles": "Không có vai trò nào"
+        "noRoles": "Không có vai trò nào",
+        "roleLabel": "Vai trò"
       }
     }
   }

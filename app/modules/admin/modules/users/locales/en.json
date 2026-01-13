@@ -69,7 +69,8 @@
         "description": "Assign roles to user \"{{name}}\"",
         "success": "Roles assigned successfully",
         "submit": "Save",
-        "noRoles": "No roles available"
+        "noRoles": "No roles available",
+        "roleLabel": "Role"
       }
     }
   }
