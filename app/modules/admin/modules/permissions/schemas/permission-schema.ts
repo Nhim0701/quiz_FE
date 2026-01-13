@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { createZodSchema, createRequiredString } from "@/lib";
+import { isValidPermissionFormat } from "@/lib/permissions";
+import type { TranslationKey } from "@/i18n";
 
 export const permissionSchema = createZodSchema((t) =>
   z.object({
@@ -7,18 +9,14 @@ export const permissionSchema = createZodSchema((t) =>
     permission: createRequiredString(
       t,
       "admin.permissions.validation.permissionRequired"
-    ).refine(
-      (val) => {
-        const parts = val.split("::");
-        return (
-          parts.length === 2 && parts[0].trim() !== "" && parts[1].trim() !== ""
-        );
-      },
-      {
-        message: t("admin.permissions.validation.permissionFormat"),
-      }
-    ),
+    ).refine(isValidPermissionFormat, {
+      message: t("admin.permissions.validation.permissionFormat"),
+    }),
     description: z.string().optional(),
+    roleId: createRequiredString(
+      t,
+      "admin.permissions.validation.roleIdRequired" as TranslationKey
+    ),
   })
 );
 

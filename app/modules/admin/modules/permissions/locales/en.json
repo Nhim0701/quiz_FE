@@ -23,20 +23,31 @@
         "id": "ID",
         "name": "Permission Name",
         "permission": "Permission",
-        "description": "Description"
+        "description": "Description",
+        "role": "Role"
       },
       "form": {
         "nameLabel": "Permission Name",
         "namePlaceholder": "Enter permission name",
         "permissionLabel": "Permission",
         "permissionPlaceholder": "Enter permission (e.g., users::read, roles::create)",
+        "roleLabel": "Role",
+        "selectRole": "Select a role",
+        "searchRole": "Search roles...",
+        "noRoleFound": "No roles found",
         "descriptionLabel": "Description",
         "descriptionPlaceholder": "Enter permission description"
+      },
+      "filters": {
+        "rolePlaceholder": "Filter by role",
+        "roleSearch": "Search roles...",
+        "roleEmpty": "No roles found"
       },
       "validation": {
         "nameRequired": "Permission name is required",
         "permissionRequired": "Permission is required",
-        "permissionFormat": "Permission must be in format resource::action (e.g., users::read)"
+        "permissionFormat": "Permission must be in format resource::action (e.g., users::read)",
+        "roleIdRequired": "Role is required"
       }
     }
   }

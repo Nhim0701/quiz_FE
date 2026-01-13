@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "@/i18n";
 import { Button } from "@/components/ui/button";
-import { FormField } from "@/components/common/form-field";
+import { FormField, ComboboxField } from "@/components/common/form-field";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,9 @@ import {
 import { useApp, usePaginationStore } from "@/hooks";
 import { permissionSchema, type PermissionFormData } from "../schemas";
 import { usePermissionsStore } from "../hooks";
+import { useRolesStore } from "../../roles/hooks";
 import { Loader2 } from "lucide-react";
+import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants";
 
 interface PermissionFormProps {
   onClearFilters?: (() => void) | null;
@@ -35,6 +37,7 @@ export function PermissionForm({ onClearFilters }: PermissionFormProps) {
     refreshPermissions,
     loading,
   } = usePermissionsStore();
+  const { fetchRoles, roles } = useRolesStore();
   const isEditMode = !!editingPermission;
 
   // Only show this dialog when not viewing (i.e., creating or editing from create button)
@@ -42,6 +45,7 @@ export function PermissionForm({ onClearFilters }: PermissionFormProps) {
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
@@ -51,8 +55,16 @@ export function PermissionForm({ onClearFilters }: PermissionFormProps) {
       name: "",
       permission: "",
       description: "",
+      roleId: "",
     },
   });
+
+  // Fetch roles when dialog opens
+  useEffect(() => {
+    if (shouldShow) {
+      fetchRoles(1, MAX_PAGE_SIZE_FOR_ALL);
+    }
+  }, [shouldShow, fetchRoles]);
 
   useEffect(() => {
     if (editingPermission) {
@@ -60,25 +72,39 @@ export function PermissionForm({ onClearFilters }: PermissionFormProps) {
         name: editingPermission.name || "",
         permission: editingPermission.permission || "",
         description: editingPermission.description || "",
+        roleId: editingPermission.roleId || "",
       });
     } else {
       reset({
         name: "",
         permission: "",
         description: "",
+        roleId: "",
       });
     }
   }, [editingPermission, reset, isDialogOpen]);
 
+  const roleOptions = roles.map((role) => ({
+    value: role.id,
+    label: role.name,
+  }));
+
   const onSubmit = async (data: PermissionFormData) => {
     try {
+      const submitData = {
+        name: data.name,
+        permission: data.permission,
+        description: data.description || undefined,
+        roleId: data.roleId,
+      };
+
       if (isEditMode && editingPermission) {
-        await updatePermission(editingPermission.id, data);
+        await updatePermission(editingPermission.id, submitData);
         showSuccess(t("admin.permissions.updateSuccess"));
         closeDialog();
         await refreshPermissions(page, pageSize);
       } else {
-        await createPermission(data);
+        await createPermission(submitData);
         showSuccess(t("admin.permissions.createSuccess"));
         closeDialog();
         // Clear filters and fetch all data after create
@@ -131,6 +157,20 @@ export function PermissionForm({ onClearFilters }: PermissionFormProps) {
               error={errors.permission}
               required
               disabled={loading || isSubmitting}
+              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+            />
+            <ComboboxField
+              id="roleId"
+              label={t("admin.permissions.form.roleLabel")}
+              name="roleId"
+              control={control}
+              options={roleOptions}
+              error={errors.roleId}
+              required
+              disabled={loading || isSubmitting}
+              placeholder={t("admin.permissions.form.selectRole")}
+              searchPlaceholder={t("admin.permissions.form.searchRole")}
+              emptyMessage={t("admin.permissions.form.noRoleFound")}
               labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
             <FormField

@@ -58,8 +58,8 @@ export function RecentActivity() {
                     variant="outline"
                     className="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700"
                   >
-                    <span className="text-blue-600 dark:text-blue-400 font-semibold">
-                      {t("dashboard.recentActivity.category")}:
+                    <span className="text-blue-600 dark:text-blue-400 font-semibold pr-2">
+                      {t("dashboard.recentActivity.category")}
                     </span>
                     {activity.category}
                   </Badge>
@@ -67,8 +67,8 @@ export function RecentActivity() {
                     variant="outline"
                     className="bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 border-purple-300 dark:border-purple-700"
                   >
-                    <span className="text-purple-600 dark:text-purple-400 font-semibold">
-                      {t("dashboard.recentActivity.test")}:
+                    <span className="text-purple-600 dark:text-purple-400 font-semibold pr-2">
+                      {t("dashboard.recentActivity.test")}
                     </span>
                     {activity.testName}
                   </Badge>

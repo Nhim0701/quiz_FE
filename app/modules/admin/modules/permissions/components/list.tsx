@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router";
 import { useTranslation } from "@/i18n";
 import {
@@ -14,9 +14,12 @@ import {
   useFilterHandlers,
   useFilterIdsConfig,
   createStringConverter,
+  createArrayConverter,
   useSyncFilterToUrl,
   useApplyFilterFromUrl,
   FilterManager,
+  createStringFilterHandler,
+  createArrayFilterHandler,
 } from "@/hooks";
 import { usePermissionsStore, type Permission } from "../hooks";
 import { Edit, Trash2, Eye } from "lucide-react";
@@ -31,8 +34,11 @@ import {
   SearchInput,
   ActiveFilters,
   FilterActions,
+  MultipleSelectCombobox,
   type ActiveFilter,
 } from "@/components/common/filters";
+import { useRolesStore } from "../../roles/hooks";
+import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants";
 
 interface PermissionsListProps {
   permissions: {
@@ -58,6 +64,24 @@ export function PermissionsList({
   const [searchInput, setSearchInput] = useState("");
   // Search value state (for filtering - only updates on Enter/button click)
   const [searchValue, setSearchValue] = useState("");
+  // Role filter state
+  const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
+
+  // Fetch roles for filter
+  const { fetchRoles, roles } = useRolesStore();
+
+  useEffect(() => {
+    fetchRoles(1, MAX_PAGE_SIZE_FOR_ALL);
+  }, [fetchRoles]);
+
+  // Create role map for efficient lookup
+  const roleMap = useMemo(() => {
+    const map = new Map<string, string>();
+    roles.forEach((role) => {
+      map.set(role.id, role.name);
+    });
+    return map;
+  }, [roles]);
 
   // Track if filters are being applied from URL to skip initial fetch
   const isApplyingFiltersFromUrl = useRef(false);
@@ -82,6 +106,12 @@ export function PermissionsList({
           setSearchValue("");
         },
       },
+      {
+        filterId: "roleId",
+        resetValue: () => {
+          setSelectedRoleIds([]);
+        },
+      },
     ],
     []
   );
@@ -94,24 +124,34 @@ export function PermissionsList({
         defaultValue: "",
         converter: createStringConverter(),
       },
+      {
+        filterKey: "roleId",
+        value: selectedRoleIds,
+        defaultValue: [],
+        converter: createArrayConverter([]),
+      },
     ],
-    [searchValue]
+    [searchValue, selectedRoleIds]
   );
 
   const { hasFilterParams } = useApplyFilterFromUrl({
     filterHandlers: {
-      name: (_, value) => {
-        setSearchInput(value);
-        setSearchValue(value);
-      },
+      name: createStringFilterHandler(setSearchValue),
+      roleId: createArrayFilterHandler(setSelectedRoleIds),
     },
     onFilterApplied: async () => {
       isApplyingFiltersFromUrl.current = true;
       hasInitialFetch.current = true;
       setPage(1);
 
+      // Also set search input from URL
+      const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
+      const nameFilter = urlFilters.find((f) => f.key === "name");
+      if (nameFilter) {
+        setSearchInput(nameFilter.value);
+      }
+
       try {
-        const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
         const apiFilters = FilterManager.convertFiltersToApiParams(urlFilters);
         const result = await fetchPermissions(1, pageSize, apiFilters);
         if (result?.meta) {
@@ -145,6 +185,12 @@ export function PermissionsList({
     },
   });
 
+  // Handler to remove a specific role from the array
+  const handleRemoveRole = useCallback((roleId: string) => {
+    setSelectedRoleIds((prev) => prev.filter((id) => id !== roleId));
+    setPage(1);
+  }, []);
+
   // Expose clearFilters function to parent component (only once on mount)
   const clearFiltersRef = useRef(handleClearAllFilters);
   clearFiltersRef.current = handleClearAllFilters;
@@ -165,15 +211,49 @@ export function PermissionsList({
         value: searchValue,
       });
     }
+    // Create separate filter for each selected role
+    selectedRoleIds.forEach((roleId) => {
+      const roleName = roleMap.get(roleId) || roleId;
+      filters.push({
+        id: `roleId_${roleId}`,
+        label: t("admin.permissions.columns.role"),
+        value: roleName,
+      });
+    });
     return filters;
-  }, [searchValue, t]);
+  }, [searchValue, selectedRoleIds, roleMap, t]);
+
+  // Custom handler for removing filters that handles array items
+  const handleRemoveActiveFilter = useCallback(
+    (filterId: string) => {
+      // Check if it's a role filter (format: roleId_<id>)
+      if (filterId.startsWith("roleId_")) {
+        const roleId = filterId.replace("roleId_", "");
+        handleRemoveRole(roleId);
+      } else {
+        // Use default handler for other filters
+        handleRemoveFilter(filterId);
+      }
+    },
+    [handleRemoveFilter, handleRemoveRole]
+  );
 
   const filterIdsConfig = useFilterIdsConfig({
     handlers: filterHandlers,
     colorMap: {
       name: "blue",
+      roleId: "green",
     },
   });
+
+  const roleOptions = useMemo(
+    () =>
+      roles.map((role) => ({
+        value: role.id,
+        label: role.name,
+      })),
+    [roles]
+  );
 
   const handleSearch = () => {
     setSearchValue(searchInput);
@@ -188,7 +268,7 @@ export function PermissionsList({
 
   const apiFilters = useMemo(() => {
     const activeFilters: Array<{ key: string; value: string }> = [];
-    filterConfig.forEach((filter) => {
+    filterConfig.forEach((filter: any) => {
       const converted = filter.converter(filter.value);
       if (converted === null) return;
 
@@ -350,6 +430,16 @@ export function PermissionsList({
         </span>
       ),
     },
+    {
+      key: "roleName",
+      header: t("admin.permissions.columns.role"),
+      render: (permission) => {
+        const roleName =
+          permission.roleName ||
+          (permission.roleId ? roleMap.get(permission.roleId) : undefined);
+        return <span className="text-muted-foreground">{roleName || "-"}</span>;
+      },
+    },
   ];
 
   const actions: Action<Permission>[] = [
@@ -390,14 +480,27 @@ export function PermissionsList({
     <>
       {/* Filter Bar */}
       <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 items-center gap-2">
+        <div className="flex flex-1 flex-wrap items-center gap-2">
           <SearchInput
             value={searchInput}
             onChange={setSearchInput}
             onSearch={handleSearch}
             placeholderKey="admin.permissions.searchPlaceholder"
-            className="flex-1"
+            className="flex-1 min-w-[200px]"
             searchKey="name"
+          />
+          <MultipleSelectCombobox
+            options={roleOptions}
+            selectedValues={selectedRoleIds}
+            onSelect={(values) => {
+              setSelectedRoleIds(values);
+              setPage(1);
+            }}
+            placeholder={t("admin.permissions.filters.rolePlaceholder")}
+            searchPlaceholder={t("admin.permissions.filters.roleSearch")}
+            emptyMessage={t("admin.permissions.filters.roleEmpty")}
+            className="w-full sm:w-[250px]"
+            filterColor="green"
           />
           <FilterActions buttons={filterActionButtons} />
         </div>
@@ -408,7 +511,7 @@ export function PermissionsList({
         <div className="mb-4">
           <ActiveFilters
             filters={activeFilters}
-            onRemove={handleRemoveFilter}
+            onRemove={handleRemoveActiveFilter}
             filterIdsConfig={filterIdsConfig}
           />
         </div>

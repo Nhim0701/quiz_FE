@@ -23,20 +23,31 @@
         "id": "ID",
         "name": "Tên Quyền",
         "permission": "Quyền",
-        "description": "Mô Tả"
+        "description": "Mô Tả",
+        "role": "Vai Trò"
       },
       "form": {
         "nameLabel": "Tên Quyền",
         "namePlaceholder": "Nhập tên quyền",
         "permissionLabel": "Quyền",
         "permissionPlaceholder": "Nhập quyền (ví dụ: users::read, roles::create)",
+        "roleLabel": "Vai Trò",
+        "selectRole": "Chọn vai trò",
+        "searchRole": "Tìm kiếm vai trò...",
+        "noRoleFound": "Không tìm thấy vai trò",
         "descriptionLabel": "Mô Tả",
         "descriptionPlaceholder": "Nhập mô tả quyền"
+      },
+      "filters": {
+        "rolePlaceholder": "Lọc theo vai trò",
+        "roleSearch": "Tìm kiếm vai trò...",
+        "roleEmpty": "Không tìm thấy vai trò"
       },
       "validation": {
         "nameRequired": "Tên quyền là bắt buộc",
         "permissionRequired": "Quyền là bắt buộc",
-        "permissionFormat": "Quyền phải có định dạng resource::action (ví dụ: users::read)"
+        "permissionFormat": "Quyền phải có định dạng resource::action (ví dụ: users::read)",
+        "roleIdRequired": "Vai trò là bắt buộc"
       }
     }
   }

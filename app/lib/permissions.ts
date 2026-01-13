@@ -29,6 +29,24 @@ const WILDCARD_RESOURCE = "*";
 const WILDCARD_ACTION = "*";
 
 /**
+ * Validate permission format: resource::action
+ * Checks if permission string has correct format with non-empty resource and action
+ *
+ * @param permission - Permission string to validate
+ * @returns true if permission has valid format (resource::action with both parts non-empty)
+ *
+ * @example
+ * isValidPermissionFormat("users::read") // true
+ * isValidPermissionFormat("users::") // false
+ * isValidPermissionFormat("::read") // false
+ * isValidPermissionFormat("users::read::write") // false
+ */
+export function isValidPermissionFormat(permission: string): boolean {
+  const parts = permission.split(PERMISSION_SEPARATOR);
+  return parts.length === 2 && parts[0].trim() !== "" && parts[1].trim() !== "";
+}
+
+/**
  * Parse permission string into resource and action
  */
 function parsePermission(permission: string): [string, string] | null {

@@ -8,6 +8,8 @@ export interface Permission {
   name: string;
   permission: string;
   description?: string;
+  roleId?: string;
+  roleName?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -40,6 +42,7 @@ interface PermissionsState {
     name: string;
     permission: string;
     description?: string;
+    roleId?: string;
   }) => Promise<Permission>;
   updatePermission: (
     id: string,
@@ -47,6 +50,7 @@ interface PermissionsState {
       name: string;
       permission: string;
       description?: string;
+      roleId?: string;
     }
   ) => Promise<Permission>;
   deletePermission: (id: string) => Promise<void>;
