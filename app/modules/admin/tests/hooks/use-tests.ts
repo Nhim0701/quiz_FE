@@ -44,6 +44,15 @@ interface TestsState {
     description?: string;
     timeLimit: number;
   }) => Promise<TestProps>;
+  updateTest: (
+    id: string,
+    data: {
+      name: string;
+      categoryId: string;
+      description?: string;
+      timeLimit: number;
+    }
+  ) => Promise<TestProps>;
   deleteTest: (id: string) => Promise<void>;
   refreshTests: (
     page?: number,
@@ -231,6 +240,55 @@ export const useTestsStore = create<TestsState>((set, get) => ({
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to create test";
+      set({ adminError: errorMessage, adminLoading: false });
+      throw error;
+    }
+  },
+
+  updateTest: async (id, data) => {
+    set({ adminLoading: true, adminError: null });
+    try {
+      const response = await apiClient.put<ApiSuccessResponse<TestProps>>(
+        API_ENDPOINTS.TESTS.GET(id),
+        data
+      );
+      const updatedTest = response.data.data;
+
+      // Update cache
+      set((state) => {
+        const updatedTestsById = {
+          ...state.testsById,
+          [id]: updatedTest,
+        };
+
+        // Update in testsByCategory if exists
+        const updatedTestsByCategory = { ...state.testsByCategory };
+        if (updatedTest.categoryId) {
+          const categoryId = parseInt(updatedTest.categoryId);
+          if (!isNaN(categoryId) && updatedTestsByCategory[categoryId]) {
+            updatedTestsByCategory[categoryId] = updatedTestsByCategory[
+              categoryId
+            ].map((test) => (test.id === id ? updatedTest : test));
+          }
+        }
+
+        // Update in adminTests if exists
+        const updatedAdminTests = state.adminTests.map((test) =>
+          test.id === id ? updatedTest : test
+        );
+
+        return {
+          testsById: updatedTestsById,
+          testsByCategory: updatedTestsByCategory,
+          adminTests: updatedAdminTests,
+          adminLoading: false,
+        };
+      });
+
+      return updatedTest;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update test";
       set({ adminError: errorMessage, adminLoading: false });
       throw error;
     }

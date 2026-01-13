@@ -15,15 +15,22 @@ import adminTestsEnLocales from "../modules/admin/tests/locales/en.json";
 /**
  * Type definition for all module locales
  * Add new module imports above and merge them here
+ * Note:
+ * - Admin modules already have "admin" namespace in JSON, so we extract the nested structure
+ * - Tests module (user/tests) is flattened, so we spread its contents directly
  */
 export type ModuleLocales = {
   auth: typeof authEnLocales;
   dashboard: typeof dashboardEnLocales;
   profile: typeof profileEnLocales;
-  tests: typeof testsEnLocales;
+  // Tests module is flattened (spread contents directly)
+  test: typeof testsEnLocales.test;
+  result: typeof testsEnLocales.result;
+  tests: typeof testsEnLocales.tests;
+  ui: typeof testsEnLocales.ui;
   admin: {
-    categories: typeof adminCategoriesEnLocales;
-    tests: typeof adminTestsEnLocales;
+    categories: typeof adminCategoriesEnLocales.admin.categories;
+    tests: typeof adminTestsEnLocales.admin.tests;
   };
 };
 

@@ -23,15 +23,16 @@ import type { FilterColorKey } from "@/hooks";
 // Darker color palette for badges inside combobox
 const BADGE_COLOR_PALETTE: Record<string, string> = {
   primary:
-    "bg-primary/20 text-primary border-primary/30 dark:bg-primary/30 dark:text-primary-foreground",
-  blue: "bg-blue-500/20 text-blue-700 border-blue-500/30 dark:bg-blue-500/30 dark:text-blue-300",
+    "bg-gradient-to-r from-primary/20 to-primary/30 text-primary border-primary/30 dark:from-primary/30 dark:to-primary/40 dark:text-primary-foreground shadow-sm",
+  blue: "bg-gradient-to-r from-blue-500 to-indigo-500 text-blue-700 border-blue-500 dark:from-blue-500 dark:to-indigo-500 dark:text-blue-300 shadow-sm",
   green:
-    "bg-green-500/20 text-green-700 border-green-500/30 dark:bg-green-500/30 dark:text-green-300",
+    "bg-gradient-to-r from-emerald-500 to-green-500 text-emerald-700 border-emerald-500 dark:from-emerald-500 dark:to-green-500 dark:text-emerald-300 shadow-sm",
   yellow:
-    "bg-yellow-500/20 text-yellow-700 border-yellow-500/30 dark:bg-yellow-500/30 dark:text-yellow-300",
+    "bg-gradient-to-r from-yellow-500/20 to-amber-500/20 text-yellow-700 border-yellow-500/30 dark:from-yellow-500/30 dark:to-amber-500/30 dark:text-yellow-300 shadow-sm",
   purple:
-    "bg-purple-500/20 text-purple-700 border-purple-500/30 dark:bg-purple-500/30 dark:text-purple-300",
-  default: "bg-muted/50 text-muted-foreground border-border",
+    "bg-gradient-to-r from-purple-500/20 to-violet-500/20 text-purple-700 border-purple-500/30 dark:from-purple-500/30 dark:to-violet-500/30 dark:text-purple-300 shadow-sm",
+  default:
+    "bg-gradient-to-r from-slate-200 to-slate-300 text-slate-700 border-slate-300 dark:from-slate-700 dark:to-slate-600 dark:text-slate-300 dark:border-slate-600 shadow-sm",
 };
 
 export interface MultipleSelectOption {

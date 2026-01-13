@@ -10,8 +10,12 @@
       "createTitle": "Tạo bài kiểm tra mới",
       "createDescription": "Điền thông tin để tạo bài kiểm tra mới",
       "createSuccess": "Tạo bài kiểm tra thành công",
+      "updateSuccess": "Cập nhật bài kiểm tra thành công",
       "deleteSuccess": "Xóa bài kiểm tra thành công",
       "confirmDelete": "Bạn có chắc chắn muốn xóa bài kiểm tra \"{{name}}\"?",
+      "edit": "Chỉnh Sửa",
+      "editTitle": "Chỉnh Sửa Bài Kiểm Tra",
+      "editDescription": "Cập nhật thông tin bài kiểm tra",
       "form": {
         "nameLabel": "Tên Bài Kiểm Tra",
         "namePlaceholder": "Nhập tên bài kiểm tra",

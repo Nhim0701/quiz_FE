@@ -1,9 +1,24 @@
 import enTranslations from "./locales/en.json";
-import type { ModuleLocales } from "./module-locales-types";
+import type { ModuleLocales } from "./module-locales";
+
+// Deep merge helper type for nested objects
+type DeepMerge<T, U> = {
+  [K in keyof T | keyof U]: K extends keyof U
+    ? K extends keyof T
+      ? T[K] extends object
+        ? U[K] extends object
+          ? DeepMerge<T[K], U[K]>
+          : U[K]
+        : U[K]
+      : U[K]
+    : K extends keyof T
+      ? T[K]
+      : never;
+};
 
 // Merge base translations with module locales for type-safety
 // Extract the translation keys type from the merged English translations
-type TranslationKeys = typeof enTranslations & ModuleLocales;
+type TranslationKeys = DeepMerge<typeof enTranslations, ModuleLocales>;
 
 // Helper type to convert nested object to dot-notation paths
 type NestedKeyOf<ObjectType extends object> = {
@@ -65,24 +80,8 @@ export interface TypedTFunction {
 export type SupportedLanguage = "en" | "vi";
 
 // Resources type for i18next
+// Merge global locales with module locales for type-safety
 export type Resources = {
-  en: { translation: typeof enTranslations };
-  vi: { translation: typeof enTranslations };
-};
-
-/**
- * Type-safe imports for all module locales
- * This file is used for TypeScript type inference only
- * Import all module locale files here to ensure type-safety
- */
-
-// Import module locales directly for type-safety
-import authEnLocales from "../modules/common/auth/locales/en.json";
-
-/**
- * Type definition for all module locales
- * Add new module imports above and merge them here
- */
-export type ModuleLocales = {
-  auth: typeof authEnLocales;
+  en: { translation: TranslationKeys };
+  vi: { translation: TranslationKeys };
 };

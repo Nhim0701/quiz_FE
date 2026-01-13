@@ -1,11 +1,7 @@
 import { XIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib";
-import type {
-  ActiveFilter,
-  FilterIdsConfig,
-  FilterColorKey,
-} from "@/hooks";
+import type { ActiveFilter, FilterIdsConfig, FilterColorKey } from "@/hooks";
 import { FILTER_PATTERNS, FILTER_COLOR_PALETTE } from "@/constants/filters";
 
 interface ActiveFiltersProps {
@@ -100,7 +96,7 @@ export const ActiveFilters = ({
           key={filter.id}
           variant="outline"
           className={cn(
-            "flex items-center gap-1.5 px-3 py-1.5 text-xs transition-colors",
+            "flex items-center gap-1.5 px-3 py-1.5 text-xs transition-all duration-200",
             getFilterColorClasses(filter.id, filterIdsConfig, filterColorMap)
           )}
         >
