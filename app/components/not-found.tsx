@@ -34,7 +34,7 @@ export function NotFound() {
           <Button
             onClick={() => navigate(DASHBOARD_ROUTES.INDEX)}
             size="lg"
-            className="px-8"
+            className="px-8 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 dark:from-indigo-600 dark:to-purple-700 dark:hover:from-indigo-700 dark:hover:to-purple-800 text-white shadow-md hover:shadow-lg transition-all duration-200 font-medium"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

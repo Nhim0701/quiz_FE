@@ -25,7 +25,7 @@ export function ResultSummary() {
   };
 
   const handleRetake = () => {
-    navigate(TESTS_ROUTES.TAKE(summary.testType));
+    navigate(TESTS_ROUTES.INDEX);
   };
   const completionPercentage = Math.round(
     (summary.answered / summary.total) * 100
