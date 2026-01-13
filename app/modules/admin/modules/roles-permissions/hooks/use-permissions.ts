@@ -3,84 +3,94 @@ import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
 import { apiClient } from "@/lib";
 import { ENDPOINTS } from "../constants";
 
-const ROLES_ENDPOINTS = ENDPOINTS.ROLES;
-
-export interface Role {
+export interface Permission {
   id: string;
   name: string;
   description?: string;
-  permissions?: string[];
+  resource?: string;
+  action?: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
-interface RolesState {
-  // Roles list
-  roles: Role[];
+interface PermissionsState {
+  // Permissions list
+  permissions: Permission[];
   loading: boolean;
   error: string | null;
 
   // Form state
   isDialogOpen: boolean;
-  editingRole: Role | null;
-  viewingRole: Role | null;
+  editingPermission: Permission | null;
+  viewingPermission: Permission | null;
   isEditMode: boolean;
 
   // Actions
-  openDialog: (role?: Role | null) => void;
+  openDialog: (permission?: Permission | null) => void;
   closeDialog: () => void;
-  openViewDialog: (role: Role) => void;
+  openViewDialog: (permission: Permission) => void;
   setEditMode: (isEdit: boolean) => void;
 
   // API methods
-  fetchRoles: (
+  fetchPermissions: (
     page?: number,
     pageSize?: number,
     filters?: Record<string, string>
-  ) => Promise<{ data: Role[]; meta?: ApiResponseMeta } | undefined>;
-  createRole: (data: { name: string; description?: string }) => Promise<Role>;
-  updateRole: (
+  ) => Promise<{ data: Permission[]; meta?: ApiResponseMeta } | undefined>;
+  createPermission: (data: {
+    name: string;
+    description?: string;
+    resource: string;
+    action: string;
+  }) => Promise<Permission>;
+  updatePermission: (
     id: string,
     data: {
       name: string;
       description?: string;
+      resource: string;
+      action: string;
     }
-  ) => Promise<Role>;
-  deleteRole: (id: string) => Promise<void>;
-  refreshRoles: (
+  ) => Promise<Permission>;
+  deletePermission: (id: string) => Promise<void>;
+  refreshPermissions: (
     page?: number,
     pageSize?: number,
     filters?: Record<string, string>
   ) => Promise<void>;
 }
 
-export const useRolesStore = create<RolesState>((set, get) => ({
+export const usePermissionsStore = create<PermissionsState>((set, get) => ({
   // Initial state
-  roles: [],
+  permissions: [],
   loading: false,
   error: null,
   isDialogOpen: false,
-  editingRole: null,
-  viewingRole: null,
+  editingPermission: null,
+  viewingPermission: null,
   isEditMode: false,
 
   // Form actions
-  openDialog: (role = null) => {
-    set({ isDialogOpen: true, editingRole: role, isEditMode: false });
+  openDialog: (permission = null) => {
+    set({
+      isDialogOpen: true,
+      editingPermission: permission,
+      isEditMode: false,
+    });
   },
   closeDialog: () => {
     set({
       isDialogOpen: false,
-      editingRole: null,
-      viewingRole: null,
+      editingPermission: null,
+      viewingPermission: null,
       isEditMode: false,
     });
   },
-  openViewDialog: (role) => {
+  openViewDialog: (permission) => {
     set({
       isDialogOpen: true,
-      viewingRole: role,
-      editingRole: null,
+      viewingPermission: permission,
+      editingPermission: null,
       isEditMode: false,
     });
   },
@@ -89,7 +99,7 @@ export const useRolesStore = create<RolesState>((set, get) => ({
   },
 
   // API methods
-  fetchRoles: async (
+  fetchPermissions: async (
     page = 1,
     pageSize = 10,
     filters?: Record<string, string>
@@ -110,8 +120,8 @@ export const useRolesStore = create<RolesState>((set, get) => ({
         });
       }
 
-      const response = await apiClient.get<ApiSuccessResponse<Role[]>>(
-        ROLES_ENDPOINTS.LIST,
+      const response = await apiClient.get<ApiSuccessResponse<Permission[]>>(
+        ENDPOINTS.PERMISSIONS.LIST,
         {
           params,
         }
@@ -121,80 +131,82 @@ export const useRolesStore = create<RolesState>((set, get) => ({
       const meta = response.data.meta;
 
       set({
-        roles: data,
+        permissions: data,
         loading: false,
       });
 
       return { data, meta };
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch roles";
+        error instanceof Error ? error.message : "Failed to fetch permissions";
       set({ error: errorMessage, loading: false });
       throw error;
     }
   },
 
-  createRole: async (data) => {
+  createPermission: async (data) => {
     set({ loading: true, error: null });
     try {
-      const response = await apiClient.post<ApiSuccessResponse<Role>>(
-        ROLES_ENDPOINTS.CREATE,
+      const response = await apiClient.post<ApiSuccessResponse<Permission>>(
+        ENDPOINTS.PERMISSIONS.CREATE,
         data
       );
       set({ loading: false });
       return response.data.data;
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to create role";
+        error instanceof Error ? error.message : "Failed to create permission";
       set({ error: errorMessage, loading: false });
       throw error;
     }
   },
 
-  updateRole: async (id, data) => {
+  updatePermission: async (id, data) => {
     set({ loading: true, error: null });
     try {
-      const response = await apiClient.put<ApiSuccessResponse<Role>>(
-        ROLES_ENDPOINTS.UPDATE(id),
+      const response = await apiClient.put<ApiSuccessResponse<Permission>>(
+        ENDPOINTS.PERMISSIONS.UPDATE(id),
         data
       );
       set({ loading: false });
       return response.data.data;
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to update role";
+        error instanceof Error ? error.message : "Failed to update permission";
       set({ error: errorMessage, loading: false });
       throw error;
     }
   },
 
-  deleteRole: async (id) => {
+  deletePermission: async (id) => {
     set({ loading: true, error: null });
     try {
-      await apiClient.delete(ROLES_ENDPOINTS.DELETE(id));
+      await apiClient.delete(ENDPOINTS.PERMISSIONS.DELETE(id));
       set({ loading: false });
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to delete role";
+        error instanceof Error ? error.message : "Failed to delete permission";
       set({ error: errorMessage, loading: false });
       throw error;
     }
   },
 
-  refreshRoles: async (
+  refreshPermissions: async (
     page = 1,
     pageSize = 10,
     filters?: Record<string, string>
   ) => {
-    const { viewingRole } = get();
-    await get().fetchRoles(page, pageSize, filters);
+    const { viewingPermission } = get();
+    await get().fetchPermissions(page, pageSize, filters);
 
-    // Update viewingRole if it exists and dialog is still open
-    if (viewingRole) {
-      const { roles } = get();
-      const updatedRole = roles.find((r) => r.id === viewingRole.id);
-      if (updatedRole) {
-        set({ viewingRole: updatedRole });
+    // Update viewingPermission if it exists and dialog is still open
+    if (viewingPermission) {
+      const { permissions } = get();
+      const updatedPermission = permissions.find(
+        (p) => p.id === viewingPermission.id
+      );
+      if (updatedPermission) {
+        set({ viewingPermission: updatedPermission });
       }
     }
   },

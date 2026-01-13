@@ -76,7 +76,8 @@
       "questions": "Questions",
       "users": "Users",
       "rolesPermissions": "Roles & Permissions",
-      "roles": "Roles"
+      "roles": "Roles",
+      "permissions": "Permissions"
     }
   },
   "breadcrumb": {

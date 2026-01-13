@@ -73,6 +73,10 @@ export default [
         ADMIN_ROLES_PERMISSIONS_ROUTES.ROLES.INDEX,
         "modules/admin/modules/roles-permissions/roles.tsx"
       ),
+      route(
+        ADMIN_ROLES_PERMISSIONS_ROUTES.PERMISSIONS.INDEX,
+        "modules/admin/modules/roles-permissions/permissions.tsx"
+      ),
     ]),
   ]),
 ];

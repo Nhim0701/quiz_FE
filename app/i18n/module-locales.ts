@@ -37,6 +37,7 @@ export type ModuleLocales = {
     questions: typeof adminQuestionsEnLocales.admin.questions;
     users: typeof adminUsersEnLocales.admin.users;
     roles: typeof adminRolesEnLocales.admin.roles;
+    permissions: typeof adminRolesEnLocales.admin.permissions;
   };
 };
 

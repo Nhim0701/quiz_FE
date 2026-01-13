@@ -301,6 +301,29 @@ export function AppSidebar() {
                                 </Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
+                            <SidebarMenuSubItem>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={
+                                  location.pathname ===
+                                    ADMIN_ROLES_PERMISSIONS_ROUTES.PERMISSIONS
+                                      .INDEX ||
+                                  location.pathname.startsWith(
+                                    ADMIN_ROLES_PERMISSIONS_ROUTES.PERMISSIONS
+                                      .INDEX + "/"
+                                  )
+                                }
+                              >
+                                <Link
+                                  to={
+                                    ADMIN_ROLES_PERMISSIONS_ROUTES.PERMISSIONS
+                                      .INDEX
+                                  }
+                                >
+                                  <span>{t("sidebar.admin.permissions")}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
                           </SidebarMenuSub>
                         </CollapsibleContent>
                       </SidebarMenuItem>

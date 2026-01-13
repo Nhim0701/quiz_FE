@@ -149,7 +149,8 @@
       "questions": "Câu Hỏi",
       "users": "Người Dùng",
       "rolesPermissions": "Vai Trò & Quyền",
-      "roles": "Vai Trò"
+      "roles": "Vai Trò",
+      "permissions": "Quyền"
     }
   }
 }

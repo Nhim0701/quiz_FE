@@ -33,6 +33,48 @@
       "validation": {
         "nameRequired": "Tên vai trò là bắt buộc"
       }
+    },
+    "permissions": {
+      "title": "Quản Lý Quyền",
+      "cardTitle": "Danh Sách Quyền",
+      "createTitle": "Tạo Quyền",
+      "createDescription": "Tạo một quyền mới trong hệ thống",
+      "editTitle": "Chỉnh Sửa Quyền",
+      "editDescription": "Cập nhật thông tin quyền",
+      "viewTitle": "Thông Tin Quyền",
+      "viewDescription": "Xem chi tiết thông tin quyền",
+      "create": "Tạo",
+      "update": "Cập nhật",
+      "delete": "Xóa",
+      "createSuccess": "Tạo quyền thành công",
+      "updateSuccess": "Cập nhật quyền thành công",
+      "deleteSuccess": "Xóa quyền thành công",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa quyền {{name}}?",
+      "searchPlaceholder": "Tìm kiếm theo tên quyền...",
+      "empty": "Không có quyền nào",
+      "noPermission": "Bạn không có quyền truy cập trang này",
+      "columns": {
+        "id": "ID",
+        "name": "Tên Quyền",
+        "resource": "Tài Nguyên",
+        "action": "Hành Động",
+        "description": "Mô Tả"
+      },
+      "form": {
+        "nameLabel": "Tên Quyền",
+        "namePlaceholder": "Nhập tên quyền",
+        "resourceLabel": "Tài Nguyên",
+        "resourcePlaceholder": "Nhập tài nguyên (ví dụ: users, roles)",
+        "actionLabel": "Hành Động",
+        "actionPlaceholder": "Nhập hành động (ví dụ: read, create, update, delete)",
+        "descriptionLabel": "Mô Tả",
+        "descriptionPlaceholder": "Nhập mô tả quyền"
+      },
+      "validation": {
+        "nameRequired": "Tên quyền là bắt buộc",
+        "resourceRequired": "Tài nguyên là bắt buộc",
+        "actionRequired": "Hành động là bắt buộc"
+      }
     }
   }
 }
