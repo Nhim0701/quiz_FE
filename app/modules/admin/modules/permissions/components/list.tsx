@@ -333,20 +333,11 @@ export function PermissionsList({
       ),
     },
     {
-      key: "resource",
-      header: t("admin.permissions.columns.resource"),
+      key: "permission",
+      header: t("admin.permissions.columns.permission"),
       render: (permission) => (
-        <span className="text-muted-foreground">
-          {permission.resource || "-"}
-        </span>
-      ),
-    },
-    {
-      key: "action",
-      header: t("admin.permissions.columns.action"),
-      render: (permission) => (
-        <span className="text-muted-foreground">
-          {permission.action || "-"}
+        <span className="text-muted-foreground font-mono">
+          {permission.permission || "-"}
         </span>
       ),
     },

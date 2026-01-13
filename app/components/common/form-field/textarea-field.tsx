@@ -1,4 +1,5 @@
 import type { UseFormRegisterReturn, FieldError } from "react-hook-form";
+import { FileText, type LucideIcon } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib";
 
@@ -15,6 +16,15 @@ export interface TextareaFieldProps {
   rows?: number;
 }
 
+// Icon mapping for textarea fields
+const getTextareaIcon = (id: string): { Icon: LucideIcon; color: string } => {
+  if (id.includes("description")) {
+    return { Icon: FileText, color: "text-purple-500 dark:text-purple-400" };
+  }
+  // Default
+  return { Icon: FileText, color: "text-blue-500 dark:text-blue-400" };
+};
+
 export function TextareaField({
   id,
   label,
@@ -30,6 +40,7 @@ export function TextareaField({
 }: TextareaFieldProps) {
   const hasError = !!error;
   const errorMessage = error?.message;
+  const { Icon, color } = getTextareaIcon(id);
 
   const inputClassName = cn(
     "mt-1 flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
@@ -45,8 +56,12 @@ export function TextareaField({
 
   return (
     <div>
-      <Label htmlFor={id} className={labelClasses}>
-        {label}
+      <Label
+        htmlFor={id}
+        className={cn(labelClasses, "flex items-center gap-2")}
+      >
+        <Icon className={cn("h-4 w-4", color)} />
+        <span>{label}</span>
         {required && (
           <span className="text-red-500 dark:text-red-400 ml-1">*</span>
         )}

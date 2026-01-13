@@ -63,9 +63,8 @@ export function PermissionViewDialog({
     resolver: zodResolver(permissionSchema(t)),
     defaultValues: {
       name: "",
+      permission: "",
       description: "",
-      resource: "",
-      action: "",
     },
   });
 
@@ -73,9 +72,8 @@ export function PermissionViewDialog({
     if (viewingPermission) {
       reset({
         name: viewingPermission.name || "",
+        permission: viewingPermission.permission || "",
         description: viewingPermission.description || "",
-        resource: viewingPermission.resource || "",
-        action: viewingPermission.action || "",
       });
     }
   }, [viewingPermission, reset, isDialogOpen]);
@@ -89,9 +87,8 @@ export function PermissionViewDialog({
     if (viewingPermission) {
       reset({
         name: viewingPermission.name || "",
+        permission: viewingPermission.permission || "",
         description: viewingPermission.description || "",
-        resource: viewingPermission.resource || "",
-        action: viewingPermission.action || "",
       });
     }
   };
@@ -164,9 +161,8 @@ export function PermissionViewDialog({
   const currentData = watch();
   const hasChanges =
     currentData.name !== viewingPermission.name ||
-    currentData.description !== (viewingPermission.description || "") ||
-    currentData.resource !== (viewingPermission.resource || "") ||
-    currentData.action !== (viewingPermission.action || "");
+    currentData.permission !== viewingPermission.permission ||
+    currentData.description !== (viewingPermission.description || "");
 
   return (
     <Dialog
@@ -193,30 +189,17 @@ export function PermissionViewDialog({
               disabled={!isEditMode || loading || isSubmitting}
               labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                id="resource"
-                label={t("admin.permissions.form.resourceLabel")}
-                type="text"
-                placeholder={t("admin.permissions.form.resourcePlaceholder")}
-                register={register("resource")}
-                error={errors.resource}
-                required
-                disabled={!isEditMode || loading || isSubmitting}
-                labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
-              />
-              <FormField
-                id="action"
-                label={t("admin.permissions.form.actionLabel")}
-                type="text"
-                placeholder={t("admin.permissions.form.actionPlaceholder")}
-                register={register("action")}
-                error={errors.action}
-                required
-                disabled={!isEditMode || loading || isSubmitting}
-                labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
-              />
-            </div>
+            <FormField
+              id="permission"
+              label={t("admin.permissions.form.permissionLabel")}
+              type="text"
+              placeholder={t("admin.permissions.form.permissionPlaceholder")}
+              register={register("permission")}
+              error={errors.permission}
+              required
+              disabled={!isEditMode || loading || isSubmitting}
+              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+            />
             <FormField
               id="description"
               label={t("admin.permissions.form.descriptionLabel")}

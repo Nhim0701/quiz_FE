@@ -6,9 +6,8 @@ import { ENDPOINTS } from "../constants";
 export interface Permission {
   id: string;
   name: string;
+  permission: string;
   description?: string;
-  resource?: string;
-  action?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -39,17 +38,15 @@ interface PermissionsState {
   ) => Promise<{ data: Permission[]; meta?: ApiResponseMeta } | undefined>;
   createPermission: (data: {
     name: string;
+    permission: string;
     description?: string;
-    resource: string;
-    action: string;
   }) => Promise<Permission>;
   updatePermission: (
     id: string,
     data: {
       name: string;
+      permission: string;
       description?: string;
-      resource: string;
-      action: string;
     }
   ) => Promise<Permission>;
   deletePermission: (id: string) => Promise<void>;

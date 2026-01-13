@@ -22,7 +22,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Folder, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib";
 import { ScrollArea } from "../../ui/scroll-area";
 
@@ -46,6 +46,15 @@ export interface ComboboxFieldProps<T extends FieldValues> {
   className?: string;
   labelClassName?: string;
 }
+
+// Icon mapping for combobox fields
+const getComboboxIcon = (id: string): { Icon: LucideIcon; color: string } => {
+  if (id.includes("category")) {
+    return { Icon: Folder, color: "text-green-500 dark:text-green-400" };
+  }
+  // Default
+  return { Icon: Folder, color: "text-blue-500 dark:text-blue-400" };
+};
 
 export function ComboboxField<T extends FieldValues>({
   id,
@@ -88,11 +97,13 @@ export function ComboboxField<T extends FieldValues>({
     "text-xs text-slate-500 dark:text-slate-400",
     labelClassName
   );
+  const { Icon, color } = getComboboxIcon(id);
 
   return (
     <div>
-      <Label htmlFor={id} className={labelClasses}>
-        {label}
+      <Label htmlFor={id} className={cn(labelClasses, "flex items-center gap-2")}>
+        <Icon className={cn("h-4 w-4", color)} />
+        <span>{label}</span>
         {required && (
           <span className="text-red-500 dark:text-red-400 ml-1">*</span>
         )}

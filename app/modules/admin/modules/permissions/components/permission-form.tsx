@@ -49,9 +49,8 @@ export function PermissionForm({ onClearFilters }: PermissionFormProps) {
     resolver: zodResolver(permissionSchema(t)),
     defaultValues: {
       name: "",
+      permission: "",
       description: "",
-      resource: "",
-      action: "",
     },
   });
 
@@ -59,16 +58,14 @@ export function PermissionForm({ onClearFilters }: PermissionFormProps) {
     if (editingPermission) {
       reset({
         name: editingPermission.name || "",
+        permission: editingPermission.permission || "",
         description: editingPermission.description || "",
-        resource: editingPermission.resource || "",
-        action: editingPermission.action || "",
       });
     } else {
       reset({
         name: "",
+        permission: "",
         description: "",
-        resource: "",
-        action: "",
       });
     }
   }, [editingPermission, reset, isDialogOpen]);
@@ -125,30 +122,17 @@ export function PermissionForm({ onClearFilters }: PermissionFormProps) {
               disabled={loading || isSubmitting}
               labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                id="resource"
-                label={t("admin.permissions.form.resourceLabel")}
-                type="text"
-                placeholder={t("admin.permissions.form.resourcePlaceholder")}
-                register={register("resource")}
-                error={errors.resource}
-                required
-                disabled={loading || isSubmitting}
-                labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
-              />
-              <FormField
-                id="action"
-                label={t("admin.permissions.form.actionLabel")}
-                type="text"
-                placeholder={t("admin.permissions.form.actionPlaceholder")}
-                register={register("action")}
-                error={errors.action}
-                required
-                disabled={loading || isSubmitting}
-                labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
-              />
-            </div>
+            <FormField
+              id="permission"
+              label={t("admin.permissions.form.permissionLabel")}
+              type="text"
+              placeholder={t("admin.permissions.form.permissionPlaceholder")}
+              register={register("permission")}
+              error={errors.permission}
+              required
+              disabled={loading || isSubmitting}
+              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+            />
             <FormField
               id="description"
               label={t("admin.permissions.form.descriptionLabel")}

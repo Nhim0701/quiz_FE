@@ -22,24 +22,21 @@
       "columns": {
         "id": "ID",
         "name": "Tên Quyền",
-        "resource": "Tài Nguyên",
-        "action": "Hành Động",
+        "permission": "Quyền",
         "description": "Mô Tả"
       },
       "form": {
         "nameLabel": "Tên Quyền",
         "namePlaceholder": "Nhập tên quyền",
-        "resourceLabel": "Tài Nguyên",
-        "resourcePlaceholder": "Nhập tài nguyên (ví dụ: users, roles)",
-        "actionLabel": "Hành Động",
-        "actionPlaceholder": "Nhập hành động (ví dụ: read, create, update, delete)",
+        "permissionLabel": "Quyền",
+        "permissionPlaceholder": "Nhập quyền (ví dụ: users::read, roles::create)",
         "descriptionLabel": "Mô Tả",
         "descriptionPlaceholder": "Nhập mô tả quyền"
       },
       "validation": {
         "nameRequired": "Tên quyền là bắt buộc",
-        "resourceRequired": "Tài nguyên là bắt buộc",
-        "actionRequired": "Hành động là bắt buộc"
+        "permissionRequired": "Quyền là bắt buộc",
+        "permissionFormat": "Quyền phải có định dạng resource::action (ví dụ: users::read)"
       }
     }
   }

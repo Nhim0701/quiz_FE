@@ -5,6 +5,7 @@ import {
   type FieldValues,
 } from "react-hook-form";
 import type { FieldError } from "react-hook-form";
+import { Calendar } from "lucide-react";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib";
@@ -72,8 +73,9 @@ export function DatePickerField<T extends FieldValues>({
 
   return (
     <div>
-      <Label htmlFor={id} className={labelClasses}>
-        {label}
+      <Label htmlFor={id} className={cn(labelClasses, "flex items-center gap-2")}>
+        <Calendar className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+        <span>{label}</span>
         {required && (
           <span className="text-red-500 dark:text-red-400 ml-1">*</span>
         )}

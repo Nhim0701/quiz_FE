@@ -22,24 +22,21 @@
       "columns": {
         "id": "ID",
         "name": "Permission Name",
-        "resource": "Resource",
-        "action": "Action",
+        "permission": "Permission",
         "description": "Description"
       },
       "form": {
         "nameLabel": "Permission Name",
         "namePlaceholder": "Enter permission name",
-        "resourceLabel": "Resource",
-        "resourcePlaceholder": "Enter resource (e.g., users, roles)",
-        "actionLabel": "Action",
-        "actionPlaceholder": "Enter action (e.g., read, create, update, delete)",
+        "permissionLabel": "Permission",
+        "permissionPlaceholder": "Enter permission (e.g., users::read, roles::create)",
         "descriptionLabel": "Description",
         "descriptionPlaceholder": "Enter permission description"
       },
       "validation": {
         "nameRequired": "Permission name is required",
-        "resourceRequired": "Resource is required",
-        "actionRequired": "Action is required"
+        "permissionRequired": "Permission is required",
+        "permissionFormat": "Permission must be in format resource::action (e.g., users::read)"
       }
     }
   }
