@@ -2,10 +2,11 @@ import { create } from "zustand";
 import type { ApiSuccessResponse } from "@/types";
 import type { SubmissionItem } from "../types";
 import { apiClient } from "@/lib";
-import { ENDPOINTS, TIME_CONSTANTS } from "../constants";
+import { ENDPOINTS } from "../constants";
 import { useTestQuestionsStore } from "./use-test-questions";
 import { useTestAnswersStore } from "./use-test-answers";
 import { useTestTimerStore } from "./use-test-timer";
+import { useTestsStore } from "@/modules/admin/modules/tests/hooks";
 
 interface TestSubmissionState {
   // Submission
@@ -53,10 +54,19 @@ export const useTestSubmissionStore = create<TestSubmissionState>(
       // Stop timer
       setTimeStarted(false);
 
+      // Get test to get timeLimit
+      const getTestById = useTestsStore.getState().getTestById;
+      const test = await getTestById(testId);
+
+      if (!test) {
+        if (onError) onError("Test not found");
+        return;
+      }
+
       const total = questions.length;
       const answered = Object.keys(answers).length;
-      const initialTime =
-        questions.length * TIME_CONSTANTS.SECONDS_PER_QUESTION;
+      // Convert timeLimit from minutes to seconds
+      const initialTime = test.timeLimit * 60;
       const timeSpent = initialTime - timeRemaining;
 
       // Build responses array for backend submission

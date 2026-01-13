@@ -2,13 +2,14 @@ import { create } from "zustand";
 import type { ApiSuccessResponse, PaginationMeta } from "@/types";
 import type { QuestionProps } from "@/modules/admin/modules/questions/types";
 import { apiClient } from "@/lib";
-import { ENDPOINTS, TIME_CONSTANTS } from "../constants";
+import { ENDPOINTS } from "../constants";
 import { useTestNavigationStore } from "./use-test-navigation";
 import { useTestAnswersStore } from "./use-test-answers";
 import { useTestFlagsStore } from "./use-test-flags";
 import { useTestRevealedStore } from "./use-test-revealed";
 import { useTestTimerStore } from "./use-test-timer";
 import { useTestSubmissionStore } from "./use-test-submission";
+import { useTestsStore } from "@/modules/admin/modules/tests/hooks";
 
 interface TestQuestionsState {
   // Questions
@@ -19,7 +20,7 @@ interface TestQuestionsState {
   setLoading: (loading: boolean) => void;
 
   // Initialize test
-  initializeTest: (testId: string, questions: QuestionProps[]) => void;
+  initializeTest: (questions: QuestionProps[], timeLimit: number) => void;
 
   // Fetch and initialize questions
   fetchAndInitializeTest: (
@@ -38,15 +39,14 @@ export const useTestQuestionsStore = create<TestQuestionsState>((set, get) => ({
   setLoading: (loading) => set({ loading }),
 
   // Initialize test
-  initializeTest: (testId, questions) => {
+  initializeTest: (questions, timeLimit) => {
     // Reset all related stores
     useTestNavigationStore.getState().setCurrentIndex(0);
     useTestAnswersStore.getState().resetAnswers();
     useTestFlagsStore.getState().resetFlags();
     useTestRevealedStore.getState().resetRevealed();
-    useTestTimerStore
-      .getState()
-      .setTimeRemaining(questions.length * TIME_CONSTANTS.SECONDS_PER_QUESTION);
+    // Convert timeLimit from minutes to seconds
+    useTestTimerStore.getState().setTimeRemaining(timeLimit * 60);
     useTestTimerStore.getState().setTimeStarted(false);
     useTestSubmissionStore.getState().setSubmitting(false);
 
@@ -103,8 +103,16 @@ export const useTestQuestionsStore = create<TestQuestionsState>((set, get) => ({
         });
       }
 
+      // Get test to get timeLimit
+      const getTestById = useTestsStore.getState().getTestById;
+      const test = await getTestById(testId);
+
+      if (!test) {
+        throw new Error("Test not found");
+      }
+
       const { initializeTest } = get();
-      initializeTest(testId, allQuestions);
+      initializeTest(allQuestions, test.timeLimit);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to fetch questions";

@@ -24,6 +24,5 @@ export const ROUTES = {
  * Time constants for tests
  */
 export const TIME_CONSTANTS = {
-  SECONDS_PER_QUESTION: 60, // 1 minute per question
   TIMER_INTERVAL: 1000, // 1 second
 } as const;

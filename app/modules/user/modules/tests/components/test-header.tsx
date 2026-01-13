@@ -56,6 +56,11 @@ export function TestHeader() {
             <h1 className="text-lg sm:text-2xl font-bold text-slate-800 dark:text-slate-100 capitalize truncate">
               {test?.name || ""}
             </h1>
+            {test?.description && (
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1.5 line-clamp-2">
+                {test.description}
+              </p>
+            )}
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
               {t("test.question", {
                 current: currentIndex + 1,
