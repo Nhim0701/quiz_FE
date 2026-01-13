@@ -24,7 +24,8 @@ import {
 import { useTestsStore } from "../hooks";
 import type { TestProps } from "../types";
 import { useCategoriesStore } from "../../categories/hooks";
-import { Eye, Trash2 } from "lucide-react";
+import { Eye, Trash2, Edit } from "lucide-react";
+import { TestViewDialog } from "./test-dialog";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -48,9 +49,10 @@ interface TestsListProps {
     update: boolean;
     delete: boolean;
   };
+  onClearFiltersReady?: (clearFilters: () => void) => void;
 }
 
-export function TestsList({ roles }: TestsListProps) {
+export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
@@ -87,6 +89,9 @@ export function TestsList({ roles }: TestsListProps) {
     fetchTests,
     deleteTest,
     refreshTests,
+    openDialog,
+    openViewDialog,
+    viewingTest,
   } = useTestsStore();
   const { categories, fetchCategories } = useCategoriesStore();
 
@@ -213,6 +218,17 @@ export function TestsList({ roles }: TestsListProps) {
       setPage(1);
     },
   });
+
+  // Expose clearFilters function to parent component (only once on mount)
+  const clearFiltersRef = useRef(handleClearAllFilters);
+  clearFiltersRef.current = handleClearAllFilters;
+
+  useEffect(() => {
+    if (onClearFiltersReady) {
+      onClearFiltersReady(() => clearFiltersRef.current());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   // Handler to remove a specific category from the array
   const handleRemoveCategory = useCallback((categoryId: string) => {
@@ -362,7 +378,11 @@ export function TestsList({ roles }: TestsListProps) {
   };
 
   const handleViewInfo = (test: TestProps) => {
-    navigate(ROUTES.TESTS.INFO(test.id));
+    openViewDialog(test);
+  };
+
+  const handleEdit = (test: TestProps) => {
+    openDialog(test);
   };
 
   const handleDelete = (test: TestProps) => {
@@ -458,13 +478,23 @@ export function TestsList({ roles }: TestsListProps) {
   ];
 
   const actions: Action<TestProps>[] = [
-    ...(roles.update
+    ...(roles.read
       ? [
           {
-            label: t("common.viewInfo"),
+            label: t("admin.tests.viewInfo"),
             onClick: handleViewInfo,
             icon: <Eye className="h-4 w-4" />,
             actionType: "viewInfo" as const,
+          },
+        ]
+      : []),
+    ...(roles.update
+      ? [
+          {
+            label: t("common.edit"),
+            onClick: handleEdit,
+            icon: <Edit className="h-4 w-4" />,
+            actionType: "edit" as const,
           },
         ]
       : []),
@@ -537,6 +567,7 @@ export function TestsList({ roles }: TestsListProps) {
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
       />
+      <TestViewDialog test={viewingTest} onDelete={handleDelete} />
     </>
   );
 }

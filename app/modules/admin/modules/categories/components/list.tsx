@@ -20,7 +20,7 @@ import {
 } from "@/hooks";
 import { useCategoriesStore, type Category } from "../hooks";
 import { Edit, Trash2, Eye } from "lucide-react";
-import { CategoryViewDialog } from "./category-view-dialog";
+import { CategoryViewDialog } from "./category-dialog";
 import {
   AlertDialogAction,
   AlertDialogCancel,

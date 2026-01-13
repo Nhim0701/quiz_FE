@@ -17,6 +17,18 @@ interface TestsState {
   adminLoading: boolean;
   adminError: string | null;
 
+  // Form state
+  isDialogOpen: boolean;
+  editingTest: TestProps | null;
+  viewingTest: TestProps | null;
+  isEditMode: boolean;
+
+  // Actions
+  openDialog: (test?: TestProps | null) => void;
+  closeDialog: () => void;
+  openViewDialog: (test: TestProps) => void;
+  setEditMode: (isEdit: boolean) => void;
+
   // API methods
   getTestsByCategory: (categoryId: string) => Promise<TestProps[]>;
   getTestById: (testId: string) => Promise<TestProps | null>;
@@ -59,6 +71,34 @@ export const useTestsStore = create<TestsState>((set, get) => ({
   adminTests: [],
   adminLoading: false,
   adminError: null,
+  isDialogOpen: false,
+  editingTest: null,
+  viewingTest: null,
+  isEditMode: false,
+
+  // Form actions
+  openDialog: (test = null) => {
+    set({ isDialogOpen: true, editingTest: test, isEditMode: false });
+  },
+  closeDialog: () => {
+    set({
+      isDialogOpen: false,
+      editingTest: null,
+      viewingTest: null,
+      isEditMode: false,
+    });
+  },
+  openViewDialog: (test) => {
+    set({
+      isDialogOpen: true,
+      viewingTest: test,
+      editingTest: null,
+      isEditMode: false,
+    });
+  },
+  setEditMode: (isEdit) => {
+    set({ isEditMode: isEdit });
+  },
 
   // API methods
   getTestsByCategory: async (categoryId: string) => {
@@ -301,6 +341,16 @@ export const useTestsStore = create<TestsState>((set, get) => ({
     pageSize = 10,
     filters?: Record<string, string>
   ) => {
+    const { viewingTest } = get();
     await get().fetchTests(page, pageSize, filters);
+
+    // Update viewingTest if it exists and dialog is still open
+    if (viewingTest) {
+      const { adminTests } = get();
+      const updatedTest = adminTests.find((t) => t.id === viewingTest.id);
+      if (updatedTest) {
+        set({ viewingTest: updatedTest });
+      }
+    }
   },
 }));

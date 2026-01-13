@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useTranslation } from "@/i18n";
 import { useRole } from "@/modules/common/auth/hooks/use-role";
 import { RESOURCES } from "@/modules/admin/constants/permissions";
@@ -10,13 +10,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { TestsList, TestForm } from "./components";
+import { useTestsStore } from "./hooks";
 
 export default function AdminTests() {
   const { t } = useTranslation();
   const { getNamespaceRoles } = useRole();
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const { openDialog } = useTestsStore();
+  const [clearFilters, setClearFilters] = useState<(() => void) | null>(null);
 
   const roles = getNamespaceRoles(RESOURCES.TEST);
+
+  const handleClearFiltersReady = useCallback((clearFiltersFn: () => void) => {
+    setClearFilters(() => clearFiltersFn);
+  }, []);
 
   useBreadcrumb(
     [
@@ -55,7 +61,7 @@ export default function AdminTests() {
           <CardTitle>{t("admin.tests.cardTitle")}</CardTitle>
           {roles.create && (
             <Button
-              onClick={() => setIsFormOpen(true)}
+              onClick={() => openDialog()}
               size="sm"
               className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 dark:from-emerald-600 dark:to-green-700 dark:hover:from-emerald-700 dark:hover:to-green-800 text-white shadow-md hover:shadow-lg transition-all duration-200 font-medium"
             >
@@ -65,11 +71,14 @@ export default function AdminTests() {
           )}
         </CardHeader>
         <CardContent className="overflow-auto">
-          <TestsList roles={roles} />
+          <TestsList
+            roles={roles}
+            onClearFiltersReady={handleClearFiltersReady}
+          />
         </CardContent>
       </Card>
       <div className="mt-4">
-        <TestForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} />
+        <TestForm onClearFilters={clearFilters} />
       </div>
     </Container>
   );
