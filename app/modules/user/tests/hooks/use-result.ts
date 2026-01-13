@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { QuestionProps } from "@/hooks";
+import type { QuestionProps } from "@/modules/admin/tests/types";
 
 interface ResultSummary {
   total: number;

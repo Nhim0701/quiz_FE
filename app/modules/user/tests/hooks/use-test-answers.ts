@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { useTestQuestionsStore } from "./use-test-questions";
+import type { AnswerProps, QuestionProps } from "@/modules/admin/tests/types";
 
 interface TestAnswersState {
   // Answers
@@ -21,7 +22,7 @@ export const useTestAnswersStore = create<TestAnswersState>((set, get) => ({
 
     const existing = answers[questionId] || [];
     const correctAnswersCount = question.answers.filter(
-      (a) => a.isCorrect
+      (a: AnswerProps) => a.isCorrect
     ).length;
     const hasMultipleCorrect = correctAnswersCount > 1;
 

@@ -21,7 +21,8 @@ import {
   createStringFilterHandler,
   createArrayFilterHandler,
 } from "@/hooks";
-import { useTestsStore, type TestProps } from "../hooks";
+import { useTestsStore } from "../hooks";
+import type { TestProps } from "../types";
 import { useCategoriesStore } from "../../categories/hooks";
 import { Eye, Trash2 } from "lucide-react";
 import {

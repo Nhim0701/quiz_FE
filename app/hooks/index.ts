@@ -1,4 +1,4 @@
-export type { AnswerProps } from "./use-answers";
+export type { AnswerProps } from "../modules/admin/tests/hooks/use-answers";
 export { default as useApp, useTheme } from "./use-app";
 export {
   useBreadcrumb,
@@ -32,4 +32,3 @@ export {
 } from "./use-filter";
 export { usePageData } from "./use-page-data";
 export { usePaginationStore, type PaginationState } from "./use-pagination";
-export type { QuestionProps } from "./use-questions";

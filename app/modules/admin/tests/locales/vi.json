@@ -67,6 +67,38 @@
           "updatedAt": "Ngày Cập Nhật"
         },
         "noDescription": "Không có mô tả"
+      },
+      "questions": {
+        "title": "Câu Hỏi",
+        "create": "Tạo Câu Hỏi",
+        "delete": "Xóa",
+        "deleteSuccess": "Xóa câu hỏi thành công",
+        "confirmDelete": "Bạn có chắc chắn muốn xóa câu hỏi này?",
+        "info": "Thông Tin Câu Hỏi",
+        "empty": "Không tìm thấy câu hỏi nào",
+        "createNotImplemented": "Tính năng tạo câu hỏi chưa được triển khai",
+        "fields": {
+          "content": "Nội Dung",
+          "image": "Hình Ảnh",
+          "answers": "Câu Trả Lời"
+        },
+        "columns": {
+          "id": "ID",
+          "content": "Nội Dung",
+          "isMultipleChoice": "Loại",
+          "answers": "Câu Trả Lời"
+        },
+        "multipleChoice": "Nhiều Lựa Chọn",
+        "singleChoice": "Một Lựa Chọn",
+        "filters": {
+          "searchPlaceholder": "Tìm kiếm theo nội dung...",
+          "multipleChoice": "Nhiều Lựa Chọn",
+          "singleChoice": "Một Lựa Chọn",
+          "multipleChoicePlaceholder": "Chọn loại...",
+          "multipleChoiceSearch": "Tìm kiếm loại...",
+          "multipleChoiceEmpty": "Không tìm thấy loại nào.",
+          "clear": "Xóa Bộ Lọc"
+        }
       }
     }
   }

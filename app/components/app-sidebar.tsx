@@ -153,13 +153,20 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = location.pathname === item.url;
+                const isActive =
+                  location.pathname === item.url ||
+                  location.pathname.startsWith(item.url + "/");
                 return (
                   <SidebarMenuItem key={item.url}>
                     <SidebarMenuButton
                       asChild
                       isActive={isActive}
                       tooltip={item.title}
+                      className={
+                        isActive
+                          ? "bg-gradient-to-r from-indigo-500/15 to-purple-500/15 dark:from-indigo-500/20 dark:to-purple-500/20 text-indigo-600 dark:text-indigo-400 font-semibold border-l-2 border-indigo-500 dark:border-indigo-400 shadow-sm"
+                          : ""
+                      }
                     >
                       <Link to={item.url}>
                         <Icon />
@@ -185,13 +192,20 @@ export function AppSidebar() {
                 <SidebarMenu>
                   {adminMenuItems.map((item) => {
                     const Icon = item.icon;
-                    const isActive = location.pathname === item.url;
+                    const isActive =
+                      location.pathname === item.url ||
+                      location.pathname.startsWith(item.url + "/");
                     return (
                       <SidebarMenuItem key={item.url}>
                         <SidebarMenuButton
                           asChild
                           isActive={isActive}
                           tooltip={item.title}
+                          className={
+                            isActive
+                              ? "bg-gradient-to-r from-indigo-500/15 to-purple-500/15 dark:from-indigo-500/20 dark:to-purple-500/20 text-indigo-600 dark:text-indigo-400 font-semibold border-l-2 border-indigo-500 dark:border-indigo-400 shadow-sm"
+                              : ""
+                          }
                         >
                           <Link to={item.url}>
                             <Icon />

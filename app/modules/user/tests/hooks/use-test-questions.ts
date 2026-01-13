@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { ApiSuccessResponse, PaginationMeta } from "@/types";
-import type { QuestionProps } from "@/hooks";
+import type { QuestionProps } from "@/modules/admin/tests/types";
 import { apiClient } from "@/lib";
 import { TESTS_API_ENDPOINTS, TIME_CONSTANTS } from "../constants";
 import { useTestNavigationStore } from "./use-test-navigation";

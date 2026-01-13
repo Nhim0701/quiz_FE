@@ -2,18 +2,7 @@ import { create } from "zustand";
 import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
 import { apiClient } from "@/lib";
 import { API_ENDPOINTS } from "@/constants";
-
-export interface TestProps {
-  id: string;
-  name: string;
-  questionCount: number;
-  categoryId: string;
-  categoryName?: string;
-  description?: string;
-  timeLimit: number;
-  createdAt?: string | number;
-  updatedAt?: string | number;
-}
+import type { TestProps } from "../types";
 
 interface TestsState {
   // Tests by category ID
