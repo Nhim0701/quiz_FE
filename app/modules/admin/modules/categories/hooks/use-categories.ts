@@ -16,12 +16,16 @@ interface CategoriesState {
   error: string | null;
 
   // Form state
-  isSheetOpen: boolean;
+  isDialogOpen: boolean;
   editingCategory: Category | null;
+  viewingCategory: Category | null;
+  isEditMode: boolean;
 
   // Actions
-  openSheet: (category?: Category | null) => void;
-  closeSheet: () => void;
+  openDialog: (category?: Category | null) => void;
+  closeDialog: () => void;
+  openViewDialog: (category: Category) => void;
+  setEditMode: (isEdit: boolean) => void;
 
   // API methods
   fetchCategories: (
@@ -44,15 +48,33 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
   categories: [],
   loading: false,
   error: null,
-  isSheetOpen: false,
+  isDialogOpen: false,
   editingCategory: null,
+  viewingCategory: null,
+  isEditMode: false,
 
   // Form actions
-  openSheet: (category = null) => {
-    set({ isSheetOpen: true, editingCategory: category });
+  openDialog: (category = null) => {
+    set({ isDialogOpen: true, editingCategory: category, isEditMode: false });
   },
-  closeSheet: () => {
-    set({ isSheetOpen: false, editingCategory: null });
+  closeDialog: () => {
+    set({
+      isDialogOpen: false,
+      editingCategory: null,
+      viewingCategory: null,
+      isEditMode: false,
+    });
+  },
+  openViewDialog: (category) => {
+    set({
+      isDialogOpen: true,
+      viewingCategory: category,
+      editingCategory: null,
+      isEditMode: false,
+    });
+  },
+  setEditMode: (isEdit) => {
+    set({ isEditMode: isEdit });
   },
 
   // API methods
@@ -154,6 +176,18 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
     pageSize = 10,
     filters?: Record<string, string>
   ) => {
+    const { viewingCategory } = get();
     await get().fetchCategories(page, pageSize, filters);
+
+    // Update viewingCategory if it exists and dialog is still open
+    if (viewingCategory) {
+      const { categories } = get();
+      const updatedCategory = categories.find(
+        (c) => c.id === viewingCategory.id
+      );
+      if (updatedCategory) {
+        set({ viewingCategory: updatedCategory });
+      }
+    }
   },
 }));

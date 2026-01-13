@@ -16,6 +16,9 @@
       "update": "Cập nhật danh mục",
       "createSuccess": "Tạo danh mục thành công",
       "updateSuccess": "Cập nhật danh mục thành công",
+      "viewTitle": "Thông tin danh mục",
+      "viewDescription": "Xem và chỉnh sửa thông tin danh mục",
+      "viewInfo": "Xem thông tin",
       "form": {
         "nameLabel": "Tên danh mục",
         "namePlaceholder": "Nhập tên danh mục"

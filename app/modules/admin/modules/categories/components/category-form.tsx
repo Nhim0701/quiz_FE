@@ -5,13 +5,13 @@ import { useTranslation } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/common/form-field";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetFooter,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useApp, usePaginationStore } from "@/hooks";
 import { categorySchema, type CategoryFormData } from "../schemas";
 import { useCategoriesStore } from "../hooks";
@@ -26,15 +26,19 @@ export function CategoryForm({ onClearFilters }: CategoryFormProps) {
   const { showSuccess, showError } = useApp();
   const { page, pageSize } = usePaginationStore();
   const {
-    isSheetOpen,
+    isDialogOpen,
     editingCategory,
-    closeSheet,
+    viewingCategory,
+    closeDialog,
     createCategory,
     updateCategory,
     refreshCategories,
     loading,
   } = useCategoriesStore();
   const isEditMode = !!editingCategory;
+
+  // Only show this dialog when not viewing (i.e., creating or editing from create button)
+  const shouldShow = isDialogOpen && !viewingCategory;
 
   const {
     register,
@@ -58,19 +62,19 @@ export function CategoryForm({ onClearFilters }: CategoryFormProps) {
         name: "",
       });
     }
-  }, [editingCategory, reset, isSheetOpen]);
+  }, [editingCategory, reset, isDialogOpen]);
 
   const onSubmit = async (data: CategoryFormData) => {
     try {
       if (isEditMode && editingCategory) {
         await updateCategory(editingCategory.id, data);
         showSuccess(t("admin.categories.updateSuccess"));
-        closeSheet();
+        closeDialog();
         await refreshCategories(page, pageSize);
       } else {
         await createCategory(data);
         showSuccess(t("admin.categories.createSuccess"));
-        closeSheet();
+        closeDialog();
         // Clear filters and fetch all data after create
         if (onClearFilters) {
           onClearFilters();
@@ -85,20 +89,20 @@ export function CategoryForm({ onClearFilters }: CategoryFormProps) {
   };
 
   return (
-    <Sheet open={isSheetOpen} onOpenChange={(open) => !open && closeSheet()}>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>
+    <Dialog open={shouldShow} onOpenChange={(open) => !open && closeDialog()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
             {isEditMode
               ? t("admin.categories.editTitle")
               : t("admin.categories.createTitle")}
-          </SheetTitle>
-          <SheetDescription>
+          </DialogTitle>
+          <DialogDescription>
             {isEditMode
               ? t("admin.categories.editDescription")
               : t("admin.categories.createDescription")}
-          </SheetDescription>
-        </SheetHeader>
+          </DialogDescription>
+        </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
           <FormField
             id="name"
@@ -111,12 +115,12 @@ export function CategoryForm({ onClearFilters }: CategoryFormProps) {
             disabled={loading || isSubmitting}
             labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
           />
-          <SheetFooter>
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
               size="sm"
-              onClick={closeSheet}
+              onClick={closeDialog}
               disabled={loading || isSubmitting}
             >
               {t("common.cancel")}
@@ -134,9 +138,9 @@ export function CategoryForm({ onClearFilters }: CategoryFormProps) {
                 ? t("admin.categories.update")
                 : t("admin.categories.create")}
             </Button>
-          </SheetFooter>
+          </DialogFooter>
         </form>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

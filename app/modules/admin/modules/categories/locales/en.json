@@ -16,6 +16,9 @@
       "update": "Update",
       "createSuccess": "Category created successfully",
       "updateSuccess": "Category updated successfully",
+      "viewTitle": "Category Information",
+      "viewDescription": "View and edit category information",
+      "viewInfo": "View Info",
       "form": {
         "nameLabel": "Category Name",
         "namePlaceholder": "Enter category name"

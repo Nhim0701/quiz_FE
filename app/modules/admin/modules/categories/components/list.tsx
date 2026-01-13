@@ -19,7 +19,8 @@ import {
   FilterManager,
 } from "@/hooks";
 import { useCategoriesStore, type Category } from "../hooks";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Eye } from "lucide-react";
+import { CategoryViewDialog } from "./category-view-dialog";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -65,9 +66,11 @@ export function CategoriesList({
     categories,
     loading,
     fetchCategories,
-    openSheet,
+    openDialog,
+    openViewDialog,
     deleteCategory,
     refreshCategories,
+    viewingCategory,
   } = useCategoriesStore();
 
   const filterHandlers = useMemo(
@@ -260,7 +263,11 @@ export function CategoriesList({
   };
 
   const handleEdit = (category: Category) => {
-    openSheet(category);
+    openDialog(category);
+  };
+
+  const handleView = (category: Category) => {
+    openViewDialog(category);
   };
 
   const handleDelete = (category: Category) => {
@@ -338,6 +345,16 @@ export function CategoriesList({
   ];
 
   const actions: Action<Category>[] = [
+    ...(roles.read
+      ? [
+          {
+            label: t("admin.categories.viewInfo"),
+            onClick: handleView,
+            icon: <Eye className="h-4 w-4" />,
+            actionType: "viewInfo" as const,
+          },
+        ]
+      : []),
     ...(roles.update
       ? [
           {
@@ -403,6 +420,7 @@ export function CategoriesList({
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
       />
+      <CategoryViewDialog category={viewingCategory} onDelete={handleDelete} />
     </>
   );
 }

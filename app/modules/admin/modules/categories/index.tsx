@@ -15,7 +15,7 @@ import { useCategoriesStore } from "./hooks";
 export default function AdminCategories() {
   const { t } = useTranslation();
   const { getNamespaceRoles } = useRole();
-  const { openSheet } = useCategoriesStore();
+  const { openDialog } = useCategoriesStore();
   const [clearFilters, setClearFilters] = useState<(() => void) | null>(null);
 
   const roles = getNamespaceRoles(RESOURCES.CATEGORY);
@@ -61,7 +61,7 @@ export default function AdminCategories() {
           <CardTitle>{t("admin.categories.cardTitle")}</CardTitle>
           {roles.create && (
             <Button
-              onClick={() => openSheet()}
+              onClick={() => openDialog()}
               size="sm"
               className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 dark:from-emerald-600 dark:to-green-700 dark:hover:from-emerald-700 dark:hover:to-green-800 text-white shadow-md hover:shadow-lg transition-all duration-200 font-medium"
             >
