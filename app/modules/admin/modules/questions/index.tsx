@@ -5,18 +5,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "@/i18n";
 import { useRole } from "@/modules/common/auth/hooks/use-role";
 import { RESOURCES } from "@/modules/admin/constants/permissions";
-import { ROUTES as ADMIN_ROUTES } from "@/constants";
-import { ROUTES } from "../../constants";
+import { ROUTES as QUESTIONS_ROUTES } from "./constants";
+import { ROUTES as TESTS_ROUTES } from "../tests/constants";
 import { useBreadcrumb, useApp } from "@/hooks";
-import { useTestsStore, useQuestionStore } from "../../hooks";
-import { questionSchema, type QuestionFormData } from "../../schemas";
+import { useTestsStore } from "../tests/hooks";
+import { useQuestionsStore } from "./hooks";
+import { questionSchema, type QuestionFormData } from "./schemas";
 import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/page-header";
-import { EditorContainer, Editor } from "@/components/ui/editor";
+import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Loader2, FileText, CheckSquare, Save } from "lucide-react";
 import { cn } from "@/lib";
 
@@ -31,7 +32,7 @@ export default function AdminQuestionForm() {
   const { showSuccess, showError } = useApp();
   const { getTestById } = useTestsStore();
   const { createQuestion, updateQuestion, getQuestion, loading } =
-    useQuestionStore();
+    useQuestionsStore();
 
   const roles = getNamespaceRoles(RESOURCES.QUESTION);
   const isEditMode = !!questionId;
@@ -65,7 +66,7 @@ export default function AdminQuestionForm() {
         }
       } catch (error) {
         showError(t("admin.tests.info.notFound"));
-        navigate(ROUTES.TESTS.INDEX);
+        navigate(TESTS_ROUTES.TESTS.INDEX);
       } finally {
         setTestLoading(false);
       }
@@ -84,8 +85,8 @@ export default function AdminQuestionForm() {
           isMultipleChoice: question.isMultipleChoice || false,
         });
       } catch (error) {
-        showError(t("admin.tests.questions.notFound"));
-        navigate(ROUTES.TESTS.INFO(testId));
+        showError(t("admin.questions.notFound"));
+        navigate(TESTS_ROUTES.TESTS.INFO(testId));
       }
     };
     loadQuestion();
@@ -109,22 +110,24 @@ export default function AdminQuestionForm() {
       },
       {
         label: t("sidebar.admin.tests"),
-        href: ROUTES.TESTS.INDEX,
+        href: TESTS_ROUTES.TESTS.INDEX,
       },
       {
         label: test?.name || t("admin.tests.info.title"),
-        href: testId ? ROUTES.TESTS.INFO(testId) : ROUTES.TESTS.INDEX,
+        href: testId
+          ? TESTS_ROUTES.TESTS.INFO(testId)
+          : TESTS_ROUTES.TESTS.INDEX,
       },
       {
         label: isEditMode
-          ? t("admin.tests.questions.edit")
-          : t("admin.tests.questions.create"),
+          ? t("admin.questions.edit")
+          : t("admin.questions.create"),
         href: questionId
           ? testId && questionId
-            ? ROUTES.TESTS.QUESTIONS.EDIT(testId, questionId)
+            ? QUESTIONS_ROUTES.QUESTIONS.EDIT(testId, questionId)
             : ""
           : testId
-            ? ROUTES.TESTS.QUESTIONS.NEW(testId)
+            ? QUESTIONS_ROUTES.QUESTIONS.NEW(testId)
             : "",
       },
     ],
@@ -142,12 +145,12 @@ export default function AdminQuestionForm() {
       };
       if (isEditMode && questionId) {
         await updateQuestion(testId, questionId, questionData);
-        showSuccess(t("admin.tests.questions.updateSuccess"));
+        showSuccess(t("admin.questions.updateSuccess"));
       } else {
         await createQuestion(testId, questionData);
-        showSuccess(t("admin.tests.questions.createSuccess"));
+        showSuccess(t("admin.questions.createSuccess"));
       }
-      navigate(ROUTES.TESTS.INFO(testId));
+      navigate(TESTS_ROUTES.TESTS.INFO(testId));
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : t("errors.genericError");
@@ -159,7 +162,7 @@ export default function AdminQuestionForm() {
 
   const handleCancel = () => {
     if (testId) {
-      navigate(ROUTES.TESTS.INFO(testId));
+      navigate(TESTS_ROUTES.TESTS.INFO(testId));
     }
   };
 
@@ -168,15 +171,13 @@ export default function AdminQuestionForm() {
       <Container>
         <PageHeader
           title={
-            isEditMode
-              ? t("admin.tests.questions.edit")
-              : t("admin.tests.questions.create")
+            isEditMode ? t("admin.questions.edit") : t("admin.questions.create")
           }
         />
         <Card>
           <CardContent className="p-6">
             <p className="text-muted-foreground">
-              {t("admin.tests.questions.noPermission")}
+              {t("admin.questions.noPermission")}
             </p>
           </CardContent>
         </Card>
@@ -187,11 +188,11 @@ export default function AdminQuestionForm() {
   if (!roles.update && isEditMode) {
     return (
       <Container>
-        <PageHeader title={t("admin.tests.questions.edit")} />
+        <PageHeader title={t("admin.questions.edit")} />
         <Card>
           <CardContent className="p-6">
             <p className="text-muted-foreground">
-              {t("admin.tests.questions.noPermission")}
+              {t("admin.questions.noPermission")}
             </p>
           </CardContent>
         </Card>
@@ -204,9 +205,7 @@ export default function AdminQuestionForm() {
       <Container>
         <PageHeader
           title={
-            isEditMode
-              ? t("admin.tests.questions.edit")
-              : t("admin.tests.questions.create")
+            isEditMode ? t("admin.questions.edit") : t("admin.questions.create")
           }
         />
         <Card>
@@ -224,9 +223,7 @@ export default function AdminQuestionForm() {
     <Container className="p-2">
       <PageHeader
         title={
-          isEditMode
-            ? t("admin.tests.questions.edit")
-            : t("admin.tests.questions.create")
+          isEditMode ? t("admin.questions.edit") : t("admin.questions.create")
         }
       />
       <Card>
@@ -234,8 +231,8 @@ export default function AdminQuestionForm() {
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-blue-500 dark:text-blue-400" />
             {isEditMode
-              ? t("admin.tests.questions.editTitle")
-              : t("admin.tests.questions.createTitle")}
+              ? t("admin.questions.editTitle")
+              : t("admin.questions.createTitle")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -243,7 +240,7 @@ export default function AdminQuestionForm() {
             {/* Content Field */}
             <div className="space-y-2">
               <Label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                {t("admin.tests.questions.fields.content")}
+                {t("admin.questions.fields.content")}
                 <span className="text-red-500 dark:text-red-400 ml-1">*</span>
               </Label>
               <Controller
@@ -251,24 +248,17 @@ export default function AdminQuestionForm() {
                 control={control}
                 render={({ field }) => (
                   <div>
-                    <EditorContainer
-                      variant="select"
+                    <Textarea
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder={t("admin.questions.form.contentPlaceholder")}
+                      disabled={isSubmitting}
                       className={cn(
-                        "min-h-[200px] border border-input rounded-md",
+                        "min-h-[200px]",
                         errors.content &&
                           "border-red-500 dark:border-red-600 ring-1 ring-red-500 dark:ring-red-600"
                       )}
-                    >
-                      <Editor
-                        placeholder={t(
-                          "admin.tests.questions.form.contentPlaceholder"
-                        )}
-                        value={field.value}
-                        onChange={field.onChange}
-                        variant="select"
-                        disabled={isSubmitting}
-                      />
-                    </EditorContainer>
+                    />
                     {errors.content && (
                       <p className="mt-1 text-xs text-red-600 dark:text-red-400">
                         {errors.content.message}
@@ -282,7 +272,7 @@ export default function AdminQuestionForm() {
             {/* Type Field (Checkbox) */}
             <div className="space-y-2">
               <Label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                {t("admin.tests.questions.fields.type")}
+                {t("admin.questions.fields.type")}
               </Label>
               <Controller
                 name="isMultipleChoice"
@@ -301,7 +291,7 @@ export default function AdminQuestionForm() {
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2 cursor-pointer"
                     >
                       <CheckSquare className="h-4 w-4 text-blue-500 dark:text-blue-400" />
-                      {t("admin.tests.questions.multipleChoice")}
+                      {t("admin.questions.multipleChoice")}
                     </Label>
                   </div>
                 )}

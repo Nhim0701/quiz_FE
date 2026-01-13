@@ -1,14 +1,11 @@
 import { z } from "zod";
-import {
-  createZodSchema,
-  createRequiredString,
-} from "@/lib";
+import { createZodSchema, createRequiredString } from "@/lib";
 
 export const questionSchema = createZodSchema((t) =>
   z.object({
     content: createRequiredString(
       t,
-      "admin.tests.questions.validation.contentRequired"
+      "admin.questions.validation.contentRequired"
     ),
     isMultipleChoice: z.boolean().default(false),
   })

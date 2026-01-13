@@ -1,5 +1,4 @@
 import type { AnswerProps } from "./answer.type";
-
 import type { ApiResponseMeta } from "@/types";
 
 export interface QuestionState {
@@ -18,7 +17,7 @@ export interface QuestionState {
   ) => Promise<void>;
   createQuestion: (
     testId: string,
-    data: QuestionFormData
+    data: { content: string; isMultipleChoice: boolean }
   ) => Promise<QuestionProps>;
   updateQuestion: (
     testId: string,

@@ -1,0 +1,49 @@
+{
+  "admin": {
+    "questions": {
+      "title": "Câu Hỏi",
+      "create": "Tạo Câu Hỏi",
+      "createTitle": "Tạo Câu Hỏi Mới",
+      "createSuccess": "Tạo câu hỏi thành công",
+      "edit": "Chỉnh Sửa",
+      "editTitle": "Chỉnh Sửa Câu Hỏi",
+      "updateSuccess": "Cập nhật câu hỏi thành công",
+      "delete": "Xóa",
+      "deleteSuccess": "Xóa câu hỏi thành công",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa câu hỏi này?",
+      "info": "Thông Tin Câu Hỏi",
+      "empty": "Không tìm thấy câu hỏi nào",
+      "notFound": "Không tìm thấy câu hỏi",
+      "noPermission": "Bạn không có quyền truy cập trang này",
+      "fields": {
+        "content": "Nội Dung",
+        "type": "Loại Câu Hỏi",
+        "image": "Hình Ảnh",
+        "answers": "Câu Trả Lời"
+      },
+      "form": {
+        "contentPlaceholder": "Nhập nội dung câu hỏi..."
+      },
+      "validation": {
+        "contentRequired": "Nội dung câu hỏi là bắt buộc"
+      },
+      "columns": {
+        "id": "ID",
+        "content": "Nội Dung",
+        "isMultipleChoice": "Loại",
+        "answers": "Câu Trả Lời"
+      },
+      "multipleChoice": "Nhiều Lựa Chọn",
+      "singleChoice": "Một Lựa Chọn",
+      "filters": {
+        "searchPlaceholder": "Tìm kiếm theo nội dung...",
+        "multipleChoice": "Nhiều Lựa Chọn",
+        "singleChoice": "Một Lựa Chọn",
+        "multipleChoicePlaceholder": "Chọn loại...",
+        "multipleChoiceSearch": "Tìm kiếm loại...",
+        "multipleChoiceEmpty": "Không tìm thấy loại nào.",
+        "clear": "Xóa Bộ Lọc"
+      }
+    }
+  }
+}

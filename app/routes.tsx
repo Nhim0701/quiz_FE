@@ -5,13 +5,13 @@ import {
   route,
   type RouteConfig,
 } from "@react-router/dev/routes";
-import { ROUTES } from "./constants";
 import { ROUTES as AUTH_ROUTES } from "./modules/common/auth/constants";
 import { ROUTES as DASHBOARD_ROUTES } from "./modules/user/modules/dashboard/constants";
 import { ROUTES as PROFILE_ROUTES } from "./modules/user/modules/profile/constants";
 import { ROUTES as TESTS_ROUTES } from "./modules/user/modules/tests/constants";
 import { ROUTES as ADMIN_TESTS_ROUTES } from "./modules/admin/modules/tests/constants/";
 import { ROUTES as ADMIN_CATEGORIES_ROUTES } from "./modules/admin/modules/categories/constants";
+import { ROUTES as ADMIN_QUESTIONS_ROUTES } from "./modules/admin/modules/questions/constants";
 
 export default [
   index("modules/home.tsx"),
@@ -55,18 +55,14 @@ export default [
         ...prefix(ADMIN_TESTS_ROUTES.TESTS.INFO(), [
           index("modules/admin/modules/tests/routes/index.tsx"),
 
-          // route(
-          //   ADMIN_TESTS_ROUTES.TESTS.QUESTIONS.INDEX(),
-          //   "modules/admin/modules/tests/routes/questions/index.tsx"
-          // ),
           route(
-            ADMIN_TESTS_ROUTES.TESTS.QUESTIONS.NEW(),
-            "modules/admin/modules/tests/routes/questions/index.tsx"
+            ADMIN_QUESTIONS_ROUTES.QUESTIONS.NEW(),
+            "modules/admin/modules/questions/routes/index.tsx"
           ),
-          // route(
-          //   ADMIN_TESTS_ROUTES.TESTS.QUESTIONS.EDIT(),
-          //   "modules/admin/modules/tests/routes/questions/index.tsx"
-          // ),
+          route(
+            ADMIN_QUESTIONS_ROUTES.QUESTIONS.EDIT(),
+            "modules/admin/modules/questions/routes/index.tsx"
+          ),
         ]),
       ]),
     ]),

@@ -4,7 +4,7 @@ import { apiClient } from "@/lib";
 import { ENDPOINTS } from "../constants";
 import type { QuestionState, QuestionProps } from "../types";
 
-export const useQuestionStore = create<QuestionState>((set, get) => ({
+export const useQuestionsStore = create<QuestionState>((set, get) => ({
   // Initial state
   questions: [],
   loading: false,
@@ -68,7 +68,7 @@ export const useQuestionStore = create<QuestionState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await apiClient.post<ApiSuccessResponse<QuestionProps>>(
-        ENDPOINTS.QUESTIONS.CREATE(testId),
+        ENDPOINTS.QUESTIONS.CREATE,
         data
       );
       set({ loading: false });
@@ -90,7 +90,7 @@ export const useQuestionStore = create<QuestionState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await apiClient.put<ApiSuccessResponse<QuestionProps>>(
-        ENDPOINTS.QUESTIONS.UPDATE(testId, questionId),
+        ENDPOINTS.QUESTIONS.UPDATE(questionId),
         data
       );
       set({ loading: false });
@@ -108,7 +108,7 @@ export const useQuestionStore = create<QuestionState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await apiClient.get<ApiSuccessResponse<QuestionProps>>(
-        ENDPOINTS.QUESTIONS.GET(testId, questionId)
+        ENDPOINTS.QUESTIONS.GET(questionId)
       );
       set({ loading: false });
       return response.data.data;
@@ -130,7 +130,7 @@ export const useQuestionStore = create<QuestionState>((set, get) => ({
   ) => {
     set({ loading: true, error: null });
     try {
-      await apiClient.delete(ENDPOINTS.QUESTIONS.DELETE(testId, questionId));
+      await apiClient.delete(ENDPOINTS.QUESTIONS.DELETE(questionId));
       // Refresh questions after delete
       await get().fetchQuestions(testId, page, pageSize, filters);
       set({ loading: false });

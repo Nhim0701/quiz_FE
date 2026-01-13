@@ -11,6 +11,7 @@ import profileEnLocales from "../modules/user/modules/profile/locales/en.json";
 import testsEnLocales from "../modules/user/modules/tests/locales/en.json";
 import adminCategoriesEnLocales from "../modules/admin/modules/categories/locales/en.json";
 import adminTestsEnLocales from "../modules/admin/modules/tests/locales/en.json";
+import adminQuestionsEnLocales from "../modules/admin/modules/questions/locales/en.json";
 
 /**
  * Type definition for all module locales
@@ -31,6 +32,7 @@ export type ModuleLocales = {
   admin: {
     categories: typeof adminCategoriesEnLocales.admin.categories;
     tests: typeof adminTestsEnLocales.admin.tests;
+    questions: typeof adminQuestionsEnLocales.admin.questions;
   };
 };
 
