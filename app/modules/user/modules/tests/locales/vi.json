@@ -20,7 +20,8 @@
     "questions": "câu hỏi",
     "questionsLabel": "Câu hỏi",
     "startTest": "Bắt Đầu Bài Kiểm Tra",
-    "noTests": "Không có bài kiểm tra nào"
+    "noTests": "Không có bài kiểm tra nào",
+    "timeLimit": "phút"
   },
   "ui": {
     "buttons": {

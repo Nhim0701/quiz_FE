@@ -4,4 +4,4 @@ export {
   hasAnyPermission,
   hasAllPermissions,
   hasResourcePermission,
-} from "./permissions";
+} from "@/lib";

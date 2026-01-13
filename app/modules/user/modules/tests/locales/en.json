@@ -20,7 +20,8 @@
     "questions": "questions",
     "questionsLabel": "Questions",
     "startTest": "Start Test",
-    "noTests": "No tests available"
+    "noTests": "No tests available",
+    "timeLimit": "minutes"
   },
   "ui": {
     "buttons": {

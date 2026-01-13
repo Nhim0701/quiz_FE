@@ -1,10 +1,4 @@
-import {
-  index,
-  layout,
-  prefix,
-  route,
-  type RouteConfig,
-} from "@react-router/dev/routes";
+import { index, layout, prefix, route } from "@react-router/dev/routes";
 import { ROUTES as AUTH_ROUTES } from "./modules/common/auth/constants";
 import { ROUTES as DASHBOARD_ROUTES } from "./modules/user/modules/dashboard/constants";
 import { ROUTES as PROFILE_ROUTES } from "./modules/user/modules/profile/constants";
@@ -70,4 +64,4 @@ export default [
       ),
     ]),
   ]),
-] satisfies RouteConfig;
+];

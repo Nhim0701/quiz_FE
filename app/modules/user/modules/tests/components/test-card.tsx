@@ -1,4 +1,4 @@
-import { FileText } from "lucide-react";
+import { FileText, Clock } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "@/i18n";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -40,7 +40,20 @@ export function TestCard({ test }: TestCardProps) {
           <h4 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 mb-1 truncate">
             {test.name}
           </h4>
+          {test.description && (
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1.5 line-clamp-2">
+              {test.description}
+            </p>
+          )}
         </div>
+        {test.timeLimit && (
+          <div className="flex items-center gap-1.5 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+            <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+            <span>
+              {test.timeLimit} {t("tests.timeLimit")}
+            </span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

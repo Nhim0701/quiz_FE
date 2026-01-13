@@ -11,7 +11,7 @@
  * Use constants from @/constants/permissions for permission strings
  */
 
-import { PERMISSIONS, ACTIONS } from "@/modules/admin/constants/permissions";
+import { PERMISSIONS } from "@/modules/admin/constants/permissions";
 
 /**
  * Permission separator

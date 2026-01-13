@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSearchParams } from "react-router";
 import { useTranslation } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +18,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
-import { useApp, usePaginationStore } from "@/hooks";
+import { useApp, usePaginationStore, FilterManager } from "@/hooks";
 import { testSchema, type TestFormData } from "../schemas";
 import { useTestsStore } from "../hooks";
 import { useCategoriesStore } from "../../categories/hooks";
@@ -31,6 +32,7 @@ export function TestForm({ onClearFilters }: TestFormProps) {
   const { t } = useTranslation();
   const { showSuccess, showError } = useApp();
   const { page, pageSize } = usePaginationStore();
+  const [searchParams] = useSearchParams();
   const {
     isDialogOpen,
     editingTest,
@@ -103,7 +105,10 @@ export function TestForm({ onClearFilters }: TestFormProps) {
         await updateTest(editingTest.id, data);
         showSuccess(t("admin.tests.updateSuccess"));
         closeDialog();
-        await refreshTests(page, pageSize);
+        // Get current filters from URL and apply them
+        const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
+        const apiFilters = FilterManager.convertFiltersToApiParams(urlFilters);
+        await refreshTests(page, pageSize, apiFilters);
       } else {
         await createTest(data);
         showSuccess(t("admin.tests.createSuccess"));

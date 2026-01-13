@@ -4,7 +4,7 @@ import { useApp } from "@/hooks";
 import type { ApiSuccessResponse } from "@/types";
 import { apiClient } from "@/lib";
 import { ENDPOINTS } from "../constants";
-import { ProfileMapper } from "../utils/mapper";
+import { AuthMapper } from "@/modules/common/auth/utils";
 import type { User } from "../types";
 import type { UpdateUserFormData, ChangePasswordFormData } from "../schemas";
 
@@ -50,7 +50,7 @@ export const useProfileStore = create<ProfileState>((set) => ({
     if (setLoading) setLoading(true);
     try {
       // Convert UI form data to API payload using mapper
-      const payload = ProfileMapper.toUpdateUserPayload(formData);
+      const payload = AuthMapper.toUpdateUserPayload(formData);
 
       const response = await apiClient.put<ApiSuccessResponse<User>>(
         ENDPOINTS.UPDATE,
@@ -70,7 +70,7 @@ export const useProfileStore = create<ProfileState>((set) => ({
     if (setLoading) setLoading(true);
     try {
       // Convert UI form data to API payload using mapper
-      const payload = ProfileMapper.toChangePasswordPayload(formData);
+      const payload = AuthMapper.toChangePasswordPayload(formData);
 
       await apiClient.put(ENDPOINTS.CHANGE_PASSWORD, payload);
     } catch (error) {
