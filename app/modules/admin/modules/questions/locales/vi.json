@@ -55,6 +55,37 @@
         "testPlaceholder": "Chọn bài kiểm tra...",
         "testSearch": "Tìm kiếm bài kiểm tra...",
         "testEmpty": "Không tìm thấy bài kiểm tra nào."
+      },
+      "questionInfo": "Thông Tin Câu Hỏi",
+      "generalInfo": "Thông Tin Chung",
+      "answersList": "Danh Sách Câu Trả Lời",
+      "answers": {
+        "create": "Tạo Câu Trả Lời",
+        "viewTitle": "Thông Tin Câu Trả Lời",
+        "editTitle": "Chỉnh Sửa Câu Trả Lời",
+        "viewDescription": "Xem chi tiết câu trả lời",
+        "editDescription": "Chỉnh sửa thông tin câu trả lời",
+        "delete": "Xóa",
+        "deleteSuccess": "Xóa câu trả lời thành công",
+        "confirmDelete": "Bạn có chắc chắn muốn xóa câu trả lời này?",
+        "createSuccess": "Tạo câu trả lời thành công",
+        "updateSuccess": "Cập nhật câu trả lời thành công",
+        "empty": "Không tìm thấy câu trả lời nào",
+        "isCorrect": "Đúng",
+        "isIncorrect": "Sai",
+        "isCorrectLabel": "Đây có phải là câu trả lời đúng không?",
+        "columns": {
+          "content": "Nội Dung",
+          "isCorrect": "Đúng",
+          "explanation": "Giải Thích"
+        },
+        "validation": {
+          "contentRequired": "Nội dung câu trả lời là bắt buộc"
+        },
+        "form": {
+          "contentPlaceholder": "Nhập nội dung câu trả lời...",
+          "explanationPlaceholder": "Nhập giải thích (tùy chọn)..."
+        }
       }
     }
   }

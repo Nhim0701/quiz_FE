@@ -23,11 +23,17 @@ export interface QuestionState {
     testId: string;
     content: string;
     isMultipleChoice: boolean;
+    categoryId?: string;
   }) => Promise<QuestionProps>;
   updateQuestion: (
     testId: string,
     questionId: string,
-    data: { content: string; isMultipleChoice: boolean }
+    data: {
+      content: string;
+      isMultipleChoice: boolean;
+      testId?: string;
+      categoryId?: string;
+    }
   ) => Promise<QuestionProps>;
   getQuestion: (testId: string, questionId: string) => Promise<QuestionProps>;
   deleteQuestion: (

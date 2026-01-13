@@ -55,6 +55,37 @@
         "testPlaceholder": "Select tests...",
         "testSearch": "Search tests...",
         "testEmpty": "No tests found."
+      },
+      "questionInfo": "Question Info",
+      "generalInfo": "General Information",
+      "answersList": "Binding Answers List",
+      "answers": {
+        "create": "Create Answer",
+        "viewTitle": "Answer Information",
+        "editTitle": "Edit Answer",
+        "viewDescription": "View answer details",
+        "editDescription": "Edit answer information",
+        "delete": "Delete",
+        "deleteSuccess": "Answer deleted successfully",
+        "confirmDelete": "Are you sure you want to delete this answer?",
+        "createSuccess": "Answer created successfully",
+        "updateSuccess": "Answer updated successfully",
+        "empty": "No answers found",
+        "isCorrect": "Correct",
+        "isIncorrect": "Incorrect",
+        "isCorrectLabel": "Is this the correct answer?",
+        "columns": {
+          "content": "Content",
+          "isCorrect": "Is Correct",
+          "explanation": "Explanation"
+        },
+        "validation": {
+          "contentRequired": "Answer content is required"
+        },
+        "form": {
+          "contentPlaceholder": "Enter answer content...",
+          "explanationPlaceholder": "Enter explanation (optional)..."
+        }
       }
     }
   }

@@ -17,4 +17,10 @@ export const ENDPOINTS = {
     UPDATE: (questionId: string) => `/api/v1/questions/${questionId}`,
     DELETE: (questionId: string) => `/api/v1/questions/${questionId}`,
   },
+  ANSWERS: {
+    LIST: (questionId: string) => `/api/v1/questions/${questionId}/answers`,
+    CREATE: "/api/v1/answers",
+    UPDATE: (answerId: string) => `/api/v1/answers/${answerId}`,
+    DELETE: (answerId: string) => `/api/v1/answers/${answerId}`,
+  },
 } as const;

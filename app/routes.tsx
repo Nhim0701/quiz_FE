@@ -64,6 +64,10 @@ export default [
         ADMIN_QUESTIONS_ROUTES.QUESTIONS.INDEX,
         "modules/admin/modules/questions/index.tsx"
       ),
+      route(
+        ADMIN_QUESTIONS_ROUTES.QUESTIONS.EDIT,
+        "modules/admin/modules/questions/routes/view.tsx"
+      ),
     ]),
   ]),
 ] satisfies RouteConfig;

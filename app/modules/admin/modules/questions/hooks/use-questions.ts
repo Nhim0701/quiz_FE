@@ -69,6 +69,7 @@ export const useQuestionsStore = create<QuestionState>((set, get) => ({
     testId: string;
     content: string;
     isMultipleChoice: boolean;
+    categoryId?: string;
   }) => {
     set({ loading: true, error: null });
     try {
@@ -90,7 +91,12 @@ export const useQuestionsStore = create<QuestionState>((set, get) => ({
   updateQuestion: async (
     testId: string,
     questionId: string,
-    data: { content: string; isMultipleChoice: boolean }
+    data: {
+      content: string;
+      isMultipleChoice: boolean;
+      testId?: string;
+      categoryId?: string;
+    }
   ) => {
     set({ loading: true, error: null });
     try {

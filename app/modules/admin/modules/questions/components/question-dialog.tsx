@@ -3,6 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "@/i18n";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { TextareaField, ComboboxField } from "@/components/common/form-field";
 import {
   Dialog,
@@ -81,25 +82,35 @@ export function QuestionDialog() {
     formState: { errors, isSubmitting },
     reset,
     watch,
+    setValue,
   } = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema(t)),
     defaultValues: {
       content: "",
       testId: "",
+      categoryId: "",
       isMultipleChoice: false,
     },
   });
 
   const watchedTestId = watch("testId");
 
-  // Update selectedTestId when form testId changes
+  // Update selectedTestId and categoryId when form testId changes
   useEffect(() => {
     if (watchedTestId) {
       setSelectedTestId(watchedTestId);
+      // Update categoryId when test is selected
+      const selectedTest = tests.find((t) => t.id === watchedTestId);
+      if (selectedTest?.categoryId) {
+        setValue("categoryId", selectedTest.categoryId);
+      } else {
+        setValue("categoryId", "");
+      }
     } else {
       setSelectedTestId("");
+      setValue("categoryId", "");
     }
-  }, [watchedTestId]);
+  }, [watchedTestId, tests, setValue]);
 
   // Reset form when dialog opens/closes
   useEffect(() => {
@@ -107,6 +118,7 @@ export function QuestionDialog() {
       reset({
         content: "",
         testId: "",
+        categoryId: "",
         isMultipleChoice: false,
       });
       setSelectedTestId("");
@@ -119,6 +131,7 @@ export function QuestionDialog() {
         testId: data.testId,
         content: data.content,
         isMultipleChoice: data.isMultipleChoice || false,
+        categoryId: data.categoryId,
       });
       showSuccess(t("admin.questions.createSuccess"));
       closeDialog();
@@ -194,20 +207,37 @@ export function QuestionDialog() {
             <div className="flex items-center gap-2">
               <Folder className="h-4 w-4 text-green-500 dark:text-green-400" />
               <Label
-                htmlFor="category"
+                htmlFor="categoryId"
                 className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
               >
                 {t("admin.questions.filters.category")}
                 <span className="text-red-500 dark:text-red-400 ml-1">*</span>
               </Label>
             </div>
-            <input
-              id="category"
-              type="text"
-              value={selectedCategory || ""}
-              placeholder={t("admin.questions.filters.categoryPlaceholder")}
-              disabled={true}
-              className="mt-1 flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            <Controller
+              name="categoryId"
+              control={control}
+              render={({ field }) => (
+                <div>
+                  <Input
+                    id="categoryId"
+                    name={field.name}
+                    type="text"
+                    value={selectedCategory || ""}
+                    placeholder={t(
+                      "admin.questions.filters.categoryPlaceholder"
+                    )}
+                    disabled={true}
+                    className="mt-1 flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    readOnly
+                  />
+                  {errors.categoryId && (
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                      {errors.categoryId.message}
+                    </p>
+                  )}
+                </div>
+              )}
             />
           </div>
 
@@ -216,7 +246,7 @@ export function QuestionDialog() {
             <div className="flex items-center gap-2">
               <CheckSquare className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />
               <Label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
-                {t("admin.questions.multipleChoice")}
+                {t("admin.questions.columns.isMultipleChoice")}
               </Label>
             </div>
             <div className="flex items-center space-x-2 mt-2">
