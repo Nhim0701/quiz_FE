@@ -33,6 +33,8 @@
     "selectPlaceholder": "Chọn...",
     "comboboxSearchPlaceholder": "Tìm kiếm...",
     "noResultsFound": "Không tìm thấy.",
+    "noDataAvailable": "Không có dữ liệu",
+    "actions": "Thao tác",
     "seconds": "giây",
     "minutes": "phút"
   },

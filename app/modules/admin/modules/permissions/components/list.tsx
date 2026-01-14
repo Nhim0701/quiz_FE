@@ -20,6 +20,7 @@ import {
   FilterManager,
   createStringFilterHandler,
   createArrayFilterHandler,
+  usePageData,
 } from "@/hooks";
 import { usePermissionsStore, type Permission } from "../hooks";
 import { Edit, Trash2, Eye } from "lucide-react";
@@ -70,9 +71,11 @@ export function PermissionsList({
   // Fetch roles for filter
   const { fetchRoles, roles } = useRolesStore();
 
-  useEffect(() => {
-    fetchRoles(1, MAX_PAGE_SIZE_FOR_ALL);
-  }, [fetchRoles]);
+  usePageData(() => fetchRoles(1, MAX_PAGE_SIZE_FOR_ALL), {
+    errorKey: "errors.fetchRolesFailed",
+    showLoading: false, // Don't show global loading for filter data
+    showError: false, // Handle error silently for filter data
+  });
 
   // Create role map for efficient lookup
   const roleMap = useMemo(() => {

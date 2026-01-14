@@ -1,11 +1,9 @@
 import { ChevronDownIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  BaseDropdown,
+  type BaseDropdownItem,
+} from "@/components/common/base-dropdown";
 import { useTranslation, type TranslationKey } from "@/i18n";
 import { cn } from "@/lib";
 import { FILTER_COLOR_PALETTE } from "@/constants/filters";
@@ -45,9 +43,16 @@ export const FilterDropdown = ({
     ? FILTER_COLOR_PALETTE[filterColor] || ""
     : "";
 
+  const dropdownItems: BaseDropdownItem[] = options.map((option) => ({
+    key: option.value,
+    label: t(option.labelKey as TranslationKey),
+    onClick: () => onSelect(option.value),
+    className: cn(selectedValue === option.value ? "bg-accent" : ""),
+  }));
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <BaseDropdown
+      trigger={
         <Button
           variant="outline"
           size="sm"
@@ -61,18 +66,8 @@ export const FilterDropdown = ({
           {displayLabel}
           <ChevronDownIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {options.map((option) => (
-          <DropdownMenuItem
-            key={option.value}
-            onClick={() => onSelect(option.value)}
-            className={cn(selectedValue === option.value ? "bg-accent" : "")}
-          >
-            {t(option.labelKey as TranslationKey)}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      }
+      items={dropdownItems}
+    />
   );
 };

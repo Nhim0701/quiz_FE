@@ -60,8 +60,13 @@ export interface AuthResponse {
   refreshToken?: string;
 }
 
+// ============================================
+// ENTITY TYPES
+// ============================================
+
 /**
  * User data from API (already transformed to camelCase by axios interceptor)
+ * Used across auth, profile, and admin modules
  */
 export interface User {
   id: string;
@@ -69,6 +74,7 @@ export interface User {
   fullName: string;
   email: string;
   permissions?: string[];
+  roleId?: string; // Only present in admin context
   phone?: string;
   birthday?: string;
   address?: string;
@@ -76,8 +82,3 @@ export interface User {
   company?: string;
   joinDate?: string;
 }
-
-/**
- * User role type
- */
-export type UserRole = "admin" | "user";

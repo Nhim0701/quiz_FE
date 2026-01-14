@@ -4,7 +4,7 @@ import { useCategoriesStore } from "../../../admin/modules/categories/hooks";
 import { useTestsStore } from "@/modules/admin/modules/tests/hooks";
 import { useTranslation } from "@/i18n";
 import { ROUTES } from "./constants";
-import { PageHeader } from "@/components/page-header";
+import { PageHeader } from "@/components/common/page-header";
 import { Container } from "@/components/ui/container";
 import { TestList } from "./components";
 import { pageMeta } from "@/lib";

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Edit, Lock } from "lucide-react";
 import type { Route } from "./+types/index";
 import { useBreadcrumb, usePageData } from "@/hooks";
-import { PageHeader } from "@/components/page-header";
+import { PageHeader } from "@/components/common/page-header";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { UserInfo } from "./components";

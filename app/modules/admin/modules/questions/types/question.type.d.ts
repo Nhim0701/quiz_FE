@@ -1,5 +1,22 @@
-import type { AnswerProps } from "./answer.type";
 import type { ApiResponseMeta } from "@/types";
+import type { AnswerProps } from "./answer.type";
+
+// ============================================
+// QUESTION TYPES
+// ============================================
+
+/**
+ * Question entity
+ */
+export interface QuestionProps {
+  id: string;
+  content: string;
+  imageUrl: string | null;
+  category: string;
+  test: string;
+  isMultipleChoice: boolean;
+  answers: AnswerProps[];
+}
 
 export interface QuestionState {
   questions: QuestionProps[];
@@ -49,14 +66,4 @@ export interface QuestionState {
     pageSize?: number,
     filters?: Record<string, string>
   ) => Promise<void>;
-}
-
-export interface QuestionProps {
-  id: string;
-  content: string;
-  imageUrl: string | null;
-  category: string;
-  test: string;
-  isMultipleChoice: boolean;
-  answers: AnswerProps[];
 }

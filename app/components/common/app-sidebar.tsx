@@ -33,13 +33,13 @@ import {
   SidebarRail,
   SidebarSeparator,
   useSidebar,
-} from "./ui/sidebar";
+} from "../ui/sidebar";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "./ui/collapsible";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+} from "../ui/collapsible";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
 import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/modules/dashboard/constants";
 import { ROUTES as PROFILE_ROUTES } from "@/modules/user/modules/profile/constants";

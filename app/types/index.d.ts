@@ -1,4 +1,7 @@
-// API Response Types
+// ============================================
+// API RESPONSE TYPES
+// ============================================
+
 export interface PaginationMeta {
   total: number;
   page: number;
@@ -9,6 +12,7 @@ export interface PaginationMeta {
 export interface ApiResponseMeta extends PaginationMeta {
   [key: string]: unknown;
 }
+
 export interface ApiSuccessResponse<T = unknown> {
   data: T;
   meta?: ApiResponseMeta;

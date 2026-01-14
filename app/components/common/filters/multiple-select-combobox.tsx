@@ -1,24 +1,10 @@
 import * as React from "react";
-import { Check, ChevronsUpDown, X } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { cn } from "@/lib";
-import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { FILTER_COLOR_PALETTE } from "@/constants/filters";
 import type { FilterColorKey } from "@/hooks";
+import { Combobox, type ComboboxOption } from "@/components/common/combobox";
 
 // Darker color palette for badges inside combobox
 const BADGE_COLOR_PALETTE: Record<string, string> = {
@@ -35,10 +21,7 @@ const BADGE_COLOR_PALETTE: Record<string, string> = {
     "bg-gradient-to-r from-slate-200 to-slate-300 text-slate-700 border-slate-300 dark:from-slate-700 dark:to-slate-600 dark:text-slate-300 dark:border-slate-600 shadow-sm",
 };
 
-export interface MultipleSelectOption {
-  value: string;
-  label: string;
-}
+export type MultipleSelectOption = ComboboxOption;
 
 interface MultipleSelectComboboxProps {
   options: MultipleSelectOption[];
@@ -63,13 +46,9 @@ export function MultipleSelectCombobox({
   disabled = false,
   filterColor,
 }: MultipleSelectComboboxProps) {
-  const [open, setOpen] = React.useState(false);
   const { t } = useTranslation();
 
   const defaultPlaceholder = placeholder ?? t("common.selectPlaceholder");
-  const defaultSearchPlaceholder =
-    searchPlaceholder ?? t("common.comboboxSearchPlaceholder");
-  const defaultEmptyMessage = emptyMessage ?? t("common.noResultsFound");
 
   // Get color classes based on filterColor prop
   const colorClasses = React.useMemo(() => {
@@ -87,88 +66,34 @@ export function MultipleSelectCombobox({
     return BADGE_COLOR_PALETTE[filterColor] || "";
   }, [filterColor]);
 
-  const handleSelect = (value: string) => {
-    const newValues = selectedValues.includes(value)
-      ? selectedValues.filter((v) => v !== value)
-      : [...selectedValues, value];
-    onSelect(newValues);
-  };
-
-  const handleRemove = (value: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    onSelect(selectedValues.filter((v) => v !== value));
-  };
-
-  const selectedLabels = React.useMemo(() => {
-    return selectedValues
-      .map((value) => options.find((opt) => opt.value === value)?.label)
-      .filter(Boolean) as string[];
-  }, [selectedValues, options]);
-
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn(
-            "w-full justify-between h-10 border-slate-300 dark:border-slate-600 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:border-transparent",
-            !selectedValues.length && "text-muted-foreground",
-            colorClasses,
-            className
-          )}
-          disabled={disabled}
-        >
-          <div className="flex flex-1 flex-wrap gap-1 overflow-hidden">
-            {selectedValues.length === 0 ? (
-              <span className="text-muted-foreground">
-                {defaultPlaceholder}
-              </span>
-            ) : (
-              selectedValues.length && (
-                <Badge
-                  variant="outline"
-                  className={cn("mr-1", badgeColorClasses)}
-                >
-                  {selectedValues.length} {t("common.selected")}
-                </Badge>
-              )
-            )}
-          </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
-        <Command>
-          <CommandInput placeholder={defaultSearchPlaceholder} />
-          <CommandList>
-            <CommandEmpty className="p-4 text-center overflow-ellipsis">
-              {defaultEmptyMessage}
-            </CommandEmpty>
-            <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  value={option.value}
-                  onSelect={() => handleSelect(option.value)}
-                  keywords={[option.label]}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      selectedValues.includes(option.value)
-                        ? "opacity-100"
-                        : "opacity-0"
-                    )}
-                  />
-                  {option.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <Combobox
+      mode="multiple"
+      options={options}
+      value={selectedValues}
+      onSelect={onSelect}
+      placeholder={placeholder}
+      searchPlaceholder={searchPlaceholder}
+      emptyMessage={emptyMessage}
+      disabled={disabled}
+      className={cn(
+        "h-10 border-slate-300 dark:border-slate-600 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:border-transparent",
+        !selectedValues.length && "text-muted-foreground",
+        colorClasses,
+        className
+      )}
+    >
+      <div className="flex flex-1 flex-wrap gap-1 overflow-hidden">
+        {selectedValues.length === 0 ? (
+          <span className="text-muted-foreground">{defaultPlaceholder}</span>
+        ) : (
+          selectedValues.length > 0 && (
+            <Badge variant="outline" className={cn("mr-1", badgeColorClasses)}>
+              {selectedValues.length} {t("common.selected")}
+            </Badge>
+          )
+        )}
+      </div>
+    </Combobox>
   );
 }

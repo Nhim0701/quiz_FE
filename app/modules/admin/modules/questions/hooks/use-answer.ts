@@ -2,8 +2,7 @@ import { create } from "zustand";
 import type { ApiSuccessResponse } from "@/types";
 import { apiClient } from "@/lib";
 import { ENDPOINTS } from "../constants";
-import type { AnswerProps } from "../types/answer.type";
-import type { QuestionProps } from "../types/question.type";
+import type { AnswerProps, QuestionProps } from "../types";
 
 interface AnswerState {
   loading: boolean;

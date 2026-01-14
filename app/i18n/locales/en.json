@@ -33,6 +33,8 @@
     "selectPlaceholder": "Select...",
     "comboboxSearchPlaceholder": "Search...",
     "noResultsFound": "No results found.",
+    "noDataAvailable": "No data available",
+    "actions": "Actions",
     "seconds": "seconds",
     "minutes": "minutes"
   },

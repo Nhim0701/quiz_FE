@@ -2,7 +2,7 @@ import type { Route } from "./+types/index";
 import { useBreadcrumb, usePageData } from "@/hooks";
 import { useTranslation } from "@/i18n";
 import { ROUTES } from "./constants";
-import { PageHeader } from "@/components/page-header";
+import { PageHeader } from "@/components/common/page-header";
 import { Container } from "@/components/ui/container";
 import { useDashboard } from "./hooks";
 import { Stats, CategoryStats, TestStats, RecentActivity } from "./components";

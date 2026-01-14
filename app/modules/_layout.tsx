@@ -1,8 +1,8 @@
 import { Outlet } from "react-router";
 import type { Route } from "./+types/_layout";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/common/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AppHeader } from "@/components/app-header";
+import { AppHeader } from "@/components/common/app-header";
 import authMiddleware from "@/middleware/auth";
 
 export const clientMiddleware: Route.ClientMiddlewareFunction[] = [

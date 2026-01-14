@@ -1,4 +1,7 @@
-export type { AnswerProps } from "../modules/admin/modules/questions/types";
+export type {
+  AnswerProps,
+  QuestionProps,
+} from "@/modules/admin/modules/questions/types";
 export { default as useApp, useTheme } from "./use-app";
 export {
   useBreadcrumb,

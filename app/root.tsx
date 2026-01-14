@@ -11,8 +11,8 @@ import type { Route } from "./+types/root";
 import "@/assets/css/index.css";
 import "@/i18n";
 import { Toaster } from "@/components/ui/sonner";
-import { NotFound } from "@/components/not-found";
-import { AppDialog } from "@/components/app-dialog";
+import { NotFound } from "@/components/common/not-found";
+import { AppDialog } from "@/components/common/app-dialog";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },

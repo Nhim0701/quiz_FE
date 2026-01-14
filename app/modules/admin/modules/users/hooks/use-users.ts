@@ -1,22 +1,8 @@
 import { create } from "zustand";
 import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
+import type { User } from "@/modules/common/auth/types";
 import { apiClient } from "@/lib";
 import { ENDPOINTS } from "../constants";
-
-export interface User {
-  id: string;
-  userId: string;
-  fullName: string;
-  email: string;
-  permissions?: string[];
-  roleId?: string;
-  phone?: string;
-  birthday?: string;
-  address?: string;
-  jobTitle?: string;
-  company?: string;
-  joinDate?: string;
-}
 
 interface UsersState {
   // Users list

@@ -20,6 +20,7 @@ import {
   FilterManager,
   createStringFilterHandler,
   createArrayFilterHandler,
+  usePageData,
 } from "@/hooks";
 import { useTestsStore } from "../hooks";
 import type { TestProps } from "../types";
@@ -98,17 +99,15 @@ export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
   const { categories, fetchCategories } = useCategoriesStore();
 
   // Fetch categories to map categoryId to categoryName
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        await fetchCategories(1, MAX_PAGE_SIZE_FOR_ALL); // Fetch all categories
-      } catch (error) {
-        // Silently fail - category names are optional
-        console.error("Failed to fetch categories:", error);
-      }
-    };
-    loadCategories();
-  }, [fetchCategories]);
+  usePageData(() => fetchCategories(1, MAX_PAGE_SIZE_FOR_ALL), {
+    errorKey: "errors.fetchCategoriesFailed",
+    showLoading: false, // Don't show global loading for filter data
+    showError: false, // Handle error silently for filter data
+    onError: (error) => {
+      // Silently fail - category names are optional
+      console.error("Failed to fetch categories:", error);
+    },
+  });
 
   // Create category map
   const categoryMap = useMemo(() => {

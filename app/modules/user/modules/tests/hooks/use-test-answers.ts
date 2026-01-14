@@ -1,9 +1,6 @@
 import { create } from "zustand";
 import { useTestQuestionsStore } from "./use-test-questions";
-import type {
-  AnswerProps,
-  QuestionProps,
-} from "@/modules/admin/modules/questions/types";
+import type { AnswerProps } from "@/modules/admin/modules/questions/types";
 
 interface TestAnswersState {
   // Answers

@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router";
 import { useTranslation } from "@/i18n";
 import {
@@ -76,17 +76,19 @@ export function CategoriesList({
     viewingCategory,
   } = useCategoriesStore();
 
+  const resetSearchFilter = useCallback(() => {
+    setSearchInput("");
+    setSearchValue("");
+  }, []);
+
   const filterHandlers = useMemo(
     () => [
       {
         filterId: "name",
-        resetValue: () => {
-          setSearchInput("");
-          setSearchValue("");
-        },
+        resetValue: resetSearchFilter,
       },
     ],
-    []
+    [resetSearchFilter]
   );
 
   const filterConfig = useMemo(
@@ -117,11 +119,8 @@ export function CategoriesList({
         const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
         const apiFilters = FilterManager.convertFiltersToApiParams(urlFilters);
         const result = await fetchCategories(1, pageSize, apiFilters);
-        if (result?.meta) {
-          setTotal(result.meta.total || 0);
-        } else if (result?.data) {
-          setTotal(result.data.length);
-        }
+        const totalCount = result?.meta?.total ?? result?.data?.length ?? 0;
+        setTotal(totalCount);
       } catch (error) {
         const errorMessage =
           error instanceof Error
@@ -140,12 +139,13 @@ export function CategoriesList({
     hookId: "categories",
   });
 
+  const handleFilterChange = useCallback(() => {
+    setPage(1);
+  }, [setPage]);
+
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
     handlers: filterHandlers,
-    onFilterChange: () => {
-      // Reset to first page when filter changes
-      setPage(1);
-    },
+    onFilterChange: handleFilterChange,
   });
 
   // Expose clearFilters function to parent component (only once on mount)
@@ -159,17 +159,19 @@ export function CategoriesList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
 
-  const activeFilters = useMemo<ActiveFilter[]>(() => {
-    const filters: ActiveFilter[] = [];
-    if (searchValue) {
-      filters.push({
-        id: "name",
-        label: t("admin.categories.columns.name"),
-        value: searchValue,
-      });
-    }
-    return filters;
-  }, [searchValue, t]);
+  const activeFilters = useMemo<ActiveFilter[]>(
+    () =>
+      searchValue
+        ? [
+            {
+              id: "name",
+              label: t("admin.categories.columns.name"),
+              value: searchValue,
+            },
+          ]
+        : [],
+    [searchValue, t]
+  );
 
   const filterIdsConfig = useFilterIdsConfig({
     handlers: filterHandlers,
@@ -178,10 +180,10 @@ export function CategoriesList({
     },
   });
 
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     setSearchValue(searchInput);
     setPage(1);
-  };
+  }, [searchInput, setPage]);
 
   const filterActionButtons = useFilterActions({
     onSearch: handleSearch,
@@ -191,30 +193,26 @@ export function CategoriesList({
 
   const apiFilters = useMemo(() => {
     const activeFilters: Array<{ key: string; value: string }> = [];
-    filterConfig.forEach((filter) => {
-      const converted = filter.converter(filter.value);
-      if (converted === null) return;
 
-      let isActive = false;
-      if (Array.isArray(converted)) {
-        isActive = converted.length > 0;
-      } else if (filter.defaultValue !== undefined) {
-        const defaultConverted = filter.converter(filter.defaultValue);
-        isActive = converted !== defaultConverted;
-      } else {
-        isActive = converted !== "";
-      }
+    for (const filter of filterConfig) {
+      const converted = filter.converter(filter.value);
+      if (converted === null) continue;
+
+      // Check if filter is active
+      const isActive = Array.isArray(converted)
+        ? converted.length > 0
+        : filter.defaultValue !== undefined
+          ? converted !== filter.converter(filter.defaultValue)
+          : converted !== "";
 
       if (isActive) {
-        const filterValue = Array.isArray(converted)
-          ? converted.join(",")
-          : converted;
         activeFilters.push({
           key: filter.filterKey,
-          value: filterValue,
+          value: Array.isArray(converted) ? converted.join(",") : converted,
         });
       }
-    });
+    }
+
     return FilterManager.convertFiltersToApiParams(activeFilters);
   }, [filterConfig]);
 
@@ -230,11 +228,8 @@ export function CategoriesList({
     const loadCategories = async () => {
       try {
         const result = await fetchCategories(page, pageSize, apiFilters);
-        if (result?.meta) {
-          setTotal(result.meta.total || 0);
-        } else if (result?.data) {
-          setTotal(result.data.length);
-        }
+        const totalCount = result?.meta?.total ?? result?.data?.length ?? 0;
+        setTotal(totalCount);
       } catch (error) {
         const errorMessage =
           error instanceof Error

@@ -62,8 +62,6 @@ export const useFilterActions = ({
   exportButtonClassName = FILTER_ACTION_CLASSES.EXPORT_DEFAULT,
   exportButtonOnClick,
 }: UseFilterActionsOptions): FilterAction[] => {
-  const hasActiveFilters = activeFilters.length > 0;
-
   return useMemo(() => {
     const buttons: FilterAction[] = [
       {
@@ -74,6 +72,7 @@ export const useFilterActions = ({
       },
     ];
 
+    const hasActiveFilters = activeFilters.length > 0;
     if (hasActiveFilters && onClearFilters) {
       buttons.push({
         id: FILTER_ACTION_IDS.FILTER_CLEAR,
@@ -95,7 +94,7 @@ export const useFilterActions = ({
     return buttons;
   }, [
     onSearch,
-    hasActiveFilters,
+    activeFilters.length,
     onClearFilters,
     showExport,
     exportButtonId,
@@ -176,7 +175,6 @@ export type FilterHandler = (filterKey: string, filterValue: string) => void;
 interface UseApplyFilterFromUrlOptions {
   filterHandlers: Record<string, FilterHandler>;
   onFilterApplied?: () => void;
-  skipInitialFetch?: boolean;
 }
 
 /**
@@ -226,20 +224,15 @@ export const createArrayFilterHandler = (
   setter: (value: string[]) => void
 ): FilterHandler => {
   return (_, filterValue) => {
-    // Handle empty string or whitespace-only values
-    if (!filterValue || !filterValue.trim()) {
-      // Always create a new array reference to ensure state updates trigger re-renders
+    if (!filterValue?.trim()) {
       setter([]);
       return;
     }
-    // Split by comma, trim each value, and filter out empty strings
-    // Always create a new array reference to ensure state updates trigger re-renders
     const array = filterValue
       .split(",")
       .map((item) => item.trim())
       .filter(Boolean);
-    // Create a new array reference to ensure React/Zustand detects the change
-    setter([...array]);
+    setter(array);
   };
 };
 
@@ -330,9 +323,7 @@ export const createMappedConverter = <TMapping extends Record<string, any>>(
   defaultValue: TMapping[keyof TMapping]
 ): FilterValueConverter<TMapping[keyof TMapping]> => {
   return (val: TMapping[keyof TMapping]) => {
-    const match = Object.entries(mapping).find(
-      ([_, def]) => JSON.stringify(def) === JSON.stringify(val)
-    );
+    const match = Object.entries(mapping).find(([_, def]) => def === val);
     return match && match[0] !== "ALL" ? match[0] : null;
   };
 };
@@ -365,8 +356,6 @@ export const FilterManager = {
     );
 
     if (hasIndexedFormat) {
-      // Extract indexed filters (filter-key-1, filter-value-1, ...)
-      // Stop at first gap to ensure we only read valid consecutive filters
       let index = 1;
       while (true) {
         const key = searchParams.get(FILTER_QUERY_PARAMS.FILTER_KEY(index));
@@ -375,26 +364,16 @@ export const FilterManager = {
           filters.push({ key, value });
           index++;
         } else {
-          // Stop at first gap (ensures we only read valid consecutive filters)
           break;
         }
       }
     } else {
-      // Check for legacy format (key, value) for backward compatibility
+      // Legacy format support
       const legacyKey = searchParams.get("key");
       const legacyValue = searchParams.get("value");
       if (legacyKey && legacyValue) {
         filters.push({ key: legacyKey, value: legacyValue });
       }
-      // Also check for direct filter keys (e.g., name=value) and convert to indexed format
-      // This handles cases where params were set directly
-      const commonFilterKeys = ["name", "status", "id", "category", "type"];
-      commonFilterKeys.forEach((filterKey) => {
-        const value = searchParams.get(filterKey);
-        if (value) {
-          filters.push({ key: filterKey, value });
-        }
-      });
     }
 
     return filters;
@@ -410,12 +389,11 @@ export const FilterManager = {
   ): URLSearchParams {
     const newParams = new URLSearchParams(searchParams);
 
-    // Remove all existing filter params (legacy and indexed)
-    // Remove legacy format (key, value)
+    // Remove legacy format
     newParams.delete("key");
     newParams.delete("value");
 
-    // Remove all indexed filter params first
+    // Remove all indexed filter params
     let index = 1;
     while (true) {
       const key = FILTER_QUERY_PARAMS.FILTER_KEY(index);
@@ -429,30 +407,11 @@ export const FilterManager = {
       }
     }
 
-    // Remove any direct filter keys that might exist (e.g., "name", "status", etc.)
-    // This ensures we don't have duplicate params - check all possible filter keys
-    const filterKeysToRemove = new Set<string>();
-    filters.forEach((filter) => {
-      filterKeysToRemove.add(filter.key);
-    });
-    // Also check for common filter keys that might exist
-    const commonFilterKeys = [
-      "name",
-      "status",
-      "id",
-      "category",
-      "type",
-      "search",
-    ];
-    commonFilterKeys.forEach((key) => filterKeysToRemove.add(key));
+    // Remove filter keys that will be added as indexed params
+    const filterKeysToRemove = new Set(filters.map((f) => f.key));
+    filterKeysToRemove.forEach((key) => newParams.delete(key));
 
-    filterKeysToRemove.forEach((key) => {
-      if (newParams.has(key)) {
-        newParams.delete(key);
-      }
-    });
-
-    // Add all active filters with indexed format (always use indexed format)
+    // Add all active filters with indexed format
     filters.forEach((filter, idx) => {
       const filterIndex = idx + 1;
       newParams.set(FILTER_QUERY_PARAMS.FILTER_KEY(filterIndex), filter.key);
@@ -508,13 +467,11 @@ const getOrCreateRef = (hookId: string): { current: boolean } => {
  * Automatically reads all filter-key-N and filter-value-N from URL and applies the appropriate filters
  * @param filterHandlers - Object mapping filter keys to handler functions
  * @param onFilterApplied - Optional callback to call after filter is applied (e.g., fetch data)
- * @param skipInitialFetch - If true, skips initial fetch when filter params are present
  * @param hookId - Unique identifier for this hook instance (to share ref state)
  */
 export const useApplyFilterFromUrl = ({
   filterHandlers,
   onFilterApplied,
-  skipInitialFetch = false,
   hookId = "default",
 }: UseApplyFilterFromUrlOptions & { hookId?: string }): {
   hasFilterParams: boolean;
@@ -522,24 +479,17 @@ export const useApplyFilterFromUrl = ({
   const [searchParams] = useSearchParams();
   const ref = useMemo(() => getOrCreateRef(hookId), [hookId]);
 
-  // Use searchParams.toString() to ensure we detect changes properly
   const searchParamsString = searchParams.toString();
   const filters = useMemo(
     () => FilterManager.extractFiltersFromUrl(searchParams),
     [searchParams, searchParamsString]
   );
 
-  // Track previous filters to detect changes and prevent duplicate applies
   const prevFiltersRef = useRef<string>("");
   const isInitialMount = useRef(true);
 
   useEffect(() => {
-    // Create a string representation of filters for comparison
     const filtersKey = JSON.stringify(filters);
-
-    // Apply filters if:
-    // 1. Initial mount and filters exist in URL
-    // 2. Filters changed from previous state
     const shouldApply =
       filters.length > 0 &&
       (isInitialMount.current || filtersKey !== prevFiltersRef.current);
@@ -547,12 +497,9 @@ export const useApplyFilterFromUrl = ({
     if (shouldApply) {
       isInitialMount.current = false;
       prevFiltersRef.current = filtersKey;
-
-      // Set flag BEFORE applying to prevent sync during apply
       ref.current = true;
-      let hasApplied = false;
 
-      // Apply all filters synchronously to ensure proper state updates
+      let hasApplied = false;
       filters.forEach(({ key, value }) => {
         const handler = filterHandlers[key];
         if (handler) {
@@ -561,40 +508,23 @@ export const useApplyFilterFromUrl = ({
         }
       });
 
-      // Use a microtask to ensure all state updates are processed before calling callbacks
-      Promise.resolve().then(() => {
-        // Call onFilterApplied after all filters are applied
-        if (hasApplied) {
-          if (onFilterApplied) {
-            // Use requestAnimationFrame to ensure state updates are batched and UI is updated
-            requestAnimationFrame(() => {
-              onFilterApplied();
-              // Reset flag after callbacks are executed
-              // Use longer timeout to ensure all state updates and sync operations complete
-              setTimeout(() => {
-                ref.current = false;
-              }, 300);
-            });
-          } else {
-            // Reset flag even if no callback
-            setTimeout(() => {
-              ref.current = false;
-            }, 300);
-          }
-        } else {
-          // Reset flag if no filters were applied
+      if (hasApplied && onFilterApplied) {
+        requestAnimationFrame(() => {
+          onFilterApplied();
           setTimeout(() => {
             ref.current = false;
           }, 100);
-        }
-      });
+        });
+      } else {
+        setTimeout(() => {
+          ref.current = false;
+        }, 100);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, searchParamsString]);
 
-  const hasFilterParams = filters.length > 0;
-
-  return { hasFilterParams };
+  return { hasFilterParams: filters.length > 0 };
 };
 
 // ============================================================================
@@ -652,50 +582,37 @@ export const useSyncFilterToUrl = ({
         const converted = filter.converter(filter.value);
         if (converted === null) return;
 
-        let isActive = false;
-        if (Array.isArray(converted)) {
-          isActive = converted.length > 0;
-        } else if (filter.defaultValue !== undefined) {
-          const defaultConverted = filter.converter(filter.defaultValue);
-          isActive = converted !== defaultConverted;
-        } else {
-          isActive = converted !== "";
-        }
+        const isActive = Array.isArray(converted)
+          ? converted.length > 0
+          : filter.defaultValue !== undefined
+            ? converted !== filter.converter(filter.defaultValue)
+            : converted !== "";
 
         if (isActive) {
-          const filterValue = Array.isArray(converted)
-            ? converted.join(",")
-            : converted;
           activeFilters.push({
             key: filter.filterKey,
-            value: filterValue,
+            value: Array.isArray(converted) ? converted.join(",") : converted,
           });
         }
       });
 
-      // Serialize all active filters to URL with indexed format
       const newSearchParams = FilterManager.serializeFiltersToUrl(
         searchParams,
         activeFilters
       );
 
-      // Compare filters instead of string comparison (more reliable with multiple filters)
-      // Sort both arrays by key for order-independent comparison
+      // Compare filters (order-independent)
       const currentFilters = FilterManager.extractFiltersFromUrl(searchParams);
-      const sortedActiveFilters = [...activeFilters].sort((a, b) =>
-        a.key.localeCompare(b.key)
-      );
-      const sortedCurrentFilters = [...currentFilters].sort((a, b) =>
-        a.key.localeCompare(b.key)
-      );
+      const createFilterMap = (entries: FilterEntry[]) =>
+        new Map(entries.map((f) => [f.key, f.value]));
+
+      const activeMap = createFilterMap(activeFilters);
+      const currentMap = createFilterMap(currentFilters);
 
       const filtersChanged =
-        sortedActiveFilters.length !== sortedCurrentFilters.length ||
-        sortedActiveFilters.some(
-          (filter, idx) =>
-            !sortedCurrentFilters[idx] ||
-            filter.key !== sortedCurrentFilters[idx].key ||
-            filter.value !== sortedCurrentFilters[idx].value
+        activeMap.size !== currentMap.size ||
+        Array.from(activeMap.entries()).some(
+          ([key, value]) => currentMap.get(key) !== value
         );
 
       // Only update if filters actually changed

@@ -1,8 +1,8 @@
 import { Link } from "react-router";
-import { Separator } from "./ui/separator";
-import { LanguageSwitcher } from "./ui/language-switcher";
-import ThemeToggle from "./ui/theme-toggle";
-import { useSidebar } from "./ui/sidebar";
+import { Separator } from "../ui/separator";
+import { LanguageSwitcher } from "../ui/language-switcher";
+import ThemeToggle from "../ui/theme-toggle";
+import { useSidebar } from "../ui/sidebar";
 import { SquareChevronLeftIcon, SquareChevronRightIcon } from "lucide-react";
 import {
   Breadcrumb,
@@ -11,7 +11,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "./ui/breadcrumb";
+} from "../ui/breadcrumb";
 import { useBreadcrumbStore } from "@/hooks";
 
 const SidebarTriggerIcon = ({

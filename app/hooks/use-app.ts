@@ -15,7 +15,27 @@ interface DialogConfig {
   footerContainerClassName?: string;
 }
 
-interface AppState {
+interface DialogState {
+  isDialogOpen: boolean;
+  dialogTitle?: ReactNode;
+  dialogTitleClassName?: string;
+  dialogContent?: ReactNode;
+  dialogContentContainerClassName?: string;
+  dialogFooter?: ReactNode;
+  dialogFooterContainerClassName?: string;
+}
+
+const DEFAULT_DIALOG_STATE: DialogState = {
+  isDialogOpen: false,
+  dialogTitle: undefined,
+  dialogTitleClassName: undefined,
+  dialogContent: undefined,
+  dialogContentContainerClassName: undefined,
+  dialogFooter: undefined,
+  dialogFooterContainerClassName: undefined,
+};
+
+interface AppState extends DialogState {
   theme: Theme;
   loading: boolean;
   setTheme: (theme: Theme) => void;
@@ -37,32 +57,20 @@ interface AppState {
     message: string,
     options?: Parameters<typeof toast.warning>[1]
   ) => void;
-  // Dialog state
-  isDialogOpen: boolean;
-  dialogTitle?: ReactNode;
-  dialogTitleClassName?: string;
-  dialogContent?: ReactNode;
-  dialogContentContainerClassName?: string;
-  dialogFooter?: ReactNode;
-  dialogFooterContainerClassName?: string;
   showDialog: (config: DialogConfig) => void;
   closeDialog: () => void;
 }
 
 // Helper function to get initial theme
 // Always return default on server to avoid hydration mismatch
-const getInitialTheme = (): Theme => {
-  return THEME_VALUES.LIGHT;
-};
+const getInitialTheme = (): Theme => THEME_VALUES.LIGHT;
 
 // Helper function to apply theme to DOM
 const applyTheme = (theme: Theme) => {
-  if (typeof document !== "undefined") {
-    const root = document.documentElement;
-    theme === THEME_VALUES.LIGHT
-      ? root.classList.remove(THEME_VALUES.DARK)
-      : root.classList.add(THEME_VALUES.DARK);
-  }
+  if (typeof document === "undefined") return;
+
+  const root = document.documentElement;
+  root.classList.toggle(THEME_VALUES.DARK, theme === THEME_VALUES.DARK);
 };
 
 // Base arrow function for toast notifications
@@ -110,14 +118,8 @@ const useApp = create<AppState>()(
       showSuccess: createToastHandler(toast.success, TOAST_CLASSES.SUCCESS),
       showInfo: createToastHandler(toast.info, TOAST_CLASSES.INFO),
       showWarning: createToastHandler(toast.warning, TOAST_CLASSES.WARNING),
-      // Dialog state
-      isDialogOpen: false,
-      dialogTitle: undefined,
-      dialogTitleClassName: undefined,
-      dialogContent: undefined,
-      dialogContentContainerClassName: undefined,
-      dialogFooter: undefined,
-      dialogFooterContainerClassName: undefined,
+      // Dialog state - initialize with default values
+      ...DEFAULT_DIALOG_STATE,
       showDialog: (config: DialogConfig) => {
         set({
           isDialogOpen: true,
@@ -130,15 +132,7 @@ const useApp = create<AppState>()(
         });
       },
       closeDialog: () => {
-        set({
-          isDialogOpen: false,
-          dialogTitle: undefined,
-          dialogTitleClassName: undefined,
-          dialogContent: undefined,
-          dialogContentContainerClassName: undefined,
-          dialogFooter: undefined,
-          dialogFooterContainerClassName: undefined,
-        });
+        set(DEFAULT_DIALOG_STATE);
       },
     }),
     {
@@ -151,7 +145,6 @@ const useApp = create<AppState>()(
       onRehydrateStorage: () => (state) => {
         if (typeof window === "undefined") return;
 
-        // Theme class is already applied by inline script before React hydrates
         if (state) {
           // Store has persisted state, ensure DOM matches (should already match)
           applyTheme(state.theme);

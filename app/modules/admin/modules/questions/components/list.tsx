@@ -20,6 +20,7 @@ import {
   FilterManager,
   createStringFilterHandler,
   createArrayFilterHandler,
+  usePageData,
 } from "@/hooks";
 import { useQuestionsStore } from "../hooks";
 import type { QuestionProps } from "../types";
@@ -106,19 +107,22 @@ export function QuestionsList({ roles }: QuestionsListProps) {
   const { adminTests: tests, fetchTests } = useTestsStore();
 
   // Fetch categories and tests for filters
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        await Promise.all([
-          fetchCategories(1, MAX_PAGE_SIZE_FOR_ALL),
-          fetchTests(1, MAX_PAGE_SIZE_FOR_ALL),
-        ]);
-      } catch (error) {
+  usePageData(
+    async () => {
+      await Promise.all([
+        fetchCategories(1, MAX_PAGE_SIZE_FOR_ALL),
+        fetchTests(1, MAX_PAGE_SIZE_FOR_ALL),
+      ]);
+    },
+    {
+      errorKey: "errors.fetchFilterDataFailed",
+      showLoading: false, // Don't show global loading for filter data
+      showError: false, // Handle error silently for filter data
+      onError: (error) => {
         console.error("Failed to fetch filter data:", error);
-      }
-    };
-    loadData();
-  }, [fetchCategories, fetchTests]);
+      },
+    }
+  );
 
   // Clear selected tests that are no longer valid when categories change
   useEffect(() => {

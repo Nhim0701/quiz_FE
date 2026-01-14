@@ -1,3 +1,10 @@
+// ============================================
+// ANSWER TYPES
+// ============================================
+
+/**
+ * Answer entity
+ */
 export interface AnswerProps {
   id: string;
   content: string;

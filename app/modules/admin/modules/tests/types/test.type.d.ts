@@ -1,3 +1,10 @@
+// ============================================
+// TEST TYPES
+// ============================================
+
+/**
+ * Test entity
+ */
 export interface TestProps {
   id: string;
   name: string;
