@@ -70,7 +70,10 @@
         "success": "Roles assigned successfully",
         "submit": "Save",
         "noRoles": "No roles available",
-        "roleLabel": "Role"
+        "roleLabel": "Role",
+        "validation": {
+          "roleIdRequired": "Role is required"
+        }
       }
     }
   }

@@ -10,9 +10,10 @@ import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { UsersList, UserForm } from "./components";
+import { UsersList, UserFormDialog } from "./components";
 import { useUsersStore } from "./hooks";
 import { pageMeta } from "@/lib";
+import { DIALOG_MODES } from "@/constants";
 
 export const meta: Route.MetaFunction = () => {
   return pageMeta(t("admin.users.title"))();
@@ -67,7 +68,7 @@ export default function AdminUsers() {
           <CardTitle>{t("admin.users.cardTitle")}</CardTitle>
           {roles.create && (
             <Button
-              onClick={() => openDialog()}
+              onClick={() => openDialog(DIALOG_MODES.CREATE)}
               size="sm"
               className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 dark:from-emerald-600 dark:to-green-700 dark:hover:from-emerald-700 dark:hover:to-green-800 text-white shadow-md hover:shadow-lg transition-all duration-200 font-medium"
             >
@@ -83,9 +84,7 @@ export default function AdminUsers() {
           />
         </CardContent>
       </Card>
-      <div className="mt-4">
-        <UserForm onClearFilters={clearFilters} />
-      </div>
+      <UserFormDialog onClearFilters={clearFilters} />
     </Container>
   );
 }

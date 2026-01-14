@@ -3,6 +3,8 @@ import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
 import type { User } from "@/modules/common/auth/types";
 import { apiClient } from "@/lib";
 import { ENDPOINTS } from "../constants";
+import type { FormDialogMode } from "@/constants";
+import { DIALOG_MODES } from "@/constants";
 
 interface UsersState {
   // Users list
@@ -12,14 +14,13 @@ interface UsersState {
 
   // Form state
   isDialogOpen: boolean;
-  editingUser: User | null;
-  viewingUser: User | null;
+  dialogMode: FormDialogMode | null;
+  user: User | null;
   isEditMode: boolean;
 
   // Actions
-  openDialog: (user?: User | null) => void;
+  openDialog: (mode: FormDialogMode, user?: User | null) => void;
   closeDialog: () => void;
-  openViewDialog: (user: User) => void;
   setEditMode: (isEdit: boolean) => void;
 
   // API methods
@@ -65,27 +66,24 @@ export const useUsersStore = create<UsersState>((set, get) => ({
   loading: false,
   error: null,
   isDialogOpen: false,
-  editingUser: null,
-  viewingUser: null,
+  dialogMode: null,
+  user: null,
   isEditMode: false,
 
   // Form actions
-  openDialog: (user = null) => {
-    set({ isDialogOpen: true, editingUser: user, isEditMode: false });
+  openDialog: (mode: FormDialogMode, user?: User | null) => {
+    set({
+      isDialogOpen: true,
+      dialogMode: mode,
+      user: user ?? null,
+      isEditMode: mode === DIALOG_MODES.EDIT,
+    });
   },
   closeDialog: () => {
     set({
       isDialogOpen: false,
-      editingUser: null,
-      viewingUser: null,
-      isEditMode: false,
-    });
-  },
-  openViewDialog: (user) => {
-    set({
-      isDialogOpen: true,
-      viewingUser: user,
-      editingUser: null,
+      dialogMode: null,
+      user: null,
       isEditMode: false,
     });
   },
@@ -191,15 +189,15 @@ export const useUsersStore = create<UsersState>((set, get) => ({
     pageSize = 10,
     filters?: Record<string, string>
   ) => {
-    const { viewingUser } = get();
+    const { user, dialogMode } = get();
     await get().fetchUsers(page, pageSize, filters);
 
-    // Update viewingUser if it exists and dialog is still open
-    if (viewingUser) {
+    // Update user if it exists and dialog is still open
+    if (user && dialogMode) {
       const { users } = get();
-      const updatedUser = users.find((u) => u.id === viewingUser.id);
+      const updatedUser = users.find((u) => u.id === user.id);
       if (updatedUser) {
-        set({ viewingUser: updatedUser });
+        set({ user: updatedUser });
       }
     }
   },

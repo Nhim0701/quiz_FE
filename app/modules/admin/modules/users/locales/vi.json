@@ -70,7 +70,10 @@
         "success": "Gán vai trò thành công",
         "submit": "Lưu",
         "noRoles": "Không có vai trò nào",
-        "roleLabel": "Vai trò"
+        "roleLabel": "Vai trò",
+        "validation": {
+          "roleIdRequired": "Vai trò là bắt buộc"
+        }
       }
     }
   }
