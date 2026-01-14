@@ -10,7 +10,7 @@ import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { NamespacesList, NamespaceForm } from "./components";
+import { NamespacesList, NamespaceFormDialog } from "./components";
 import { useNamespacesStore } from "./hooks";
 import { pageMeta } from "@/lib";
 
@@ -83,9 +83,7 @@ export default function AdminNamespaces() {
           />
         </CardContent>
       </Card>
-      <div className="mt-4">
-        <NamespaceForm onClearFilters={clearFilters} />
-      </div>
+      <NamespaceFormDialog onClearFilters={clearFilters} />
     </Container>
   );
 }

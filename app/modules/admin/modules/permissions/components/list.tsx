@@ -1,9 +1,8 @@
 import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router";
-import { useTranslation } from "@/i18n";
+import { useTranslation, type TranslationParams } from "@/i18n";
 import {
   DataTable,
-  Pagination,
   type Column,
   type Action,
 } from "@/components/common/data-table";
@@ -18,13 +17,11 @@ import {
   useSyncFilterToUrl,
   useApplyFilterFromUrl,
   FilterManager,
-  createStringFilterHandler,
-  createArrayFilterHandler,
   usePageData,
 } from "@/hooks";
 import { usePermissionsStore, type Permission } from "../hooks";
 import { Edit, Trash2, Eye } from "lucide-react";
-import { PermissionViewDialog } from "./permission-dialog";
+import { PermissionFormDialog } from "./form-dialog";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -100,23 +97,27 @@ export function PermissionsList({
     viewingPermission,
   } = usePermissionsStore();
 
+  const resetSearchFilter = useCallback(() => {
+    setSearchInput("");
+    setSearchValue("");
+  }, []);
+
+  const resetRoleFilter = useCallback(() => {
+    setSelectedRoleIds([]);
+  }, []);
+
   const filterHandlers = useMemo(
     () => [
       {
         filterId: "name",
-        resetValue: () => {
-          setSearchInput("");
-          setSearchValue("");
-        },
+        resetValue: resetSearchFilter,
       },
       {
         filterId: "roleId",
-        resetValue: () => {
-          setSelectedRoleIds([]);
-        },
+        resetValue: resetRoleFilter,
       },
     ],
-    []
+    [resetSearchFilter, resetRoleFilter]
   );
 
   const filterConfig = useMemo(
@@ -139,29 +140,26 @@ export function PermissionsList({
 
   const { hasFilterParams } = useApplyFilterFromUrl({
     filterHandlers: {
-      name: createStringFilterHandler(setSearchValue),
-      roleId: createArrayFilterHandler(setSelectedRoleIds),
+      name: (_, value) => {
+        setSearchInput(value);
+        setSearchValue(value);
+      },
+      roleId: (_, value) => {
+        const roleIds = Array.isArray(value) ? value : [value].filter(Boolean);
+        setSelectedRoleIds(roleIds);
+      },
     },
     onFilterApplied: async () => {
       isApplyingFiltersFromUrl.current = true;
       hasInitialFetch.current = true;
       setPage(1);
 
-      // Also set search input from URL
-      const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
-      const nameFilter = urlFilters.find((f) => f.key === "name");
-      if (nameFilter) {
-        setSearchInput(nameFilter.value);
-      }
-
       try {
+        const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
         const apiFilters = FilterManager.convertFiltersToApiParams(urlFilters);
         const result = await fetchPermissions(1, pageSize, apiFilters);
-        if (result?.meta) {
-          setTotal(result.meta.total || 0);
-        } else if (result?.data) {
-          setTotal(result.data.length);
-        }
+        const totalCount = result?.meta?.total ?? result?.data?.length ?? 0;
+        setTotal(totalCount);
       } catch (error) {
         const errorMessage =
           error instanceof Error
@@ -180,12 +178,13 @@ export function PermissionsList({
     hookId: "permissions",
   });
 
+  const handleFilterChange = useCallback(() => {
+    setPage(1);
+  }, [setPage]);
+
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
     handlers: filterHandlers,
-    onFilterChange: () => {
-      // Reset to first page when filter changes
-      setPage(1);
-    },
+    onFilterChange: handleFilterChange,
   });
 
   // Handler to remove a specific role from the array
@@ -195,12 +194,9 @@ export function PermissionsList({
   }, []);
 
   // Expose clearFilters function to parent component (only once on mount)
-  const clearFiltersRef = useRef(handleClearAllFilters);
-  clearFiltersRef.current = handleClearAllFilters;
-
   useEffect(() => {
     if (onClearFiltersReady) {
-      onClearFiltersReady(() => clearFiltersRef.current());
+      onClearFiltersReady(handleClearAllFilters);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
@@ -258,10 +254,10 @@ export function PermissionsList({
     [roles]
   );
 
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     setSearchValue(searchInput);
     setPage(1);
-  };
+  }, [searchInput, setPage]);
 
   const filterActionButtons = useFilterActions({
     onSearch: handleSearch,
@@ -310,175 +306,196 @@ export function PermissionsList({
     const loadPermissions = async () => {
       try {
         const result = await fetchPermissions(page, pageSize, apiFilters);
-        if (result?.meta) {
-          setTotal(result.meta.total || 0);
-        } else if (result?.data) {
-          setTotal(result.data.length);
-        }
+        const totalCount = result?.meta?.total ?? result?.data?.length ?? 0;
+        setTotal(totalCount);
       } catch (error) {
-        const errorMessage =
+        showError(
           error instanceof Error
             ? error.message
-            : t("errors.fetchDashboardFailed");
-        showError(errorMessage);
+            : t("errors.fetchDashboardFailed")
+        );
       } finally {
         hasInitialFetch.current = true;
       }
     };
 
     loadPermissions();
-  }, [
-    page,
-    pageSize,
-    apiFilters,
-    hasFilterParams,
-    fetchPermissions,
-    setTotal,
-    showError,
-    t,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, apiFilters]);
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
+  const handlePageChange = useCallback(
+    (newPage: number) => setPage(newPage),
+    [setPage]
+  );
 
-  const handlePageSizeChange = (newPageSize: number) => {
-    setPageSize(newPageSize);
-  };
+  const handlePageSizeChange = useCallback(
+    (newPageSize: number) => setPageSize(newPageSize),
+    [setPageSize]
+  );
 
-  const handleEdit = (permission: Permission) => {
-    openDialog(permission);
-  };
+  const handleEdit = useCallback(
+    (permission: Permission) => openDialog(permission),
+    [openDialog]
+  );
 
-  const handleView = (permission: Permission) => {
-    openViewDialog(permission);
-  };
+  const handleView = useCallback(
+    (permission: Permission) => openViewDialog(permission),
+    [openViewDialog]
+  );
 
-  const handleDelete = (permission: Permission) => {
-    const confirmDelete = async () => {
-      try {
-        await deletePermission(permission.id);
-        showSuccess(t("admin.permissions.deleteSuccess"));
-        // Clear filters and fetch all data after delete
-        handleClearAllFilters();
-        await refreshPermissions(1, pageSize);
-        closeDialog();
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : t("errors.genericError");
-        showError(errorMessage);
-      }
-    };
+  const handleDelete = useCallback(
+    (permission: Permission) => {
+      const confirmDelete = async () => {
+        try {
+          await deletePermission(permission.id);
+          showSuccess(t("admin.permissions.deleteSuccess"));
+          handleClearAllFilters();
+          await refreshPermissions(1, pageSize);
+          closeDialog();
+        } catch (error) {
+          showError(
+            error instanceof Error ? error.message : t("errors.genericError")
+          );
+        }
+      };
 
-    showDialog({
-      title: t("admin.permissions.delete"),
-      content: (
-        <AlertDialogDescription>
-          {(
-            t as (
-              key: string,
-              params?: Record<string, string | number>
-            ) => string
-          )("admin.permissions.confirmDelete", { name: permission.name })}
-        </AlertDialogDescription>
-      ),
-      footer: (
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={closeDialog}>
-            {t("common.cancel")}
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={confirmDelete}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
-            {t("admin.permissions.delete")}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      ),
-    });
-  };
-
-  const columns: Column<Permission>[] = [
-    {
-      key: "id",
-      header: t("admin.permissions.columns.id"),
-      className: "w-[100px]",
-      render: (permission) => (
-        <span className="truncate block max-w-[100px]" title={permission.id}>
-          {permission.id}
-        </span>
-      ),
+      showDialog({
+        title: t("admin.permissions.delete"),
+        content: (
+          <AlertDialogDescription>
+            {t("admin.permissions.confirmDelete", {
+              name: permission.name,
+            } as TranslationParams<"admin.permissions.confirmDelete">)}
+          </AlertDialogDescription>
+        ),
+        footer: (
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={closeDialog}>
+              {t("common.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("admin.permissions.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        ),
+      });
     },
-    {
-      key: "name",
-      header: t("admin.permissions.columns.name"),
-      render: (permission) => (
-        <span className="font-medium">{permission.name}</span>
-      ),
-    },
-    {
-      key: "permission",
-      header: t("admin.permissions.columns.permission"),
-      render: (permission) => (
-        <span className="text-muted-foreground font-mono">
-          {permission.permission || "-"}
-        </span>
-      ),
-    },
-    {
-      key: "description",
-      header: t("admin.permissions.columns.description"),
-      render: (permission) => (
-        <span className="text-muted-foreground">
-          {permission.description || "-"}
-        </span>
-      ),
-    },
-    {
-      key: "roleName",
-      header: t("admin.permissions.columns.role"),
-      render: (permission) => {
-        const roleName =
-          permission.roleName ||
-          (permission.roleId ? roleMap.get(permission.roleId) : undefined);
-        return <span className="text-muted-foreground">{roleName || "-"}</span>;
+    [
+      deletePermission,
+      showSuccess,
+      t,
+      handleClearAllFilters,
+      refreshPermissions,
+      pageSize,
+      closeDialog,
+      showDialog,
+      showError,
+    ]
+  );
+
+  const columns = useMemo<Column<Permission>[]>(
+    () => [
+      {
+        key: "id",
+        header: t("admin.permissions.columns.id"),
+        className: "w-[100px]",
+        render: (permission) => (
+          <span className="truncate block max-w-[100px]" title={permission.id}>
+            {permission.id}
+          </span>
+        ),
       },
-    },
-  ];
+      {
+        key: "name",
+        header: t("admin.permissions.columns.name"),
+        render: (permission) => (
+          <span className="font-medium">{permission.name}</span>
+        ),
+      },
+      {
+        key: "permission",
+        header: t("admin.permissions.columns.permission"),
+        render: (permission) => (
+          <span className="text-muted-foreground font-mono">
+            {permission.permission || "-"}
+          </span>
+        ),
+      },
+      {
+        key: "description",
+        header: t("admin.permissions.columns.description"),
+        render: (permission) => (
+          <span className="text-muted-foreground">
+            {permission.description || "-"}
+          </span>
+        ),
+      },
+      {
+        key: "roleName",
+        header: t("admin.permissions.columns.role"),
+        render: (permission) => {
+          const roleName =
+            permission.roleName ||
+            (permission.roleId ? roleMap.get(permission.roleId) : undefined);
+          return (
+            <span className="text-muted-foreground">{roleName || "-"}</span>
+          );
+        },
+      },
+    ],
+    [t, roleMap]
+  );
 
-  const actions: Action<Permission>[] = [
-    ...(permissions.read
-      ? [
-          {
-            label: t("common.viewInfo"),
-            onClick: handleView,
-            icon: <Eye className="h-4 w-4" />,
-            actionType: "viewInfo" as const,
-          },
-        ]
-      : []),
-    ...(permissions.update
-      ? [
-          {
-            label: t("common.edit"),
-            onClick: handleEdit,
-            icon: <Edit className="h-4 w-4" />,
-            actionType: "edit" as const,
-          },
-        ]
-      : []),
-    ...(permissions.delete
-      ? [
-          {
-            label: t("admin.permissions.delete"),
-            onClick: handleDelete,
-            variant: "destructive" as const,
-            icon: <Trash2 className="h-4 w-4" />,
-            actionType: "delete" as const,
-          },
-        ]
-      : []),
-  ];
+  const actions = useMemo<Action<Permission>[]>(
+    () => [
+      ...(permissions.read
+        ? [
+            {
+              label: t("common.viewInfo"),
+              onClick: handleView,
+              icon: <Eye className="h-4 w-4" />,
+              actionType: "viewInfo" as const,
+            },
+          ]
+        : []),
+      ...(permissions.update
+        ? [
+            {
+              label: t("common.edit"),
+              onClick: handleEdit,
+              icon: <Edit className="h-4 w-4" />,
+              actionType: "edit" as const,
+            },
+          ]
+        : []),
+      ...(permissions.delete
+        ? [
+            {
+              label: t("admin.permissions.delete"),
+              onClick: handleDelete,
+              variant: "destructive" as const,
+              icon: <Trash2 className="h-4 w-4" />,
+              actionType: "delete" as const,
+            },
+          ]
+        : []),
+    ],
+    [permissions, t, handleView, handleEdit, handleDelete]
+  );
+
+  const paginationProps = useMemo(
+    () => ({
+      page,
+      pageSize,
+      total,
+      onPageChange: handlePageChange,
+      onPageSizeChange: handlePageSizeChange,
+    }),
+    [page, pageSize, total, handlePageChange, handlePageSizeChange]
+  );
 
   return (
     <>
@@ -527,18 +544,9 @@ export function PermissionsList({
         actions={actions}
         loading={loading}
         emptyMessage={t("admin.permissions.empty")}
+        pagination={paginationProps}
       />
-      <Pagination
-        page={page}
-        pageSize={pageSize}
-        total={total}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
-      />
-      <PermissionViewDialog
-        permission={viewingPermission}
-        onDelete={handleDelete}
-      />
+      <PermissionFormDialog onDelete={handleDelete} />
     </>
   );
 }

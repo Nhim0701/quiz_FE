@@ -1,9 +1,8 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router";
-import { useTranslation } from "@/i18n";
+import { useTranslation, type TranslationParams } from "@/i18n";
 import {
   DataTable,
-  Pagination,
   type Column,
   type Action,
 } from "@/components/common/data-table";
@@ -20,7 +19,7 @@ import {
 } from "@/hooks";
 import { useNamespacesStore, type Namespace } from "../hooks";
 import { Edit, Trash2, Eye } from "lucide-react";
-import { NamespaceViewDialog } from "./namespace-dialog";
+import { NamespaceFormDialog } from "./form-dialog";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -73,17 +72,19 @@ export function NamespacesList({
     viewingNamespace,
   } = useNamespacesStore();
 
+  const resetSearchFilter = useCallback(() => {
+    setSearchInput("");
+    setSearchValue("");
+  }, []);
+
   const filterHandlers = useMemo(
     () => [
       {
         filterId: "name",
-        resetValue: () => {
-          setSearchInput("");
-          setSearchValue("");
-        },
+        resetValue: resetSearchFilter,
       },
     ],
-    []
+    [resetSearchFilter]
   );
 
   const filterConfig = useMemo(
@@ -114,11 +115,8 @@ export function NamespacesList({
         const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
         const apiFilters = FilterManager.convertFiltersToApiParams(urlFilters);
         const result = await fetchNamespaces(1, pageSize, apiFilters);
-        if (result?.meta) {
-          setTotal(result.meta.total || 0);
-        } else if (result?.data) {
-          setTotal(result.data.length);
-        }
+        const totalCount = result?.meta?.total ?? result?.data?.length ?? 0;
+        setTotal(totalCount);
       } catch (error) {
         const errorMessage =
           error instanceof Error
@@ -137,36 +135,36 @@ export function NamespacesList({
     hookId: "namespaces",
   });
 
+  const handleFilterChange = useCallback(() => {
+    setPage(1);
+  }, [setPage]);
+
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
     handlers: filterHandlers,
-    onFilterChange: () => {
-      // Reset to first page when filter changes
-      setPage(1);
-    },
+    onFilterChange: handleFilterChange,
   });
 
   // Expose clearFilters function to parent component (only once on mount)
-  const clearFiltersRef = useRef(handleClearAllFilters);
-  clearFiltersRef.current = handleClearAllFilters;
-
   useEffect(() => {
     if (onClearFiltersReady) {
-      onClearFiltersReady(() => clearFiltersRef.current());
+      onClearFiltersReady(handleClearAllFilters);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
 
-  const activeFilters = useMemo<ActiveFilter[]>(() => {
-    const filters: ActiveFilter[] = [];
-    if (searchValue) {
-      filters.push({
-        id: "name",
-        label: t("admin.namespaces.columns.name"),
-        value: searchValue,
-      });
-    }
-    return filters;
-  }, [searchValue, t]);
+  const activeFilters = useMemo<ActiveFilter[]>(
+    () =>
+      searchValue
+        ? [
+            {
+              id: "name",
+              label: t("admin.namespaces.columns.name"),
+              value: searchValue,
+            },
+          ]
+        : [],
+    [searchValue, t]
+  );
 
   const filterIdsConfig = useFilterIdsConfig({
     handlers: filterHandlers,
@@ -175,10 +173,10 @@ export function NamespacesList({
     },
   });
 
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     setSearchValue(searchInput);
     setPage(1);
-  };
+  }, [searchInput, setPage]);
 
   const filterActionButtons = useFilterActions({
     onSearch: handleSearch,
@@ -186,34 +184,15 @@ export function NamespacesList({
     onClearFilters: handleClearAllFilters,
   });
 
-  const apiFilters = useMemo(() => {
-    const activeFilters: Array<{ key: string; value: string }> = [];
-    filterConfig.forEach((filter) => {
-      const converted = filter.converter(filter.value);
-      if (converted === null) return;
-
-      let isActive = false;
-      if (Array.isArray(converted)) {
-        isActive = converted.length > 0;
-      } else if (filter.defaultValue !== undefined) {
-        const defaultConverted = filter.converter(filter.defaultValue);
-        isActive = converted !== defaultConverted;
-      } else {
-        isActive = converted !== "";
-      }
-
-      if (isActive) {
-        const filterValue = Array.isArray(converted)
-          ? converted.join(",")
-          : converted;
-        activeFilters.push({
-          key: filter.filterKey,
-          value: filterValue,
-        });
-      }
-    });
-    return FilterManager.convertFiltersToApiParams(activeFilters);
-  }, [filterConfig]);
+  const apiFilters = useMemo(
+    () =>
+      searchValue
+        ? FilterManager.convertFiltersToApiParams([
+            { key: "name", value: searchValue },
+          ])
+        : {},
+    [searchValue]
+  );
 
   useEffect(() => {
     // Skip initial fetch if filters are being applied from URL
@@ -227,164 +206,184 @@ export function NamespacesList({
     const loadNamespaces = async () => {
       try {
         const result = await fetchNamespaces(page, pageSize, apiFilters);
-        if (result?.meta) {
-          setTotal(result.meta.total || 0);
-        } else if (result?.data) {
-          setTotal(result.data.length);
-        }
+        const totalCount = result?.meta?.total ?? result?.data?.length ?? 0;
+        setTotal(totalCount);
       } catch (error) {
-        const errorMessage =
+        showError(
           error instanceof Error
             ? error.message
-            : t("errors.fetchDashboardFailed");
-        showError(errorMessage);
+            : t("errors.fetchDashboardFailed")
+        );
+      } finally {
+        hasInitialFetch.current = true;
       }
     };
 
     loadNamespaces();
-    hasInitialFetch.current = true;
-  }, [
-    page,
-    pageSize,
-    apiFilters,
-    hasFilterParams,
-    fetchNamespaces,
-    setTotal,
-    showError,
-    t,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, apiFilters]);
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
+  const handlePageChange = useCallback(
+    (newPage: number) => setPage(newPage),
+    [setPage]
+  );
 
-  const handlePageSizeChange = (newPageSize: number) => {
-    setPageSize(newPageSize);
-  };
+  const handlePageSizeChange = useCallback(
+    (newPageSize: number) => setPageSize(newPageSize),
+    [setPageSize]
+  );
 
-  const handleEdit = (namespace: Namespace) => {
-    openDialog(namespace);
-  };
+  const handleEdit = useCallback(
+    (namespace: Namespace) => openDialog(namespace),
+    [openDialog]
+  );
 
-  const handleView = (namespace: Namespace) => {
-    openViewDialog(namespace);
-  };
+  const handleView = useCallback(
+    (namespace: Namespace) => openViewDialog(namespace),
+    [openViewDialog]
+  );
 
-  const handleDelete = (namespace: Namespace) => {
-    const confirmDelete = async () => {
-      try {
-        await deleteNamespace(namespace.id);
-        showSuccess(t("admin.namespaces.deleteSuccess"));
-        // Clear filters and fetch all data after delete
-        handleClearAllFilters();
-        await refreshNamespaces(1, pageSize);
-        closeDialog();
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : t("errors.genericError");
-        showError(errorMessage);
-      }
-    };
+  const handleDelete = useCallback(
+    (namespace: Namespace) => {
+      const confirmDelete = async () => {
+        try {
+          await deleteNamespace(namespace.id);
+          showSuccess(t("admin.namespaces.deleteSuccess"));
+          handleClearAllFilters();
+          await refreshNamespaces(1, pageSize);
+          closeDialog();
+        } catch (error) {
+          showError(
+            error instanceof Error ? error.message : t("errors.genericError")
+          );
+        }
+      };
 
-    showDialog({
-      title: t("admin.namespaces.delete"),
-      content: (
-        <AlertDialogDescription>
-          {(
-            t as (
-              key: string,
-              params?: Record<string, string | number>
-            ) => string
-          )("admin.namespaces.confirmDelete", { name: namespace.name })}
-        </AlertDialogDescription>
-      ),
-      footer: (
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={closeDialog}>
-            {t("common.cancel")}
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={confirmDelete}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
-            {t("admin.namespaces.delete")}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      ),
-    });
-  };
-
-  const columns: Column<Namespace>[] = [
-    {
-      key: "id",
-      header: t("admin.namespaces.columns.id"),
-      className: "w-[100px]",
-      render: (namespace) => (
-        <span className="truncate block max-w-[100px]" title={namespace.id}>
-          {namespace.id}
-        </span>
-      ),
+      showDialog({
+        title: t("admin.namespaces.delete"),
+        content: (
+          <AlertDialogDescription>
+            {t("admin.namespaces.confirmDelete", {
+              name: namespace.name,
+            } as TranslationParams<"admin.namespaces.confirmDelete">)}
+          </AlertDialogDescription>
+        ),
+        footer: (
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={closeDialog}>
+              {t("common.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("admin.namespaces.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        ),
+      });
     },
-    {
-      key: "name",
-      header: t("admin.namespaces.columns.name"),
-      render: (namespace) => (
-        <span className="font-medium">{namespace.name}</span>
-      ),
-    },
-    {
-      key: "prefix",
-      header: t("admin.namespaces.columns.prefix"),
-      render: (namespace) => (
-        <span className="text-muted-foreground font-mono">
-          {namespace.prefix || "-"}
-        </span>
-      ),
-    },
-    {
-      key: "description",
-      header: t("admin.namespaces.columns.description"),
-      render: (namespace) => (
-        <span className="text-muted-foreground">
-          {namespace.description || "-"}
-        </span>
-      ),
-    },
-  ];
+    [
+      deleteNamespace,
+      showSuccess,
+      t,
+      handleClearAllFilters,
+      refreshNamespaces,
+      pageSize,
+      closeDialog,
+      showDialog,
+      showError,
+    ]
+  );
 
-  const actions: Action<Namespace>[] = [
-    ...(roles.read
-      ? [
-          {
-            label: t("common.viewInfo"),
-            onClick: handleView,
-            icon: <Eye className="h-4 w-4" />,
-            actionType: "viewInfo" as const,
-          },
-        ]
-      : []),
-    ...(roles.update
-      ? [
-          {
-            label: t("common.edit"),
-            onClick: handleEdit,
-            icon: <Edit className="h-4 w-4" />,
-            actionType: "edit" as const,
-          },
-        ]
-      : []),
-    ...(roles.delete
-      ? [
-          {
-            label: t("admin.namespaces.delete"),
-            onClick: handleDelete,
-            variant: "destructive" as const,
-            icon: <Trash2 className="h-4 w-4" />,
-            actionType: "delete" as const,
-          },
-        ]
-      : []),
-  ];
+  const columns = useMemo<Column<Namespace>[]>(
+    () => [
+      {
+        key: "id",
+        header: t("admin.namespaces.columns.id"),
+        className: "w-[100px]",
+        render: (namespace) => (
+          <span className="truncate block max-w-[100px]" title={namespace.id}>
+            {namespace.id}
+          </span>
+        ),
+      },
+      {
+        key: "name",
+        header: t("admin.namespaces.columns.name"),
+        render: (namespace) => (
+          <span className="font-medium">{namespace.name}</span>
+        ),
+      },
+      {
+        key: "prefix",
+        header: t("admin.namespaces.columns.prefix"),
+        render: (namespace) => (
+          <span className="text-muted-foreground font-mono">
+            {namespace.prefix || "-"}
+          </span>
+        ),
+      },
+      {
+        key: "description",
+        header: t("admin.namespaces.columns.description"),
+        render: (namespace) => (
+          <span className="text-muted-foreground">
+            {namespace.description || "-"}
+          </span>
+        ),
+      },
+    ],
+    [t]
+  );
+
+  const actions = useMemo<Action<Namespace>[]>(
+    () => [
+      ...(roles.read
+        ? [
+            {
+              label: t("common.viewInfo"),
+              onClick: handleView,
+              icon: <Eye className="h-4 w-4" />,
+              actionType: "viewInfo" as const,
+            },
+          ]
+        : []),
+      ...(roles.update
+        ? [
+            {
+              label: t("common.edit"),
+              onClick: handleEdit,
+              icon: <Edit className="h-4 w-4" />,
+              actionType: "edit" as const,
+            },
+          ]
+        : []),
+      ...(roles.delete
+        ? [
+            {
+              label: t("admin.namespaces.delete"),
+              onClick: handleDelete,
+              variant: "destructive" as const,
+              icon: <Trash2 className="h-4 w-4" />,
+              actionType: "delete" as const,
+            },
+          ]
+        : []),
+    ],
+    [roles, t, handleView, handleEdit, handleDelete]
+  );
+
+  const paginationProps = useMemo(
+    () => ({
+      page,
+      pageSize,
+      total,
+      onPageChange: handlePageChange,
+      onPageSizeChange: handlePageSizeChange,
+    }),
+    [page, pageSize, total, handlePageChange, handlePageSizeChange]
+  );
 
   return (
     <>
@@ -420,18 +419,9 @@ export function NamespacesList({
         actions={actions}
         loading={loading}
         emptyMessage={t("admin.namespaces.empty")}
+        pagination={paginationProps}
       />
-      <Pagination
-        page={page}
-        pageSize={pageSize}
-        total={total}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
-      />
-      <NamespaceViewDialog
-        namespace={viewingNamespace}
-        onDelete={handleDelete}
-      />
+      <NamespaceFormDialog onDelete={handleDelete} />
     </>
   );
 }

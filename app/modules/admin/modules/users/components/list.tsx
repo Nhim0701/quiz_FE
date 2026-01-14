@@ -133,6 +133,10 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
     setAssignRolesUser(user);
   }, []);
 
+  const handleAssignRolesSuccess = useCallback(async () => {
+    await refreshUsers(page, pageSize, apiFilters);
+  }, [refreshUsers, page, pageSize, apiFilters]);
+
   const handleDelete = useCallback(
     (user: User) => {
       const confirmDelete = async () => {
@@ -247,6 +251,7 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
         user={assignRolesUser}
         open={!!assignRolesUser}
         onOpenChange={(open) => !open && setAssignRolesUser(null)}
+        onSuccess={handleAssignRolesSuccess}
       />
     </>
   );

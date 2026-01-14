@@ -10,7 +10,7 @@ import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { RolesList, RoleForm } from "./components";
+import { RolesList, RoleFormDialog } from "./components";
 import { useRolesStore } from "./hooks";
 import { pageMeta } from "@/lib";
 
@@ -83,9 +83,7 @@ export default function AdminRoles() {
           />
         </CardContent>
       </Card>
-      <div className="mt-4">
-        <RoleForm onClearFilters={clearFilters} />
-      </div>
+      <RoleFormDialog onClearFilters={clearFilters} />
     </Container>
   );
 }

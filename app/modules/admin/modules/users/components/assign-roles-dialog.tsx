@@ -16,12 +16,14 @@ interface AssignRolesDialogProps {
   user: User | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 export function AssignRolesDialog({
   user,
   open,
   onOpenChange,
+  onSuccess,
 }: AssignRolesDialogProps) {
   const { t } = useTranslation();
   const { showSuccess, showError } = useApp();
@@ -91,13 +93,14 @@ export function AssignRolesDialog({
         await assignRoles(user.id, data.roleId);
         showSuccess(t("admin.users.assignRoles.success"));
         handleClose();
+        onSuccess?.();
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : t("errors.genericError");
         showError(errorMessage);
       }
     },
-    [user, assignRoles, showSuccess, showError, t, handleClose]
+    [user, assignRoles, showSuccess, showError, t, handleClose, onSuccess]
   );
 
   const handleFormSubmit = useCallback(() => {

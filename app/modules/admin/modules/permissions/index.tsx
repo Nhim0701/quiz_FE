@@ -10,7 +10,7 @@ import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { PermissionsList, PermissionForm } from "./components";
+import { PermissionsList, PermissionFormDialog } from "./components";
 import { usePermissionsStore } from "./hooks";
 import { pageMeta } from "@/lib";
 
@@ -83,9 +83,7 @@ export default function AdminPermissions() {
           />
         </CardContent>
       </Card>
-      <div className="mt-4">
-        <PermissionForm onClearFilters={clearFilters} />
-      </div>
+      <PermissionFormDialog onClearFilters={clearFilters} />
     </Container>
   );
 }

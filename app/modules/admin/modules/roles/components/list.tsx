@@ -1,9 +1,8 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router";
-import { useTranslation } from "@/i18n";
+import { useTranslation, type TranslationParams } from "@/i18n";
 import {
   DataTable,
-  Pagination,
   type Column,
   type Action,
 } from "@/components/common/data-table";
@@ -20,7 +19,7 @@ import {
 } from "@/hooks";
 import { useRolesStore, type Role } from "../hooks";
 import { Edit, Trash2, Eye } from "lucide-react";
-import { RoleViewDialog } from "./role-dialog";
+import { RoleFormDialog } from "./form-dialog";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -70,17 +69,19 @@ export function RolesList({ roles, onClearFiltersReady }: RolesListProps) {
     viewingRole,
   } = useRolesStore();
 
+  const resetSearchFilter = useCallback(() => {
+    setSearchInput("");
+    setSearchValue("");
+  }, []);
+
   const filterHandlers = useMemo(
     () => [
       {
         filterId: "name",
-        resetValue: () => {
-          setSearchInput("");
-          setSearchValue("");
-        },
+        resetValue: resetSearchFilter,
       },
     ],
-    []
+    [resetSearchFilter]
   );
 
   const filterConfig = useMemo(
@@ -111,11 +112,8 @@ export function RolesList({ roles, onClearFiltersReady }: RolesListProps) {
         const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
         const apiFilters = FilterManager.convertFiltersToApiParams(urlFilters);
         const result = await fetchRoles(1, pageSize, apiFilters);
-        if (result?.meta) {
-          setTotal(result.meta.total || 0);
-        } else if (result?.data) {
-          setTotal(result.data.length);
-        }
+        const totalCount = result?.meta?.total ?? result?.data?.length ?? 0;
+        setTotal(totalCount);
       } catch (error) {
         const errorMessage =
           error instanceof Error
@@ -134,36 +132,36 @@ export function RolesList({ roles, onClearFiltersReady }: RolesListProps) {
     hookId: "roles",
   });
 
+  const handleFilterChange = useCallback(() => {
+    setPage(1);
+  }, [setPage]);
+
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
     handlers: filterHandlers,
-    onFilterChange: () => {
-      // Reset to first page when filter changes
-      setPage(1);
-    },
+    onFilterChange: handleFilterChange,
   });
 
   // Expose clearFilters function to parent component (only once on mount)
-  const clearFiltersRef = useRef(handleClearAllFilters);
-  clearFiltersRef.current = handleClearAllFilters;
-
   useEffect(() => {
     if (onClearFiltersReady) {
-      onClearFiltersReady(() => clearFiltersRef.current());
+      onClearFiltersReady(handleClearAllFilters);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
 
-  const activeFilters = useMemo<ActiveFilter[]>(() => {
-    const filters: ActiveFilter[] = [];
-    if (searchValue) {
-      filters.push({
-        id: "name",
-        label: t("admin.roles.columns.name"),
-        value: searchValue,
-      });
-    }
-    return filters;
-  }, [searchValue, t]);
+  const activeFilters = useMemo<ActiveFilter[]>(
+    () =>
+      searchValue
+        ? [
+            {
+              id: "name",
+              label: t("admin.roles.columns.name"),
+              value: searchValue,
+            },
+          ]
+        : [],
+    [searchValue, t]
+  );
 
   const filterIdsConfig = useFilterIdsConfig({
     handlers: filterHandlers,
@@ -172,10 +170,10 @@ export function RolesList({ roles, onClearFiltersReady }: RolesListProps) {
     },
   });
 
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     setSearchValue(searchInput);
     setPage(1);
-  };
+  }, [searchInput, setPage]);
 
   const filterActionButtons = useFilterActions({
     onSearch: handleSearch,
@@ -183,34 +181,15 @@ export function RolesList({ roles, onClearFiltersReady }: RolesListProps) {
     onClearFilters: handleClearAllFilters,
   });
 
-  const apiFilters = useMemo(() => {
-    const activeFilters: Array<{ key: string; value: string }> = [];
-    filterConfig.forEach((filter) => {
-      const converted = filter.converter(filter.value);
-      if (converted === null) return;
-
-      let isActive = false;
-      if (Array.isArray(converted)) {
-        isActive = converted.length > 0;
-      } else if (filter.defaultValue !== undefined) {
-        const defaultConverted = filter.converter(filter.defaultValue);
-        isActive = converted !== defaultConverted;
-      } else {
-        isActive = converted !== "";
-      }
-
-      if (isActive) {
-        const filterValue = Array.isArray(converted)
-          ? converted.join(",")
-          : converted;
-        activeFilters.push({
-          key: filter.filterKey,
-          value: filterValue,
-        });
-      }
-    });
-    return FilterManager.convertFiltersToApiParams(activeFilters);
-  }, [filterConfig]);
+  const apiFilters = useMemo(
+    () =>
+      searchValue
+        ? FilterManager.convertFiltersToApiParams([
+            { key: "name", value: searchValue },
+          ])
+        : {},
+    [searchValue]
+  );
 
   useEffect(() => {
     // Skip initial fetch if filters are being applied from URL
@@ -224,152 +203,173 @@ export function RolesList({ roles, onClearFiltersReady }: RolesListProps) {
     const loadRoles = async () => {
       try {
         const result = await fetchRoles(page, pageSize, apiFilters);
-        if (result?.meta) {
-          setTotal(result.meta.total || 0);
-        } else if (result?.data) {
-          setTotal(result.data.length);
-        }
+        const totalCount = result?.meta?.total ?? result?.data?.length ?? 0;
+        setTotal(totalCount);
       } catch (error) {
-        const errorMessage =
+        showError(
           error instanceof Error
             ? error.message
-            : t("errors.fetchDashboardFailed");
-        showError(errorMessage);
+            : t("errors.fetchDashboardFailed")
+        );
       } finally {
         hasInitialFetch.current = true;
       }
     };
 
     loadRoles();
-  }, [
-    page,
-    pageSize,
-    apiFilters,
-    hasFilterParams,
-    fetchRoles,
-    setTotal,
-    showError,
-    t,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, apiFilters]);
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
+  const handlePageChange = useCallback(
+    (newPage: number) => setPage(newPage),
+    [setPage]
+  );
 
-  const handlePageSizeChange = (newPageSize: number) => {
-    setPageSize(newPageSize);
-  };
+  const handlePageSizeChange = useCallback(
+    (newPageSize: number) => setPageSize(newPageSize),
+    [setPageSize]
+  );
 
-  const handleEdit = (role: Role) => {
-    openDialog(role);
-  };
+  const handleEdit = useCallback(
+    (role: Role) => openDialog(role),
+    [openDialog]
+  );
 
-  const handleView = (role: Role) => {
-    openViewDialog(role);
-  };
+  const handleView = useCallback(
+    (role: Role) => openViewDialog(role),
+    [openViewDialog]
+  );
 
-  const handleDelete = (role: Role) => {
-    const confirmDelete = async () => {
-      try {
-        await deleteRole(role.id);
-        showSuccess(t("admin.roles.deleteSuccess"));
-        // Clear filters and fetch all data after delete
-        handleClearAllFilters();
-        await refreshRoles(1, pageSize);
-        closeDialog();
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : t("errors.genericError");
-        showError(errorMessage);
-      }
-    };
+  const handleDelete = useCallback(
+    (role: Role) => {
+      const confirmDelete = async () => {
+        try {
+          await deleteRole(role.id);
+          showSuccess(t("admin.roles.deleteSuccess"));
+          handleClearAllFilters();
+          await refreshRoles(1, pageSize);
+          closeDialog();
+        } catch (error) {
+          showError(
+            error instanceof Error ? error.message : t("errors.genericError")
+          );
+        }
+      };
 
-    showDialog({
-      title: t("admin.roles.delete"),
-      content: (
-        <AlertDialogDescription>
-          {(
-            t as (
-              key: string,
-              params?: Record<string, string | number>
-            ) => string
-          )("admin.roles.confirmDelete", { name: role.name })}
-        </AlertDialogDescription>
-      ),
-      footer: (
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={closeDialog}>
-            {t("common.cancel")}
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={confirmDelete}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
-            {t("admin.roles.delete")}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      ),
-    });
-  };
-
-  const columns: Column<Role>[] = [
-    {
-      key: "id",
-      header: t("admin.roles.columns.id"),
-      className: "w-[100px]",
-      render: (role) => (
-        <span className="truncate block max-w-[100px]" title={role.id}>
-          {role.id}
-        </span>
-      ),
+      showDialog({
+        title: t("admin.roles.delete"),
+        content: (
+          <AlertDialogDescription>
+            {t("admin.roles.confirmDelete", {
+              name: role.name,
+            } as TranslationParams<"admin.roles.confirmDelete">)}
+          </AlertDialogDescription>
+        ),
+        footer: (
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={closeDialog}>
+              {t("common.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("admin.roles.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        ),
+      });
     },
-    {
-      key: "name",
-      header: t("admin.roles.columns.name"),
-      render: (role) => <span className="font-medium">{role.name}</span>,
-    },
-    {
-      key: "description",
-      header: t("admin.roles.columns.description"),
-      render: (role) => (
-        <span className="text-muted-foreground">{role.description || "-"}</span>
-      ),
-    },
-  ];
+    [
+      deleteRole,
+      showSuccess,
+      t,
+      handleClearAllFilters,
+      refreshRoles,
+      pageSize,
+      closeDialog,
+      showDialog,
+      showError,
+    ]
+  );
 
-  const actions: Action<Role>[] = [
-    ...(roles.read
-      ? [
-          {
-            label: t("common.viewInfo"),
-            onClick: handleView,
-            icon: <Eye className="h-4 w-4" />,
-            actionType: "viewInfo" as const,
-          },
-        ]
-      : []),
-    ...(roles.update
-      ? [
-          {
-            label: t("common.edit"),
-            onClick: handleEdit,
-            icon: <Edit className="h-4 w-4" />,
-            actionType: "edit" as const,
-          },
-        ]
-      : []),
-    ...(roles.delete
-      ? [
-          {
-            label: t("admin.roles.delete"),
-            onClick: handleDelete,
-            variant: "destructive" as const,
-            icon: <Trash2 className="h-4 w-4" />,
-            actionType: "delete" as const,
-          },
-        ]
-      : []),
-  ];
+  const columns = useMemo<Column<Role>[]>(
+    () => [
+      {
+        key: "id",
+        header: t("admin.roles.columns.id"),
+        className: "w-[100px]",
+        render: (role) => (
+          <span className="truncate block max-w-[100px]" title={role.id}>
+            {role.id}
+          </span>
+        ),
+      },
+      {
+        key: "name",
+        header: t("admin.roles.columns.name"),
+        render: (role) => <span className="font-medium">{role.name}</span>,
+      },
+      {
+        key: "description",
+        header: t("admin.roles.columns.description"),
+        render: (role) => (
+          <span className="text-muted-foreground">
+            {role.description || "-"}
+          </span>
+        ),
+      },
+    ],
+    [t]
+  );
+
+  const actions = useMemo<Action<Role>[]>(
+    () => [
+      ...(roles.read
+        ? [
+            {
+              label: t("common.viewInfo"),
+              onClick: handleView,
+              icon: <Eye className="h-4 w-4" />,
+              actionType: "viewInfo" as const,
+            },
+          ]
+        : []),
+      ...(roles.update
+        ? [
+            {
+              label: t("common.edit"),
+              onClick: handleEdit,
+              icon: <Edit className="h-4 w-4" />,
+              actionType: "edit" as const,
+            },
+          ]
+        : []),
+      ...(roles.delete
+        ? [
+            {
+              label: t("admin.roles.delete"),
+              onClick: handleDelete,
+              variant: "destructive" as const,
+              icon: <Trash2 className="h-4 w-4" />,
+              actionType: "delete" as const,
+            },
+          ]
+        : []),
+    ],
+    [roles, t, handleView, handleEdit, handleDelete]
+  );
+
+  const paginationProps = useMemo(
+    () => ({
+      page,
+      pageSize,
+      total,
+      onPageChange: handlePageChange,
+      onPageSizeChange: handlePageSizeChange,
+    }),
+    [page, pageSize, total, handlePageChange, handlePageSizeChange]
+  );
 
   return (
     <>
@@ -405,15 +405,9 @@ export function RolesList({ roles, onClearFiltersReady }: RolesListProps) {
         actions={actions}
         loading={loading}
         emptyMessage={t("admin.roles.empty")}
+        pagination={paginationProps}
       />
-      <Pagination
-        page={page}
-        pageSize={pageSize}
-        total={total}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
-      />
-      <RoleViewDialog role={viewingRole} onDelete={handleDelete} />
+      <RoleFormDialog onDelete={handleDelete} />
     </>
   );
 }
