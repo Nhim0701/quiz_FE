@@ -15,6 +15,8 @@ import {
   AlertDialogDescription,
   AlertDialogFooter as AlertDialogFooterComponent,
 } from "@/components/ui/alert-dialog";
+import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 
 interface RoleFormDialogProps {
   onDelete?: (role: Role) => void;
@@ -279,6 +281,57 @@ export function RoleFormDialog({
             disabled={isDisabled || loading || isSubmitting}
             labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
           />
+          {/* Read-only fields for view mode */}
+          {isViewMode && role && (
+            <>
+              <div>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 block">
+                  {t("admin.roles.form.defaultLabel")}
+                </label>
+                <Badge variant={role.default ? "default" : "secondary"}>
+                  {role.default ? "Yes" : "No"}
+                </Badge>
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 block">
+                  {t("admin.roles.form.permissionsLabel")}
+                </label>
+                <div className="text-sm text-muted-foreground">
+                  {role.permissions && role.permissions.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {role.permissions.map((permission, index) => (
+                        <Badge key={index} variant="outline">
+                          {permission}
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <span>-</span>
+                  )}
+                </div>
+              </div>
+              {role.createdAt && (
+                <div>
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 block">
+                    {t("admin.roles.form.createdAtLabel")}
+                  </label>
+                  <div className="text-sm text-muted-foreground">
+                    {format(new Date(role.createdAt), "dd/MM/yyyy HH:mm")}
+                  </div>
+                </div>
+              )}
+              {role.updatedAt && (
+                <div>
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 block">
+                    {t("admin.roles.form.updatedAtLabel")}
+                  </label>
+                  <div className="text-sm text-muted-foreground">
+                    {format(new Date(role.updatedAt), "dd/MM/yyyy HH:mm")}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </Form>
       </FormProvider>
     </FormDialog>

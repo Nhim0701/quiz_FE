@@ -1,8 +1,15 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useTranslation } from "@/i18n";
 import { DataTable, Pagination } from "@/components/common/data-table";
-import { usePaginationStore, useApp } from "@/hooks";
+import {
+  usePaginationStore,
+  useApp,
+  useFilterActions,
+  useFilterHandlers,
+  useFilterIdsConfig,
+} from "@/hooks";
 import { useUsersStore, useUsersFilters, type User } from "../hooks";
+import { useRolesStore } from "@/modules/admin/modules/roles/hooks";
 import { ChangePasswordDialog } from "./change-password-dialog";
 import { AssignRolesDialog } from "./assign-roles-dialog";
 import { DIALOG_MODES } from "@/constants";
@@ -16,6 +23,8 @@ import {
   SearchInput,
   ActiveFilters,
   FilterActions,
+  MultipleSelectCombobox,
+  type ActiveFilter,
 } from "@/components/common/filters";
 import { useUsersColumns } from "./list-columns";
 
@@ -38,6 +47,8 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
   const { users, loading, fetchUsers, openDialog, deleteUser, refreshUsers } =
     useUsersStore();
 
+  const { roles: rolesList, fetchRoles } = useRolesStore();
+
   const [changePasswordUser, setChangePasswordUser] = useState<User | null>(
     null
   );
@@ -46,16 +57,139 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
   const {
     searchInput,
     setSearchInput,
-    activeFilters,
-    filterActionButtons,
-    filterIdsConfig,
-    handleRemoveFilter,
-    handleSearch,
+    searchValue,
+    setSearchValue,
+    selectedRoleIds,
+    setSelectedRoleIds,
+    handleSearch: handleSearchBase,
     apiFilters,
     hasFilterParams,
     isApplyingFiltersFromUrl,
     hasInitialFetch,
   } = useUsersFilters(onClearFiltersReady);
+
+  // Fetch roles on mount
+  useEffect(() => {
+    fetchRoles(1, 100);
+  }, [fetchRoles]);
+
+  // Create role map for efficient lookup
+  const roleMap = useMemo(() => {
+    const map = new Map<string, string>();
+    rolesList.forEach((role) => {
+      map.set(role.id, role.name);
+    });
+    return map;
+  }, [rolesList]);
+
+  // Role options for combobox
+  const roleOptions = useMemo(
+    () =>
+      rolesList.map((role) => ({
+        value: role.id,
+        label: role.name,
+      })),
+    [rolesList]
+  );
+
+  // Filter handlers
+  const filterHandlers = useMemo(
+    () => [
+      {
+        filterId: "name",
+        resetValue: () => {
+          setSearchInput("");
+          setSearchValue("");
+        },
+      },
+      {
+        filterId: "roleId",
+        resetValue: () => {
+          setSelectedRoleIds([]);
+        },
+      },
+    ],
+    [setSearchInput, setSelectedRoleIds]
+  );
+
+  const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
+    handlers: filterHandlers,
+    onFilterChange: () => {
+      setPage(1);
+    },
+  });
+
+  // Expose clearFilters function to parent component (only once on mount)
+  useEffect(() => {
+    if (onClearFiltersReady) {
+      onClearFiltersReady(handleClearAllFilters);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
+
+  // Handler to remove a specific role from the array
+  const handleRemoveRole = useCallback(
+    (roleId: string) => {
+      setSelectedRoleIds((prev) => prev.filter((id) => id !== roleId));
+      setPage(1);
+    },
+    [setSelectedRoleIds, setPage]
+  );
+
+  // Active filters for display
+  const activeFilters = useMemo<ActiveFilter[]>(() => {
+    const filters: ActiveFilter[] = [];
+    if (searchValue) {
+      filters.push({
+        id: "name",
+        label: t("admin.users.columns.fullName"),
+        value: searchValue,
+      });
+    }
+    // Create separate filter for each selected role
+    selectedRoleIds.forEach((roleId) => {
+      const roleName = roleMap.get(roleId) || roleId;
+      filters.push({
+        id: `roleId_${roleId}`,
+        label: t("admin.users.columns.role"),
+        value: roleName,
+      });
+    });
+    return filters;
+  }, [searchValue, selectedRoleIds, roleMap, t]);
+
+  // Custom handler for removing filters that handles array items
+  const handleRemoveActiveFilter = useCallback(
+    (filterId: string) => {
+      // Check if it's a role filter (format: roleId_<id>)
+      if (filterId.startsWith("roleId_")) {
+        const roleId = filterId.replace("roleId_", "");
+        handleRemoveRole(roleId);
+      } else {
+        // Use default handler for other filters
+        handleRemoveFilter(filterId);
+      }
+    },
+    [handleRemoveFilter, handleRemoveRole]
+  );
+
+  const filterIdsConfig = useFilterIdsConfig({
+    handlers: filterHandlers,
+    colorMap: {
+      name: "blue",
+      roleId: "green",
+    },
+  });
+
+  const handleSearch = useCallback(() => {
+    handleSearchBase();
+  }, [handleSearchBase]);
+
+  const filterActionButtons = useFilterActions({
+    onSearch: handleSearch,
+    activeFilters,
+    onClearFilters: handleClearAllFilters,
+  });
 
   // Fetch users when filters or pagination changes
   useEffect(() => {
@@ -193,6 +327,7 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
 
   const { columns, actions } = useUsersColumns({
     roles,
+    rolesList,
     onEdit: handleEdit,
     onView: handleView,
     onDelete: handleDelete,
@@ -204,14 +339,27 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
     <>
       {/* Filter Bar */}
       <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 items-center gap-2">
+        <div className="flex flex-1 flex-wrap items-center gap-2">
           <SearchInput
             value={searchInput}
             onChange={setSearchInput}
             onSearch={handleSearch}
             placeholderKey="admin.users.searchPlaceholder"
-            className="flex-1"
+            className="flex-1 min-w-[200px]"
             searchKey="fullName"
+          />
+          <MultipleSelectCombobox
+            options={roleOptions}
+            selectedValues={selectedRoleIds}
+            onSelect={(values) => {
+              setSelectedRoleIds(values);
+              setPage(1);
+            }}
+            placeholder={t("admin.users.filters.rolePlaceholder")}
+            searchPlaceholder={t("admin.users.filters.roleSearch")}
+            emptyMessage={t("admin.users.filters.roleEmpty")}
+            className="w-full sm:w-[250px]"
+            filterColor="green"
           />
           <FilterActions buttons={filterActionButtons} />
         </div>
@@ -222,7 +370,7 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
         <div className="mb-4">
           <ActiveFilters
             filters={activeFilters}
-            onRemove={handleRemoveFilter}
+            onRemove={handleRemoveActiveFilter}
             filterIdsConfig={filterIdsConfig}
           />
         </div>

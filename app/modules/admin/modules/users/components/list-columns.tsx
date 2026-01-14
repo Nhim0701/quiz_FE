@@ -1,6 +1,7 @@
 import { useTranslation } from "@/i18n";
 import type { Column, Action } from "@/components/common/data-table";
 import type { User } from "../hooks";
+import type { Role } from "@/modules/admin/modules/roles/hooks";
 import { Edit, Trash2, Eye, Lock, Shield } from "lucide-react";
 
 interface UseUsersColumnsProps {
@@ -10,6 +11,7 @@ interface UseUsersColumnsProps {
     update: boolean;
     delete: boolean;
   };
+  rolesList: Role[];
   onEdit: (user: User) => void;
   onView: (user: User) => void;
   onDelete: (user: User) => void;
@@ -19,6 +21,7 @@ interface UseUsersColumnsProps {
 
 export function useUsersColumns({
   roles,
+  rolesList,
   onEdit,
   onView,
   onDelete,
@@ -56,6 +59,18 @@ export function useUsersColumns({
       render: (user) => (
         <span className="text-muted-foreground">{user.phone || "-"}</span>
       ),
+    },
+    {
+      key: "role",
+      header: t("admin.users.columns.role"),
+      render: (user) => {
+        const role = rolesList.find((r) => r.id === user.roleId);
+        return (
+          <span className="text-muted-foreground">
+            {role?.name || "-"}
+          </span>
+        );
+      },
     },
   ];
 

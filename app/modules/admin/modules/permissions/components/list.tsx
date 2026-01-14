@@ -14,6 +14,8 @@ import {
   useFilterIdsConfig,
   createStringConverter,
   createArrayConverter,
+  createStringFilterHandler,
+  createArrayFilterHandler,
   useSyncFilterToUrl,
   useApplyFilterFromUrl,
   FilterManager,
@@ -97,27 +99,24 @@ export function PermissionsList({
     viewingPermission,
   } = usePermissionsStore();
 
-  const resetSearchFilter = useCallback(() => {
-    setSearchInput("");
-    setSearchValue("");
-  }, []);
-
-  const resetRoleFilter = useCallback(() => {
-    setSelectedRoleIds([]);
-  }, []);
-
+  // Filter handlers
   const filterHandlers = useMemo(
     () => [
       {
         filterId: "name",
-        resetValue: resetSearchFilter,
+        resetValue: () => {
+          setSearchInput("");
+          setSearchValue("");
+        },
       },
       {
         filterId: "roleId",
-        resetValue: resetRoleFilter,
+        resetValue: () => {
+          setSelectedRoleIds([]);
+        },
       },
     ],
-    [resetSearchFilter, resetRoleFilter]
+    []
   );
 
   const filterConfig = useMemo(
@@ -140,22 +139,22 @@ export function PermissionsList({
 
   const { hasFilterParams } = useApplyFilterFromUrl({
     filterHandlers: {
-      name: (_, value) => {
-        setSearchInput(value);
-        setSearchValue(value);
-      },
-      roleId: (_, value) => {
-        const roleIds = Array.isArray(value) ? value : [value].filter(Boolean);
-        setSelectedRoleIds(roleIds);
-      },
+      name: createStringFilterHandler(setSearchValue),
+      roleId: createArrayFilterHandler(setSelectedRoleIds),
     },
     onFilterApplied: async () => {
       isApplyingFiltersFromUrl.current = true;
       hasInitialFetch.current = true;
       setPage(1);
 
+      // Also set search input from URL
+      const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
+      const nameFilter = urlFilters.find((f) => f.key === "name");
+      if (nameFilter) {
+        setSearchInput(nameFilter.value);
+      }
+
       try {
-        const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
         const apiFilters = FilterManager.convertFiltersToApiParams(urlFilters);
         const result = await fetchPermissions(1, pageSize, apiFilters);
         const totalCount = result?.meta?.total ?? result?.data?.length ?? 0;
@@ -187,12 +186,6 @@ export function PermissionsList({
     onFilterChange: handleFilterChange,
   });
 
-  // Handler to remove a specific role from the array
-  const handleRemoveRole = useCallback((roleId: string) => {
-    setSelectedRoleIds((prev) => prev.filter((id) => id !== roleId));
-    setPage(1);
-  }, []);
-
   // Expose clearFilters function to parent component (only once on mount)
   useEffect(() => {
     if (onClearFiltersReady) {
@@ -201,6 +194,13 @@ export function PermissionsList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
 
+  // Handler to remove a specific role from the array
+  const handleRemoveRole = useCallback((roleId: string) => {
+    setSelectedRoleIds((prev) => prev.filter((id) => id !== roleId));
+    setPage(1);
+  }, []);
+
+  // Active filters for display
   const activeFilters = useMemo<ActiveFilter[]>(() => {
     const filters: ActiveFilter[] = [];
     if (searchValue) {

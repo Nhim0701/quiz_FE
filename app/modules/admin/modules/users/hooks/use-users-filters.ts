@@ -4,15 +4,14 @@ import { useTranslation } from "@/i18n";
 import {
   usePaginationStore,
   useApp,
-  useFilterActions,
-  useFilterHandlers,
-  useFilterIdsConfig,
   createStringConverter,
+  createArrayConverter,
+  createStringFilterHandler,
+  createArrayFilterHandler,
   useSyncFilterToUrl,
   useApplyFilterFromUrl,
   FilterManager,
 } from "@/hooks";
-import type { ActiveFilter } from "@/components/common/filters";
 import { useUsersStore } from "./use-users";
 
 const HOOK_ID = "users";
@@ -23,31 +22,19 @@ export function useUsersFilters(
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const { showError } = useApp();
-  const { page, pageSize, setPage, setPageSize, setTotal } =
-    usePaginationStore();
+  const { pageSize, setPage, setTotal } = usePaginationStore();
   const { fetchUsers } = useUsersStore();
 
   // Search input state (for typing)
   const [searchInput, setSearchInput] = useState("");
   // Search value state (for filtering - only updates on Enter/button click)
   const [searchValue, setSearchValue] = useState("");
+  // Role filter state
+  const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
 
   // Track if filters are being applied from URL to skip initial fetch
   const isApplyingFiltersFromUrl = useRef(false);
   const hasInitialFetch = useRef(false);
-
-  const filterHandlers = useMemo(
-    () => [
-      {
-        filterId: "name",
-        resetValue: () => {
-          setSearchInput("");
-          setSearchValue("");
-        },
-      },
-    ],
-    []
-  );
 
   const filterConfig = useMemo(
     () => [
@@ -57,24 +44,34 @@ export function useUsersFilters(
         defaultValue: "",
         converter: createStringConverter(),
       },
+      {
+        filterKey: "roleId",
+        value: selectedRoleIds,
+        defaultValue: [],
+        converter: createArrayConverter([]),
+      },
     ],
-    [searchValue]
+    [searchValue, selectedRoleIds]
   );
 
   const { hasFilterParams } = useApplyFilterFromUrl({
     filterHandlers: {
-      name: (_, value) => {
-        setSearchInput(value);
-        setSearchValue(value);
-      },
+      fullName: createStringFilterHandler(setSearchValue),
+      roleId: createArrayFilterHandler(setSelectedRoleIds),
     },
     onFilterApplied: async () => {
       isApplyingFiltersFromUrl.current = true;
       hasInitialFetch.current = true;
       setPage(1);
 
+      // Also set search input from URL
+      const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
+      const nameFilter = urlFilters.find((f) => f.key === "fullName");
+      if (nameFilter) {
+        setSearchInput(nameFilter.value);
+      }
+
       try {
-        const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
         const apiFilters = FilterManager.convertFiltersToApiParams(urlFilters);
         const result = await fetchUsers(1, pageSize, apiFilters);
         const totalCount = result?.meta?.total ?? result?.data?.length ?? 0;
@@ -97,56 +94,14 @@ export function useUsersFilters(
     hookId: HOOK_ID,
   });
 
-  const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
-    handlers: filterHandlers,
-    onFilterChange: useCallback(() => {
-      setPage(1);
-    }, [setPage]),
-  });
-
-  // Expose clearFilters function to parent component
-  useEffect(() => {
-    if (onClearFiltersReady) {
-      onClearFiltersReady(handleClearAllFilters);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const activeFilters = useMemo<ActiveFilter[]>(
-    () =>
-      searchValue
-        ? [
-            {
-              id: "name",
-              label: t("admin.users.columns.fullName"),
-              value: searchValue,
-            },
-          ]
-        : [],
-    [searchValue, t]
-  );
-
-  const filterIdsConfig = useFilterIdsConfig({
-    handlers: filterHandlers,
-    colorMap: {
-      name: "blue",
-    },
-  });
-
   const handleSearch = useCallback(() => {
     setSearchValue(searchInput);
     setPage(1);
   }, [searchInput, setPage]);
 
-  const filterActionButtons = useFilterActions({
-    onSearch: handleSearch,
-    activeFilters,
-    onClearFilters: handleClearAllFilters,
-  });
-
   const apiFilters = useMemo(() => {
     const activeFilters: Array<{ key: string; value: string }> = [];
-    filterConfig.forEach((filter) => {
+    filterConfig.forEach((filter: any) => {
       const converted = filter.converter(filter.value);
       if (converted === null) return;
 
@@ -177,10 +132,9 @@ export function useUsersFilters(
     searchInput,
     setSearchInput,
     searchValue,
-    activeFilters,
-    filterActionButtons,
-    filterIdsConfig,
-    handleRemoveFilter,
+    setSearchValue,
+    selectedRoleIds,
+    setSelectedRoleIds,
     handleSearch,
     apiFilters,
     hasFilterParams,

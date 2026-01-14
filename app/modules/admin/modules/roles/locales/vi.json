@@ -22,13 +22,21 @@
       "columns": {
         "id": "ID",
         "name": "Tên Vai Trò",
-        "description": "Mô Tả"
+        "description": "Mô Tả",
+        "default": "Mặc Định",
+        "permissions": "Quyền",
+        "createdAt": "Ngày Tạo",
+        "updatedAt": "Ngày Cập Nhật"
       },
       "form": {
         "nameLabel": "Tên Vai Trò",
         "namePlaceholder": "Nhập tên vai trò",
         "descriptionLabel": "Mô Tả",
-        "descriptionPlaceholder": "Nhập mô tả vai trò"
+        "descriptionPlaceholder": "Nhập mô tả vai trò",
+        "defaultLabel": "Vai Trò Mặc Định",
+        "permissionsLabel": "Quyền",
+        "createdAtLabel": "Ngày Tạo",
+        "updatedAtLabel": "Ngày Cập Nhật"
       },
       "validation": {
         "nameRequired": "Tên vai trò là bắt buộc"

@@ -382,9 +382,7 @@ export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
       const searchParams = new URLSearchParams();
       searchParams.set(FILTER_QUERY_PARAMS.FILTER_KEY(1), "testId");
       searchParams.set(FILTER_QUERY_PARAMS.FILTER_VALUE(1), test.id);
-      navigate(
-        `${QUESTIONS_ROUTES.QUESTIONS.INDEX}?${searchParams.toString()}`
-      );
+      navigate(`${QUESTIONS_ROUTES.INDEX}?${searchParams.toString()}`);
     },
     [navigate]
   );

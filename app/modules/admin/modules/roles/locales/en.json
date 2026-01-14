@@ -22,13 +22,21 @@
       "columns": {
         "id": "ID",
         "name": "Role Name",
-        "description": "Description"
+        "description": "Description",
+        "default": "Default",
+        "permissions": "Permissions",
+        "createdAt": "Created At",
+        "updatedAt": "Updated At"
       },
       "form": {
         "nameLabel": "Role Name",
         "namePlaceholder": "Enter role name",
         "descriptionLabel": "Description",
-        "descriptionPlaceholder": "Enter role description"
+        "descriptionPlaceholder": "Enter role description",
+        "defaultLabel": "Default Role",
+        "permissionsLabel": "Permissions",
+        "createdAtLabel": "Created At",
+        "updatedAtLabel": "Updated At"
       },
       "validation": {
         "nameRequired": "Role name is required"

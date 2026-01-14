@@ -19,6 +19,11 @@
       "viewTitle": "Thông tin người dùng",
       "viewDescription": "Xem và chỉnh sửa thông tin người dùng",
       "searchPlaceholder": "Tìm kiếm theo tên hoặc email...",
+      "filters": {
+        "rolePlaceholder": "Chọn vai trò",
+        "roleSearch": "Tìm kiếm vai trò...",
+        "roleEmpty": "Không có vai trò nào"
+      },
       "form": {
         "fullNameLabel": "Họ và tên",
         "fullNamePlaceholder": "Nhập họ và tên",
@@ -44,7 +49,8 @@
         "id": "ID",
         "fullName": "Họ và tên",
         "email": "Email",
-        "phone": "Số điện thoại"
+        "phone": "Số điện thoại",
+        "role": "Vai trò"
       },
       "changePassword": {
         "title": "Đổi mật khẩu",

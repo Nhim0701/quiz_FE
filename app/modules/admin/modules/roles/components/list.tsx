@@ -19,6 +19,8 @@ import {
 } from "@/hooks";
 import { useRolesStore, type Role } from "../hooks";
 import { Edit, Trash2, Eye } from "lucide-react";
+import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 import { RoleFormDialog } from "./form-dialog";
 import {
   AlertDialogAction,
@@ -316,6 +318,51 @@ export function RolesList({ roles, onClearFiltersReady }: RolesListProps) {
         render: (role) => (
           <span className="text-muted-foreground">
             {role.description || "-"}
+          </span>
+        ),
+      },
+      {
+        key: "default",
+        header: t("admin.roles.columns.default"),
+        className: "w-[100px]",
+        render: (role) => (
+          <Badge variant={role.default ? "default" : "secondary"}>
+            {role.default ? "Yes" : "No"}
+          </Badge>
+        ),
+      },
+      {
+        key: "permissions",
+        header: t("admin.roles.columns.permissions"),
+        render: (role) => (
+          <span className="text-muted-foreground">
+            {role.permissions && role.permissions.length > 0
+              ? `${role.permissions.length} ${t("admin.roles.columns.permissions")}`
+              : "-"}
+          </span>
+        ),
+      },
+      {
+        key: "createdAt",
+        header: t("admin.roles.columns.createdAt"),
+        className: "w-[150px]",
+        render: (role) => (
+          <span className="text-muted-foreground text-sm">
+            {role.createdAt
+              ? format(new Date(role.createdAt), "dd/MM/yyyy HH:mm")
+              : "-"}
+          </span>
+        ),
+      },
+      {
+        key: "updatedAt",
+        header: t("admin.roles.columns.updatedAt"),
+        className: "w-[150px]",
+        render: (role) => (
+          <span className="text-muted-foreground text-sm">
+            {role.updatedAt
+              ? format(new Date(role.updatedAt), "dd/MM/yyyy HH:mm")
+              : "-"}
           </span>
         ),
       },

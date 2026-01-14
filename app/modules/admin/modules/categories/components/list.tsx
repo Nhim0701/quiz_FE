@@ -250,7 +250,7 @@ export function CategoriesList({
       const searchParams = new URLSearchParams();
       searchParams.set(FILTER_QUERY_PARAMS.FILTER_KEY(1), "categoryId");
       searchParams.set(FILTER_QUERY_PARAMS.FILTER_VALUE(1), category.id);
-      navigate(`${TESTS_ROUTES.TESTS.INDEX}?${searchParams.toString()}`);
+      navigate(`${TESTS_ROUTES.INDEX}?${searchParams.toString()}`);
     },
     [navigate]
   );

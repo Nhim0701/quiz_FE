@@ -19,6 +19,11 @@
       "viewTitle": "User Information",
       "viewDescription": "View and edit user information",
       "searchPlaceholder": "Search by name or email...",
+      "filters": {
+        "rolePlaceholder": "Select role",
+        "roleSearch": "Search roles...",
+        "roleEmpty": "No roles available"
+      },
       "form": {
         "fullNameLabel": "Full Name",
         "fullNamePlaceholder": "Enter full name",
@@ -44,7 +49,8 @@
         "id": "ID",
         "fullName": "Full Name",
         "email": "Email",
-        "phone": "Phone"
+        "phone": "Phone",
+        "role": "Role"
       },
       "changePassword": {
         "title": "Change Password",
