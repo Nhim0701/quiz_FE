@@ -1,4 +1,3 @@
-import { useState, useCallback } from "react";
 import type { Route } from "./+types/index";
 import { useTranslation, t } from "@/i18n";
 import { useRole } from "@/modules/common/auth/hooks/use-role";
@@ -12,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { QuestionsList } from "./components";
 import { useQuestionsStore } from "./hooks";
+import { DIALOG_MODES } from "@/constants";
 import { pageMeta } from "@/lib";
 
 export const meta: Route.MetaFunction = () => {
@@ -21,7 +21,6 @@ export const meta: Route.MetaFunction = () => {
 export default function AdminQuestions() {
   const { t } = useTranslation();
   const { getNamespaceRoles } = useRole();
-  const [clearFilters, setClearFilters] = useState<(() => void) | null>(null);
 
   const roles = getNamespaceRoles(RESOURCES.QUESTION);
 
@@ -33,20 +32,16 @@ export default function AdminQuestions() {
       },
       {
         label: t("sidebar.admin.questions"),
-        href: ROUTES.QUESTIONS.INDEX,
+        href: ROUTES.INDEX,
       },
     ],
     [t]
   );
 
-  const handleClearFiltersReady = useCallback((clearFiltersFn: () => void) => {
-    setClearFilters(() => clearFiltersFn);
-  }, []);
-
   const { openDialog } = useQuestionsStore();
 
   const handleCreateQuestion = () => {
-    openDialog();
+    openDialog(DIALOG_MODES.CREATE);
   };
 
   if (!roles.read) {
@@ -81,7 +76,7 @@ export default function AdminQuestions() {
             </Button>
           )}
         </CardHeader>
-        <CardContent className="overflow-auto">
+        <CardContent>
           <QuestionsList roles={roles} />
         </CardContent>
       </Card>

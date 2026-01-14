@@ -3,6 +3,7 @@ import type { ApiSuccessResponse } from "@/types";
 import { apiClient } from "@/lib";
 import { ENDPOINTS } from "../constants";
 import type { AnswerProps, QuestionProps } from "../types";
+import { FILTER_QUERY_PARAMS } from "@/constants";
 
 interface AnswerState {
   loading: boolean;
@@ -33,7 +34,12 @@ export const useAnswerStore = create<AnswerState>((set) => ({
       // Get answers from question endpoint (which includes answers)
       const questionResponse = await apiClient.get<
         ApiSuccessResponse<QuestionProps>
-      >(ENDPOINTS.QUESTIONS.GET(questionId));
+      >(ENDPOINTS.ANSWERS.LIST, {
+        params: {
+          [FILTER_QUERY_PARAMS.FILTER_KEY(1)]: "question_id",
+          [FILTER_QUERY_PARAMS.FILTER_VALUE(1)]: questionId,
+        },
+      });
       const answers = questionResponse.data.data?.answers || [];
       set({ answers, loading: false });
       return answers;

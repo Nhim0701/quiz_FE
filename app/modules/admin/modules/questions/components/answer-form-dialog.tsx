@@ -39,7 +39,7 @@ interface AnswerDialogProps {
   onEdit?: () => void;
 }
 
-export function AnswerDialog({
+export function AnswerFormDialog({
   answer,
   questionId,
   isOpen,

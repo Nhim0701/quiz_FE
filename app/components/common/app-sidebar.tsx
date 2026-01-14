@@ -113,7 +113,7 @@ export function AppSidebar() {
     {
       title: t("sidebar.admin.questions"),
       icon: HelpCircle,
-      url: ADMIN_QUESTIONS_ROUTES.QUESTIONS.INDEX,
+      url: ADMIN_QUESTIONS_ROUTES.INDEX,
       permission: COMMON_PERMISSIONS.QUESTION_READ,
       resourcePrefix: RESOURCES.QUESTION,
     },

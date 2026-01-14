@@ -4,9 +4,10 @@
       "title": "Câu Hỏi",
       "create": "Tạo Câu Hỏi",
       "createTitle": "Tạo Câu Hỏi Mới",
+      "viewTitle": "Thông Tin Câu Hỏi",
+      "editTitle": "Chỉnh Sửa Câu Hỏi",
       "createSuccess": "Tạo câu hỏi thành công",
       "edit": "Chỉnh Sửa",
-      "editTitle": "Chỉnh Sửa Câu Hỏi",
       "updateSuccess": "Cập nhật câu hỏi thành công",
       "delete": "Xóa",
       "deleteSuccess": "Xóa câu hỏi thành công",
@@ -25,9 +26,17 @@
         "contentPlaceholder": "Nhập nội dung câu hỏi..."
       },
       "createDescription": "Tạo câu hỏi mới cho bài kiểm tra",
+      "viewDescription": "Xem chi tiết câu hỏi",
+      "editDescription": "Chỉnh sửa thông tin câu hỏi",
       "validation": {
         "contentRequired": "Nội dung câu hỏi là bắt buộc",
         "testRequired": "Bài kiểm tra là bắt buộc"
+      },
+      "errors": {
+        "fetchFailed": "Không thể tải danh sách câu hỏi",
+        "createFailed": "Không thể tạo câu hỏi",
+        "updateFailed": "Không thể cập nhật câu hỏi",
+        "deleteFailed": "Không thể xóa câu hỏi"
       },
       "columns": {
         "id": "ID",

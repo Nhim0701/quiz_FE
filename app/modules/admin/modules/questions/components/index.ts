@@ -1,3 +1,3 @@
 export { QuestionsList } from "./list";
-export { QuestionDialog } from "./question-dialog";
-export { AnswerDialog } from "./answer-dialog";
+export { QuestionFormDialog } from "./question-form-dialog";
+export { AnswerFormDialog } from "./answer-form-dialog";

@@ -52,18 +52,15 @@ export default [
       ),
 
       // Tests routes
-      route(
-        ADMIN_TESTS_ROUTES.TESTS.INDEX,
-        "modules/admin/modules/tests/index.tsx"
-      ),
+      route(ADMIN_TESTS_ROUTES.INDEX, "modules/admin/modules/tests/index.tsx"),
 
       // Questions routes
       route(
-        ADMIN_QUESTIONS_ROUTES.QUESTIONS.INDEX,
+        ADMIN_QUESTIONS_ROUTES.INDEX,
         "modules/admin/modules/questions/index.tsx"
       ),
       route(
-        ADMIN_QUESTIONS_ROUTES.QUESTIONS.EDIT,
+        ADMIN_QUESTIONS_ROUTES.VIEW(":questionId"),
         "modules/admin/modules/questions/routes/view.tsx"
       ),
 

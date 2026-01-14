@@ -1,9 +1,8 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { useLocation, useSearchParams, useNavigate } from "react-router";
+import { useSearchParams, useNavigate } from "react-router";
 import { useTranslation } from "@/i18n";
 import {
   DataTable,
-  Pagination,
   type Column,
   type Action,
 } from "@/components/common/data-table";
@@ -23,9 +22,11 @@ import {
   usePageData,
 } from "@/hooks";
 import { useQuestionsStore } from "../hooks";
+import { DIALOG_MODES } from "@/constants";
 import type { QuestionProps } from "../types";
 import { useCategoriesStore } from "../../categories/hooks";
 import { useTestsStore } from "../../tests/hooks";
+import type { TestProps } from "../../tests/types";
 import { Eye, Trash2, CheckSquare, Square } from "lucide-react";
 import {
   AlertDialogAction,
@@ -47,9 +48,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ROUTES } from "../constants";
 import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants/app";
-import { QuestionDialog } from "./question-dialog";
+import { QuestionFormDialog } from "./question-form-dialog";
 
 interface QuestionsListProps {
   roles: {
@@ -62,19 +62,11 @@ interface QuestionsListProps {
 
 export function QuestionsList({ roles }: QuestionsListProps) {
   const { t } = useTranslation();
-  const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { showError, showSuccess, showDialog, closeDialog } = useApp();
-  const {
-    page,
-    pageSize,
-    total,
-    setPage,
-    setPageSize,
-    setTotal,
-    setCurrentRoute,
-  } = usePaginationStore();
+  const { page, pageSize, total, setPage, setPageSize, setTotal } =
+    usePaginationStore();
 
   // Filter states
   const [searchInput, setSearchInput] = useState("");
@@ -89,12 +81,6 @@ export function QuestionsList({ roles }: QuestionsListProps) {
   const isApplyingFiltersFromUrl = useRef(false);
   const hasInitialFetch = useRef(false);
 
-  // Reset pagination when route changes
-  useEffect(() => {
-    const routePath = location.pathname;
-    setCurrentRoute(routePath);
-  }, [location.pathname, setCurrentRoute]);
-
   const {
     questions,
     loading,
@@ -102,9 +88,10 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     fetchQuestions,
     deleteQuestion,
     refreshQuestions,
+    openDialog,
   } = useQuestionsStore();
   const { categories, fetchCategories } = useCategoriesStore();
-  const { adminTests: tests, fetchTests } = useTestsStore();
+  const { tests, fetchTests } = useTestsStore();
 
   // Fetch categories and tests for filters
   usePageData(
@@ -128,8 +115,10 @@ export function QuestionsList({ roles }: QuestionsListProps) {
   useEffect(() => {
     if (selectedCategories.length > 0 && selectedTests.length > 0) {
       const validTestIds = tests
-        .filter((test) => selectedCategories.includes(test.categoryId))
-        .map((test) => test.id);
+        .filter((test: { categoryId: string }) =>
+          selectedCategories.includes(test.categoryId)
+        )
+        .map((test: { id: string }) => test.id);
       const invalidTests = selectedTests.filter(
         (testId) => !validTestIds.includes(testId)
       );
@@ -154,7 +143,7 @@ export function QuestionsList({ roles }: QuestionsListProps) {
 
   const testMap = useMemo(() => {
     const map = new Map<string, string>();
-    tests.forEach((test) => {
+    tests.forEach((test: TestProps) => {
       map.set(test.id, test.name);
     });
     return map;
@@ -415,7 +404,7 @@ export function QuestionsList({ roles }: QuestionsListProps) {
 
     let filteredTests = tests;
     if (selectedCategories.length > 0) {
-      filteredTests = tests.filter((test) => {
+      filteredTests = tests.filter((test: TestProps) => {
         // Ensure test has categoryId and it matches selected categories
         if (!test.categoryId) {
           return false;
@@ -424,7 +413,7 @@ export function QuestionsList({ roles }: QuestionsListProps) {
       });
     }
 
-    return filteredTests.map((test) => ({
+    return filteredTests.map((test: TestProps) => ({
       value: test.id,
       label: test.name,
     }));
@@ -432,7 +421,7 @@ export function QuestionsList({ roles }: QuestionsListProps) {
 
   // Enrich questions with test names
   const questionsWithTestNames = useMemo(() => {
-    return questions.map((question) => ({
+    return questions.map((question: QuestionProps) => ({
       ...question,
       testName: question.test
         ? testMap.get(question.test) || question.test || "-"
@@ -480,154 +469,189 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     setTotal(questionsTotal);
   }, [questionsTotal, setTotal]);
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
+  const handlePageChange = useCallback(
+    (newPage: number) => setPage(newPage),
+    [setPage]
+  );
 
-  const handlePageSizeChange = (newPageSize: number) => {
-    setPageSize(newPageSize);
-  };
+  const handlePageSizeChange = useCallback(
+    (newPageSize: number) => setPageSize(newPageSize),
+    [setPageSize]
+  );
 
-  const handleViewInfo = (question: QuestionProps) => {
-    // Navigate to question detail or test info page
-    navigate(ROUTES.QUESTIONS.EDIT.replace(":questionId", question.id));
-  };
+  const paginationProps = useMemo(
+    () => ({
+      page,
+      pageSize,
+      total,
+      onPageChange: handlePageChange,
+      onPageSizeChange: handlePageSizeChange,
+    }),
+    [page, pageSize, total, handlePageChange, handlePageSizeChange]
+  );
 
-  const handleDelete = (question: QuestionProps) => {
-    const confirmDelete = async () => {
-      try {
-        // Delete question (testId is not needed for delete endpoint)
-        await deleteQuestion("", question.id, page, pageSize, apiFilters);
-        showSuccess(t("admin.questions.deleteSuccess"));
-        await fetchQuestions(page, pageSize, apiFilters);
-        closeDialog();
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : t("errors.genericError");
-        showError(errorMessage);
-      }
-    };
+  const handleViewInfo = useCallback(
+    (question: QuestionProps) => {
+      openDialog(DIALOG_MODES.VIEW, question);
+    },
+    [openDialog]
+  );
 
-    showDialog({
-      title: t("admin.questions.delete"),
-      content: (
-        <AlertDialogDescription>
-          {t("admin.questions.confirmDelete")}
-        </AlertDialogDescription>
-      ),
-      footer: (
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={closeDialog}>
-            {t("common.cancel")}
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={confirmDelete}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
-            {t("admin.questions.delete")}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      ),
-    });
-  };
+  const handleDelete = useCallback(
+    (question: QuestionProps) => {
+      const confirmDelete = async () => {
+        try {
+          // Delete question (testId is not needed for delete endpoint)
+          await deleteQuestion("", question.id, page, pageSize, apiFilters);
+          showSuccess(t("admin.questions.deleteSuccess"));
+          await fetchQuestions(page, pageSize, apiFilters);
+          closeDialog();
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : t("errors.genericError");
+          showError(errorMessage);
+        }
+      };
 
-  const columns: Column<QuestionProps>[] = [
-    {
-      key: "id",
-      header: t("admin.questions.columns.id"),
-      className: "w-[50px]",
-      render: (question) => (
-        <span className="truncate block max-w-[100px]" title={question.id}>
-          {question.id}
-        </span>
-      ),
+      showDialog({
+        title: t("admin.questions.delete"),
+        content: (
+          <AlertDialogDescription>
+            {t("admin.questions.confirmDelete")}
+          </AlertDialogDescription>
+        ),
+        footer: (
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={closeDialog}>
+              {t("common.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("admin.questions.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        ),
+      });
     },
-    {
-      key: "content",
-      header: t("admin.questions.columns.content"),
-      className: "w-[600px]",
-      render: (question) => (
-        <span className="font-medium line-clamp-2">{question.content}</span>
-      ),
-    },
-    {
-      key: "category",
-      header: t("admin.questions.columns.category"),
-      render: (question) => (
-        <span className="text-muted-foreground">
-          {question.category || "-"}
-        </span>
-      ),
-    },
-    {
-      key: "test",
-      header: t("admin.questions.columns.test"),
-      render: (question) => (
-        <span className="text-muted-foreground">{question.test || "-"}</span>
-      ),
-    },
-    {
-      key: "isMultipleChoice",
-      header: t("admin.questions.columns.isMultipleChoice"),
-      meta: { center: true },
-      render: (question) => (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex items-center justify-center">
-                {question.isMultipleChoice ? (
-                  <CheckSquare className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-                ) : (
-                  <Square className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                )}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>
-                {question.isMultipleChoice
-                  ? t("admin.questions.multipleChoice")
-                  : t("admin.questions.singleChoice")}
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      ),
-    },
-    {
-      key: "answers",
-      header: t("admin.questions.columns.answers"),
-      meta: { center: true },
-      render: (question) => (
-        <span className="text-muted-foreground">
-          {question.answers?.length || 0}
-        </span>
-      ),
-    },
-  ];
+    [
+      deleteQuestion,
+      page,
+      pageSize,
+      apiFilters,
+      showSuccess,
+      t,
+      fetchQuestions,
+      closeDialog,
+      showDialog,
+      showError,
+    ]
+  );
 
-  const actions: Action<QuestionProps>[] = [
-    ...(roles.read
-      ? [
-          {
-            label: t("common.viewInfo"),
-            onClick: handleViewInfo,
-            icon: <Eye className="h-4 w-4" />,
-            actionType: "viewInfo" as const,
-          },
-        ]
-      : []),
-    ...(roles.delete
-      ? [
-          {
-            label: t("admin.questions.delete"),
-            onClick: handleDelete,
-            variant: "destructive" as const,
-            icon: <Trash2 className="h-4 w-4" />,
-            actionType: "delete" as const,
-          },
-        ]
-      : []),
-  ];
+  const columns = useMemo<Column<QuestionProps>[]>(
+    () => [
+      {
+        key: "id",
+        header: t("admin.questions.columns.id"),
+        className: "w-[50px]",
+        render: (question) => (
+          <span className="truncate block max-w-[100px]" title={question.id}>
+            {question.id}
+          </span>
+        ),
+      },
+      {
+        key: "content",
+        header: t("admin.questions.columns.content"),
+        className: "w-[600px]",
+        render: (question) => (
+          <span className="font-medium line-clamp-2">{question.content}</span>
+        ),
+      },
+      {
+        key: "category",
+        header: t("admin.questions.columns.category"),
+        render: (question) => (
+          <span className="text-muted-foreground">
+            {question.category || "-"}
+          </span>
+        ),
+      },
+      {
+        key: "test",
+        header: t("admin.questions.columns.test"),
+        render: (question) => (
+          <span className="text-muted-foreground">{question.test || "-"}</span>
+        ),
+      },
+      {
+        key: "isMultipleChoice",
+        header: t("admin.questions.columns.isMultipleChoice"),
+        meta: { center: true },
+        render: (question) => (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center justify-center">
+                  {question.isMultipleChoice ? (
+                    <CheckSquare className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+                  ) : (
+                    <Square className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                  )}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  {question.isMultipleChoice
+                    ? t("admin.questions.multipleChoice")
+                    : t("admin.questions.singleChoice")}
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ),
+      },
+      {
+        key: "answers",
+        header: t("admin.questions.columns.answers"),
+        meta: { center: true },
+        render: (question) => (
+          <span className="text-muted-foreground">
+            {question.answers?.length || 0}
+          </span>
+        ),
+      },
+    ],
+    [t]
+  );
+
+  const actions = useMemo<Action<QuestionProps>[]>(
+    () => [
+      ...(roles.read
+        ? [
+            {
+              label: t("common.viewInfo"),
+              onClick: handleViewInfo,
+              icon: <Eye className="h-4 w-4" />,
+              actionType: "viewInfo" as const,
+            },
+          ]
+        : []),
+      ...(roles.delete
+        ? [
+            {
+              label: t("admin.questions.delete"),
+              onClick: handleDelete,
+              variant: "destructive" as const,
+              icon: <Trash2 className="h-4 w-4" />,
+              actionType: "delete" as const,
+            },
+          ]
+        : []),
+    ],
+    [roles, t, handleViewInfo, handleDelete]
+  );
 
   return (
     <>
@@ -711,15 +735,9 @@ export function QuestionsList({ roles }: QuestionsListProps) {
         actions={actions}
         loading={loading}
         emptyMessage={t("admin.questions.empty")}
+        pagination={paginationProps}
       />
-      <Pagination
-        page={page}
-        pageSize={pageSize}
-        total={total}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
-      />
-      <QuestionDialog />
+      <QuestionFormDialog />
     </>
   );
 }

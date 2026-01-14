@@ -2,9 +2,7 @@ import { create } from "zustand";
 import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
 import { apiClient } from "@/lib";
 import { ENDPOINTS, ERROR_MESSAGES, DEFAULT_VALUES } from "../constants";
-import { ENDPOINTS as QUESTIONS_ENDPOINTS } from "../../questions/constants";
 import type { TestProps } from "../types";
-import type { QuestionProps } from "../../questions/types";
 import type { FormDialogMode } from "@/constants";
 import { DIALOG_MODES, FILTER_QUERY_PARAMS } from "@/constants";
 import { PAGINATION } from "@/constants";
@@ -65,51 +63,6 @@ interface TestsState {
     pageSize?: number,
     filters?: Record<string, string>
   ) => Promise<void>;
-
-  // Questions state and methods (merged from useQuestionsStore)
-  questions: QuestionProps[];
-  questionsLoading: boolean;
-  questionsError: string | null;
-  questionsTotal: number;
-  questionsMeta?: ApiResponseMeta;
-  isQuestionsDialogOpen: boolean;
-  openQuestionsDialog: () => void;
-  closeQuestionsDialog: () => void;
-  fetchQuestions: (
-    page?: number,
-    pageSize?: number,
-    filters?: Record<string, string>
-  ) => Promise<void>;
-  createQuestion: (data: {
-    testId: string;
-    content: string;
-    isMultipleChoice: boolean;
-    categoryId?: string;
-  }) => Promise<QuestionProps>;
-  updateQuestion: (
-    testId: string,
-    questionId: string,
-    data: {
-      content: string;
-      isMultipleChoice: boolean;
-      testId?: string;
-      categoryId?: string;
-    }
-  ) => Promise<QuestionProps>;
-  getQuestion: (testId: string, questionId: string) => Promise<QuestionProps>;
-  deleteQuestion: (
-    testId: string,
-    questionId: string,
-    page?: number,
-    pageSize?: number,
-    filters?: Record<string, string>
-  ) => Promise<void>;
-  refreshQuestions: (
-    testId: string,
-    page?: number,
-    pageSize?: number,
-    filters?: Record<string, string>
-  ) => Promise<void>;
 }
 
 export const useTestsStore = create<TestsState>((set, get) => ({
@@ -125,14 +78,6 @@ export const useTestsStore = create<TestsState>((set, get) => ({
   dialogMode: null,
   test: null,
   isEditMode: false,
-
-  // Questions initial state
-  questions: [],
-  questionsLoading: false,
-  questionsError: null,
-  questionsTotal: 0,
-  questionsMeta: undefined,
-  isQuestionsDialogOpen: false,
 
   // Form actions
   openDialog: (mode: FormDialogMode, test?: TestProps | null) => {
@@ -420,155 +365,5 @@ export const useTestsStore = create<TestsState>((set, get) => ({
         set({ test: updatedTest });
       }
     }
-  },
-
-  // Questions dialog actions
-  openQuestionsDialog: () => set({ isQuestionsDialogOpen: true }),
-  closeQuestionsDialog: () => set({ isQuestionsDialogOpen: false }),
-
-  // Questions API methods
-  fetchQuestions: async (
-    page = 1,
-    pageSize = 10,
-    filters?: Record<string, string>
-  ) => {
-    set({ questionsLoading: true, questionsError: null });
-    try {
-      const params: Record<string, any> = {
-        page,
-        pageSize,
-      };
-
-      // Add filter params if provided
-      if (filters) {
-        Object.entries(filters).forEach(([key, value]) => {
-          if (value && typeof value === "string" && value.trim()) {
-            params[key] = value;
-          }
-        });
-      }
-
-      const response = await apiClient.get<ApiSuccessResponse<QuestionProps[]>>(
-        QUESTIONS_ENDPOINTS.QUESTIONS.LIST,
-        {
-          params,
-        }
-      );
-      set({
-        questions: response.data.data || [],
-        questionsLoading: false,
-        questionsTotal:
-          response.data.meta?.total || response.data.data?.length || 0,
-        questionsMeta: response.data.meta,
-      });
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : t(ERROR_MESSAGES.FETCH_FAILED);
-      set({
-        questionsError: errorMessage,
-        questionsLoading: false,
-        questions: [],
-        questionsTotal: 0,
-      });
-      throw error;
-    }
-  },
-
-  createQuestion: async (data: {
-    testId: string;
-    content: string;
-    isMultipleChoice: boolean;
-    categoryId?: string;
-  }) => {
-    set({ questionsLoading: true, questionsError: null });
-    try {
-      const response = await apiClient.post<ApiSuccessResponse<QuestionProps>>(
-        QUESTIONS_ENDPOINTS.QUESTIONS.CREATE,
-        data
-      );
-      set({ questionsLoading: false });
-      return response.data.data;
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : t(ERROR_MESSAGES.CREATE_FAILED);
-      set({ questionsError: errorMessage, questionsLoading: false });
-      throw error;
-    }
-  },
-
-  updateQuestion: async (
-    testId: string,
-    questionId: string,
-    data: {
-      content: string;
-      isMultipleChoice: boolean;
-      testId?: string;
-      categoryId?: string;
-    }
-  ) => {
-    set({ questionsLoading: true, questionsError: null });
-    try {
-      const response = await apiClient.put<ApiSuccessResponse<QuestionProps>>(
-        QUESTIONS_ENDPOINTS.QUESTIONS.UPDATE(questionId),
-        data
-      );
-      set({ questionsLoading: false });
-      return response.data.data;
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : t(ERROR_MESSAGES.UPDATE_FAILED);
-      set({ questionsError: errorMessage, questionsLoading: false });
-      throw error;
-    }
-  },
-
-  getQuestion: async (testId: string, questionId: string) => {
-    set({ questionsLoading: true, questionsError: null });
-    try {
-      const response = await apiClient.get<ApiSuccessResponse<QuestionProps>>(
-        QUESTIONS_ENDPOINTS.QUESTIONS.GET(questionId)
-      );
-      set({ questionsLoading: false });
-      return response.data.data;
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : t(ERROR_MESSAGES.FETCH_FAILED);
-      set({ questionsError: errorMessage, questionsLoading: false });
-      throw error;
-    }
-  },
-
-  deleteQuestion: async (
-    testId: string,
-    questionId: string,
-    page = 1,
-    pageSize = 10,
-    filters?: Record<string, string>
-  ) => {
-    set({ questionsLoading: true, questionsError: null });
-    try {
-      await apiClient.delete(QUESTIONS_ENDPOINTS.QUESTIONS.DELETE(questionId));
-      // Refresh questions after delete
-      await get().fetchQuestions(page, pageSize, filters);
-      set({ questionsLoading: false });
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to delete question";
-      set({ questionsError: errorMessage, questionsLoading: false });
-      throw error;
-    }
-  },
-
-  refreshQuestions: async (
-    testId: string,
-    page = 1,
-    pageSize = 10,
-    filters?: Record<string, string>
-  ) => {
-    await get().fetchQuestions(page, pageSize, filters);
   },
 }));

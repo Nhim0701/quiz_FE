@@ -4,9 +4,10 @@
       "title": "Questions",
       "create": "Create Question",
       "createTitle": "Create New Question",
+      "viewTitle": "Question Information",
+      "editTitle": "Edit Question",
       "createSuccess": "Question created successfully",
       "edit": "Edit",
-      "editTitle": "Edit Question",
       "updateSuccess": "Question updated successfully",
       "delete": "Delete",
       "deleteSuccess": "Question deleted successfully",
@@ -25,9 +26,17 @@
         "contentPlaceholder": "Enter question content..."
       },
       "createDescription": "Create a new question for the test",
+      "viewDescription": "View question details",
+      "editDescription": "Edit question information",
       "validation": {
         "contentRequired": "Question content is required",
         "testRequired": "Test is required"
+      },
+      "errors": {
+        "fetchFailed": "Failed to fetch questions",
+        "createFailed": "Failed to create question",
+        "updateFailed": "Failed to update question",
+        "deleteFailed": "Failed to delete question"
       },
       "columns": {
         "id": "ID",

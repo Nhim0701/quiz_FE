@@ -1,3 +1,2 @@
-export { useQuestionsStore } from "../../tests/hooks/use-tests";
+export { useQuestionsStore } from "./use-question";
 export { useAnswerStore } from "./use-answer";
-export type { QuestionProps } from "../types";
