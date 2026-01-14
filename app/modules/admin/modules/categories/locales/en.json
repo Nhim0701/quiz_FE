@@ -31,6 +31,12 @@
         "id": "ID",
         "name": "Name",
         "questionCount": "Questions"
+      },
+      "errors": {
+        "fetchFailed": "Failed to fetch categories",
+        "createFailed": "Failed to create category",
+        "updateFailed": "Failed to update category",
+        "deleteFailed": "Failed to delete category"
       }
     }
   }

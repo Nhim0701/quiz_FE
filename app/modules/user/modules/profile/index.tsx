@@ -9,11 +9,10 @@ import { UserInfo } from "./components";
 import { ChangePasswordModal } from "./components/change-password-modal";
 import { useProfile } from "./hooks";
 import { ROUTES } from "./constants";
-import { useTranslation } from "@/i18n";
+import { useTranslation, t } from "@/i18n";
 import { pageMeta } from "@/lib";
 
 export const meta: Route.MetaFunction = () => {
-  const { t } = useTranslation();
   return pageMeta(t("sidebar.profile"))();
 };
 

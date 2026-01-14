@@ -11,3 +11,15 @@ export const ENDPOINTS = {
 
   TESTS: (categoryId: string) => `/api/v1/categories/${categoryId}/tests`,
 };
+
+export const ERROR_MESSAGES = {
+  FETCH_FAILED: "admin.categories.errors.fetchFailed",
+  CREATE_FAILED: "admin.categories.errors.createFailed",
+  UPDATE_FAILED: "admin.categories.errors.updateFailed",
+  DELETE_FAILED: "admin.categories.errors.deleteFailed",
+} as const;
+
+export const DEFAULT_VALUES = {
+  PAGE: 1,
+  PAGE_SIZE: 10,
+} as const;

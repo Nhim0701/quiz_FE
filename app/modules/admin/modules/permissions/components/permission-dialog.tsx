@@ -187,7 +187,7 @@ export function PermissionViewDialog({
               error={errors.name}
               required
               disabled={!isEditMode || loading || isSubmitting}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
             <FormField
               id="permission"
@@ -198,7 +198,7 @@ export function PermissionViewDialog({
               error={errors.permission}
               required
               disabled={!isEditMode || loading || isSubmitting}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
             <FormField
               id="description"
@@ -208,7 +208,7 @@ export function PermissionViewDialog({
               register={register("description")}
               error={errors.description}
               disabled={!isEditMode || loading || isSubmitting}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
           </div>
           <DialogFooter>

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import type { Route } from "./+types/index";
-import { useTranslation } from "@/i18n";
+import { useTranslation, t } from "@/i18n";
 import { useRole } from "@/modules/common/auth/hooks/use-role";
 import { RESOURCES } from "@/modules/admin/constants/permissions";
 import { ROUTES } from "./constants";
@@ -10,12 +10,13 @@ import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { CategoriesList, CategoryForm } from "./components";
+import { CategoriesList } from "./components";
+import { CategoryFormDialog } from "./components/form-dialog";
 import { useCategoriesStore } from "./hooks";
 import { pageMeta } from "@/lib";
+import { DIALOG_MODES } from "@/constants";
 
 export const meta: Route.MetaFunction = () => {
-  const { t } = useTranslation();
   return pageMeta(t("admin.categories.title"))();
 };
 
@@ -68,7 +69,7 @@ export default function AdminCategories() {
           <CardTitle>{t("admin.categories.cardTitle")}</CardTitle>
           {roles.create && (
             <Button
-              onClick={() => openDialog()}
+              onClick={() => openDialog(DIALOG_MODES.CREATE)}
               size="sm"
               className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 dark:from-emerald-600 dark:to-green-700 dark:hover:from-emerald-700 dark:hover:to-green-800 text-white shadow-md hover:shadow-lg transition-all duration-200 font-medium"
             >
@@ -84,9 +85,7 @@ export default function AdminCategories() {
           />
         </CardContent>
       </Card>
-      <div className="mt-4">
-        <CategoryForm onClearFilters={clearFilters} />
-      </div>
+      <CategoryFormDialog onClearFilters={clearFilters} />
     </Container>
   );
 }

@@ -5,11 +5,10 @@ import { useAuth } from "@/modules/common/auth/hooks/use-auth";
 import { SESSION_KEYS } from "@/constants";
 import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/modules/dashboard/constants";
 import { LoginHeader, LoginForm, LoginCard, LoginFooter } from "./components";
-import { useTranslation } from "@/i18n";
+import { useTranslation, t } from "@/i18n";
 import { pageMeta } from "@/lib";
 
 export const meta: Route.MetaFunction = () => {
-  const { t } = useTranslation();
   return pageMeta(t("auth.login.title"))();
 };
 

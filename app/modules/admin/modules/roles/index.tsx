@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import type { Route } from "./+types/index";
-import { useTranslation } from "@/i18n";
+import { useTranslation, t } from "@/i18n";
 import { useRole } from "@/modules/common/auth/hooks/use-role";
 import { RESOURCES } from "@/modules/admin/constants/permissions";
 import { ROUTES } from "./constants";
@@ -15,7 +15,6 @@ import { useRolesStore } from "./hooks";
 import { pageMeta } from "@/lib";
 
 export const meta: Route.MetaFunction = () => {
-  const { t } = useTranslation();
   return pageMeta(t("admin.roles.title"))();
 };
 

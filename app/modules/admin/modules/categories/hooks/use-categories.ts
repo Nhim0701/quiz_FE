@@ -1,7 +1,10 @@
 import { create } from "zustand";
 import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
 import { apiClient } from "@/lib";
-import { ENDPOINTS } from "../constants";
+import { ENDPOINTS, ERROR_MESSAGES, DEFAULT_VALUES } from "../constants";
+import type { FormDialogMode } from "@/constants";
+import { DIALOG_MODES } from "@/constants";
+import { t } from "@/i18n/utils";
 
 export interface Category {
   id: string;
@@ -17,14 +20,13 @@ interface CategoriesState {
 
   // Form state
   isDialogOpen: boolean;
-  editingCategory: Category | null;
-  viewingCategory: Category | null;
+  dialogMode: FormDialogMode | null;
+  category: Category | null;
   isEditMode: boolean;
 
   // Actions
-  openDialog: (category?: Category | null) => void;
+  openDialog: (mode: FormDialogMode, category?: Category | null) => void;
   closeDialog: () => void;
-  openViewDialog: (category: Category) => void;
   setEditMode: (isEdit: boolean) => void;
 
   // API methods
@@ -49,27 +51,24 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
   loading: false,
   error: null,
   isDialogOpen: false,
-  editingCategory: null,
-  viewingCategory: null,
+  dialogMode: null,
+  category: null,
   isEditMode: false,
 
   // Form actions
-  openDialog: (category = null) => {
-    set({ isDialogOpen: true, editingCategory: category, isEditMode: false });
+  openDialog: (mode: FormDialogMode, category?: Category | null) => {
+    set({
+      isDialogOpen: true,
+      dialogMode: mode,
+      category: category ?? null,
+      isEditMode: mode === DIALOG_MODES.EDIT,
+    });
   },
   closeDialog: () => {
     set({
       isDialogOpen: false,
-      editingCategory: null,
-      viewingCategory: null,
-      isEditMode: false,
-    });
-  },
-  openViewDialog: (category) => {
-    set({
-      isDialogOpen: true,
-      viewingCategory: category,
-      editingCategory: null,
+      dialogMode: null,
+      category: null,
       isEditMode: false,
     });
   },
@@ -79,8 +78,8 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
 
   // API methods
   fetchCategories: async (
-    page = 1,
-    pageSize = 10,
+    page = DEFAULT_VALUES.PAGE,
+    pageSize = DEFAULT_VALUES.PAGE_SIZE,
     filters?: Record<string, string>
   ) => {
     set({ loading: true, error: null });
@@ -102,23 +101,17 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
 
       const response = await apiClient.get<ApiSuccessResponse<Category[]>>(
         ENDPOINTS.LIST,
-        {
-          params,
-        }
+        { params }
       );
 
       const data = response.data.data || [];
       const meta = response.data.meta;
 
-      set({
-        categories: data,
-        loading: false,
-      });
-
+      set({ categories: data, loading: false });
       return { data, meta };
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch categories";
+        error instanceof Error ? error.message : t(ERROR_MESSAGES.FETCH_FAILED);
       set({ error: errorMessage, loading: false });
       throw error;
     }
@@ -128,14 +121,16 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await apiClient.post<ApiSuccessResponse<Category>>(
-        ENDPOINTS.LIST,
+        ENDPOINTS.CREATE,
         data
       );
       set({ loading: false });
       return response.data.data;
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to create category";
+        error instanceof Error
+          ? error.message
+          : t(ERROR_MESSAGES.CREATE_FAILED);
       set({ error: errorMessage, loading: false });
       throw error;
     }
@@ -145,14 +140,16 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await apiClient.put<ApiSuccessResponse<Category>>(
-        ENDPOINTS.GET(id),
+        ENDPOINTS.UPDATE(id),
         data
       );
       set({ loading: false });
       return response.data.data;
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to update category";
+        error instanceof Error
+          ? error.message
+          : t(ERROR_MESSAGES.UPDATE_FAILED);
       set({ error: errorMessage, loading: false });
       throw error;
     }
@@ -161,32 +158,32 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
   deleteCategory: async (id) => {
     set({ loading: true, error: null });
     try {
-      await apiClient.delete(ENDPOINTS.GET(id));
+      await apiClient.delete(ENDPOINTS.DELETE(id));
       set({ loading: false });
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to delete category";
+        error instanceof Error
+          ? error.message
+          : t(ERROR_MESSAGES.DELETE_FAILED);
       set({ error: errorMessage, loading: false });
       throw error;
     }
   },
 
   refreshCategories: async (
-    page = 1,
-    pageSize = 10,
+    page = DEFAULT_VALUES.PAGE,
+    pageSize = DEFAULT_VALUES.PAGE_SIZE,
     filters?: Record<string, string>
   ) => {
-    const { viewingCategory } = get();
+    const { category, dialogMode } = get();
     await get().fetchCategories(page, pageSize, filters);
 
-    // Update viewingCategory if it exists and dialog is still open
-    if (viewingCategory) {
+    // Update category if it exists and dialog is still open
+    if (category && dialogMode) {
       const { categories } = get();
-      const updatedCategory = categories.find(
-        (c) => c.id === viewingCategory.id
-      );
+      const updatedCategory = categories.find((c) => c.id === category.id);
       if (updatedCategory) {
-        set({ viewingCategory: updatedCategory });
+        set({ category: updatedCategory });
       }
     }
   },

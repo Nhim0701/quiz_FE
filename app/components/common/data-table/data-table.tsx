@@ -21,8 +21,11 @@ import {
 import { ActionButtons } from "./action-buttons";
 import { ActionDropdown } from "./action-dropdown";
 import { Pagination } from "./pagination";
-import type { Column, DataTableProps } from "./types";
-import { convertColumnToColumnDef } from "./types";
+import {
+  convertColumnToColumnDef,
+  type Column,
+  type DataTableProps,
+} from "./types";
 
 export function DataTable<T extends { id: string | number }>({
   columns,
@@ -89,106 +92,94 @@ export function DataTable<T extends { id: string | number }>({
     getCoreRowModel: getCoreRowModel(),
   });
 
-  // Memoize loading state
-  const loadingState = useMemo(
-    () => (
-      <div className={cn("w-full", className)}>
-        <div className="rounded-lg border border-border bg-card shadow-sm">
-          <div className="p-12 text-center">
-            <div className="inline-flex items-center gap-2 text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-sm font-medium">{loadingText}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    ),
-    [className, loadingText]
-  );
+  // Get row model to ensure it updates when data changes
+  const rowModel = table.getRowModel();
+  const headerGroups = table.getHeaderGroups();
 
-  if (loading) {
-    return loadingState;
-  }
-
-  // Memoize table content
+  // Memoize table content using shadcn/ui pattern
   const tableContent = useMemo(
     () => (
-      <div>
-        <table className="w-full caption-bottom text-sm">
-          <TableHeader
-            className={cn(
-              isScrollEnabled && "sticky top-0 z-10 bg-card shadow-sm"
-            )}
-          >
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  const meta = header.column.columnDef.meta as
+      <Table>
+        <TableHeader
+          className={cn(
+            isScrollEnabled && "sticky top-0 z-10 bg-card shadow-sm"
+          )}
+        >
+          {headerGroups.map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                const meta = header.column.columnDef.meta as
+                  | { className?: string; center?: boolean }
+                  | undefined;
+                return (
+                  <TableHead
+                    key={header.id}
+                    className={cn(
+                      meta?.center && "text-center",
+                      meta?.className
+                    )}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                );
+              })}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {rowModel.rows?.length ? (
+            rowModel.rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+              >
+                {row.getVisibleCells().map((cell) => {
+                  const meta = cell.column.columnDef.meta as
                     | { className?: string; center?: boolean }
                     | undefined;
                   return (
-                    <TableHead
-                      key={header.id}
+                    <TableCell
+                      key={cell.id}
                       className={cn(
                         meta?.center && "text-center",
                         meta?.className
                       )}
                     >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
                   );
                 })}
               </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => {
-                    const meta = cell.column.columnDef.meta as
-                      | { className?: string; center?: boolean }
-                      | undefined;
-                    return (
-                      <TableCell
-                        key={cell.id}
-                        className={cn(
-                          meta?.center && "text-center",
-                          meta?.className
-                        )}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={tableColumns.length}
-                  className="h-24 text-center text-sm text-muted-foreground"
-                >
-                  {displayEmptyMessage}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </table>
-      </div>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan={tableColumns.length}
+                className="h-24 text-center text-sm text-muted-foreground"
+              >
+                {displayEmptyMessage}
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
     ),
-    [table, tableColumns.length, displayEmptyMessage, isScrollEnabled]
+    [
+      headerGroups,
+      rowModel.rows,
+      tableColumns.length,
+      displayEmptyMessage,
+      isScrollEnabled,
+      data,
+    ]
   );
 
   // Memoize pagination component
@@ -214,8 +205,30 @@ export function DataTable<T extends { id: string | number }>({
     ]
   );
 
+  // Memoize loading state
+  const loadingState = useMemo(
+    () => (
+      <div className={cn("w-full", className)}>
+        <div className="rounded-lg border border-border bg-card shadow-sm">
+          <div className="p-12 text-center">
+            <div className="inline-flex items-center gap-2 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm font-medium">{loadingText}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+    [className, loadingText]
+  );
+
   // Memoize container classes
   const containerClasses = cn("w-full", className);
+
+  // Early return after all hooks are called
+  if (loading) {
+    return loadingState;
+  }
 
   if (isScrollEnabled) {
     return (

@@ -34,9 +34,7 @@ export function AppDialog() {
           </AlertDialogHeader>
         )}
         {dialogContent && (
-          <div className={cn("py-4", dialogContentContainerClassName)}>
-            {dialogContent}
-          </div>
+          <div className={dialogContentContainerClassName}>{dialogContent}</div>
         )}
         {dialogFooter && (
           <AlertDialogFooter className={cn(dialogFooterContainerClassName)}>

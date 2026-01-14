@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router";
 import type { Route } from "./+types/view";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslation } from "@/i18n";
+import { useTranslation, t } from "@/i18n";
 import { useRole } from "@/modules/common/auth/hooks/use-role";
 import { RESOURCES } from "@/modules/admin/constants/permissions";
 import { ROUTES } from "../constants";
@@ -45,7 +45,6 @@ import { AnswerDialog } from "../components";
 import { pageMeta } from "@/lib";
 
 export const meta: Route.MetaFunction = () => {
-  const { t } = useTranslation();
   return pageMeta(t("admin.questions.questionInfo"))();
 };
 

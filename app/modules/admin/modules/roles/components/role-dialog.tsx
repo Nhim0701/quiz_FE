@@ -178,7 +178,7 @@ export function RoleViewDialog({ role, onDelete }: RoleViewDialogProps) {
               error={errors.name}
               required
               disabled={!isEditMode || loading || isSubmitting}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
             <FormField
               id="description"
@@ -188,7 +188,7 @@ export function RoleViewDialog({ role, onDelete }: RoleViewDialogProps) {
               register={register("description")}
               error={errors.description}
               disabled={!isEditMode || loading || isSubmitting}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
           </div>
           <DialogFooter>

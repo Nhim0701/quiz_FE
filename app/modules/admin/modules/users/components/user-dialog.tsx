@@ -199,7 +199,7 @@ export function UserViewDialog({ user, onDelete }: UserViewDialogProps) {
               error={errors.fullName}
               required
               disabled={!isEditMode || loading || isSubmitting}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
             <FormField
               id="email"
@@ -210,7 +210,7 @@ export function UserViewDialog({ user, onDelete }: UserViewDialogProps) {
               error={errors.email}
               required
               disabled={!isEditMode || loading || isSubmitting}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
             <FormField
               id="phone"
@@ -220,7 +220,7 @@ export function UserViewDialog({ user, onDelete }: UserViewDialogProps) {
               register={register("phone")}
               error={errors.phone}
               disabled={!isEditMode || loading || isSubmitting}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
             <DatePickerField
               id="birthday"
@@ -230,7 +230,7 @@ export function UserViewDialog({ user, onDelete }: UserViewDialogProps) {
               error={errors.birthday}
               disabled={!isEditMode || loading || isSubmitting}
               placeholder={t("admin.users.form.birthdayPlaceholder")}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
             <FormField
               id="jobTitle"
@@ -240,7 +240,7 @@ export function UserViewDialog({ user, onDelete }: UserViewDialogProps) {
               register={register("jobTitle")}
               error={errors.jobTitle}
               disabled={!isEditMode || loading || isSubmitting}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
             <FormField
               id="company"
@@ -250,7 +250,7 @@ export function UserViewDialog({ user, onDelete }: UserViewDialogProps) {
               register={register("company")}
               error={errors.company}
               disabled={!isEditMode || loading || isSubmitting}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
           </div>
           <FormField
@@ -261,7 +261,7 @@ export function UserViewDialog({ user, onDelete }: UserViewDialogProps) {
             register={register("address")}
             error={errors.address}
             disabled={!isEditMode || loading || isSubmitting}
-            labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+            labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
           />
           <DialogFooter>
             {!isEditMode ? (

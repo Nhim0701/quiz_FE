@@ -119,7 +119,7 @@ export function NamespaceForm({ onClearFilters }: NamespaceFormProps) {
             error={errors.name}
             required
             disabled={loading || isSubmitting}
-            labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+            labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
           />
           <FormField
             id="prefix"
@@ -130,7 +130,7 @@ export function NamespaceForm({ onClearFilters }: NamespaceFormProps) {
             error={errors.prefix}
             required
             disabled={loading || isSubmitting}
-            labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+            labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
           />
           <FormField
             id="description"
@@ -140,7 +140,7 @@ export function NamespaceForm({ onClearFilters }: NamespaceFormProps) {
             register={register("description")}
             error={errors.description}
             disabled={loading || isSubmitting}
-            labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+            labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
           />
           <DialogFooter>
             <Button

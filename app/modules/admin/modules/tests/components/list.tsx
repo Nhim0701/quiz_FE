@@ -354,11 +354,12 @@ export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
             ? error.message
             : t("errors.fetchDashboardFailed");
         showError(errorMessage);
+      } finally {
+        hasInitialFetch.current = true;
       }
     };
 
     loadTests();
-    hasInitialFetch.current = true;
   }, [
     page,
     pageSize,

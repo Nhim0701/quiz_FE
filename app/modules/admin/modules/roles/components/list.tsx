@@ -235,11 +235,12 @@ export function RolesList({ roles, onClearFiltersReady }: RolesListProps) {
             ? error.message
             : t("errors.fetchDashboardFailed");
         showError(errorMessage);
+      } finally {
+        hasInitialFetch.current = true;
       }
     };
 
     loadRoles();
-    hasInitialFetch.current = true;
   }, [
     page,
     pageSize,

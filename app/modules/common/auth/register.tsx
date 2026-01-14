@@ -6,7 +6,7 @@ import {
   type RegisterFormData,
 } from "@/modules/common/auth/hooks/use-auth";
 import { useApp } from "@/hooks";
-import { useTranslation } from "@/i18n";
+import { useTranslation, t } from "@/i18n";
 import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/modules/dashboard/constants";
 import {
   RegisterHeader,
@@ -17,7 +17,6 @@ import {
 import { pageMeta } from "@/lib";
 
 export const meta: Route.MetaFunction = () => {
-  const { t } = useTranslation();
   return pageMeta(t("auth.register.title"))();
 };
 

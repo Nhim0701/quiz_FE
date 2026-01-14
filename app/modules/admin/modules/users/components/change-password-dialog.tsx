@@ -86,7 +86,7 @@ export function ChangePasswordDialog({
             error={errors.newPassword}
             required
             disabled={loading || isSubmitting}
-            labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+            labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
           />
           <FormField
             id="confirmPassword"
@@ -99,7 +99,7 @@ export function ChangePasswordDialog({
             error={errors.confirmPassword}
             required
             disabled={loading || isSubmitting}
-            labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+            labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
           />
           <DialogFooter>
             <Button

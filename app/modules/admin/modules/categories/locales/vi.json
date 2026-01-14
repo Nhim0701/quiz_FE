@@ -31,6 +31,12 @@
         "id": "ID",
         "name": "Tên",
         "questionCount": "Câu Hỏi"
+      },
+      "errors": {
+        "fetchFailed": "Không thể tải danh sách danh mục",
+        "createFailed": "Không thể tạo danh mục",
+        "updateFailed": "Không thể cập nhật danh mục",
+        "deleteFailed": "Không thể xóa danh mục"
       }
     }
   }

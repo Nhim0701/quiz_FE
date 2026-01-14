@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router";
-import { useTranslation } from "@/i18n";
+import { useTranslation, type TranslationParams } from "@/i18n";
+import { DIALOG_MODES } from "@/constants";
 import {
   DataTable,
-  Pagination,
   type Column,
   type Action,
 } from "@/components/common/data-table";
@@ -20,7 +20,7 @@ import {
 } from "@/hooks";
 import { useCategoriesStore, type Category } from "../hooks";
 import { Edit, Trash2, Eye, List } from "lucide-react";
-import { CategoryViewDialog } from "./category-dialog";
+import { CategoryFormDialog } from "./form-dialog";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -70,10 +70,8 @@ export function CategoriesList({
     loading,
     fetchCategories,
     openDialog,
-    openViewDialog,
     deleteCategory,
     refreshCategories,
-    viewingCategory,
   } = useCategoriesStore();
 
   const resetSearchFilter = useCallback(() => {
@@ -149,12 +147,9 @@ export function CategoriesList({
   });
 
   // Expose clearFilters function to parent component (only once on mount)
-  const clearFiltersRef = useRef(handleClearAllFilters);
-  clearFiltersRef.current = handleClearAllFilters;
-
   useEffect(() => {
     if (onClearFiltersReady) {
-      onClearFiltersReady(() => clearFiltersRef.current());
+      onClearFiltersReady(handleClearAllFilters);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
@@ -191,30 +186,15 @@ export function CategoriesList({
     onClearFilters: handleClearAllFilters,
   });
 
-  const apiFilters = useMemo(() => {
-    const activeFilters: Array<{ key: string; value: string }> = [];
-
-    for (const filter of filterConfig) {
-      const converted = filter.converter(filter.value);
-      if (converted === null) continue;
-
-      // Check if filter is active
-      const isActive = Array.isArray(converted)
-        ? converted.length > 0
-        : filter.defaultValue !== undefined
-          ? converted !== filter.converter(filter.defaultValue)
-          : converted !== "";
-
-      if (isActive) {
-        activeFilters.push({
-          key: filter.filterKey,
-          value: Array.isArray(converted) ? converted.join(",") : converted,
-        });
-      }
-    }
-
-    return FilterManager.convertFiltersToApiParams(activeFilters);
-  }, [filterConfig]);
+  const apiFilters = useMemo(
+    () =>
+      searchValue
+        ? FilterManager.convertFiltersToApiParams([
+            { key: "name", value: searchValue },
+          ])
+        : {},
+    [searchValue]
+  );
 
   useEffect(() => {
     // Skip initial fetch if filters are being applied from URL
@@ -231,170 +211,195 @@ export function CategoriesList({
         const totalCount = result?.meta?.total ?? result?.data?.length ?? 0;
         setTotal(totalCount);
       } catch (error) {
-        const errorMessage =
+        showError(
           error instanceof Error
             ? error.message
-            : t("errors.fetchDashboardFailed");
-        showError(errorMessage);
+            : t("errors.fetchDashboardFailed")
+        );
+      } finally {
+        hasInitialFetch.current = true;
       }
     };
 
     loadCategories();
-    hasInitialFetch.current = true;
-  }, [
-    page,
-    pageSize,
-    apiFilters,
-    hasFilterParams,
-    fetchCategories,
-    setTotal,
-    showError,
-    t,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, apiFilters]);
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
+  const handlePageChange = useCallback(
+    (newPage: number) => setPage(newPage),
+    [setPage]
+  );
 
-  const handlePageSizeChange = (newPageSize: number) => {
-    setPageSize(newPageSize);
-  };
+  const handlePageSizeChange = useCallback(
+    (newPageSize: number) => setPageSize(newPageSize),
+    [setPageSize]
+  );
 
-  const handleEdit = (category: Category) => {
-    openDialog(category);
-  };
+  const handleEdit = useCallback(
+    (category: Category) => openDialog(DIALOG_MODES.EDIT, category),
+    [openDialog]
+  );
 
-  const handleView = (category: Category) => {
-    openViewDialog(category);
-  };
+  const handleView = useCallback(
+    (category: Category) => openDialog(DIALOG_MODES.VIEW, category),
+    [openDialog]
+  );
 
-  const handleViewTests = (category: Category) => {
-    // Navigate to tests page with categoryId filter
-    const searchParams = new URLSearchParams();
-    searchParams.set(FILTER_QUERY_PARAMS.FILTER_KEY(1), "categoryId");
-    searchParams.set(FILTER_QUERY_PARAMS.FILTER_VALUE(1), category.id);
-    navigate(`${TESTS_ROUTES.TESTS.INDEX}?${searchParams.toString()}`);
-  };
-
-  const handleDelete = (category: Category) => {
-    const confirmDelete = async () => {
-      try {
-        await deleteCategory(category.id);
-        showSuccess(t("admin.categories.deleteSuccess"));
-        // Clear filters and fetch all data after delete
-        handleClearAllFilters();
-        await refreshCategories(1, pageSize);
-        closeDialog();
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : t("errors.genericError");
-        showError(errorMessage);
-      }
-    };
-
-    showDialog({
-      title: t("admin.categories.delete"),
-      content: (
-        <AlertDialogDescription>
-          {(
-            t as (
-              key: string,
-              params?: Record<string, string | number>
-            ) => string
-          )("admin.categories.confirmDelete", { name: category.name })}
-        </AlertDialogDescription>
-      ),
-      footer: (
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={closeDialog}>
-            {t("common.cancel")}
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={confirmDelete}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
-            {t("admin.categories.delete")}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      ),
-    });
-  };
-
-  const columns: Column<Category>[] = [
-    {
-      key: "id",
-      header: t("admin.categories.columns.id"),
-      className: "w-[100px]",
-      render: (category) => (
-        <span className="truncate block max-w-[100px]" title={category.id}>
-          {category.id}
-        </span>
-      ),
+  const handleViewTests = useCallback(
+    (category: Category) => {
+      const searchParams = new URLSearchParams();
+      searchParams.set(FILTER_QUERY_PARAMS.FILTER_KEY(1), "categoryId");
+      searchParams.set(FILTER_QUERY_PARAMS.FILTER_VALUE(1), category.id);
+      navigate(`${TESTS_ROUTES.TESTS.INDEX}?${searchParams.toString()}`);
     },
-    {
-      key: "name",
-      header: t("admin.categories.columns.name"),
-      render: (category) => (
-        <span className="font-medium">{category.name}</span>
-      ),
-    },
-    {
-      key: "questionCount",
-      header: t("admin.categories.columns.questionCount"),
-      meta: { center: true },
-      render: (category) => (
-        <span className="text-muted-foreground">
-          {category.questionCount ?? 0}
-        </span>
-      ),
-    },
-  ];
+    [navigate]
+  );
 
-  const actions: Action<Category>[] = [
-    ...(roles.read
-      ? [
-          {
-            label: t("admin.categories.viewInfo"),
-            onClick: handleView,
-            icon: <Eye className="h-4 w-4" />,
-            actionType: "viewInfo" as const,
-          },
-        ]
-      : []),
-    ...(roles.update
-      ? [
-          {
-            label: t("common.edit"),
-            onClick: handleEdit,
-            icon: <Edit className="h-4 w-4" />,
-            actionType: "edit" as const,
-          },
-        ]
-      : []),
-    ...(roles.delete
-      ? [
-          {
-            label: t("admin.categories.delete"),
-            onClick: handleDelete,
-            variant: "destructive" as const,
-            icon: <Trash2 className="h-4 w-4" />,
-            actionType: "delete" as const,
-          },
-        ]
-      : []),
-    ...(roles.read
-      ? [
-          {
-            label: t("admin.categories.viewTests"),
-            onClick: handleViewTests,
-            icon: <List className="h-4 w-4" />,
-            className:
-              "border-purple-500/50 text-purple-600 hover:bg-gradient-to-br hover:from-purple-500 hover:to-violet-600 hover:text-white hover:border-purple-600 dark:border-purple-400/50 dark:text-purple-400 dark:hover:from-purple-600 dark:hover:to-violet-700 dark:hover:border-purple-500",
-            actionType: "default" as const,
-          },
-        ]
-      : []),
-  ];
+  const handleDelete = useCallback(
+    (category: Category) => {
+      const confirmDelete = async () => {
+        try {
+          await deleteCategory(category.id);
+          showSuccess(t("admin.categories.deleteSuccess"));
+          handleClearAllFilters();
+          await refreshCategories(1, pageSize);
+          closeDialog();
+        } catch (error) {
+          showError(
+            error instanceof Error ? error.message : t("errors.genericError")
+          );
+        }
+      };
+
+      showDialog({
+        title: t("admin.categories.delete"),
+        content: (
+          <AlertDialogDescription>
+            {t("admin.categories.confirmDelete", {
+              name: category.name,
+            } as TranslationParams<"admin.categories.confirmDelete">)}
+          </AlertDialogDescription>
+        ),
+        footer: (
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={closeDialog}>
+              {t("common.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("admin.categories.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        ),
+      });
+    },
+    [
+      deleteCategory,
+      showSuccess,
+      t,
+      handleClearAllFilters,
+      refreshCategories,
+      pageSize,
+      closeDialog,
+      showDialog,
+      showError,
+    ]
+  );
+
+  const columns = useMemo<Column<Category>[]>(
+    () => [
+      {
+        key: "id",
+        header: t("admin.categories.columns.id"),
+        className: "w-[100px]",
+        render: (category) => (
+          <span className="truncate block max-w-[100px]" title={category.id}>
+            {category.id}
+          </span>
+        ),
+      },
+      {
+        key: "name",
+        header: t("admin.categories.columns.name"),
+        render: (category) => (
+          <span className="font-medium">{category.name}</span>
+        ),
+      },
+      {
+        key: "questionCount",
+        header: t("admin.categories.columns.questionCount"),
+        meta: { center: true },
+        render: (category) => (
+          <span className="text-muted-foreground">
+            {category.questionCount ?? 0}
+          </span>
+        ),
+      },
+    ],
+    [t]
+  );
+
+  const actions = useMemo<Action<Category>[]>(
+    () => [
+      ...(roles.read
+        ? [
+            {
+              label: t("admin.categories.viewInfo"),
+              onClick: handleView,
+              icon: <Eye className="h-4 w-4" />,
+              actionType: "viewInfo" as const,
+            },
+          ]
+        : []),
+      ...(roles.update
+        ? [
+            {
+              label: t("common.edit"),
+              onClick: handleEdit,
+              icon: <Edit className="h-4 w-4" />,
+              actionType: "edit" as const,
+            },
+          ]
+        : []),
+      ...(roles.delete
+        ? [
+            {
+              label: t("admin.categories.delete"),
+              onClick: handleDelete,
+              variant: "destructive" as const,
+              icon: <Trash2 className="h-4 w-4" />,
+              actionType: "delete" as const,
+            },
+          ]
+        : []),
+      ...(roles.read
+        ? [
+            {
+              label: t("admin.categories.viewTests"),
+              onClick: handleViewTests,
+              icon: <List className="h-4 w-4" />,
+              className:
+                "border-purple-500/50 text-purple-600 hover:bg-gradient-to-br hover:from-purple-500 hover:to-violet-600 hover:text-white hover:border-purple-600 dark:border-purple-400/50 dark:text-purple-400 dark:hover:from-purple-600 dark:hover:to-violet-700 dark:hover:border-purple-500",
+              actionType: "default" as const,
+            },
+          ]
+        : []),
+    ],
+    [roles, t, handleView, handleEdit, handleDelete, handleViewTests]
+  );
+
+  const paginationProps = useMemo(
+    () => ({
+      page,
+      pageSize,
+      total,
+      onPageChange: handlePageChange,
+      onPageSizeChange: handlePageSizeChange,
+    }),
+    [page, pageSize, total, handlePageChange, handlePageSizeChange]
+  );
 
   return (
     <>
@@ -430,15 +435,9 @@ export function CategoriesList({
         actions={actions}
         loading={loading}
         emptyMessage={t("admin.categories.empty")}
+        pagination={paginationProps}
       />
-      <Pagination
-        page={page}
-        pageSize={pageSize}
-        total={total}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
-      />
-      <CategoryViewDialog category={viewingCategory} onDelete={handleDelete} />
+      <CategoryFormDialog onDelete={handleDelete} />
     </>
   );
 }

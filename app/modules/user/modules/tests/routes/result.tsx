@@ -4,7 +4,7 @@ import type { Route } from "./+types/result";
 import { Container } from "@/components/ui/container";
 import { ResultEmpty, ResultSummary, ResultReview } from "../components";
 import { useResultStore } from "../hooks/use-result";
-import { useTranslation } from "@/i18n";
+import { useTranslation, t } from "@/i18n";
 import { useBreadcrumb } from "@/hooks";
 import {
   useTestsStore,
@@ -15,7 +15,6 @@ import type { TestResultLocationState } from "../types";
 import { pageMeta } from "@/lib";
 
 export const meta: Route.MetaFunction = () => {
-  const { t } = useTranslation();
   return pageMeta(t("common.result"))();
 };
 

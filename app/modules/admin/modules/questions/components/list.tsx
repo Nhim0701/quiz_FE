@@ -459,11 +459,12 @@ export function QuestionsList({ roles }: QuestionsListProps) {
             ? error.message
             : t("errors.fetchDashboardFailed");
         showError(errorMessage);
+      } finally {
+        hasInitialFetch.current = true;
       }
     };
 
     loadQuestions();
-    hasInitialFetch.current = true;
   }, [
     page,
     pageSize,

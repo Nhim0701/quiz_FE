@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router";
 import type { Route } from "./+types/take";
 import { useTestStore, useTestStoreState } from "../hooks";
 import { TIME_CONSTANTS, ROUTES } from "../constants";
-import { useTranslation } from "@/i18n";
+import { useTranslation, t } from "@/i18n";
 import { useBreadcrumb } from "@/hooks";
 import {
   useTestsStore,
@@ -18,7 +18,6 @@ import {
 import { pageMeta } from "@/lib";
 
 export const meta: Route.MetaFunction = () => {
-  const { t } = useTranslation();
   return pageMeta(t("common.take"))();
 };
 

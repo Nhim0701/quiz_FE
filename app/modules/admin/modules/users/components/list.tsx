@@ -242,11 +242,12 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
             ? error.message
             : t("errors.fetchDashboardFailed");
         showError(errorMessage);
+      } finally {
+        hasInitialFetch.current = true;
       }
     };
 
     loadUsers();
-    hasInitialFetch.current = true;
   }, [
     page,
     pageSize,

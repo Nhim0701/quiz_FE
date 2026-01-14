@@ -133,7 +133,7 @@ export function UserForm({ onClearFilters }: UserFormProps) {
               error={errors.fullName}
               required
               disabled={loading || isSubmitting}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
             <FormField
               id="email"
@@ -144,7 +144,7 @@ export function UserForm({ onClearFilters }: UserFormProps) {
               error={errors.email}
               required
               disabled={loading || isSubmitting}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
             <FormField
               id="phone"
@@ -154,7 +154,7 @@ export function UserForm({ onClearFilters }: UserFormProps) {
               register={register("phone")}
               error={errors.phone}
               disabled={loading || isSubmitting}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
             <DatePickerField
               id="birthday"
@@ -164,7 +164,7 @@ export function UserForm({ onClearFilters }: UserFormProps) {
               error={errors.birthday}
               disabled={loading || isSubmitting}
               placeholder={t("admin.users.form.birthdayPlaceholder")}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
             <FormField
               id="jobTitle"
@@ -174,7 +174,7 @@ export function UserForm({ onClearFilters }: UserFormProps) {
               register={register("jobTitle")}
               error={errors.jobTitle}
               disabled={loading || isSubmitting}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
             <FormField
               id="company"
@@ -184,7 +184,7 @@ export function UserForm({ onClearFilters }: UserFormProps) {
               register={register("company")}
               error={errors.company}
               disabled={loading || isSubmitting}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
           </div>
           <FormField
@@ -195,7 +195,7 @@ export function UserForm({ onClearFilters }: UserFormProps) {
             register={register("address")}
             error={errors.address}
             disabled={loading || isSubmitting}
-            labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+            labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
           />
           <DialogFooter>
             <Button

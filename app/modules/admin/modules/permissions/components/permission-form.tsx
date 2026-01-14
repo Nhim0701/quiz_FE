@@ -146,7 +146,7 @@ export function PermissionForm({ onClearFilters }: PermissionFormProps) {
               error={errors.name}
               required
               disabled={loading || isSubmitting}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
             <FormField
               id="permission"
@@ -157,7 +157,7 @@ export function PermissionForm({ onClearFilters }: PermissionFormProps) {
               error={errors.permission}
               required
               disabled={loading || isSubmitting}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
             <ComboboxField
               id="roleId"
@@ -171,7 +171,7 @@ export function PermissionForm({ onClearFilters }: PermissionFormProps) {
               placeholder={t("admin.permissions.form.selectRole")}
               searchPlaceholder={t("admin.permissions.form.searchRole")}
               emptyMessage={t("admin.permissions.form.noRoleFound")}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
             <FormField
               id="description"
@@ -181,7 +181,7 @@ export function PermissionForm({ onClearFilters }: PermissionFormProps) {
               register={register("description")}
               error={errors.description}
               disabled={loading || isSubmitting}
-              labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
           </div>
           <DialogFooter>

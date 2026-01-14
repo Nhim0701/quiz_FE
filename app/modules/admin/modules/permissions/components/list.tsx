@@ -321,11 +321,12 @@ export function PermissionsList({
             ? error.message
             : t("errors.fetchDashboardFailed");
         showError(errorMessage);
+      } finally {
+        hasInitialFetch.current = true;
       }
     };
 
     loadPermissions();
-    hasInitialFetch.current = true;
   }, [
     page,
     pageSize,

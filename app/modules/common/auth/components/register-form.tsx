@@ -41,7 +41,7 @@ export function RegisterForm({ onSubmit, loading = false }: RegisterFormProps) {
         register={register("fullName")}
         error={errors.fullName}
         disabled={loading}
-        labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+        labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
         className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent transition"
       />
 
@@ -53,7 +53,7 @@ export function RegisterForm({ onSubmit, loading = false }: RegisterFormProps) {
         register={register("email")}
         error={errors.email}
         disabled={loading}
-        labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+        labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
         className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent transition"
       />
 
@@ -65,7 +65,7 @@ export function RegisterForm({ onSubmit, loading = false }: RegisterFormProps) {
         register={register("password")}
         error={errors.password}
         disabled={loading}
-        labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+        labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
         className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent transition"
       />
 
@@ -77,7 +77,7 @@ export function RegisterForm({ onSubmit, loading = false }: RegisterFormProps) {
         register={register("confirmPassword")}
         error={errors.confirmPassword}
         disabled={loading}
-        labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+        labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
         className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent transition"
       />
 

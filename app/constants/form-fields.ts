@@ -30,7 +30,7 @@ export const FORM_FIELD_ERROR_CLASSES = {
 
 // Form field label styles
 export const FORM_FIELD_LABEL_CLASSES = {
-  BASE: "text-xs text-slate-500 dark:text-slate-400",
+  BASE: "text-xs text-slate-500 dark:text-slate-400 flex",
   CONTAINER: "flex items-center gap-2",
 } as const;
 

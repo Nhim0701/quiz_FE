@@ -11,11 +11,10 @@ const userContext = createContext<User | null>(null);
 // Client-side authentication middleware
 const authMiddleware: Route.ClientMiddlewareFunction = async ({ context }) => {
   const user = useAuthStoreInternal.getState().user;
-  if (!user) {
-    throw redirect(AUTH_ROUTES.LOGIN);
-  }
 
-  context.set(userContext, user);
+  // If user is not logged in, redirect to login page
+  if (!user) throw redirect(AUTH_ROUTES.LOGIN);
+  else context.set(userContext, user);
 };
 
 export default authMiddleware;

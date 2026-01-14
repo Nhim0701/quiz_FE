@@ -207,7 +207,7 @@ export function TestViewDialog({ test, onDelete }: TestViewDialogProps) {
             error={errors.name}
             required
             disabled={!isEditMode || loading || isSubmitting}
-            labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+            labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
           />
 
           <ComboboxField
@@ -222,7 +222,7 @@ export function TestViewDialog({ test, onDelete }: TestViewDialogProps) {
             placeholder={t("admin.tests.form.selectCategory")}
             searchPlaceholder={t("admin.tests.form.searchCategory")}
             emptyMessage={t("admin.tests.form.noCategoryFound")}
-            labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+            labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
           />
 
           <TextareaField
@@ -233,7 +233,7 @@ export function TestViewDialog({ test, onDelete }: TestViewDialogProps) {
             register={register("description")}
             error={errors.description}
             disabled={!isEditMode || loading || isSubmitting}
-            labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+            labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
           />
 
           <FormField
@@ -248,7 +248,7 @@ export function TestViewDialog({ test, onDelete }: TestViewDialogProps) {
             error={errors.timeLimit}
             required
             disabled={!isEditMode || loading || isSubmitting}
-            labelClassName="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+            labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
           />
 
           <DialogFooter>
