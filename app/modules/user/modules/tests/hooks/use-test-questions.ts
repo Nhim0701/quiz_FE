@@ -10,6 +10,7 @@ import { useTestRevealedStore } from "./use-test-revealed";
 import { useTestTimerStore } from "./use-test-timer";
 import { useTestSubmissionStore } from "./use-test-submission";
 import { useTestsStore } from "@/modules/admin/modules/tests/hooks";
+import { FILTER_QUERY_PARAMS } from "@/constants";
 
 interface TestQuestionsState {
   // Questions
@@ -67,11 +68,13 @@ export const useTestQuestionsStore = create<TestQuestionsState>((set, get) => ({
       // Fetch first page to get pagination info
       const firstResponse = await apiClient.get<
         ApiSuccessResponse<QuestionProps[]>
-      >(ENDPOINTS.QUESTIONS(testId), {
+      >(ENDPOINTS.QUESTIONS, {
         params: {
           page: 1,
           // Request params in camelCase - will be converted to snake_case by interceptor
           pageSize: 100,
+          [FILTER_QUERY_PARAMS.FILTER_KEY(1)]: "test_id",
+          [FILTER_QUERY_PARAMS.FILTER_VALUE(1)]: testId,
         },
       });
 
@@ -91,8 +94,15 @@ export const useTestQuestionsStore = create<TestQuestionsState>((set, get) => ({
       if (totalPages > 1) {
         const remainingPages = Array.from({ length: totalPages - 1 }, (_, i) =>
           apiClient.get<ApiSuccessResponse<QuestionProps[]>>(
-            `${ENDPOINTS.QUESTIONS(testId)}`,
-            { params: { page: i + 2, pageSize: 100 } }
+            ENDPOINTS.QUESTIONS,
+            {
+              params: {
+                page: i + 2,
+                pageSize: 100,
+                [FILTER_QUERY_PARAMS.FILTER_KEY(1)]: "test_id",
+                [FILTER_QUERY_PARAMS.FILTER_VALUE(1)]: testId,
+              },
+            }
           )
         );
 

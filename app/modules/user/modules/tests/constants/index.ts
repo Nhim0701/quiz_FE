@@ -4,9 +4,7 @@
 export const ENDPOINTS = {
   LIST: "/api/v1/tests",
   GET: (testId: string) => `/api/v1/tests/${testId}`,
-  QUESTIONS: (testId: string) => `/api/v1/tests/${testId}/questions`,
-  QUESTION: (testId: string, questionId: string) =>
-    `/api/v1/tests/${testId}/questions/${questionId}`,
+  QUESTIONS: "/api/v1/questions",
   SUBMIT: (testId: string) => `/api/v1/tests/${testId}/submit`,
 } as const;
 
