@@ -13,6 +13,15 @@ import type { ApiSuccessResponse } from "@/types";
 import type { AuthResponse } from "@/modules/common/auth/types";
 import { apiClient } from "@/lib";
 
+// Constants
+const DEFAULT_TOKEN_BUFFER_SECONDS = 60;
+
+// Types
+type QueuedRequest = {
+  resolve: (token: string) => void;
+  reject: (error: Error) => void;
+};
+
 /**
  * Decode JWT token payload
  * @param token JWT token string
@@ -43,10 +52,13 @@ const getTokenExpiration = (token: string): number | null => {
 /**
  * Check if token is expired
  * @param token JWT token string
- * @param bufferSeconds Buffer time in seconds before considering token expired (default: 60)
+ * @param bufferSeconds Buffer time in seconds before considering token expired
  * @returns true if token is expired or will expire within buffer time
  */
-const isTokenExpired = (token: string, bufferSeconds: number = 60): boolean => {
+const isTokenExpired = (
+  token: string,
+  bufferSeconds: number = DEFAULT_TOKEN_BUFFER_SECONDS
+): boolean => {
   const exp = getTokenExpiration(token);
   if (!exp) {
     return true; // Consider invalid token as expired
@@ -58,23 +70,24 @@ const isTokenExpired = (token: string, bufferSeconds: number = 60): boolean => {
 
 // Refresh token management state
 let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (value?: unknown) => void;
-  reject: (error?: unknown) => void;
-}> = [];
+let failedQueue: QueuedRequest[] = [];
 
 /**
  * Process queued requests after token refresh
  */
 const processQueue = (error: Error | null, token: string | null = null) => {
-  failedQueue.forEach((prom) => {
+  const queue = [...failedQueue];
+  failedQueue = [];
+
+  queue.forEach((prom) => {
     if (error) {
       prom.reject(error);
-    } else {
+    } else if (token) {
       prom.resolve(token);
+    } else {
+      prom.reject(new Error(t("errors.failedToGetNewToken")));
     }
   });
-  failedQueue = [];
 };
 
 /**
@@ -96,7 +109,8 @@ export const tokenManager = {
   getToken: (): string | null => {
     return (
       localStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN) ||
-      sessionStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN)
+      sessionStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN) ||
+      null
     );
   },
   setToken: (token: string, rememberMe: boolean = false): void => {
@@ -120,17 +134,16 @@ export const tokenManager = {
     localStorage.removeItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
   },
   hasToken: (): boolean => {
-    return !!(
-      localStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN) ||
-      sessionStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN)
-    );
+    return !!tokenManager.getToken();
   },
   /**
    * Check if current token is expired
-   * @param bufferSeconds Buffer time in seconds before considering token expired (default: 60)
+   * @param bufferSeconds Buffer time in seconds before considering token expired
    * @returns true if token is expired or will expire within buffer time
    */
-  isTokenExpired: (bufferSeconds: number = 60): boolean => {
+  isTokenExpired: (
+    bufferSeconds: number = DEFAULT_TOKEN_BUFFER_SECONDS
+  ): boolean => {
     const token = tokenManager.getToken();
     if (!token) {
       return true;
@@ -168,7 +181,7 @@ export const tokenManager = {
   refreshAccessToken: async (): Promise<string> => {
     const refreshToken = tokenManager.getRefreshToken();
     if (!refreshToken) {
-      throw new Error("No refresh token available");
+      throw new Error(t("errors.noRefreshToken"));
     }
 
     // Use apiClient to get automatic case conversion
@@ -176,16 +189,19 @@ export const tokenManager = {
       AUTH_ENDPOINTS.REFRESH,
       {
         // Request data in camelCase - will be converted to snake_case by interceptor
-        refreshToken: refreshToken,
+        refreshToken,
       }
     );
 
     // Response data is already converted to camelCase by interceptor
     const { accessToken, refreshToken: newRefreshToken } = response.data.data;
 
-    // Store new tokens
-    const hadRefreshToken = !!tokenManager.getRefreshToken();
-    const shouldRemember = hadRefreshToken || !!newRefreshToken;
+    if (!accessToken) {
+      throw new Error(t("errors.invalidRefreshResponse"));
+    }
+
+    // Store new tokens - preserve rememberMe preference if refresh token exists
+    const shouldRemember = !!tokenManager.getRefreshToken();
     tokenManager.setToken(accessToken, shouldRemember);
 
     if (newRefreshToken) {
@@ -201,17 +217,8 @@ export const tokenManager = {
   attemptRefresh: async (): Promise<string> => {
     if (isRefreshing) {
       // Wait for ongoing refresh
-      return new Promise((resolve, reject) => {
-        failedQueue.push({
-          resolve: (token) => {
-            if (token && typeof token === "string") {
-              resolve(token);
-            } else {
-              reject(new Error("Failed to get new token"));
-            }
-          },
-          reject,
-        });
+      return new Promise<string>((resolve, reject) => {
+        failedQueue.push({ resolve, reject });
       });
     }
 
@@ -220,16 +227,20 @@ export const tokenManager = {
     try {
       const newToken = await tokenManager.refreshAccessToken();
       processQueue(null, newToken);
-      isRefreshing = false;
       return newToken;
     } catch (error) {
-      processQueue(error as Error);
-      isRefreshing = false;
+      const refreshError =
+        error instanceof Error
+          ? error
+          : new Error(t("errors.tokenRefreshFailed"));
+      processQueue(refreshError);
       tokenManager.removeToken();
       useAuthStoreInternal.getState().clearUser();
       toast.error(t("errors.sessionExpired"));
       redirectToLogin();
-      throw error;
+      throw refreshError;
+    } finally {
+      isRefreshing = false;
     }
   },
   /**

@@ -51,7 +51,12 @@
     "fetchQuestionsFailed": "Không thể tải câu hỏi. Vui lòng thử lại.",
     "fetchDashboardFailed": "Không thể tải dữ liệu bảng điều khiển. Vui lòng thử lại.",
     "submitResponsesFailed": "Không thể gửi câu trả lời. Vui lòng thử lại.",
-    "genericError": "Đã xảy ra lỗi. Vui lòng thử lại."
+    "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
+    "noRefreshToken": "Không có refresh token",
+    "invalidRefreshResponse": "Phản hồi refresh không hợp lệ: thiếu access token",
+    "tokenRefreshFailed": "Làm mới token thất bại",
+    "failedToGetNewToken": "Không thể lấy token mới",
+    "tokenExpiredNoRefresh": "Token đã hết hạn và không có refresh token"
   },
   "success": {
     "loginSuccess": "Đăng nhập thành công!",

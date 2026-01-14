@@ -24,6 +24,7 @@ export const RESOURCES = {
   QUESTION: "questions",
   USER: "users",
   ROLES: "roles",
+  PERMISSIONS: "permissions",
   NAMESPACE: "namespaces",
 } as const;
 
@@ -80,6 +81,12 @@ export const COMMON_PERMISSIONS = {
   ROLE_DELETE: buildPermission(RESOURCES.ROLES, ACTIONS.DELETE),
   ROLE_CREATE: buildPermission(RESOURCES.ROLES, ACTIONS.CREATE),
   ROLE_UPDATE: buildPermission(RESOURCES.ROLES, ACTIONS.UPDATE),
+
+  // Permission permissions
+  PERMISSION_READ: buildPermission(RESOURCES.PERMISSIONS, ACTIONS.READ),
+  PERMISSION_DELETE: buildPermission(RESOURCES.PERMISSIONS, ACTIONS.DELETE),
+  PERMISSION_CREATE: buildPermission(RESOURCES.PERMISSIONS, ACTIONS.CREATE),
+  PERMISSION_UPDATE: buildPermission(RESOURCES.PERMISSIONS, ACTIONS.UPDATE),
 
   // Namespace permissions
   NAMESPACE_READ: buildPermission(RESOURCES.NAMESPACE, ACTIONS.READ),

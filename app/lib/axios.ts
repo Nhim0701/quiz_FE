@@ -11,6 +11,11 @@ import { t } from "@/i18n/utils";
 import type { ApiErrorResponse, ApiSuccessResponse } from "@/types";
 import type { TranslationKey } from "@/i18n";
 
+// Constants
+const TOKEN_EXPIRATION_BUFFER_SECONDS = 60;
+const HTTP_STATUS_UNAUTHORIZED = 401;
+const HTTP_STATUS_FORBIDDEN = 403;
+
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -32,93 +37,189 @@ const isAuthEndpoint = (url: string | undefined): boolean => {
   return authEndpoints.some((endpoint) => url.includes(endpoint));
 };
 
+// Convert request data and params from camelCase to snake_case
+const convertRequestData = (
+  config: InternalAxiosRequestConfig
+): InternalAxiosRequestConfig => {
+  if (config.data && typeof config.data === "object") {
+    config.data = toSnakeCase(config.data);
+  }
+  if (config.params && typeof config.params === "object") {
+    config.params = toSnakeCase(config.params);
+  }
+  return config;
+};
+
+// Set authorization header
+const setAuthHeader = (
+  config: InternalAxiosRequestConfig,
+  token: string
+): void => {
+  config.headers.Authorization = `${API_CONFIG.AUTHORIZATION_PREFIX} ${token}`;
+};
+
+// Create API error object
+const createApiError = (
+  message: string,
+  code: string,
+  status: number,
+  traceId?: string,
+  details?: unknown[] | Record<string, unknown> | null
+): Error & {
+  code: string;
+  traceId?: string;
+  details?: unknown[] | Record<string, unknown> | null;
+  status: number;
+} => {
+  const error = new Error(message) as Error & {
+    code: string;
+    traceId?: string;
+    details?: unknown[] | Record<string, unknown> | null;
+    status: number;
+  };
+  error.code = code;
+  error.status = status;
+  if (traceId) error.traceId = traceId;
+  if (details !== undefined) error.details = details;
+  return error;
+};
+
+// Extract error message from various response formats
+const extractErrorMessage = (errorData: unknown): string => {
+  if (!errorData || typeof errorData !== "object") {
+    return typeof errorData === "string" ? errorData : t("errors.requestError");
+  }
+
+  const data = errorData as Record<string, unknown>;
+
+  if (typeof data.message === "string") {
+    return data.message;
+  }
+
+  if (typeof data.detail === "string") {
+    return data.detail;
+  }
+
+  if (Array.isArray(data.details)) {
+    return data.details
+      .map((detail) => {
+        if (typeof detail === "string") return detail;
+        if (typeof detail === "object" && detail !== null) {
+          const detailObj = detail as Record<string, unknown>;
+          if (typeof detailObj.message === "string") {
+            return detailObj.message;
+          }
+          return JSON.stringify(detailObj);
+        }
+        return String(detail);
+      })
+      .join(", ");
+  }
+
+  if (data.details && typeof data.details === "object") {
+    const detailsObj = data.details as Record<string, unknown>;
+    const messages = Object.entries(detailsObj)
+      .map(([key, value]) => {
+        if (Array.isArray(value)) {
+          return `${key}: ${value.join(", ")}`;
+        }
+        return `${key}: ${String(value)}`;
+      })
+      .join("; ");
+    return messages || t("errors.requestError");
+  }
+
+  return t("errors.requestError");
+};
+
+// Handle standard API error response
+const handleStandardError = (
+  error: AxiosError<ApiErrorResponse>,
+  apiErrorResponse: ApiErrorResponse
+): Error => {
+  const convertedError = toCamelCase(apiErrorResponse.error) as {
+    code: string;
+    message: string;
+    traceId: string;
+    details?: unknown[] | Record<string, unknown> | null;
+  };
+
+  const { code, traceId, details } = convertedError;
+  const errorConfig = ERROR[code as keyof typeof ERROR];
+
+  const errorMessage = errorConfig
+    ? t(errorConfig.MESSAGE_KEY as TranslationKey)
+    : t("errors.requestError");
+
+  return createApiError(
+    errorMessage,
+    code,
+    error.response!.status,
+    traceId,
+    details
+  );
+};
+
 // Request interceptor to add token, check expiration, and convert request data
 apiClient.interceptors.request.use(
   async (config) => {
+    // Convert request data and params from camelCase to snake_case
+    convertRequestData(config);
+
     // Skip token handling for auth endpoints (login, register, refresh)
     if (isAuthEndpoint(config.url)) {
-      // Convert request data from camelCase to snake_case
-      if (config.data && typeof config.data === "object") {
-        config.data = toSnakeCase(config.data);
-      }
-      // Convert request params from camelCase to snake_case
-      if (config.params && typeof config.params === "object") {
-        config.params = toSnakeCase(config.params);
-      }
       return config;
     }
 
     const token = tokenManager.getToken();
+    if (!token) {
+      return config;
+    }
 
-    if (token) {
-      // Check if token is expired or will expire soon (60 seconds buffer)
-      if (tokenManager.isTokenExpired(60)) {
-        const refreshToken = tokenManager.getRefreshToken();
+    // Check if token is expired or will expire soon
+    if (tokenManager.isTokenExpired(TOKEN_EXPIRATION_BUFFER_SECONDS)) {
+      const refreshToken = tokenManager.getRefreshToken();
 
-        if (!refreshToken) {
-          // No refresh token, clear and redirect
-          tokenManager.redirectToLoginOnExpired();
-          return Promise.reject(
-            new Error("Token expired and no refresh token available")
-          );
-        }
-
-        try {
-          // Attempt to refresh token
-          const newToken = await tokenManager.attemptRefresh();
-          config.headers.Authorization = `${API_CONFIG.AUTHORIZATION_PREFIX} ${newToken}`;
-        } catch (refreshError) {
-          return Promise.reject(refreshError);
-        }
-      } else {
-        // Token is valid, add to request
-        config.headers.Authorization = `${API_CONFIG.AUTHORIZATION_PREFIX} ${token}`;
+      if (!refreshToken) {
+        tokenManager.redirectToLoginOnExpired();
+        return Promise.reject(new Error(t("errors.tokenExpiredNoRefresh")));
       }
-    }
 
-    // Convert request data from camelCase to snake_case
-    if (config.data && typeof config.data === "object") {
-      config.data = toSnakeCase(config.data);
-    }
-
-    // Convert request params from camelCase to snake_case
-    if (config.params && typeof config.params === "object") {
-      config.params = toSnakeCase(config.params);
+      try {
+        const newToken = await tokenManager.attemptRefresh();
+        setAuthHeader(config, newToken);
+      } catch (refreshError) {
+        return Promise.reject(refreshError);
+      }
+    } else {
+      setAuthHeader(config, token);
     }
 
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Response interceptor for handling standard response structure and converting to camelCase
 apiClient.interceptors.response.use(
   (response: AxiosResponse<ApiSuccessResponse | unknown>) => {
     // For success responses (2xx), check if response follows standard structure
-    // If response has { data, meta } structure, convert data to camelCase
     if (
       response.data &&
       typeof response.data === "object" &&
       "data" in response.data
     ) {
       const apiResponse = response.data as ApiSuccessResponse;
-      // Convert data from snake_case to camelCase
-      const convertedData = toCamelCase(apiResponse.data);
-      // Convert meta if exists
-      const convertedMeta = apiResponse.meta
-        ? toCamelCase(apiResponse.meta)
-        : undefined;
       return {
         ...response,
         data: {
           ...apiResponse,
-          data: convertedData,
-          meta: convertedMeta,
+          data: toCamelCase(apiResponse.data),
+          meta: apiResponse.meta ? toCamelCase(apiResponse.meta) : undefined,
         },
       } as AxiosResponse<ApiSuccessResponse>;
     }
+
     // For non-standard responses, convert the entire response data
     if (response.data && typeof response.data === "object") {
       return {
@@ -126,7 +227,7 @@ apiClient.interceptors.response.use(
         data: toCamelCase(response.data),
       };
     }
-    // Pass through other responses
+
     return response;
   },
   async (error: AxiosError<ApiErrorResponse>) => {
@@ -135,9 +236,8 @@ apiClient.interceptors.response.use(
     };
 
     // Handle 401 Unauthorized - try to refresh token
-    // Skip token refresh for auth endpoints (login, register, refresh)
     if (
-      error.response?.status === 401 &&
+      error.response?.status === HTTP_STATUS_UNAUTHORIZED &&
       error.response?.data?.error?.code !==
         ERROR.INCORRECT_EMAIL_OR_PASSWORD.CODE &&
       originalRequest &&
@@ -148,125 +248,50 @@ apiClient.interceptors.response.use(
 
       try {
         const newToken = await tokenManager.attemptRefresh();
-
-        // Update authorization header
         if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `${API_CONFIG.AUTHORIZATION_PREFIX} ${newToken}`;
+          setAuthHeader(originalRequest, newToken);
         }
-
-        // Retry original request
         return apiClient(originalRequest);
       } catch (refreshError) {
         return Promise.reject(refreshError);
       }
     }
 
-    // Handle error responses (4xx, 5xx) with standard structure
+    // Handle error responses (4xx, 5xx)
     if (error.response) {
       const errorData = error.response.data as unknown;
-
-      // Check if response follows standard error structure
       const apiErrorResponse = errorData as ApiErrorResponse;
+
+      // Handle standard API error structure
       if (apiErrorResponse?.error) {
-        // Convert error response from snake_case to camelCase
-        const convertedError = toCamelCase(apiErrorResponse.error) as {
-          code: string;
-          message: string;
-          traceId: string;
-          details?: unknown[] | Record<string, unknown> | null;
-        };
-
-        const { code, message, traceId, details } = convertedError;
-
-        // Get i18n message from error code
-        const errorMessage = t(
-          ERROR[code as keyof typeof ERROR].MESSAGE_KEY as TranslationKey
-        );
-
-        // Create error object with standard structure
-        const apiError = new Error(errorMessage) as Error & {
-          code: string;
-          traceId: string;
-          details?: unknown[] | Record<string, unknown> | null;
-          status?: number;
-        };
-
-        apiError.code = code;
-        apiError.traceId = traceId;
-        apiError.details = details || null;
-        apiError.status = error.response.status;
-
-        return Promise.reject(apiError);
+        return Promise.reject(handleStandardError(error, apiErrorResponse));
       }
 
       // Handle specific HTTP status codes
-      if (error.response.status === 403) {
-        const permissionDeniedError = new Error(
-          t(ERROR.PERMISSION_DENIED.MESSAGE_KEY as TranslationKey)
-        ) as Error & {
-          code: string;
-          status?: number;
-        };
-        permissionDeniedError.code = ERROR.PERMISSION_DENIED.CODE;
-        permissionDeniedError.status = 403;
-        throw permissionDeniedError;
+      if (error.response.status === HTTP_STATUS_FORBIDDEN) {
+        throw createApiError(
+          t(ERROR.PERMISSION_DENIED.MESSAGE_KEY as TranslationKey),
+          ERROR.PERMISSION_DENIED.CODE,
+          HTTP_STATUS_FORBIDDEN
+        );
       }
 
       // Fallback for non-standard error responses
-      let errorMessage: string;
-
-      if (errorData && typeof errorData === "object") {
-        // Try to extract error message from various possible structures
-        const data = errorData as unknown as Record<string, unknown>;
-
-        // Check for common error message fields
-        if (typeof data.message === "string") {
-          errorMessage = data.message;
-        } else if (typeof data.detail === "string") {
-          errorMessage = data.detail;
-        } else if (Array.isArray(data.details)) {
-          // Format array of error details
-          errorMessage = data.details
-            .map((detail) => {
-              if (typeof detail === "string") return detail;
-              if (typeof detail === "object" && detail !== null) {
-                const detailObj = detail as Record<string, unknown>;
-                if (typeof detailObj.message === "string") {
-                  return detailObj.message;
-                }
-                return JSON.stringify(detailObj);
-              }
-              return String(detail);
-            })
-            .join(", ");
-        } else if (data.details && typeof data.details === "object") {
-          // Format object of error details (e.g., validation errors)
-          const detailsObj = data.details as Record<string, unknown>;
-          const messages = Object.entries(detailsObj)
-            .map(([key, value]) => {
-              if (Array.isArray(value)) {
-                return `${key}: ${value.join(", ")}`;
-              }
-              return `${key}: ${String(value)}`;
-            })
-            .join("; ");
-          errorMessage = messages || t("errors.requestError");
-        } else {
-          // If we can't extract a meaningful message, use generic error
-          errorMessage = t("errors.requestError");
-        }
-      } else if (typeof errorData === "string") {
-        errorMessage = errorData;
-      } else {
-        errorMessage = `${t("errors.httpError")} ${error.response.status}`;
-      }
+      const errorMessage =
+        error.response.status >= 500
+          ? `${t("errors.httpError")} ${error.response.status}`
+          : extractErrorMessage(errorData);
 
       throw new Error(errorMessage);
-    } else if (error.request) {
-      throw new Error(t("errors.networkError"));
-    } else {
-      throw new Error(`${t("errors.requestError")}: ${error.message}`);
     }
+
+    // Handle network errors
+    if (error.request) {
+      throw new Error(t("errors.networkError"));
+    }
+
+    // Handle request setup errors
+    throw new Error(`${t("errors.requestError")}: ${error.message}`);
   }
 );
 

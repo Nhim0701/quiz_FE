@@ -5,10 +5,12 @@
  * Examples:
  * - "*::*" = full access to all resources and actions
  * - "category::read" = read access to category
+ * - "category::*" = all actions on category resource
+ * - "*::read" = read action on all resources
  *
- * Hierarchy: *::* > resource::action
+ * Hierarchy: *::* > resource::* > resource::action
  *
- * Use constants from @/constants/permissions for permission strings
+ * Use constants from @/modules/admin/constants/permissions for permission strings
  */
 
 import { PERMISSIONS } from "@/modules/admin/constants/permissions";
@@ -27,6 +29,11 @@ const WILDCARD_RESOURCE = "*";
  * Wildcard action indicator
  */
 const WILDCARD_ACTION = "*";
+
+/**
+ * Cache for parsed permissions to improve performance
+ */
+const parseCache = new Map<string, [string, string] | null>();
 
 /**
  * Validate permission format: resource::action
@@ -48,71 +55,65 @@ export function isValidPermissionFormat(permission: string): boolean {
 
 /**
  * Parse permission string into resource and action
+ * Uses cache for better performance
  */
 function parsePermission(permission: string): [string, string] | null {
-  const [resource, action] = permission.split(PERMISSION_SEPARATOR);
-  if (!resource || !action) return null;
-  return [resource, action];
+  // Check cache first
+  if (parseCache.has(permission)) {
+    return parseCache.get(permission)!;
+  }
+
+  const parts = permission.split(PERMISSION_SEPARATOR);
+  if (parts.length !== 2 || !parts[0]?.trim() || !parts[1]?.trim()) {
+    parseCache.set(permission, null);
+    return null;
+  }
+
+  const result: [string, string] = [parts[0].trim(), parts[1].trim()];
+  parseCache.set(permission, result);
+  return result;
 }
 
 /**
- * Permission matching strategies
+ * Check if a permission matches a required permission
+ * Optimized matching logic with early returns
  */
-const matchStrategies = {
-  /**
-   * Exact match: permission === requiredPermission
-   */
-  exact: (permission: string, required: string): boolean => {
-    return permission === required;
-  },
+function matchesPermission(permission: string, required: string): boolean {
+  // Fast path: exact match
+  if (permission === required) {
+    return true;
+  }
 
-  /**
-   * Resource match: same resource, check action hierarchy
-   */
-  resource: (permission: string, required: string): boolean => {
-    const parsed = parsePermission(permission);
-    const requiredParsed = parsePermission(required);
-    if (!parsed || !requiredParsed) return false;
+  // Fast path: full access
+  if (permission === PERMISSIONS.FULL_ACCESS) {
+    return true;
+  }
 
-    const [resource, action] = parsed;
-    const [requiredResource, requiredAction] = requiredParsed;
+  const parsed = parsePermission(permission);
+  const requiredParsed = parsePermission(required);
 
-    if (resource !== requiredResource) return false;
-
-    // Same action
-    if (action === requiredAction) return true;
-
+  if (!parsed || !requiredParsed) {
     return false;
-  },
+  }
 
-  /**
-   * Wildcard resource match: *::action
-   */
-  wildcardResource: (permission: string, required: string): boolean => {
-    const parsed = parsePermission(permission);
-    const requiredParsed = parsePermission(required);
-    if (!parsed || !requiredParsed) return false;
+  const [resource, action] = parsed;
+  const [requiredResource, requiredAction] = requiredParsed;
 
-    const [resource, action] = parsed;
-    const [, requiredAction] = requiredParsed;
+  // Wildcard resource: *::action matches any resource with that action
+  if (resource === WILDCARD_RESOURCE && action === requiredAction) {
+    return true;
+  }
 
-    return resource === WILDCARD_RESOURCE && action === requiredAction;
-  },
+  // Wildcard action: resource::* matches any action on that resource
+  if (resource === requiredResource && action === WILDCARD_ACTION) {
+    return true;
+  }
 
-  /**
-   * Wildcard action match: resource::*
-   */
-  wildcardAction: (permission: string, required: string): boolean => {
-    const parsed = parsePermission(permission);
-    const requiredParsed = parsePermission(required);
-    if (!parsed || !requiredParsed) return false;
+  // Full wildcard: *::* matches everything (already checked above)
+  // Exact match: resource::action === resource::action (already checked above)
 
-    const [resource, action] = parsed;
-    const [requiredResource] = requiredParsed;
-
-    return resource === requiredResource && action === WILDCARD_ACTION;
-  },
-};
+  return false;
+}
 
 /**
  * Check if user has permission to access a specific scope
@@ -124,37 +125,27 @@ const matchStrategies = {
  * @example
  * hasPermission(["*::*"], "category::read") // true
  * hasPermission(["category::read"], "category::read") // true
+ * hasPermission(["category::*"], "category::read") // true
+ * hasPermission(["*::read"], "category::read") // true
  * hasPermission(["category::read"], "category::write") // false
  */
 export function hasPermission(
   userPermissions: string[] | undefined,
   requiredPermission: string
 ): boolean {
+  // Early return for empty permissions
   if (!userPermissions || userPermissions.length === 0) {
     return false;
   }
 
-  // Check for full access
-  if (userPermissions.includes(PERMISSIONS.FULL_ACCESS)) {
-    return true;
-  }
-
-  // Validate required permission format
-  if (!parsePermission(requiredPermission)) {
+  // Early return for invalid required permission
+  if (!isValidPermissionFormat(requiredPermission)) {
     return false;
   }
 
-  // Try each matching strategy for each user permission
+  // Check each user permission
   for (const permission of userPermissions) {
-    if (!parsePermission(permission)) continue;
-
-    // Try all strategies
-    if (
-      matchStrategies.exact(permission, requiredPermission) ||
-      matchStrategies.resource(permission, requiredPermission) ||
-      matchStrategies.wildcardResource(permission, requiredPermission) ||
-      matchStrategies.wildcardAction(permission, requiredPermission)
-    ) {
+    if (matchesPermission(permission, requiredPermission)) {
       return true;
     }
   }
@@ -173,6 +164,10 @@ export function hasAnyPermission(
   userPermissions: string[] | undefined,
   requiredPermissions: string[]
 ): boolean {
+  if (!requiredPermissions || requiredPermissions.length === 0) {
+    return false;
+  }
+
   return requiredPermissions.some((permission) =>
     hasPermission(userPermissions, permission)
   );
@@ -189,6 +184,10 @@ export function hasAllPermissions(
   userPermissions: string[] | undefined,
   requiredPermissions: string[]
 ): boolean {
+  if (!requiredPermissions || requiredPermissions.length === 0) {
+    return true; // Empty array means no requirements, so user "has all"
+  }
+
   return requiredPermissions.every((permission) =>
     hasPermission(userPermissions, permission)
   );
@@ -205,29 +204,38 @@ export function hasAllPermissions(
  * @example
  * hasResourcePermission(["categories::*"], "categories") // true
  * hasResourcePermission(["categories::read"], "categories") // true
+ * hasResourcePermission(["*::*"], "categories") // true
  * hasResourcePermission(["tests::read"], "categories") // false
  */
 export function hasResourcePermission(
   userPermissions: string[] | undefined,
   resourcePrefix: string
 ): boolean {
+  // Early return for empty permissions
   if (!userPermissions || userPermissions.length === 0) {
     return false;
   }
 
-  // Check for full access
+  // Early return for empty resource prefix
+  if (!resourcePrefix || !resourcePrefix.trim()) {
+    return false;
+  }
+
+  const normalizedPrefix = resourcePrefix.trim();
+
+  // Check for full access first (most common case)
   if (userPermissions.includes(PERMISSIONS.FULL_ACCESS)) {
     return true;
   }
 
-  // Check if any permission starts with the resource prefix
+  // Check each permission
   for (const permission of userPermissions) {
     const parsed = parsePermission(permission);
     if (!parsed) continue;
 
     const [resource] = parsed;
     // Match exact resource or wildcard resource
-    if (resource === resourcePrefix || resource === WILDCARD_RESOURCE) {
+    if (resource === normalizedPrefix || resource === WILDCARD_RESOURCE) {
       return true;
     }
   }

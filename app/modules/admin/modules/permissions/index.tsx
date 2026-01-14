@@ -25,7 +25,7 @@ export default function AdminPermissions() {
   const { openDialog } = usePermissionsStore();
   const [clearFilters, setClearFilters] = useState<(() => void) | null>(null);
 
-  const permissions = getNamespaceRoles(RESOURCES.ROLES);
+  const permissions = getNamespaceRoles(RESOURCES.PERMISSIONS);
 
   useBreadcrumb(
     [

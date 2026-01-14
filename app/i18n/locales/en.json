@@ -51,7 +51,12 @@
     "fetchQuestionsFailed": "Failed to fetch questions. Please try again.",
     "fetchDashboardFailed": "Failed to fetch dashboard data. Please try again.",
     "submitResponsesFailed": "Failed to submit responses. Please try again.",
-    "genericError": "Something went wrong. Please try again."
+    "genericError": "Something went wrong. Please try again.",
+    "noRefreshToken": "No refresh token available",
+    "invalidRefreshResponse": "Invalid refresh response: missing access token",
+    "tokenRefreshFailed": "Token refresh failed",
+    "failedToGetNewToken": "Failed to get new token",
+    "tokenExpiredNoRefresh": "Token expired and no refresh token available"
   },
   "success": {
     "loginSuccess": "Login successful!",
