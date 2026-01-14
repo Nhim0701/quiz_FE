@@ -9,6 +9,7 @@ export const ENDPOINTS = {
   CREATE: "/api/v1/questions",
   UPDATE: (questionId: string) => `/api/v1/questions/${questionId}`,
   DELETE: (questionId: string) => `/api/v1/questions/${questionId}`,
+
   ANSWERS: {
     LIST: "/api/v1/answers",
     CREATE: "/api/v1/answers",

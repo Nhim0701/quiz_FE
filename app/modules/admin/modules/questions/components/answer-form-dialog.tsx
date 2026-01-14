@@ -1,34 +1,24 @@
-import { useEffect, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { useForm, Controller, FormProvider, Form } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslation, type TypedTFunction } from "@/i18n";
-import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/i18n";
 import { TextareaField } from "@/components/common/form-field";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useApp } from "@/hooks";
 import type { AnswerProps } from "../types";
 import { useAnswerStore } from "../hooks";
-import {
-  Loader2,
-  FileText,
-  CheckSquare,
-  MessageSquare,
-  Square,
-  Save,
-  X,
-  Edit,
-} from "lucide-react";
+import { FileText, CheckSquare, MessageSquare, Square } from "lucide-react";
 import { answerSchema, type AnswerFormData } from "../schemas/anwser-schema";
-import { cn } from "@/lib";
+import { FormDialog } from "@/components/common/form-dialog";
+import type { FormDialogMode } from "@/constants";
+import { DIALOG_MODES } from "@/constants";
+import {
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter as AlertDialogFooterComponent,
+} from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface AnswerDialogProps {
   answer: AnswerProps | null;
@@ -39,6 +29,11 @@ interface AnswerDialogProps {
   onEdit?: () => void;
 }
 
+/**
+ * AnswerFormDialog extends FormDialog to provide answer-specific form functionality.
+ * It handles create, edit, and view modes for answers.
+ * Mode is determined from props (answer and isEditMode).
+ */
 export function AnswerFormDialog({
   answer,
   questionId,
@@ -48,18 +43,26 @@ export function AnswerFormDialog({
   onEdit,
 }: AnswerDialogProps) {
   const { t } = useTranslation();
-  const { showSuccess, showError, showDialog, closeDialog } = useApp();
+  const {
+    showError,
+    showSuccess,
+    showDialog,
+    closeDialog: closeAppDialog,
+  } = useApp();
   const { createAnswer, updateAnswer, deleteAnswer, loading } =
     useAnswerStore();
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors },
-    reset,
-  } = useForm<AnswerFormData>({
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Determine mode based on answer and isEditMode
+  const mode = useMemo<FormDialogMode>(() => {
+    if (answer) {
+      return isEditMode ? DIALOG_MODES.EDIT : DIALOG_MODES.VIEW;
+    }
+    return DIALOG_MODES.CREATE;
+  }, [answer, isEditMode]);
+
+  const methods = useForm<AnswerFormData>({
     resolver: zodResolver(answerSchema(t)),
     defaultValues: {
       content: "",
@@ -68,6 +71,18 @@ export function AnswerFormDialog({
     },
   });
 
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors, isSubmitting },
+    reset,
+    watch,
+  } = methods;
+
+  const currentValues = watch();
+
+  // Reset form when answer or isOpen changes
   useEffect(() => {
     if (isOpen) {
       if (answer) {
@@ -86,111 +101,163 @@ export function AnswerFormDialog({
     }
   }, [answer, reset, isOpen]);
 
-  const onSubmit = async (data: AnswerFormData) => {
-    if (!isEditMode) {
-      return;
-    }
+  const hasChanges = answer
+    ? currentValues.content !== answer.content ||
+      currentValues.isCorrect !== answer.isCorrect ||
+      currentValues.explanation !== (answer.explanation || "")
+    : false;
+  const isViewMode = mode === DIALOG_MODES.VIEW;
+  const isDisabled = isViewMode && !isEditMode;
 
+  const title = useMemo(
+    () => ({
+      create: t("admin.questions.answers.create"),
+      view: t("admin.questions.answers.viewTitle"),
+      edit: t("admin.questions.answers.editTitle"),
+    }),
+    [t]
+  );
+
+  const description = useMemo(
+    () => ({
+      create: t("admin.questions.answers.editDescription"),
+      view: t("admin.questions.answers.viewDescription"),
+      edit: t("admin.questions.answers.editDescription"),
+    }),
+    [t]
+  );
+
+  const canSubmit = useMemo(() => {
+    if (mode === DIALOG_MODES.CREATE) return !!currentValues.content.trim();
+    if (mode === DIALOG_MODES.VIEW && isEditMode) return hasChanges;
+    if (mode === DIALOG_MODES.EDIT) return true;
+    return false;
+  }, [mode, currentValues, isEditMode, hasChanges]);
+
+  const onSubmit = async (data: AnswerFormData) => {
     try {
-      setIsSubmitting(true);
-      if (answer) {
-        // Update answer
-        await updateAnswer(answer.id, {
-          content: data.content,
-          isCorrect: data.isCorrect || false,
-          explanation: data.explanation || "",
-        });
-        showSuccess(t("admin.questions.answers.updateSuccess"));
-      } else {
-        // Create answer
+      if (mode === DIALOG_MODES.CREATE) {
         await createAnswer(questionId, {
           content: data.content,
           isCorrect: data.isCorrect || false,
           explanation: data.explanation || "",
         });
         showSuccess(t("admin.questions.answers.createSuccess"));
+        onClose();
+      } else if (answer) {
+        // Handle both VIEW (with edit mode) and EDIT modes
+        await updateAnswer(answer.id, {
+          content: data.content,
+          isCorrect: data.isCorrect || false,
+          explanation: data.explanation || "",
+        });
+        showSuccess(t("admin.questions.answers.updateSuccess"));
+        onClose();
       }
-      onClose();
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : t("errors.genericError");
       showError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-  const handleDelete = () => {
+  const handleEdit = useCallback(() => {
+    onEdit?.();
+  }, [onEdit]);
+
+  const handleCancel = useCallback(() => {
+    if (isViewMode && isEditMode && answer) {
+      reset({
+        content: answer.content || "",
+        isCorrect: answer.isCorrect || false,
+        explanation: answer.explanation || "",
+      });
+    }
+    onClose();
+  }, [isViewMode, isEditMode, answer, reset, onClose]);
+
+  const handleFormSubmit = useCallback(() => {
+    handleSubmit(onSubmit)();
+  }, [handleSubmit, onSubmit]);
+
+  const handleDeleteClick = useCallback(() => {
     if (!answer) return;
 
     const confirmDelete = async () => {
+      setIsDeleting(true);
       try {
-        setIsSubmitting(true);
         await deleteAnswer(answer.id);
         showSuccess(t("admin.questions.answers.deleteSuccess"));
-        closeDialog();
+        closeAppDialog();
         onClose();
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : t("errors.genericError");
         showError(errorMessage);
       } finally {
-        setIsSubmitting(false);
+        setIsDeleting(false);
       }
     };
 
     showDialog({
       title: t("admin.questions.answers.delete"),
       content: (
-        <div className="py-4">
-          <p>{t("admin.questions.answers.confirmDelete")}</p>
-        </div>
+        <AlertDialogDescription>
+          {t("admin.questions.answers.confirmDelete")}
+        </AlertDialogDescription>
       ),
       footer: (
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={closeDialog}>
+        <AlertDialogFooterComponent>
+          <AlertDialogCancel onClick={closeAppDialog}>
             {t("common.cancel")}
-          </Button>
-          <Button
-            variant="destructive"
+          </AlertDialogCancel>
+          <AlertDialogAction
             onClick={confirmDelete}
-            disabled={loading || isSubmitting}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {(loading || isSubmitting) && (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            )}
             {t("admin.questions.answers.delete")}
-          </Button>
-        </div>
+          </AlertDialogAction>
+        </AlertDialogFooterComponent>
       ),
     });
-  };
+  }, [
+    answer,
+    t,
+    showDialog,
+    closeAppDialog,
+    onClose,
+    showError,
+    showSuccess,
+    deleteAnswer,
+  ]);
+
+  if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>
-            {isEditMode
-              ? t("admin.questions.answers.editTitle")
-              : t("admin.questions.answers.viewTitle")}
-          </DialogTitle>
-          <DialogDescription>
-            {isEditMode
-              ? t("admin.questions.answers.editDescription")
-              : t("admin.questions.answers.viewDescription")}
-          </DialogDescription>
-        </DialogHeader>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (isEditMode) {
-              handleSubmit(onSubmit)(e);
-            }
-          }}
-          className="mt-6 space-y-4"
-          noValidate
-        >
+    <FormDialog
+      open={isOpen}
+      onOpenChange={(open) => !open && onClose()}
+      mode={mode}
+      isEditMode={isEditMode}
+      title={title}
+      description={description}
+      onEdit={handleEdit}
+      onDelete={answer ? handleDeleteClick : undefined}
+      onCancel={handleCancel}
+      onSubmit={handleFormSubmit}
+      loading={loading}
+      isSubmitting={isSubmitting}
+      isDeleting={isDeleting}
+      hasChanges={hasChanges}
+      canSubmit={canSubmit}
+      createLabel={t("admin.questions.answers.create")}
+      saveLabel={t("common.save")}
+      editLabel={t("common.edit")}
+      deleteLabel={t("admin.questions.answers.delete")}
+      cancelLabel={t("common.cancel")}
+    >
+      <FormProvider {...methods}>
+        <Form className="mt-6 space-y-4">
           {/* Content Field */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -203,7 +270,11 @@ export function AnswerFormDialog({
                 <span className="text-red-500 dark:text-red-400 ml-1">*</span>
               </Label>
             </div>
-            {isEditMode ? (
+            {isDisabled ? (
+              <p className="text-sm text-muted-foreground">
+                {answer?.content || "-"}
+              </p>
+            ) : (
               <TextareaField
                 id="content"
                 label=""
@@ -213,12 +284,9 @@ export function AnswerFormDialog({
                 )}
                 register={register("content")}
                 error={errors.content}
+                required
                 disabled={loading || isSubmitting}
               />
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                {answer?.content || "-"}
-              </p>
             )}
           </div>
 
@@ -230,7 +298,25 @@ export function AnswerFormDialog({
                 {t("admin.questions.answers.columns.isCorrect")}
               </Label>
             </div>
-            {isEditMode ? (
+            {isDisabled ? (
+              <div className="flex items-center gap-2">
+                {answer?.isCorrect ? (
+                  <>
+                    <CheckSquare className="h-4 w-4 text-green-500 dark:text-green-400" />
+                    <span className="text-sm text-green-600 dark:text-green-400">
+                      {t("admin.questions.answers.isCorrect")}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Square className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      {t("admin.questions.answers.isIncorrect")}
+                    </span>
+                  </>
+                )}
+              </div>
+            ) : (
               <div className="flex items-center space-x-2 mt-2">
                 <Controller
                   name="isCorrect"
@@ -253,24 +339,6 @@ export function AnswerFormDialog({
                   {t("admin.questions.answers.isCorrectLabel")}
                 </Label>
               </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                {answer?.isCorrect ? (
-                  <>
-                    <CheckSquare className="h-4 w-4 text-green-500 dark:text-green-400" />
-                    <span className="text-sm text-green-600 dark:text-green-400">
-                      {t("admin.questions.answers.isCorrect")}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <Square className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {t("admin.questions.answers.isIncorrect")}
-                    </span>
-                  </>
-                )}
-              </div>
             )}
           </div>
 
@@ -285,7 +353,11 @@ export function AnswerFormDialog({
                 {t("admin.questions.answers.columns.explanation")}
               </Label>
             </div>
-            {isEditMode ? (
+            {isDisabled ? (
+              <p className="text-sm text-muted-foreground">
+                {answer?.explanation || "-"}
+              </p>
+            ) : (
               <TextareaField
                 id="explanation"
                 label=""
@@ -296,93 +368,11 @@ export function AnswerFormDialog({
                 register={register("explanation")}
                 error={errors.explanation}
                 disabled={loading || isSubmitting}
-                className={cn(
-                  "min-h-[350px]",
-                  answer?.explanation && "min-h-[350px]"
-                )}
               />
-            ) : (
-              <p
-                className={cn(
-                  "text-sm text-muted-foreground",
-                  answer?.explanation && "min-h-[350px]"
-                )}
-              >
-                {answer?.explanation || "-"}
-              </p>
             )}
           </div>
-
-          <DialogFooter>
-            {isEditMode ? (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={onClose}
-                  disabled={loading || isSubmitting}
-                >
-                  <X className="mr-2 h-4 w-4" />
-                  {t("common.cancel")}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={handleSubmit(onSubmit)}
-                  size="sm"
-                  disabled={loading || isSubmitting}
-                  className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 dark:from-emerald-600 dark:to-green-700 dark:hover:from-emerald-700 dark:hover:to-green-800 text-white shadow-md hover:shadow-lg transition-all duration-200 font-medium"
-                >
-                  {(loading || isSubmitting) && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  <Save className="mr-2 h-4 w-4" />
-                  {t("common.save")}
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={onClose}
-                >
-                  {t("common.close")}
-                </Button>
-                {onEdit && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onEdit();
-                    }}
-                    className="border-emerald-500/50 text-emerald-600 hover:bg-gradient-to-br hover:from-emerald-500 hover:to-green-600 hover:text-white hover:border-emerald-600 dark:border-emerald-400/50 dark:text-emerald-400 dark:hover:from-emerald-600 dark:hover:to-green-700 dark:hover:border-emerald-500"
-                  >
-                    <Edit className="mr-2 h-4 w-4" />
-                    {t("common.edit")}
-                  </Button>
-                )}
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleDelete}
-                  disabled={loading || isSubmitting}
-                >
-                  {(loading || isSubmitting) && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  {t("admin.questions.answers.delete")}
-                </Button>
-              </>
-            )}
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        </Form>
+      </FormProvider>
+    </FormDialog>
   );
 }

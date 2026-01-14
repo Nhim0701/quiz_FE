@@ -2,7 +2,7 @@ import { create } from "zustand";
 import type { ApiSuccessResponse } from "@/types";
 import { apiClient } from "@/lib";
 import { ENDPOINTS } from "../constants";
-import type { AnswerProps, QuestionProps } from "../types";
+import type { AnswerProps } from "../types";
 import { FILTER_QUERY_PARAMS } from "@/constants";
 
 interface AnswerState {
@@ -31,16 +31,17 @@ export const useAnswerStore = create<AnswerState>((set) => ({
   fetchAnswers: async (questionId: string) => {
     set({ loading: true, error: null });
     try {
-      // Get answers from question endpoint (which includes answers)
-      const questionResponse = await apiClient.get<
-        ApiSuccessResponse<QuestionProps>
-      >(ENDPOINTS.ANSWERS.LIST, {
-        params: {
-          [FILTER_QUERY_PARAMS.FILTER_KEY(1)]: "question_id",
-          [FILTER_QUERY_PARAMS.FILTER_VALUE(1)]: questionId,
-        },
-      });
-      const answers = questionResponse.data.data?.answers || [];
+      // Get answers from answers endpoint with question_id filter
+      const response = await apiClient.get<ApiSuccessResponse<AnswerProps[]>>(
+        ENDPOINTS.ANSWERS.LIST,
+        {
+          params: {
+            [FILTER_QUERY_PARAMS.FILTER_KEY(1)]: "question_id",
+            [FILTER_QUERY_PARAMS.FILTER_VALUE(1)]: questionId,
+          },
+        }
+      );
+      const answers = response.data.data || [];
       set({ answers, loading: false });
       return answers;
     } catch (error) {
@@ -62,8 +63,13 @@ export const useAnswerStore = create<AnswerState>((set) => ({
           questionId,
         }
       );
-      set({ loading: false });
-      return response.data.data;
+      const newAnswer = response.data.data;
+      // Add new answer to the list
+      set((state) => ({
+        answers: [...state.answers, newAnswer],
+        loading: false,
+      }));
+      return newAnswer;
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to create answer";
@@ -80,8 +86,15 @@ export const useAnswerStore = create<AnswerState>((set) => ({
         ENDPOINTS.ANSWERS.UPDATE(answerId),
         data
       );
-      set({ loading: false });
-      return response.data.data;
+      const updatedAnswer = response.data.data;
+      // Update answer in the list
+      set((state) => ({
+        answers: state.answers.map((answer) =>
+          answer.id === answerId ? updatedAnswer : answer
+        ),
+        loading: false,
+      }));
+      return updatedAnswer;
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to update answer";
@@ -95,7 +108,11 @@ export const useAnswerStore = create<AnswerState>((set) => ({
     set({ loading: true, error: null });
     try {
       await apiClient.delete(ENDPOINTS.ANSWERS.DELETE(answerId));
-      set({ loading: false });
+      // Remove answer from the list
+      set((state) => ({
+        answers: state.answers.filter((answer) => answer.id !== answerId),
+        loading: false,
+      }));
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to delete answer";

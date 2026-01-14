@@ -67,7 +67,7 @@
       },
       "questionInfo": "Question Info",
       "generalInfo": "General Information",
-      "answersList": "Binding Answers List",
+      "answersList": "Answers List",
       "answers": {
         "create": "Create Answer",
         "viewTitle": "Answer Information",

@@ -22,7 +22,6 @@ import {
   usePageData,
 } from "@/hooks";
 import { useQuestionsStore } from "../hooks";
-import { DIALOG_MODES } from "@/constants";
 import type { QuestionProps } from "../types";
 import { useCategoriesStore } from "../../categories/hooks";
 import { useTestsStore } from "../../tests/hooks";
@@ -50,6 +49,7 @@ import {
 } from "@/components/ui/tooltip";
 import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants/app";
 import { QuestionFormDialog } from "./question-form-dialog";
+import { ROUTES } from "../constants";
 
 interface QuestionsListProps {
   roles: {
@@ -87,7 +87,6 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     total: questionsTotal,
     fetchQuestions,
     deleteQuestion,
-    refreshQuestions,
     openDialog,
   } = useQuestionsStore();
   const { categories, fetchCategories } = useCategoriesStore();
@@ -492,9 +491,9 @@ export function QuestionsList({ roles }: QuestionsListProps) {
 
   const handleViewInfo = useCallback(
     (question: QuestionProps) => {
-      openDialog(DIALOG_MODES.VIEW, question);
+      navigate(`${ROUTES.VIEW(question.id)}`);
     },
-    [openDialog]
+    [navigate]
   );
 
   const handleDelete = useCallback(
