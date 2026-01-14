@@ -23,6 +23,8 @@ import {
   Save,
   X,
   Loader2,
+  Check,
+  CheckCheck,
 } from "lucide-react";
 import type { QuestionProps } from "../types";
 import { useQuestionsStore } from "../hooks";
@@ -514,11 +516,13 @@ export function QuestionCard() {
             ) : (
               <div>
                 {question.isMultipleChoice ? (
-                  <span className="text-sm text-blue-600 dark:text-blue-400">
+                  <span className="text-sm text-blue-600 dark:text-blue-400 flex flex-row">
+                    <CheckCheck className="h-4 w-4 text-blue-500 dark:text-blue-400 mr-2" />{" "}
                     {t("admin.questions.multipleChoice")}
                   </span>
                 ) : (
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                  <span className="text-sm text-gray-600 dark:text-gray-400 flex flex-row">
+                    <Check className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-2" />{" "}
                     {t("admin.questions.singleChoice")}
                   </span>
                 )}

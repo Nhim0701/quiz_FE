@@ -14,7 +14,7 @@ export type { ComboboxOption };
 
 export interface ComboboxFieldProps<T extends FieldValues> {
   id: string;
-  label: string;
+  label?: string;
   name: FieldPath<T>;
   control: Control<T>;
   options: ComboboxOption[];
@@ -70,16 +70,18 @@ export function ComboboxField<T extends FieldValues>({
 
   return (
     <div>
-      <Label
-        htmlFor={id}
-        className={cn(labelClasses, "flex items-center gap-2")}
-      >
-        <Icon className={cn("h-4 w-4", color)} />
-        <span>{label}</span>
-        {required && (
-          <span className="text-red-500 dark:text-red-400 ml-1">*</span>
-        )}
-      </Label>
+      {label && (
+        <Label
+          htmlFor={id}
+          className={cn(labelClasses, "flex items-center gap-2")}
+        >
+          <Icon className={cn("h-4 w-4", color)} />
+          <span>{label}</span>
+          {required && (
+            <span className="text-red-500 dark:text-red-400 ml-1">*</span>
+          )}
+        </Label>
+      )}
       <Combobox
         mode="single"
         options={options}

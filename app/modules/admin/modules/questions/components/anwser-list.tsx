@@ -20,7 +20,7 @@ import {
   type Action,
 } from "@/components/common/data-table";
 import type { AnswerProps } from "../types";
-import { AnswerFormDialog as AnswerDialog } from "./answer-form-dialog";
+import { AnswerFormDialog } from "./answer-form-dialog";
 import { useAnswerStore } from "../hooks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -114,12 +114,11 @@ export function AnswerList() {
     }
   }, [selectedAnswer]);
 
-  const handleDialogClose = useCallback(async () => {
+  const handleDialogClose = useCallback(() => {
     setIsDialogOpen(false);
     setSelectedAnswer(null);
     setIsEditMode(false);
-    await reloadAnswers();
-  }, [reloadAnswers]);
+  }, []);
 
   const handleDelete = useCallback(
     (answer: AnswerProps) => {
@@ -273,7 +272,7 @@ export function AnswerList() {
           loading={isLoadingAnswers || answerLoading}
           emptyMessage={t("admin.questions.answers.empty")}
         />
-        <AnswerDialog
+        <AnswerFormDialog
           answer={selectedAnswer}
           questionId={questionId}
           isOpen={isDialogOpen}

@@ -270,24 +270,15 @@ export function AnswerFormDialog({
                 <span className="text-red-500 dark:text-red-400 ml-1">*</span>
               </Label>
             </div>
-            {isDisabled ? (
-              <p className="text-sm text-muted-foreground">
-                {answer?.content || "-"}
-              </p>
-            ) : (
-              <TextareaField
-                id="content"
-                label=""
-                rows={4}
-                placeholder={t(
-                  "admin.questions.answers.form.contentPlaceholder"
-                )}
-                register={register("content")}
-                error={errors.content}
-                required
-                disabled={loading || isSubmitting}
-              />
-            )}
+            <TextareaField
+              id="content"
+              rows={4}
+              placeholder={t("admin.questions.answers.form.contentPlaceholder")}
+              register={register("content")}
+              error={errors.content}
+              required
+              disabled={loading || isSubmitting || isDisabled}
+            />
           </div>
 
           {/* Is Correct Field */}
@@ -298,48 +289,28 @@ export function AnswerFormDialog({
                 {t("admin.questions.answers.columns.isCorrect")}
               </Label>
             </div>
-            {isDisabled ? (
-              <div className="flex items-center gap-2">
-                {answer?.isCorrect ? (
-                  <>
-                    <CheckSquare className="h-4 w-4 text-green-500 dark:text-green-400" />
-                    <span className="text-sm text-green-600 dark:text-green-400">
-                      {t("admin.questions.answers.isCorrect")}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <Square className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {t("admin.questions.answers.isIncorrect")}
-                    </span>
-                  </>
+            <div className="flex items-center space-x-2 mt-2">
+              <Controller
+                name="isCorrect"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="isCorrect"
+                    checked={field.value}
+                    onCheckedChange={(checked) =>
+                      field.onChange(checked === true)
+                    }
+                    disabled={loading || isSubmitting || isDisabled}
+                  />
                 )}
-              </div>
-            ) : (
-              <div className="flex items-center space-x-2 mt-2">
-                <Controller
-                  name="isCorrect"
-                  control={control}
-                  render={({ field }) => (
-                    <Checkbox
-                      id="isCorrect"
-                      checked={field.value}
-                      onCheckedChange={(checked) =>
-                        field.onChange(checked === true)
-                      }
-                      disabled={loading || isSubmitting}
-                    />
-                  )}
-                />
-                <Label
-                  htmlFor="isCorrect"
-                  className="text-sm text-muted-foreground"
-                >
-                  {t("admin.questions.answers.isCorrectLabel")}
-                </Label>
-              </div>
-            )}
+              />
+              <Label
+                htmlFor="isCorrect"
+                className="text-sm text-muted-foreground"
+              >
+                {t("admin.questions.answers.isCorrectLabel")}
+              </Label>
+            </div>
           </div>
 
           {/* Explanation Field */}
@@ -353,23 +324,16 @@ export function AnswerFormDialog({
                 {t("admin.questions.answers.columns.explanation")}
               </Label>
             </div>
-            {isDisabled ? (
-              <p className="text-sm text-muted-foreground">
-                {answer?.explanation || "-"}
-              </p>
-            ) : (
-              <TextareaField
-                id="explanation"
-                label=""
-                rows={3}
-                placeholder={t(
-                  "admin.questions.answers.form.explanationPlaceholder"
-                )}
-                register={register("explanation")}
-                error={errors.explanation}
-                disabled={loading || isSubmitting}
-              />
-            )}
+            <TextareaField
+              id="explanation"
+              rows={3}
+              placeholder={t(
+                "admin.questions.answers.form.explanationPlaceholder"
+              )}
+              register={register("explanation")}
+              error={errors.explanation}
+              disabled={loading || isSubmitting || isDisabled}
+            />
           </div>
         </Form>
       </FormProvider>

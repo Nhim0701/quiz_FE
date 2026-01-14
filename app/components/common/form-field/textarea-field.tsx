@@ -5,7 +5,7 @@ import { cn } from "@/lib";
 
 export interface TextareaFieldProps {
   id: string;
-  label: string;
+  label?: string;
   error?: FieldError;
   required?: boolean;
   disabled?: boolean;
@@ -56,16 +56,18 @@ export function TextareaField({
 
   return (
     <div>
-      <Label
-        htmlFor={id}
-        className={cn(labelClasses, "flex items-center gap-2")}
-      >
-        <Icon className={cn("h-4 w-4", color)} />
-        <span>{label}</span>
-        {required && (
-          <span className="text-red-500 dark:text-red-400 ml-1">*</span>
-        )}
-      </Label>
+      {label && (
+        <Label
+          htmlFor={id}
+          className={cn(labelClasses, "flex items-center gap-2")}
+        >
+          <Icon className={cn("h-4 w-4", color)} />
+          <span>{label}</span>
+          {required && (
+            <span className="text-red-500 dark:text-red-400 ml-1">*</span>
+          )}
+        </Label>
+      )}
       <textarea
         {...register}
         id={id}

@@ -13,7 +13,7 @@ import {
 
 export interface FormFieldProps {
   id: string;
-  label: string;
+  label?: string;
   error?: FieldError;
   required?: boolean;
   disabled?: boolean;
@@ -80,13 +80,15 @@ export function FormField({
 
   return (
     <div>
-      <Label htmlFor={id} className={labelClasses}>
-        <Icon className={cn("h-4 w-4", color)} />
-        <span>{label}</span>
-        {required && (
-          <span className={FORM_FIELD_ERROR_CLASSES.REQUIRED_MARKER}>*</span>
-        )}
-      </Label>
+      {label && (
+        <Label htmlFor={id} className={labelClasses}>
+          <Icon className={cn("h-4 w-4", color)} />
+          <span>{label}</span>
+          {required && (
+            <span className={FORM_FIELD_ERROR_CLASSES.REQUIRED_MARKER}>*</span>
+          )}
+        </Label>
+      )}
       <Input
         {...register}
         id={id}
