@@ -1,23 +1,23 @@
-/**
- * Admin Tests routes
- */
 export const ROUTES = {
-  TESTS: {
-    INDEX: "/admin/tests",
-    INFO: (testId?: string) => (testId ? `/admin/tests/${testId}` : `/:testId`),
-  },
-};
+  INDEX: "/admin/tests",
+} as const;
 
 export const ENDPOINTS = {
-  TESTS: {
-    LIST: "/api/v1/tests",
-    GET: (id: string) => `/api/v1/tests/${id}`,
-    CREATE: "/api/v1/tests",
-    UPDATE: (id: string) => `/api/v1/tests/${id}`,
-    DELETE: (id: string) => `/api/v1/tests/${id}`,
+  LIST: "/api/v1/tests",
+  GET: (id: string) => `/api/v1/tests/${id}`,
+  CREATE: "/api/v1/tests",
+  UPDATE: (id: string) => `/api/v1/tests/${id}`,
+  DELETE: (id: string) => `/api/v1/tests/${id}`,
+} as const;
 
-    TEST_ID: ":testId",
-    TEST_INFO: (testId?: string) =>
-      testId ? `/admin/tests/${testId}` : `/admin/tests/:testId`,
-  },
+export const ERROR_MESSAGES = {
+  FETCH_FAILED: "admin.tests.errors.fetchFailed",
+  CREATE_FAILED: "admin.tests.errors.createFailed",
+  UPDATE_FAILED: "admin.tests.errors.updateFailed",
+  DELETE_FAILED: "admin.tests.errors.deleteFailed",
+} as const;
+
+export const DEFAULT_VALUES = {
+  PAGE: 1,
+  PAGE_SIZE: 10,
 } as const;

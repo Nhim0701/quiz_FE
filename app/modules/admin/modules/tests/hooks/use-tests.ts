@@ -1,36 +1,37 @@
 import { create } from "zustand";
 import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
 import { apiClient } from "@/lib";
-import { ENDPOINTS } from "../constants";
+import { ENDPOINTS, ERROR_MESSAGES, DEFAULT_VALUES } from "../constants";
 import { ENDPOINTS as QUESTIONS_ENDPOINTS } from "../../questions/constants";
-import { ENDPOINTS as CATEGORIES_ENDPOINTS } from "../../categories/constants";
 import type { TestProps } from "../types";
 import type { QuestionProps } from "../../questions/types";
+import type { FormDialogMode } from "@/constants";
+import { DIALOG_MODES, FILTER_QUERY_PARAMS } from "@/constants";
 import { PAGINATION } from "@/constants";
+import { t } from "@/i18n/utils";
 
 interface TestsState {
   // Tests by category ID
   testsByCategory: Record<string, TestProps[]>;
   // Tests by ID cache
   testsById: Record<string, TestProps>;
-  loading: Record<string, boolean>;
-  error: Record<string, string | null>;
+  categoryLoading: Record<string, boolean>;
+  categoryError: Record<string, string | null>;
 
   // Admin tests list state
-  adminTests: TestProps[];
-  adminLoading: boolean;
-  adminError: string | null;
+  tests: TestProps[];
+  loading: boolean;
+  error: string | null;
 
   // Form state
   isDialogOpen: boolean;
-  editingTest: TestProps | null;
-  viewingTest: TestProps | null;
+  dialogMode: FormDialogMode | null;
+  test: TestProps | null;
   isEditMode: boolean;
 
   // Actions
-  openDialog: (test?: TestProps | null) => void;
+  openDialog: (mode: FormDialogMode, test?: TestProps | null) => void;
   closeDialog: () => void;
-  openViewDialog: (test: TestProps) => void;
   setEditMode: (isEdit: boolean) => void;
 
   // API methods
@@ -115,14 +116,14 @@ export const useTestsStore = create<TestsState>((set, get) => ({
   // Initial state
   testsByCategory: {},
   testsById: {},
-  loading: {},
-  error: {},
-  adminTests: [],
-  adminLoading: false,
-  adminError: null,
+  categoryLoading: {},
+  categoryError: {},
+  tests: [],
+  loading: false,
+  error: null,
   isDialogOpen: false,
-  editingTest: null,
-  viewingTest: null,
+  dialogMode: null,
+  test: null,
   isEditMode: false,
 
   // Questions initial state
@@ -134,22 +135,19 @@ export const useTestsStore = create<TestsState>((set, get) => ({
   isQuestionsDialogOpen: false,
 
   // Form actions
-  openDialog: (test = null) => {
-    set({ isDialogOpen: true, editingTest: test, isEditMode: false });
+  openDialog: (mode: FormDialogMode, test?: TestProps | null) => {
+    set({
+      isDialogOpen: true,
+      dialogMode: mode,
+      test: test ?? null,
+      isEditMode: mode === DIALOG_MODES.EDIT,
+    });
   },
   closeDialog: () => {
     set({
       isDialogOpen: false,
-      editingTest: null,
-      viewingTest: null,
-      isEditMode: false,
-    });
-  },
-  openViewDialog: (test) => {
-    set({
-      isDialogOpen: true,
-      viewingTest: test,
-      editingTest: null,
+      dialogMode: null,
+      test: null,
       isEditMode: false,
     });
   },
@@ -167,19 +165,21 @@ export const useTestsStore = create<TestsState>((set, get) => ({
     }
 
     set((state) => ({
-      loading: { ...state.loading, [categoryId]: true },
-      error: { ...state.error, [categoryId]: null },
+      categoryLoading: { ...state.categoryLoading, [categoryId]: true },
+      categoryError: { ...state.categoryError, [categoryId]: null },
     }));
 
     try {
       const params: Record<string, any> = {
         page: 1,
         pageSize: PAGINATION.MAX_PAGE_SIZE_FOR_ALL,
+        [FILTER_QUERY_PARAMS.FILTER_KEY(1)]: "category_id",
+        [FILTER_QUERY_PARAMS.FILTER_VALUE(1)]: categoryId,
       };
 
       const response = await apiClient.get<
         ApiSuccessResponse<Array<TestProps>>
-      >(CATEGORIES_ENDPOINTS.TESTS(categoryId), { params });
+      >(ENDPOINTS.LIST, { params });
 
       const tests = response.data.data || [];
 
@@ -188,16 +188,16 @@ export const useTestsStore = create<TestsState>((set, get) => ({
           ...state.testsByCategory,
           [categoryId]: tests,
         },
-        loading: { ...state.loading, [categoryId]: false },
+        categoryLoading: { ...state.categoryLoading, [categoryId]: false },
       }));
 
       return tests;
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch tests";
+        error instanceof Error ? error.message : t(ERROR_MESSAGES.FETCH_FAILED);
       set((state) => ({
-        error: { ...state.error, [categoryId]: errorMessage },
-        loading: { ...state.loading, [categoryId]: false },
+        categoryError: { ...state.categoryError, [categoryId]: errorMessage },
+        categoryLoading: { ...state.categoryLoading, [categoryId]: false },
       }));
       throw error;
     }
@@ -229,7 +229,7 @@ export const useTestsStore = create<TestsState>((set, get) => ({
     // If not found in cache, fetch from API
     try {
       const response = await apiClient.get<ApiSuccessResponse<TestProps>>(
-        ENDPOINTS.TESTS.GET(testId)
+        ENDPOINTS.GET(testId)
       );
 
       const test = response.data.data;
@@ -275,11 +275,11 @@ export const useTestsStore = create<TestsState>((set, get) => ({
 
   // Admin API methods
   fetchTests: async (
-    page = 1,
-    pageSize = 10,
+    page = DEFAULT_VALUES.PAGE,
+    pageSize = DEFAULT_VALUES.PAGE_SIZE,
     filters?: Record<string, string>
   ) => {
-    set({ adminLoading: true, adminError: null });
+    set({ loading: true, error: null });
     try {
       const params: Record<string, any> = {
         page,
@@ -296,7 +296,7 @@ export const useTestsStore = create<TestsState>((set, get) => ({
       }
 
       const response = await apiClient.get<ApiSuccessResponse<TestProps[]>>(
-        ENDPOINTS.TESTS.LIST,
+        ENDPOINTS.LIST,
         {
           params,
         }
@@ -306,41 +306,43 @@ export const useTestsStore = create<TestsState>((set, get) => ({
       const meta = response.data.meta;
 
       set({
-        adminTests: data,
-        adminLoading: false,
+        tests: data,
+        loading: false,
       });
 
       return { data, meta };
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch tests";
-      set({ adminError: errorMessage, adminLoading: false });
+        error instanceof Error ? error.message : t(ERROR_MESSAGES.FETCH_FAILED);
+      set({ error: errorMessage, loading: false });
       throw error;
     }
   },
 
   createTest: async (data) => {
-    set({ adminLoading: true, adminError: null });
+    set({ loading: true, error: null });
     try {
       const response = await apiClient.post<ApiSuccessResponse<TestProps>>(
-        ENDPOINTS.TESTS.LIST,
+        ENDPOINTS.CREATE,
         data
       );
-      set({ adminLoading: false });
+      set({ loading: false });
       return response.data.data;
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to create test";
-      set({ adminError: errorMessage, adminLoading: false });
+        error instanceof Error
+          ? error.message
+          : t(ERROR_MESSAGES.CREATE_FAILED);
+      set({ error: errorMessage, loading: false });
       throw error;
     }
   },
 
   updateTest: async (id, data) => {
-    set({ adminLoading: true, adminError: null });
+    set({ loading: true, error: null });
     try {
       const response = await apiClient.put<ApiSuccessResponse<TestProps>>(
-        ENDPOINTS.TESTS.GET(id),
+        ENDPOINTS.UPDATE(id),
         data
       );
       const updatedTest = response.data.data;
@@ -363,55 +365,59 @@ export const useTestsStore = create<TestsState>((set, get) => ({
           }
         }
 
-        // Update in adminTests if exists
-        const updatedAdminTests = state.adminTests.map((test) =>
+        // Update in tests if exists
+        const updatedTests = state.tests.map((test) =>
           test.id === id ? updatedTest : test
         );
 
         return {
           testsById: updatedTestsById,
           testsByCategory: updatedTestsByCategory,
-          adminTests: updatedAdminTests,
-          adminLoading: false,
+          tests: updatedTests,
+          loading: false,
         };
       });
 
       return updatedTest;
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to update test";
-      set({ adminError: errorMessage, adminLoading: false });
+        error instanceof Error
+          ? error.message
+          : t(ERROR_MESSAGES.UPDATE_FAILED);
+      set({ error: errorMessage, loading: false });
       throw error;
     }
   },
 
   deleteTest: async (id) => {
-    set({ adminLoading: true, adminError: null });
+    set({ loading: true, error: null });
     try {
-      await apiClient.delete(ENDPOINTS.TESTS.GET(id));
-      set({ adminLoading: false });
+      await apiClient.delete(ENDPOINTS.DELETE(id));
+      set({ loading: false });
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to delete test";
-      set({ adminError: errorMessage, adminLoading: false });
+        error instanceof Error
+          ? error.message
+          : t(ERROR_MESSAGES.DELETE_FAILED);
+      set({ error: errorMessage, loading: false });
       throw error;
     }
   },
 
   refreshTests: async (
-    page = 1,
-    pageSize = 10,
+    page = DEFAULT_VALUES.PAGE,
+    pageSize = DEFAULT_VALUES.PAGE_SIZE,
     filters?: Record<string, string>
   ) => {
-    const { viewingTest } = get();
+    const { test, dialogMode } = get();
     await get().fetchTests(page, pageSize, filters);
 
-    // Update viewingTest if it exists and dialog is still open
-    if (viewingTest) {
-      const { adminTests } = get();
-      const updatedTest = adminTests.find((t) => t.id === viewingTest.id);
+    // Update test if it exists and dialog is still open
+    if (test && dialogMode) {
+      const { tests } = get();
+      const updatedTest = tests.find((t) => t.id === test.id);
       if (updatedTest) {
-        set({ viewingTest: updatedTest });
+        set({ test: updatedTest });
       }
     }
   },
@@ -457,7 +463,7 @@ export const useTestsStore = create<TestsState>((set, get) => ({
       });
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch questions";
+        error instanceof Error ? error.message : t(ERROR_MESSAGES.FETCH_FAILED);
       set({
         questionsError: errorMessage,
         questionsLoading: false,
@@ -484,7 +490,9 @@ export const useTestsStore = create<TestsState>((set, get) => ({
       return response.data.data;
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to create question";
+        error instanceof Error
+          ? error.message
+          : t(ERROR_MESSAGES.CREATE_FAILED);
       set({ questionsError: errorMessage, questionsLoading: false });
       throw error;
     }
@@ -510,7 +518,9 @@ export const useTestsStore = create<TestsState>((set, get) => ({
       return response.data.data;
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to update question";
+        error instanceof Error
+          ? error.message
+          : t(ERROR_MESSAGES.UPDATE_FAILED);
       set({ questionsError: errorMessage, questionsLoading: false });
       throw error;
     }
@@ -526,7 +536,7 @@ export const useTestsStore = create<TestsState>((set, get) => ({
       return response.data.data;
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch question";
+        error instanceof Error ? error.message : t(ERROR_MESSAGES.FETCH_FAILED);
       set({ questionsError: errorMessage, questionsLoading: false });
       throw error;
     }
@@ -562,81 +572,3 @@ export const useTestsStore = create<TestsState>((set, get) => ({
     await get().fetchQuestions(page, pageSize, filters);
   },
 }));
-
-// Adapter hook to provide useQuestionsStore interface from useTestsStore
-const useQuestionsStoreHook = () => {
-  const store = useTestsStore();
-  return {
-    questions: store.questions,
-    loading: store.questionsLoading,
-    error: store.questionsError,
-    total: store.questionsTotal,
-    meta: store.questionsMeta,
-    isDialogOpen: store.isQuestionsDialogOpen,
-    openDialog: store.openQuestionsDialog,
-    closeDialog: store.closeQuestionsDialog,
-    fetchQuestions: store.fetchQuestions,
-    createQuestion: store.createQuestion,
-    updateQuestion: store.updateQuestion,
-    getQuestion: store.getQuestion,
-    deleteQuestion: store.deleteQuestion,
-    refreshQuestions: store.refreshQuestions,
-  };
-};
-
-// Add store methods for direct access (like getState, setState, subscribe)
-(useQuestionsStoreHook as any).getState = () => {
-  const state = useTestsStore.getState();
-  return {
-    questions: state.questions,
-    loading: state.questionsLoading,
-    error: state.questionsError,
-    total: state.questionsTotal,
-    meta: state.questionsMeta,
-    isDialogOpen: state.isQuestionsDialogOpen,
-    openDialog: state.openQuestionsDialog,
-    closeDialog: state.closeQuestionsDialog,
-    fetchQuestions: state.fetchQuestions,
-    createQuestion: state.createQuestion,
-    updateQuestion: state.updateQuestion,
-    getQuestion: state.getQuestion,
-    deleteQuestion: state.deleteQuestion,
-    refreshQuestions: state.refreshQuestions,
-  };
-};
-
-(useQuestionsStoreHook as any).setState = (partial: any) => {
-  const updates: any = {};
-  if (partial.questions !== undefined) updates.questions = partial.questions;
-  if (partial.loading !== undefined) updates.questionsLoading = partial.loading;
-  if (partial.error !== undefined) updates.questionsError = partial.error;
-  if (partial.total !== undefined) updates.questionsTotal = partial.total;
-  if (partial.meta !== undefined) updates.questionsMeta = partial.meta;
-  if (partial.isDialogOpen !== undefined)
-    updates.isQuestionsDialogOpen = partial.isDialogOpen;
-  useTestsStore.setState(updates);
-};
-
-(useQuestionsStoreHook as any).subscribe = (listener: (state: any) => void) => {
-  return useTestsStore.subscribe((state) => {
-    const questionsState = {
-      questions: state.questions,
-      loading: state.questionsLoading,
-      error: state.questionsError,
-      total: state.questionsTotal,
-      meta: state.questionsMeta,
-      isDialogOpen: state.isQuestionsDialogOpen,
-      openDialog: state.openQuestionsDialog,
-      closeDialog: state.closeQuestionsDialog,
-      fetchQuestions: state.fetchQuestions,
-      createQuestion: state.createQuestion,
-      updateQuestion: state.updateQuestion,
-      getQuestion: state.getQuestion,
-      deleteQuestion: state.deleteQuestion,
-      refreshQuestions: state.refreshQuestions,
-    };
-    listener(questionsState);
-  });
-};
-
-export const useQuestionsStore = useQuestionsStoreHook as any;

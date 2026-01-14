@@ -106,7 +106,7 @@ export function AppSidebar() {
     {
       title: t("sidebar.admin.tests"),
       icon: FileText,
-      url: ADMIN_TESTS_ROUTES.TESTS.INDEX,
+      url: ADMIN_TESTS_ROUTES.INDEX,
       permission: COMMON_PERMISSIONS.TEST_READ,
       resourcePrefix: RESOURCES.TEST,
     },

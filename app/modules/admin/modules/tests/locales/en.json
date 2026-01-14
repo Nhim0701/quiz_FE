@@ -39,6 +39,12 @@
         "timeLimitRequired": "Time limit is required",
         "timeLimitMin": "Time limit must be at least 1 minute"
       },
+      "errors": {
+        "fetchFailed": "Failed to fetch tests",
+        "createFailed": "Failed to create test",
+        "updateFailed": "Failed to update test",
+        "deleteFailed": "Failed to delete test"
+      },
       "columns": {
         "id": "ID",
         "name": "Name",

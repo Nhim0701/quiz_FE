@@ -1,3 +1,2 @@
 export { TestsList } from "./list";
-export { TestForm } from "./test-form";
-export { TestViewDialog } from "./test-dialog";
+export { TestFormDialog } from "./form-dialog";

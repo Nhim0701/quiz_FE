@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState, useRef, useCallback } from "react";
-import { useLocation, useSearchParams, useNavigate } from "react-router";
-import { useTranslation } from "@/i18n";
+import { useSearchParams, useNavigate } from "react-router";
+import { useTranslation, type TranslationParams } from "@/i18n";
 import {
   DataTable,
-  Pagination,
   type Column,
   type Action,
 } from "@/components/common/data-table";
@@ -22,11 +21,11 @@ import {
   createArrayFilterHandler,
   usePageData,
 } from "@/hooks";
-import { useTestsStore } from "../hooks";
-import type { TestProps } from "../types";
+import { useTestsStore, type TestProps } from "../hooks";
 import { useCategoriesStore } from "../../categories/hooks";
 import { Eye, Trash2, Edit, FileQuestion } from "lucide-react";
-import { TestViewDialog } from "./test-dialog";
+import { TestFormDialog } from "./form-dialog";
+import { DIALOG_MODES } from "@/constants";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -57,19 +56,11 @@ interface TestsListProps {
 
 export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
   const { t } = useTranslation();
-  const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { showError, showSuccess, showDialog, closeDialog } = useApp();
-  const {
-    page,
-    pageSize,
-    total,
-    setPage,
-    setPageSize,
-    setTotal,
-    setCurrentRoute,
-  } = usePaginationStore();
+  const { page, pageSize, total, setPage, setPageSize, setTotal } =
+    usePaginationStore();
 
   // Filter states
   const [searchInput, setSearchInput] = useState("");
@@ -80,22 +71,8 @@ export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
   const isApplyingFiltersFromUrl = useRef(false);
   const hasInitialFetch = useRef(false);
 
-  // Reset pagination when route changes (but keep when same route)
-  useEffect(() => {
-    // Get route without query params for comparison
-    const routePath = location.pathname;
-    setCurrentRoute(routePath);
-  }, [location.pathname, setCurrentRoute]);
-  const {
-    adminTests: tests,
-    adminLoading: loading,
-    fetchTests,
-    deleteTest,
-    refreshTests,
-    openDialog,
-    openViewDialog,
-    viewingTest,
-  } = useTestsStore();
+  const { tests, loading, fetchTests, deleteTest, refreshTests, openDialog } =
+    useTestsStore();
   const { categories, fetchCategories } = useCategoriesStore();
 
   // Fetch categories to map categoryId to categoryName
@@ -221,12 +198,9 @@ export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
   });
 
   // Expose clearFilters function to parent component (only once on mount)
-  const clearFiltersRef = useRef(handleClearAllFilters);
-  clearFiltersRef.current = handleClearAllFilters;
-
   useEffect(() => {
     if (onClearFiltersReady) {
-      onClearFiltersReady(() => clearFiltersRef.current());
+      onClearFiltersReady(handleClearAllFilters);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
@@ -282,10 +256,10 @@ export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
     },
   });
 
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     setSearchValue(searchInput);
     setPage(1);
-  };
+  }, [searchInput, setPage]);
 
   const filterActionButtons = useFilterActions({
     onSearch: handleSearch,
@@ -371,167 +345,208 @@ export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
     t,
   ]);
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
+  const handlePageChange = useCallback(
+    (newPage: number) => setPage(newPage),
+    [setPage]
+  );
 
-  const handlePageSizeChange = (newPageSize: number) => {
-    setPageSize(newPageSize);
-  };
+  const handlePageSizeChange = useCallback(
+    (newPageSize: number) => setPageSize(newPageSize),
+    [setPageSize]
+  );
 
-  const handleViewInfo = (test: TestProps) => {
-    openViewDialog(test);
-  };
+  const paginationProps = useMemo(
+    () => ({
+      page,
+      pageSize,
+      total,
+      onPageChange: handlePageChange,
+      onPageSizeChange: handlePageSizeChange,
+    }),
+    [page, pageSize, total, handlePageChange, handlePageSizeChange]
+  );
 
-  const handleEdit = (test: TestProps) => {
-    openDialog(test);
-  };
+  const handleViewInfo = useCallback(
+    (test: TestProps) => openDialog(DIALOG_MODES.VIEW, test),
+    [openDialog]
+  );
 
-  const handleViewQuestions = (test: TestProps) => {
-    // Navigate to questions page with testId filter
-    const searchParams = new URLSearchParams();
-    searchParams.set(FILTER_QUERY_PARAMS.FILTER_KEY(1), "testId");
-    searchParams.set(FILTER_QUERY_PARAMS.FILTER_VALUE(1), test.id);
-    navigate(`${QUESTIONS_ROUTES.QUESTIONS.INDEX}?${searchParams.toString()}`);
-  };
+  const handleEdit = useCallback(
+    (test: TestProps) => openDialog(DIALOG_MODES.EDIT, test),
+    [openDialog]
+  );
 
-  const handleDelete = (test: TestProps) => {
-    const confirmDelete = async () => {
-      try {
-        await deleteTest(test.id);
-        showSuccess(t("admin.tests.deleteSuccess"));
-        await refreshTests(page, pageSize, apiFilters);
-        closeDialog();
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : t("errors.genericError");
-        showError(errorMessage);
-      }
-    };
-
-    showDialog({
-      title: t("admin.tests.delete"),
-      content: (
-        <AlertDialogDescription>
-          {t("admin.tests.confirmDelete", {
-            name: test.name,
-          } as any)}
-        </AlertDialogDescription>
-      ),
-      footer: (
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={closeDialog}>
-            {t("common.cancel")}
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={confirmDelete}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
-            {t("admin.tests.delete")}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      ),
-    });
-  };
-
-  const columns: Column<TestProps>[] = [
-    {
-      key: "id",
-      header: t("admin.tests.columns.id"),
-      className: "w-[100px]",
-      render: (test) => (
-        <span className="truncate block max-w-[100px]" title={test.id}>
-          {test.id}
-        </span>
-      ),
+  const handleViewQuestions = useCallback(
+    (test: TestProps) => {
+      // Navigate to questions page with testId filter
+      const searchParams = new URLSearchParams();
+      searchParams.set(FILTER_QUERY_PARAMS.FILTER_KEY(1), "testId");
+      searchParams.set(FILTER_QUERY_PARAMS.FILTER_VALUE(1), test.id);
+      navigate(
+        `${QUESTIONS_ROUTES.QUESTIONS.INDEX}?${searchParams.toString()}`
+      );
     },
-    {
-      key: "name",
-      header: t("admin.tests.columns.name"),
-      render: (test) => <span className="font-medium">{test.name}</span>,
-    },
-    {
-      key: "categoryName",
-      header: t("admin.tests.columns.category"),
-      render: (test) => (
-        <span className="text-muted-foreground">{test.categoryName}</span>
-      ),
-    },
-    {
-      key: "questionCount",
-      header: t("admin.tests.columns.questionCount" as any),
-      meta: { center: true },
-      render: (test) => (
-        <span className="text-muted-foreground">{test.questionCount ?? 0}</span>
-      ),
-    },
-    {
-      key: "description",
-      header: t("admin.tests.columns.description" as any),
-      render: (test) => (
-        <span className="text-muted-foreground text-sm">
-          {test.description || "-"}
-        </span>
-      ),
-    },
-    {
-      key: "timeLimit",
-      header: t("admin.tests.columns.timeLimit" as any),
-      meta: { center: true },
-      render: (test) => (
-        <span className="text-muted-foreground">
-          {" "}
-          {`${test.timeLimit} ${t("common.minutes")}`}
-        </span>
-      ),
-    },
-  ];
+    [navigate]
+  );
 
-  const actions: Action<TestProps>[] = [
-    ...(roles.read
-      ? [
-          {
-            label: t("admin.tests.viewInfo"),
-            onClick: handleViewInfo,
-            icon: <Eye className="h-4 w-4" />,
-            actionType: "viewInfo" as const,
-          },
-        ]
-      : []),
-    ...(roles.update
-      ? [
-          {
-            label: t("common.edit"),
-            onClick: handleEdit,
-            icon: <Edit className="h-4 w-4" />,
-            actionType: "edit" as const,
-          },
-        ]
-      : []),
-    ...(roles.delete
-      ? [
-          {
-            label: t("admin.tests.delete"),
-            onClick: handleDelete,
-            variant: "destructive" as const,
-            icon: <Trash2 className="h-4 w-4" />,
-            actionType: "delete" as const,
-          },
-        ]
-      : []),
-    ...(roles.read
-      ? [
-          {
-            label: t("admin.tests.viewQuestions"),
-            onClick: handleViewQuestions,
-            icon: <FileQuestion className="h-4 w-4" />,
-            className:
-              "border-orange-500/50 text-orange-600 hover:bg-gradient-to-br hover:from-orange-500 hover:to-amber-600 hover:text-white hover:border-orange-600 dark:border-orange-400/50 dark:text-orange-400 dark:hover:from-orange-600 dark:hover:to-amber-700 dark:hover:border-orange-500",
-            actionType: "default" as const,
-          },
-        ]
-      : []),
-  ];
+  const handleDelete = useCallback(
+    (test: TestProps) => {
+      const confirmDelete = async () => {
+        try {
+          await deleteTest(test.id);
+          showSuccess(t("admin.tests.deleteSuccess"));
+          handleClearAllFilters();
+          await refreshTests(1, pageSize);
+          closeDialog();
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : t("errors.genericError");
+          showError(errorMessage);
+        }
+      };
+
+      showDialog({
+        title: t("admin.tests.delete"),
+        content: (
+          <AlertDialogDescription>
+            {t("admin.tests.confirmDelete", {
+              name: test.name,
+            } as TranslationParams<"admin.tests.confirmDelete">)}
+          </AlertDialogDescription>
+        ),
+        footer: (
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={closeDialog}>
+              {t("common.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("admin.tests.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        ),
+      });
+    },
+    [
+      deleteTest,
+      showSuccess,
+      t,
+      handleClearAllFilters,
+      refreshTests,
+      pageSize,
+      closeDialog,
+      showDialog,
+      showError,
+    ]
+  );
+
+  const columns = useMemo<Column<TestProps>[]>(
+    () => [
+      {
+        key: "id",
+        header: t("admin.tests.columns.id"),
+        className: "w-[100px]",
+        render: (test) => (
+          <span className="truncate block max-w-[100px]" title={test.id}>
+            {test.id}
+          </span>
+        ),
+      },
+      {
+        key: "name",
+        header: t("admin.tests.columns.name"),
+        render: (test) => <span className="font-medium">{test.name}</span>,
+      },
+      {
+        key: "categoryName",
+        header: t("admin.tests.columns.category"),
+        render: (test) => (
+          <span className="text-muted-foreground">{test.categoryName}</span>
+        ),
+      },
+      {
+        key: "questionCount",
+        header: t("admin.tests.columns.questionCount"),
+        meta: { center: true },
+        render: (test) => (
+          <span className="text-muted-foreground">
+            {test.questionCount ?? 0}
+          </span>
+        ),
+      },
+      {
+        key: "description",
+        header: t("admin.tests.columns.description"),
+        render: (test) => (
+          <span className="text-muted-foreground text-sm">
+            {test.description || "-"}
+          </span>
+        ),
+      },
+      {
+        key: "timeLimit",
+        header: t("admin.tests.columns.timeLimit"),
+        meta: { center: true },
+        render: (test) => (
+          <span className="text-muted-foreground">
+            {`${test.timeLimit} ${t("common.minutes")}`}
+          </span>
+        ),
+      },
+    ],
+    [t]
+  );
+
+  const actions = useMemo<Action<TestProps>[]>(
+    () => [
+      ...(roles.read
+        ? [
+            {
+              label: t("admin.tests.viewInfo"),
+              onClick: handleViewInfo,
+              icon: <Eye className="h-4 w-4" />,
+              actionType: "viewInfo" as const,
+            },
+          ]
+        : []),
+      ...(roles.update
+        ? [
+            {
+              label: t("common.edit"),
+              onClick: handleEdit,
+              icon: <Edit className="h-4 w-4" />,
+              actionType: "edit" as const,
+            },
+          ]
+        : []),
+      ...(roles.delete
+        ? [
+            {
+              label: t("admin.tests.delete"),
+              onClick: handleDelete,
+              variant: "destructive" as const,
+              icon: <Trash2 className="h-4 w-4" />,
+              actionType: "delete" as const,
+            },
+          ]
+        : []),
+      ...(roles.read
+        ? [
+            {
+              label: t("admin.tests.viewQuestions"),
+              onClick: handleViewQuestions,
+              icon: <FileQuestion className="h-4 w-4" />,
+              className:
+                "border-orange-500/50 text-orange-600 hover:bg-gradient-to-br hover:from-orange-500 hover:to-amber-600 hover:text-white hover:border-orange-600 dark:border-orange-400/50 dark:text-orange-400 dark:hover:from-orange-600 dark:hover:to-amber-700 dark:hover:border-orange-500",
+              actionType: "default" as const,
+            },
+          ]
+        : []),
+    ],
+    [roles, t, handleViewInfo, handleEdit, handleDelete, handleViewQuestions]
+  );
 
   return (
     <>
@@ -579,17 +594,10 @@ export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
         data={testsWithCategoryNames}
         actions={actions}
         loading={loading}
-        // scroll={{ maxHeight: 500 }}
         emptyMessage={t("admin.tests.empty")}
+        pagination={paginationProps}
       />
-      <Pagination
-        page={page}
-        pageSize={pageSize}
-        total={total}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
-      />
-      <TestViewDialog test={viewingTest} onDelete={handleDelete} />
+      <TestFormDialog onDelete={handleDelete} />
     </>
   );
 }

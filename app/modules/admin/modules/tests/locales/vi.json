@@ -39,6 +39,12 @@
         "timeLimitRequired": "Thời gian giới hạn là bắt buộc",
         "timeLimitMin": "Thời gian giới hạn phải ít nhất 1 phút"
       },
+      "errors": {
+        "fetchFailed": "Không thể tải danh sách bài kiểm tra",
+        "createFailed": "Không thể tạo bài kiểm tra",
+        "updateFailed": "Không thể cập nhật bài kiểm tra",
+        "deleteFailed": "Không thể xóa bài kiểm tra"
+      },
       "columns": {
         "id": "ID",
         "name": "Tên",

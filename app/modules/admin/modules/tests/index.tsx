@@ -10,9 +10,11 @@ import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { TestsList, TestForm } from "./components";
+import { TestsList } from "./components";
+import { TestFormDialog } from "./components/form-dialog";
 import { useTestsStore } from "./hooks";
 import { pageMeta } from "@/lib";
+import { DIALOG_MODES } from "@/constants";
 
 export const meta: Route.MetaFunction = () => {
   return pageMeta(t("admin.tests.title"))();
@@ -38,7 +40,7 @@ export default function AdminTests() {
       },
       {
         label: t("sidebar.admin.tests"),
-        href: ROUTES.TESTS.INDEX,
+        href: ROUTES.INDEX,
       },
     ],
     [t]
@@ -67,7 +69,7 @@ export default function AdminTests() {
           <CardTitle>{t("admin.tests.cardTitle")}</CardTitle>
           {roles.create && (
             <Button
-              onClick={() => openDialog()}
+              onClick={() => openDialog(DIALOG_MODES.CREATE)}
               size="sm"
               className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 dark:from-emerald-600 dark:to-green-700 dark:hover:from-emerald-700 dark:hover:to-green-800 text-white shadow-md hover:shadow-lg transition-all duration-200 font-medium"
             >
@@ -76,16 +78,14 @@ export default function AdminTests() {
             </Button>
           )}
         </CardHeader>
-        <CardContent className="overflow-auto">
+        <CardContent>
           <TestsList
             roles={roles}
             onClearFiltersReady={handleClearFiltersReady}
           />
         </CardContent>
       </Card>
-      <div className="mt-4">
-        <TestForm onClearFilters={clearFilters} />
-      </div>
+      <TestFormDialog onClearFilters={clearFilters} />
     </Container>
   );
 }
