@@ -8,7 +8,7 @@ export {
   hasAllPermissions,
   hasResourcePermission,
 } from "./permissions";
-export { cn, formatUnixTimestamp, getInitials } from "./utils";
+export { cn, formatUnixTimestamp, getInitials, pageMeta } from "./utils";
 export {
   createZodSchema,
   createRequiredString,

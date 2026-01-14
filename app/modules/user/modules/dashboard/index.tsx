@@ -1,3 +1,4 @@
+import type { Route } from "./+types/index";
 import { useBreadcrumb, usePageData } from "@/hooks";
 import { useTranslation } from "@/i18n";
 import { ROUTES } from "./constants";
@@ -5,6 +6,12 @@ import { PageHeader } from "@/components/page-header";
 import { Container } from "@/components/ui/container";
 import { useDashboard } from "./hooks";
 import { Stats, CategoryStats, TestStats, RecentActivity } from "./components";
+import { pageMeta } from "@/lib";
+
+export const meta: Route.MetaFunction = () => {
+  const { t } = useTranslation();
+  return pageMeta(t("sidebar.dashboard"))();
+};
 
 export default function Dashboard() {
   const { t } = useTranslation();

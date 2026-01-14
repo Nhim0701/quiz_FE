@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Edit, Lock } from "lucide-react";
+import type { Route } from "./+types/index";
 import { useBreadcrumb, usePageData } from "@/hooks";
 import { PageHeader } from "@/components/page-header";
 import { Container } from "@/components/ui/container";
@@ -8,6 +9,13 @@ import { UserInfo } from "./components";
 import { ChangePasswordModal } from "./components/change-password-modal";
 import { useProfile } from "./hooks";
 import { ROUTES } from "./constants";
+import { useTranslation } from "@/i18n";
+import { pageMeta } from "@/lib";
+
+export const meta: Route.MetaFunction = () => {
+  const { t } = useTranslation();
+  return pageMeta(t("sidebar.profile"))();
+};
 
 export default function Profile() {
   const { t, setLoading, getCurrentUser } = useProfile();

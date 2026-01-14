@@ -1,7 +1,11 @@
 {
-  "name": "quiz-fe",
-  "private": true,
-  "version": "0.0.0",
+  "name": "hel",
+  "description": "HEL - E-learning Platform",
+  "author": "HEL - E-learning Platform",
+  "license": "MIT",
+  "homepage": "https://hel.com",
+  "private": false,
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "build": "react-router build",

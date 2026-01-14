@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import type { Route } from "./+types/register";
 import {
   useAuth,
   type RegisterFormData,
@@ -13,6 +14,12 @@ import {
   RegisterCard,
   RegisterFooter,
 } from "./components";
+import { pageMeta } from "@/lib";
+
+export const meta: Route.MetaFunction = () => {
+  const { t } = useTranslation();
+  return pageMeta(t("auth.register.title"))();
+};
 
 export default function Register() {
   const navigate = useNavigate();

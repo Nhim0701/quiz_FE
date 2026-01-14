@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import type { Route } from "./+types/index";
 import { useTranslation } from "@/i18n";
 import { useRole } from "@/modules/common/auth/hooks/use-role";
 import { RESOURCES } from "@/modules/admin/constants/permissions";
@@ -11,6 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { CategoriesList, CategoryForm } from "./components";
 import { useCategoriesStore } from "./hooks";
+import { pageMeta } from "@/lib";
+
+export const meta: Route.MetaFunction = () => {
+  const { t } = useTranslation();
+  return pageMeta(t("admin.categories.title"))();
+};
 
 export default function AdminCategories() {
   const { t } = useTranslation();

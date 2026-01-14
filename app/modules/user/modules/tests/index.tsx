@@ -1,3 +1,4 @@
+import type { Route } from "./+types/index";
 import { useBreadcrumb, usePageData } from "@/hooks";
 import { useCategoriesStore } from "../../../admin/modules/categories/hooks";
 import { useTestsStore } from "@/modules/admin/modules/tests/hooks";
@@ -6,6 +7,12 @@ import { ROUTES } from "./constants";
 import { PageHeader } from "@/components/page-header";
 import { Container } from "@/components/ui/container";
 import { TestList } from "./components";
+import { pageMeta } from "@/lib";
+
+export const meta: Route.MetaFunction = () => {
+  const { t } = useTranslation();
+  return pageMeta(t("sidebar.tests"))();
+};
 
 export default function Tests() {
   const { t } = useTranslation();

@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router";
+import type { Route } from "./+types/view";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "@/i18n";
@@ -41,6 +42,12 @@ import {
 } from "@/components/common/data-table";
 import type { QuestionProps, AnswerProps } from "../types";
 import { AnswerDialog } from "../components";
+import { pageMeta } from "@/lib";
+
+export const meta: Route.MetaFunction = () => {
+  const { t } = useTranslation();
+  return pageMeta(t("admin.questions.questionInfo"))();
+};
 
 export default function QuestionView() {
   const { t } = useTranslation();

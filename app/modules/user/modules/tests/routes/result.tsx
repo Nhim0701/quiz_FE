@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import type { Route } from "./+types/result";
 import { Container } from "@/components/ui/container";
 import { ResultEmpty, ResultSummary, ResultReview } from "../components";
 import { useResultStore } from "../hooks/use-result";
@@ -11,6 +12,12 @@ import {
 } from "@/modules/admin/modules/tests/hooks";
 import { ROUTES } from "../constants";
 import type { TestResultLocationState } from "../types";
+import { pageMeta } from "@/lib";
+
+export const meta: Route.MetaFunction = () => {
+  const { t } = useTranslation();
+  return pageMeta(t("common.result"))();
+};
 
 export default function Result() {
   const location = useLocation();

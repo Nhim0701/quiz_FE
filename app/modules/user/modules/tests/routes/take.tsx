@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router";
+import type { Route } from "./+types/take";
 import { useTestStore, useTestStoreState } from "../hooks";
 import { TIME_CONSTANTS, ROUTES } from "../constants";
 import { useTranslation } from "@/i18n";
@@ -14,6 +15,12 @@ import {
   TestSidebar,
   TestEmpty,
 } from "../components";
+import { pageMeta } from "@/lib";
+
+export const meta: Route.MetaFunction = () => {
+  const { t } = useTranslation();
+  return pageMeta(t("common.take"))();
+};
 
 export default function Test() {
   const { testId } = useParams<{ testId: string }>();

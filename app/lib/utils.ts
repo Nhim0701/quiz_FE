@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { format, fromUnixTime } from "date-fns";
+import packageJson from "package.json";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -50,4 +51,17 @@ export function getInitials(
     .toUpperCase();
 
   return initials.slice(0, maxLength);
+}
+
+/**
+ * Create page meta function with formatted title
+ * @param pageTitle The page title
+ * @returns Meta function that returns array with formatted title in format: "HEL - <page-title>"
+ */
+export function pageMeta(pageTitle: string) {
+  return () => [
+    {
+      title: `${packageJson.name.toUpperCase()} - ${pageTitle}`,
+    },
+  ];
 }
