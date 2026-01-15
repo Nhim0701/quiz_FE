@@ -2,5 +2,6 @@ import { Stats } from "./stats";
 import { CategoryStats } from "./category-stats";
 import { TestStats } from "./test-stats";
 import { RecentActivity } from "./recent-activity";
+import { DashboardSkeleton } from "./dashboard-skeleton";
 
-export { Stats, CategoryStats, TestStats, RecentActivity };
+export { Stats, CategoryStats, TestStats, RecentActivity, DashboardSkeleton };

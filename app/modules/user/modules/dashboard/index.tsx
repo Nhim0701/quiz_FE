@@ -1,11 +1,17 @@
 import type { Route } from "./+types/index";
-import { useBreadcrumb, usePageData } from "@/hooks";
+import { useBreadcrumb, usePageData, useApp } from "@/hooks";
 import { useTranslation, t } from "@/i18n";
 import { ROUTES } from "./constants";
 import { PageHeader } from "@/components/common/page-header";
 import { Container } from "@/components/ui/container";
 import { useDashboard } from "./hooks";
-import { Stats, CategoryStats, TestStats, RecentActivity } from "./components";
+import {
+  Stats,
+  CategoryStats,
+  TestStats,
+  RecentActivity,
+  DashboardSkeleton,
+} from "./components";
 import { pageMeta } from "@/lib";
 
 export const meta: Route.MetaFunction = () => {
@@ -14,7 +20,8 @@ export const meta: Route.MetaFunction = () => {
 
 export default function Dashboard() {
   const { t } = useTranslation();
-  const { getDashboard } = useDashboard();
+  const { getDashboard, dashboardData } = useDashboard();
+  const { loading } = useApp();
 
   useBreadcrumb(
     [
@@ -26,20 +33,31 @@ export default function Dashboard() {
     [t]
   );
 
-  usePageData(() => getDashboard(), "errors.fetchDashboardFailed", []);
+  usePageData(() => getDashboard(), {
+    errorKey: "errors.fetchDashboardFailed",
+    showLoading: false,
+  });
+
+  const isLoading = loading || !dashboardData;
 
   return (
     <Container>
       <PageHeader title={t("sidebar.dashboard")} />
-      <Stats />
+      {isLoading ? (
+        <DashboardSkeleton />
+      ) : (
+        <>
+          <Stats />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <CategoryStats />
-        <TestStats />
-      </div>
-      <div className="mt-4 sm:mt-6">
-        <RecentActivity />
-      </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <CategoryStats />
+            <TestStats />
+          </div>
+          <div className="mt-4 sm:mt-6">
+            <RecentActivity />
+          </div>
+        </>
+      )}
     </Container>
   );
 }
