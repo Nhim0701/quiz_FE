@@ -65,3 +65,14 @@ export function pageMeta(pageTitle: string) {
     },
   ];
 }
+
+/**
+ * Get DOM node by block id
+ * @param blockId The block id to get the DOM node for
+ * @returns The DOM node for the block id
+ */
+export function getDOMNodeByBlockId(blockId: string) {
+  return window.document.querySelector(
+    `[data-slate-node="element"][data-block-id="${blockId}"]`
+  );
+}

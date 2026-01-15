@@ -80,6 +80,9 @@ export default [
         ADMIN_NAMESPACES_ROUTES.INDEX,
         "modules/admin/modules/namespaces/index.tsx"
       ),
+
+      // Edit routes
     ]),
   ]),
+  route("/edit", "modules/admin/modules/edit/index.tsx"),
 ];

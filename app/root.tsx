@@ -13,6 +13,7 @@ import "@/i18n";
 import { Toaster } from "@/components/ui/sonner";
 import { NotFound } from "@/components/common/not-found";
 import { AppDialog } from "@/components/common/app-dialog";
+import { TooltipProvider } from "./components/ui/tooltip";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -67,7 +68,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         />
       </head>
       <body>
-        {children}
+        <TooltipProvider>{children}</TooltipProvider>
         <ScrollRestoration />
         <Scripts />
         <Toaster />
