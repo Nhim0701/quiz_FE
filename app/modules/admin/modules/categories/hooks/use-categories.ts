@@ -17,6 +17,8 @@ interface CategoriesState {
   categories: Category[];
   loading: boolean;
   error: string | null;
+  total: number;
+  meta?: ApiResponseMeta;
 
   // Form state
   isDialogOpen: boolean;
@@ -50,6 +52,8 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
   categories: [],
   loading: false,
   error: null,
+  total: 0,
+  meta: undefined,
   isDialogOpen: false,
   dialogMode: null,
   category: null,
@@ -107,7 +111,12 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
       const data = response.data.data || [];
       const meta = response.data.meta;
 
-      set({ categories: data, loading: false });
+      set({
+        categories: data,
+        loading: false,
+        total: meta?.total || data.length || 0,
+        meta,
+      });
       return { data, meta };
     } catch (error) {
       const errorMessage =

@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "@/i18n";
 import { DIALOG_MODES } from "@/constants";
@@ -8,12 +8,11 @@ import {
   createStringConverter,
   createStringFilterHandler,
   useAdminListData,
-  useApp,
+  useFilterActions,
+  useFilterHandlers,
+  useFilterIdsConfig,
 } from "@/hooks";
-import {
-  useAdminListFilters,
-  useAdminListActions,
-} from "@/modules/admin/hooks";
+import { useAdminListActions } from "@/modules/admin/hooks";
 import { AdminList } from "@/modules/admin/components";
 import { useCategoriesStore, type Category } from "../hooks";
 import { CategoryFormDialog } from "./form-dialog";
@@ -30,16 +29,12 @@ interface CategoriesListProps {
     update: boolean;
     delete: boolean;
   };
-  onClearFiltersReady?: (clearFilters: () => void) => void;
 }
 
-export function CategoriesList({
-  roles,
-  onClearFiltersReady,
-}: CategoriesListProps) {
+export function CategoriesList({ roles }: CategoriesListProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { page, pageSize, total, setPage } = usePaginationStore();
+  const { page, pageSize, total, setPage, setTotal } = usePaginationStore();
 
   const [searchInput, setSearchInput] = useState("");
   const [searchValue, setSearchValue] = useState("");
@@ -47,10 +42,10 @@ export function CategoriesList({
   const {
     categories,
     loading,
+    total: categoriesTotal,
     fetchCategories,
     openDialog,
     deleteCategory,
-    refreshCategories,
   } = useCategoriesStore();
 
   const filterConfig = useMemo(
@@ -65,6 +60,27 @@ export function CategoriesList({
     [searchValue]
   );
 
+  const fetchCategoriesRef = useRef(fetchCategories);
+  useEffect(() => {
+    fetchCategoriesRef.current = fetchCategories;
+  }, [fetchCategories]);
+
+  const fetchCategoriesWrapper = useCallback(
+    async (
+      page: number,
+      pageSize: number,
+      filters?: Record<string, string>
+    ) => {
+      const result = await fetchCategoriesRef.current(page, pageSize, filters);
+      const state = useCategoriesStore.getState();
+      return {
+        data: state.categories,
+        meta: { total: state.total },
+      };
+    },
+    []
+  );
+
   const {
     apiFilters,
     hasInitialFetch,
@@ -75,28 +91,24 @@ export function CategoriesList({
     filterConfig,
     filterHandlers: {
       name: createStringFilterHandler((value) => {
-        setSearchInput(value);
         setSearchValue(value);
       }),
     },
-    fetchFunction: fetchCategories,
+    fetchFunction: fetchCategoriesWrapper,
     onFilterAppliedFromUrl: setSearchInput,
   });
-
-  const resetSearchFilter = useCallback(() => {
-    setSearchInput("");
-    setSearchValue("");
-  }, []);
 
   const filterHandlers = useMemo(
     () => [
       {
         filterId: "name",
-        resetValue: resetSearchFilter,
-        color: "blue",
+        resetValue: () => {
+          setSearchInput("");
+          setSearchValue("");
+        },
       },
     ],
-    [resetSearchFilter]
+    []
   );
 
   const activeFilters = useMemo<ActiveFilter[]>(
@@ -113,21 +125,32 @@ export function CategoriesList({
     [searchValue, t]
   );
 
-  const {
-    filterIdsConfig,
-    filterActionButtons,
-    handleRemoveFilter,
-    handleClearAllFilters,
-  } = useAdminListFilters({
-    filterHandlers,
-    activeFilters,
-    onClearFiltersReady,
+  const handleFilterChange = useCallback(() => {
+    setPage(1);
+  }, [setPage]);
+
+  const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
+    handlers: filterHandlers,
+    onFilterChange: handleFilterChange,
+  });
+
+  const filterIdsConfig = useFilterIdsConfig({
+    handlers: filterHandlers,
+    colorMap: {
+      name: "blue",
+    },
   });
 
   const handleSearch = useCallback(() => {
     setSearchValue(searchInput);
     setPage(1);
   }, [searchInput, setPage]);
+
+  const filterActionButtons = useFilterActions({
+    onSearch: handleSearch,
+    activeFilters,
+    onClearFilters: handleClearAllFilters,
+  });
 
   const paginationProps = useMemo(
     () => ({
@@ -160,17 +183,15 @@ export function CategoriesList({
     [navigate]
   );
 
-  const refreshCategoriesList = useCallback(
-    async (refreshPage: number, refreshPageSize: number) => {
-      await refreshCategories(refreshPage, refreshPageSize);
-    },
-    [refreshCategories]
-  );
-
   const { actions: baseActions } = useAdminListActions<Category>({
     roles,
-    deleteFunction: deleteCategory,
-    refreshFunction: refreshCategoriesList,
+    deleteFunction: async (id: string) => {
+      await deleteCategory(id);
+      await fetchCategories(page, pageSize, apiFilters);
+    },
+    refreshFunction: async (refreshPage: number, refreshPageSize: number) => {
+      await fetchCategories(refreshPage, refreshPageSize, apiFilters);
+    },
     successMessageKey: "admin.categories.deleteSuccess",
     deleteTitleKey: "admin.categories.delete",
     confirmDeleteKey: "admin.categories.confirmDelete",
@@ -230,15 +251,23 @@ export function CategoriesList({
     [t]
   );
 
+  useEffect(() => {
+    setTotal(categoriesTotal);
+  }, [categoriesTotal, setTotal]);
+
   const handleRefresh = useCallback(async () => {
-    await refreshCategories(page, pageSize, apiFilters);
-  }, [refreshCategories, page, pageSize, apiFilters]);
+    await fetchCategories(page, pageSize, apiFilters);
+  }, [fetchCategories, page, pageSize, apiFilters]);
 
   // Show skeleton on initial load
   if (loading && categories.length === 0 && !hasInitialFetch.current) {
     return (
       <>
         <CategoriesListSkeleton />
+        <CategoryFormDialog
+          onClearFilters={handleClearAllFilters}
+          onRefresh={handleRefresh}
+        />
       </>
     );
   }
@@ -264,8 +293,12 @@ export function CategoriesList({
         filterIdsConfig={filterIdsConfig}
         filterActionButtons={filterActionButtons}
         pagination={paginationProps}
+        filterBarClassName="my-4"
       />
-      <CategoryFormDialog onRefresh={handleRefresh} />
+      <CategoryFormDialog
+        onClearFilters={handleClearAllFilters}
+        onRefresh={handleRefresh}
+      />
     </>
   );
 }

@@ -1,4 +1,3 @@
-import { useState, useCallback } from "react";
 import type { Route } from "./+types/index";
 import { useTranslation, t } from "@/i18n";
 import { useRole } from "@/modules/common/auth/hooks/use-role";
@@ -11,7 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { CategoriesList } from "./components";
-import { CategoryFormDialog } from "./components/form-dialog";
 import { useCategoriesStore } from "./hooks";
 import { pageMeta } from "@/lib";
 import { DIALOG_MODES } from "@/constants";
@@ -24,7 +22,6 @@ export default function AdminCategories() {
   const { t } = useTranslation();
   const { getNamespaceRoles } = useRole();
   const { openDialog } = useCategoriesStore();
-  const [clearFilters, setClearFilters] = useState<(() => void) | null>(null);
 
   const roles = getNamespaceRoles(RESOURCES.CATEGORY);
 
@@ -41,10 +38,6 @@ export default function AdminCategories() {
     ],
     [t]
   );
-
-  const handleClearFiltersReady = useCallback((clearFiltersFn: () => void) => {
-    setClearFilters(() => clearFiltersFn);
-  }, []);
 
   if (!roles.read) {
     return (
@@ -79,13 +72,9 @@ export default function AdminCategories() {
           )}
         </CardHeader>
         <CardContent>
-          <CategoriesList
-            roles={roles}
-            onClearFiltersReady={handleClearFiltersReady}
-          />
+          <CategoriesList roles={roles} />
         </CardContent>
       </Card>
-      <CategoryFormDialog onClearFilters={clearFilters} />
     </Container>
   );
 }

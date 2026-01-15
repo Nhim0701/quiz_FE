@@ -3,8 +3,12 @@ import { useForm, FormProvider, Form } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation, type TranslationParams } from "@/i18n";
 import { FormField } from "@/components/common/form-field";
-import { useApp, usePaginationStore } from "@/hooks";
-import { categorySchema, type CategoryFormData } from "../schemas";
+import { useApp } from "@/hooks";
+import {
+  categorySchema,
+  categoryFormBuilder,
+  type CategoryFormData,
+} from "../schemas";
 import { useCategoriesStore, type Category } from "../hooks";
 import { FormDialog } from "@/components/common/form-dialog";
 import type { FormDialogMode } from "@/constants";
@@ -39,7 +43,6 @@ export function CategoryFormDialog({
     showDialog,
     closeDialog: closeAppDialog,
   } = useApp();
-  const { page, pageSize } = usePaginationStore();
   const {
     isDialogOpen,
     dialogMode,
@@ -47,7 +50,6 @@ export function CategoryFormDialog({
     closeDialog,
     createCategory,
     updateCategory,
-    refreshCategories,
     loading,
     isEditMode,
     setEditMode,
@@ -62,9 +64,7 @@ export function CategoryFormDialog({
 
   const methods = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema(t)),
-    defaultValues: {
-      name: "",
-    },
+    defaultValues: categoryFormBuilder(),
   });
 
   const {
@@ -75,17 +75,17 @@ export function CategoryFormDialog({
     watch,
   } = methods;
 
-  // Reset form when category or mode changes
+  const currentValues = watch();
+
   useEffect(() => {
     if (shouldShow && category) {
-      reset({ name: category.name || "" });
+      reset(categoryFormBuilder(category));
     } else if (shouldShow && mode === DIALOG_MODES.CREATE) {
-      reset({ name: "" });
+      reset(categoryFormBuilder());
     }
   }, [shouldShow, category, mode, reset]);
 
-  const currentName = watch("name");
-  const hasChanges = category ? currentName !== category.name : false;
+  const hasChanges = category ? currentValues.name !== category.name : false;
   const isViewMode = mode === DIALOG_MODES.VIEW;
   const isDisabled = isViewMode && !isEditMode;
 
@@ -108,19 +108,11 @@ export function CategoryFormDialog({
   );
 
   const canSubmit = useMemo(() => {
-    if (mode === DIALOG_MODES.CREATE) return !!currentName.trim();
+    if (mode === DIALOG_MODES.CREATE) return !!currentValues.name.trim();
     if (mode === DIALOG_MODES.VIEW && isEditMode) return hasChanges;
     if (mode === DIALOG_MODES.EDIT) return true;
     return false;
-  }, [mode, currentName, isEditMode, hasChanges]);
-
-  // Helper to refresh categories after mutation
-  const handleRefresh = useCallback(
-    async (refreshPage: number = page) => {
-      await refreshCategories(refreshPage, pageSize);
-    },
-    [refreshCategories, page, pageSize]
-  );
+  }, [mode, currentValues, isEditMode, hasChanges]);
 
   const onSubmit = async (data: CategoryFormData) => {
     try {
@@ -129,13 +121,8 @@ export function CategoryFormDialog({
         showSuccess(t("admin.categories.createSuccess"));
         closeDialog();
         onClearFilters?.();
-        if (onRefresh) {
-          await onRefresh();
-        } else {
-          await handleRefresh(1);
-        }
+        onRefresh && (await onRefresh());
       } else if (category) {
-        // Handle both VIEW (with edit mode) and EDIT modes
         await updateCategory(category.id, data);
         showSuccess(t("admin.categories.updateSuccess"));
 
@@ -144,8 +131,7 @@ export function CategoryFormDialog({
         } else {
           closeDialog();
         }
-
-        await handleRefresh();
+        onRefresh && (await onRefresh());
       }
     } catch (error) {
       const errorMessage =
@@ -159,14 +145,11 @@ export function CategoryFormDialog({
   }, [setEditMode]);
 
   const handleCancel = useCallback(() => {
-    if (isViewMode && isEditMode) {
-      setEditMode(false);
-      if (category) {
-        reset({ name: category.name || "" });
-      }
+    if (isViewMode && isEditMode && category) {
+      reset(categoryFormBuilder(category));
     }
     closeDialog();
-  }, [isViewMode, isEditMode, category, setEditMode, reset, closeDialog]);
+  }, [isViewMode, isEditMode, category, reset, closeDialog]);
 
   const handleFormSubmit = useCallback(() => {
     handleSubmit(onSubmit)();
