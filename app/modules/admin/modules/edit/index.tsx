@@ -1,9 +1,9 @@
 import { createSlateEditor } from "platejs";
-import { BaseEditorKit } from "@/components/editor/editor-base-kit";
+import { EditorKit } from "@/components/editor/editor-kit";
 import { PlateEditor } from "@/components/editor/plate-editor";
 
 const editor = createSlateEditor({
-  plugins: BaseEditorKit,
+  plugins: EditorKit,
 });
 
 // Render statically
