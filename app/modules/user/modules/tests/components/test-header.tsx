@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { Clock, X } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { useTestStore } from "../hooks";
@@ -7,46 +7,84 @@ import {
   type TestProps,
 } from "@/modules/admin/modules/tests/hooks";
 import { useNavigate, useParams } from "react-router";
-import { ROUTES } from "../constants";
+import { ROUTES, TIME_CONSTANTS } from "../constants";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useTestTimerStore } from "../hooks/use-test-timer";
 
 export function TestHeader() {
   const { t } = useTranslation();
-
   const navigate = useNavigate();
   const { testId } = useParams<{ testId: string }>();
-  const { currentIndex, questions, timeRemaining } = useTestStore();
-  const getTestById = useTestsStore((state) => state.getTestById);
+  const {
+    test,
+    currentIndex,
+    questions,
+    loading,
+    finishTest,
+    timeRemaining,
+    startTimer,
+    setTimeRemaining,
+  } = useTestStore();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const finishTestRef = useRef(finishTest);
 
-  const [test, setTest] = useState<TestProps | null>(null);
-
+  // Update ref when finishTest changes
   useEffect(() => {
-    if (testId) {
-      getTestById(testId).then((testData) => {
-        setTest(testData);
-      });
-    } else {
-      setTest(null);
-    }
-  }, [testId, getTestById]);
+    finishTestRef.current = finishTest;
+  }, [finishTest]);
 
-  const handleClose = () => {
+  // Start timer when test and questions are ready
+  useEffect(() => {
+    if (test && !loading && questions.length > 0) {
+      startTimer();
+
+      intervalRef.current = setInterval(() => {
+        const currentTime = useTestTimerStore.getState().timeRemaining;
+
+        setTimeRemaining(currentTime - 1);
+        if (currentTime == 0) {
+          intervalRef.current &&
+            clearInterval(intervalRef.current as NodeJS.Timeout);
+          intervalRef.current = null;
+          finishTestRef.current(navigate, testId || "", (errorMessage) => {
+            console.error(errorMessage);
+          });
+        }
+      }, TIME_CONSTANTS.TIMER_INTERVAL);
+    }
+    return () => {
+      intervalRef.current &&
+        clearInterval(intervalRef.current as NodeJS.Timeout);
+      intervalRef.current = null;
+    };
+  }, [test, loading, questions.length, startTimer, navigate, testId]);
+
+  const handleClose = useCallback(() => {
     navigate(ROUTES.INDEX);
-  };
-  const formatTime = (seconds: number) => {
+  }, [navigate]);
+
+  const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs
       .toString()
       .padStart(2, "0")}`;
-  };
+  }, []);
 
-  const isTimeLow = timeRemaining <= 5 * 60;
+  const isTimeLow = useMemo(() => timeRemaining <= 5 * 60, [timeRemaining]);
 
-  const progressValue =
-    questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0;
+  const progressValue = useMemo(
+    () =>
+      questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0,
+    [currentIndex, questions.length]
+  );
+
+  const formattedTime = useMemo(
+    () => formatTime(timeRemaining),
+    [formatTime, timeRemaining]
+  );
 
   return (
     <Card className="p-4 sm:p-6">
@@ -78,7 +116,7 @@ export function TestHeader() {
               }`}
             >
               <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mr-1.5" />
-              <span>{formatTime(timeRemaining)}</span>
+              <span>{formattedTime}</span>
             </Badge>
             <Button
               onClick={handleClose}

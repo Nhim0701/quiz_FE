@@ -21,7 +21,7 @@ export function TestEmpty({ onBack }: TestEmptyProps) {
             onClick={onBack}
             className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 hover:from-blue-700 hover:to-indigo-700 dark:hover:from-blue-600 dark:hover:to-indigo-600"
           >
-            {t("ui.buttons.backToDashboard")}
+            {t("common.back")}
           </Button>
         </CardContent>
       </Card>

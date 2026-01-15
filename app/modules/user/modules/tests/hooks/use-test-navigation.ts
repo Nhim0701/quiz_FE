@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { useTestQuestionsStore } from "./use-test-questions";
 
 interface TestNavigationState {
-  // Test progress
   currentIndex: number;
   setCurrentIndex: (index: number) => void;
   goToQuestion: (index: number) => void;
@@ -10,28 +9,32 @@ interface TestNavigationState {
   goPrev: () => void;
 }
 
-export const useTestNavigationStore = create<TestNavigationState>(
-  (set, get) => ({
-    // Initial state
-    currentIndex: 0,
+const clampIndex = (index: number, maxIndex: number): number => {
+  return Math.max(0, Math.min(maxIndex, index));
+};
 
-    // Current index
-    setCurrentIndex: (index) => set({ currentIndex: index }),
+export const useTestNavigationStore = create<TestNavigationState>((set) => ({
+  currentIndex: 0,
 
-    goToQuestion: (index) => {
-      const { questions } = useTestQuestionsStore.getState();
-      set({ currentIndex: Math.max(0, Math.min(questions.length - 1, index)) });
-    },
+  setCurrentIndex: (index) => set({ currentIndex: index }),
 
-    goNext: () => {
-      const { questions } = useTestQuestionsStore.getState();
-      const { currentIndex } = get();
-      set({ currentIndex: Math.min(questions.length - 1, currentIndex + 1) });
-    },
+  goToQuestion: (index) => {
+    const { questions } = useTestQuestionsStore.getState();
+    const maxIndex = Math.max(0, questions.length - 1);
+    set({ currentIndex: clampIndex(index, maxIndex) });
+  },
 
-    goPrev: () => {
-      const { currentIndex } = get();
-      set({ currentIndex: Math.max(0, currentIndex - 1) });
-    },
-  })
-);
+  goNext: () => {
+    const { questions } = useTestQuestionsStore.getState();
+    const maxIndex = Math.max(0, questions.length - 1);
+    set((state) => ({
+      currentIndex: clampIndex(state.currentIndex + 1, maxIndex),
+    }));
+  },
+
+  goPrev: () => {
+    set((state) => ({
+      currentIndex: Math.max(0, state.currentIndex - 1),
+    }));
+  },
+}));

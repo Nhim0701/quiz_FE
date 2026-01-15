@@ -1,6 +1,10 @@
 import { create } from "zustand";
 import type { ApiSuccessResponse } from "@/types";
 import type { SubmissionItem } from "../types";
+import type {
+  QuestionProps,
+  AnswerProps,
+} from "@/modules/admin/modules/questions/types";
 import { apiClient } from "@/lib";
 import { ENDPOINTS } from "../constants";
 import { useTestQuestionsStore } from "./use-test-questions";
@@ -9,7 +13,6 @@ import { useTestTimerStore } from "./use-test-timer";
 import { useTestsStore } from "@/modules/admin/modules/tests/hooks";
 
 interface TestSubmissionState {
-  // Submission
   submitting: boolean;
   setSubmitting: (submitting: boolean) => void;
   submit: <T>(
@@ -23,100 +26,107 @@ interface TestSubmissionState {
   ) => Promise<void>;
 }
 
-export const useTestSubmissionStore = create<TestSubmissionState>(
-  (set, get) => ({
-    // Initial state
-    submitting: false,
+const buildSubmissions = (
+  answers: Record<string, string[]>,
+  questions: QuestionProps[]
+): SubmissionItem[] => {
+  return Object.entries(answers).flatMap(([questionId, selectedAnswerIds]) => {
+    const question = questions.find((q) => q.id === questionId);
+    if (!question) return [];
 
-    // Submission
-    setSubmitting: (submitting) => set({ submitting }),
+    return selectedAnswerIds
+      .map((answerId) => {
+        const answer = question.answers.find(
+          (a: AnswerProps) => a.id === answerId
+        );
+        if (!answer) return null;
 
-    submit: async <T>(
-      testId: string,
-      submissions: SubmissionItem[]
-    ): Promise<ApiSuccessResponse<T>> => {
-      const response = await apiClient.post<ApiSuccessResponse<T>>(
-        ENDPOINTS.SUBMIT(testId),
-        {
-          submissions,
-        }
-      );
-      return response.data;
-    },
+        return {
+          questionId,
+          answerId,
+          isCorrect: answer.isCorrect,
+        };
+      })
+      .filter((item): item is SubmissionItem => item !== null);
+  });
+};
 
-    finishTest: async (navigate, testId, onError) => {
-      const { questions } = useTestQuestionsStore.getState();
-      const { answers } = useTestAnswersStore.getState();
-      const { timeRemaining, timeStarted, setTimeStarted } =
-        useTestTimerStore.getState();
-      const { setSubmitting, submit } = get();
+const calculateTimeSpent = (
+  timeLimit: number,
+  timeRemaining: number
+): number => {
+  const initialTime = timeLimit * 60;
+  return initialTime - timeRemaining;
+};
 
-      // Stop timer
-      setTimeStarted(false);
+export const useTestSubmissionStore = create<TestSubmissionState>((set) => ({
+  submitting: false,
 
-      // Get test to get timeLimit
-      const getTestById = useTestsStore.getState().getTestById;
-      const test = await getTestById(testId);
+  setSubmitting: (submitting) => set({ submitting }),
 
-      if (!test) {
-        if (onError) onError("Test not found");
-        return;
+  submit: async <T>(
+    testId: string,
+    submissions: SubmissionItem[]
+  ): Promise<ApiSuccessResponse<T>> => {
+    const response = await apiClient.post<ApiSuccessResponse<T>>(
+      ENDPOINTS.SUBMIT(testId),
+      { submissions }
+    );
+    return response.data as ApiSuccessResponse<T>;
+  },
+
+  finishTest: async (navigate, testId, onError) => {
+    const questionsStore = useTestQuestionsStore.getState();
+    const answersStore = useTestAnswersStore.getState();
+    const timerStore = useTestTimerStore.getState();
+    const { setSubmitting, submit } = useTestSubmissionStore.getState();
+
+    // Stop timer
+    timerStore.setTimeStarted(false);
+
+    // Get test to get timeLimit
+    const getTestById = useTestsStore.getState().getTestById;
+    const test = await getTestById(testId);
+
+    if (!test) {
+      onError?.("Test not found");
+      return;
+    }
+
+    const { questions } = questionsStore;
+    const { answers } = answersStore;
+    const { timeRemaining } = timerStore;
+
+    const submissions = buildSubmissions(answers, questions);
+    const timeSpent = calculateTimeSpent(test.timeLimit, timeRemaining);
+
+    // Submit responses to backend
+    if (submissions.length > 0) {
+      setSubmitting(true);
+      try {
+        await submit<void>(testId, submissions);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to submit responses";
+        onError?.(errorMessage);
+        // Continue to result page even if submission fails
+      } finally {
+        setSubmitting(false);
       }
+    }
 
-      const total = questions.length;
-      const answered = Object.keys(answers).length;
-      // Convert timeLimit from minutes to seconds
-      const initialTime = test.timeLimit * 60;
-      const timeSpent = initialTime - timeRemaining;
-
-      // Build responses array for backend submission
-      const submissions: SubmissionItem[] = [];
-      for (const [questionId, selectedAnswerIds] of Object.entries(answers)) {
-        const question = questions.find((q) => q.id === questionId);
-        if (!question) continue;
-
-        for (const answerId of selectedAnswerIds) {
-          const answer = question.answers.find((a) => a.id === answerId);
-          if (!answer) continue;
-
-          submissions.push({
-            questionId: questionId,
-            answerId: answerId,
-            isCorrect: answer.isCorrect,
-          });
-        }
-      }
-
-      // Submit responses to backend
-      if (submissions.length > 0) {
-        setSubmitting(true);
-        try {
-          await submit<void>(testId, submissions);
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error
-              ? error.message
-              : "Failed to submit responses";
-          if (onError) onError(errorMessage);
-          // Continue to result page even if submission fails
-        } finally {
-          setSubmitting(false);
-        }
-      }
-
-      navigate(`/tests/${testId}/result`, {
-        state: {
-          answers,
-          questions,
-          summary: {
-            total,
-            answered,
-            date: new Date().toISOString(),
-            timeSpent,
-            timeRemaining,
-          },
+    navigate(`/tests/${testId}/result`, {
+      state: {
+        answers,
+        questions,
+        summary: {
+          total: questions.length,
+          answered: Object.keys(answers).length,
+          date: new Date().toISOString(),
+          timeSpent,
+          timeRemaining,
         },
-      });
-    },
-  })
-);
+      },
+    });
+  },
+}));

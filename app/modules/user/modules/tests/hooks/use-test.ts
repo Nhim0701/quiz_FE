@@ -25,6 +25,7 @@ export function useTestStore() {
 
   return {
     // Questions
+    test: questionsStore.test,
     questions: questionsStore.questions,
     loading: questionsStore.loading,
     setLoading: questionsStore.setLoading,
@@ -77,6 +78,7 @@ export const useTestStoreState = {
     const submissionState = useTestSubmissionStore.getState();
 
     return {
+      test: questionsState.test,
       questions: questionsState.questions,
       loading: questionsState.loading,
       currentIndex: navigationState.currentIndex,

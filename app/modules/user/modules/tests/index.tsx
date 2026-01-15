@@ -1,12 +1,12 @@
 import type { Route } from "./+types/index";
-import { useBreadcrumb, usePageData } from "@/hooks";
+import { useBreadcrumb, usePageData, useApp } from "@/hooks";
 import { useCategoriesStore } from "../../../admin/modules/categories/hooks";
 import { useTestsStore } from "@/modules/admin/modules/tests/hooks";
 import { useTranslation, t } from "@/i18n";
 import { ROUTES } from "./constants";
 import { PageHeader } from "@/components/common/page-header";
 import { Container } from "@/components/ui/container";
-import { TestList } from "./components";
+import { TestList, TestListSkeleton } from "./components";
 import { pageMeta } from "@/lib";
 
 export const meta: Route.MetaFunction = () => {
@@ -15,6 +15,7 @@ export const meta: Route.MetaFunction = () => {
 
 export default function Tests() {
   const { t } = useTranslation();
+  const { loading } = useApp();
   const { fetchCategories } = useCategoriesStore();
   const { getTestsByCategory } = useTestsStore();
 
@@ -51,7 +52,7 @@ export default function Tests() {
   return (
     <Container>
       <PageHeader title={t("sidebar.tests")} />
-      <TestList />
+      {loading ? <TestListSkeleton /> : <TestList />}
     </Container>
   );
 }
