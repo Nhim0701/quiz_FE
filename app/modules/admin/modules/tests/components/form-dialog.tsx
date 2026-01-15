@@ -7,7 +7,7 @@ import {
   TextareaField,
   ComboboxField,
 } from "@/components/common/form-field";
-import { useApp, usePaginationStore } from "@/hooks";
+import { useApp } from "@/hooks";
 import { testSchema, type TestFormData } from "../schemas";
 import { useTestsStore, type TestProps } from "../hooks";
 import { FormDialog } from "@/components/common/form-dialog";
@@ -26,6 +26,7 @@ import { usePageData } from "@/hooks";
 interface TestFormDialogProps {
   onDelete?: (test: TestProps) => void;
   onClearFilters?: (() => void) | null;
+  onRefresh?: () => Promise<void>;
 }
 
 /**
@@ -36,6 +37,7 @@ interface TestFormDialogProps {
 export function TestFormDialog({
   onDelete,
   onClearFilters,
+  onRefresh,
 }: TestFormDialogProps) {
   const { t } = useTranslation();
   const {
@@ -44,7 +46,6 @@ export function TestFormDialog({
     showDialog,
     closeDialog: closeAppDialog,
   } = useApp();
-  const { page, pageSize } = usePaginationStore();
   const {
     isDialogOpen,
     dialogMode,
@@ -52,7 +53,6 @@ export function TestFormDialog({
     closeDialog,
     createTest,
     updateTest,
-    refreshTests,
     loading,
     isEditMode,
     setEditMode,
@@ -164,14 +164,6 @@ export function TestFormDialog({
     return false;
   }, [mode, currentValues, isEditMode, hasChanges]);
 
-  // Helper to refresh tests after mutation
-  const handleRefresh = useCallback(
-    async (refreshPage: number = page) => {
-      await refreshTests(refreshPage, pageSize);
-    },
-    [refreshTests, page, pageSize]
-  );
-
   const onSubmit = async (data: TestFormData) => {
     try {
       if (mode === DIALOG_MODES.CREATE) {
@@ -179,9 +171,8 @@ export function TestFormDialog({
         showSuccess(t("admin.tests.createSuccess"));
         closeDialog();
         onClearFilters?.();
-        await handleRefresh(1);
+        onRefresh && (await onRefresh());
       } else if (test) {
-        // Handle both VIEW (with edit mode) and EDIT modes
         await updateTest(test.id, data);
         showSuccess(t("admin.tests.updateSuccess"));
 
@@ -191,7 +182,7 @@ export function TestFormDialog({
           closeDialog();
         }
 
-        await handleRefresh();
+        onRefresh && (await onRefresh());
       }
     } catch (error) {
       const errorMessage =

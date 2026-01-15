@@ -1,4 +1,3 @@
-import { useState, useCallback } from "react";
 import type { Route } from "./+types/index";
 import { useTranslation, t } from "@/i18n";
 import { useRole } from "@/modules/common/auth/hooks/use-role";
@@ -11,7 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { TestsList } from "./components";
-import { TestFormDialog } from "./components/form-dialog";
 import { useTestsStore } from "./hooks";
 import { pageMeta } from "@/lib";
 import { DIALOG_MODES } from "@/constants";
@@ -23,14 +21,8 @@ export const meta: Route.MetaFunction = () => {
 export default function AdminTests() {
   const { t } = useTranslation();
   const { getNamespaceRoles } = useRole();
-  const { openDialog } = useTestsStore();
-  const [clearFilters, setClearFilters] = useState<(() => void) | null>(null);
 
   const roles = getNamespaceRoles(RESOURCES.TEST);
-
-  const handleClearFiltersReady = useCallback((clearFiltersFn: () => void) => {
-    setClearFilters(() => clearFiltersFn);
-  }, []);
 
   useBreadcrumb(
     [
@@ -45,6 +37,12 @@ export default function AdminTests() {
     ],
     [t]
   );
+
+  const { openDialog } = useTestsStore();
+
+  const handleCreateTest = () => {
+    openDialog(DIALOG_MODES.CREATE);
+  };
 
   if (!roles.read) {
     return (
@@ -69,7 +67,7 @@ export default function AdminTests() {
           <CardTitle>{t("admin.tests.cardTitle")}</CardTitle>
           {roles.create && (
             <Button
-              onClick={() => openDialog(DIALOG_MODES.CREATE)}
+              onClick={handleCreateTest}
               size="sm"
               className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 dark:from-emerald-600 dark:to-green-700 dark:hover:from-emerald-700 dark:hover:to-green-800 text-white shadow-md hover:shadow-lg transition-all duration-200 font-medium"
             >
@@ -79,13 +77,9 @@ export default function AdminTests() {
           )}
         </CardHeader>
         <CardContent>
-          <TestsList
-            roles={roles}
-            onClearFiltersReady={handleClearFiltersReady}
-          />
+          <TestsList roles={roles} />
         </CardContent>
       </Card>
-      <TestFormDialog onClearFilters={clearFilters} />
     </Container>
   );
 }

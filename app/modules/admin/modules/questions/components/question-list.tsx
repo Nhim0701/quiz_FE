@@ -4,7 +4,6 @@ import { useTranslation } from "@/i18n";
 import { type Column } from "@/components/common/data-table";
 import {
   usePaginationStore,
-  useApp,
   useFilterActions,
   useFilterHandlers,
   useFilterIdsConfig,
@@ -23,7 +22,7 @@ import { useCategoriesStore } from "../../categories/hooks";
 import { useTestsStore } from "../../tests/hooks";
 import type { TestProps } from "../../tests/types";
 import { QuestionsListSkeleton } from "./list-skeleton";
-import { Eye, Trash2, CheckSquare, Square } from "lucide-react";
+import { CheckSquare, Square } from "lucide-react";
 import {
   MultipleSelectCombobox,
   FilterDropdown,
@@ -51,7 +50,6 @@ interface QuestionsListProps {
 export function QuestionsList({ roles }: QuestionsListProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { showError, showSuccess, showDialog, closeDialog } = useApp();
   const { page, pageSize, total, setPage, setTotal } = usePaginationStore();
 
   const [searchInput, setSearchInput] = useState("");
