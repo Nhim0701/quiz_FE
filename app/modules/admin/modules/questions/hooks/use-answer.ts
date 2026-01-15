@@ -4,11 +4,25 @@ import { apiClient } from "@/lib";
 import { ENDPOINTS } from "../constants";
 import type { AnswerProps } from "../types";
 import { FILTER_QUERY_PARAMS } from "@/constants";
+import type { FormDialogMode } from "@/constants";
+import { DIALOG_MODES } from "@/constants";
 
 interface AnswerState {
   loading: boolean;
   error: string | null;
   answers: AnswerProps[];
+  questionId: string | null;
+  isDialogOpen: boolean;
+  dialogMode: FormDialogMode | null;
+  answer: AnswerProps | null;
+  isEditMode: boolean;
+  openDialog: (
+    mode: FormDialogMode,
+    questionId: string,
+    answer?: AnswerProps | null
+  ) => void;
+  closeDialog: () => void;
+  setEditMode: (isEdit: boolean) => void;
   fetchAnswers: (questionId: string) => Promise<AnswerProps[]>;
   createAnswer: (
     questionId: string,
@@ -18,16 +32,47 @@ interface AnswerState {
     answerId: string,
     data: Omit<AnswerProps, "id">
   ) => Promise<AnswerProps>;
-  deleteAnswer: (answerId: string) => Promise<void>;
+  deleteAnswer: (answerId: string, questionId: string) => Promise<void>;
+  refreshAnswers: (questionId: string) => Promise<void>;
 }
 
-export const useAnswerStore = create<AnswerState>((set) => ({
-  // Initial state
+export const useAnswerStore = create<AnswerState>((set, get) => ({
   loading: false,
   error: null,
   answers: [],
+  questionId: null,
+  isDialogOpen: false,
+  dialogMode: null,
+  answer: null,
+  isEditMode: false,
 
-  // Fetch answers for a question
+  openDialog: (
+    mode: FormDialogMode,
+    questionId: string,
+    answer?: AnswerProps | null
+  ) => {
+    set({
+      isDialogOpen: true,
+      dialogMode: mode,
+      questionId,
+      answer: answer ?? null,
+      isEditMode: mode === DIALOG_MODES.EDIT,
+    });
+  },
+
+  closeDialog: () => {
+    set({
+      isDialogOpen: false,
+      dialogMode: null,
+      answer: null,
+      isEditMode: false,
+    });
+  },
+
+  setEditMode: (isEdit: boolean) => {
+    set({ isEditMode: isEdit });
+  },
+
   fetchAnswers: async (questionId: string) => {
     set({ loading: true, error: null });
     try {
@@ -103,21 +148,30 @@ export const useAnswerStore = create<AnswerState>((set) => ({
     }
   },
 
-  // Delete an answer
-  deleteAnswer: async (answerId: string) => {
+  deleteAnswer: async (answerId: string, questionId: string) => {
     set({ loading: true, error: null });
     try {
       await apiClient.delete(ENDPOINTS.ANSWERS.DELETE(answerId));
-      // Remove answer from the list
-      set((state) => ({
-        answers: state.answers.filter((answer) => answer.id !== answerId),
-        loading: false,
-      }));
+      await get().fetchAnswers(questionId);
+      set({ loading: false });
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to delete answer";
       set({ error: errorMessage, loading: false });
       throw error;
+    }
+  },
+
+  refreshAnswers: async (questionId: string) => {
+    const { answer, dialogMode } = get();
+    await get().fetchAnswers(questionId);
+
+    if (answer && dialogMode) {
+      const { answers } = get();
+      const updatedAnswer = answers.find((a) => a.id === answer.id);
+      if (updatedAnswer) {
+        set({ answer: updatedAnswer });
+      }
     }
   },
 }));

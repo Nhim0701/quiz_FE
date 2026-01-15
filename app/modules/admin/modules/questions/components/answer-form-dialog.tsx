@@ -7,8 +7,12 @@ import { Label } from "@/components/ui/label";
 import { useApp } from "@/hooks";
 import type { AnswerProps } from "../types";
 import { useAnswerStore } from "../hooks";
-import { FileText, CheckSquare, MessageSquare, Square } from "lucide-react";
-import { answerSchema, type AnswerFormData } from "../schemas/anwser-schema";
+import { FileText, CheckSquare, MessageSquare } from "lucide-react";
+import {
+  answerSchema,
+  answerFormBuilder,
+  type AnswerFormData,
+} from "../schemas/anwser-schema";
 import { FormDialog } from "@/components/common/form-dialog";
 import type { FormDialogMode } from "@/constants";
 import { DIALOG_MODES } from "@/constants";
@@ -20,28 +24,20 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 
-interface AnswerDialogProps {
-  answer: AnswerProps | null;
-  questionId: string;
-  isOpen: boolean;
-  isEditMode: boolean;
-  onClose: () => void;
-  onEdit?: () => void;
+interface AnswerFormDialogProps {
+  onDelete?: (answer: AnswerProps) => void;
+  onRefresh?: () => Promise<void>;
 }
 
 /**
  * AnswerFormDialog extends FormDialog to provide answer-specific form functionality.
  * It handles create, edit, and view modes for answers.
- * Mode is determined from props (answer and isEditMode).
+ * Mode is automatically determined from store state.
  */
 export function AnswerFormDialog({
-  answer,
-  questionId,
-  isOpen,
-  isEditMode,
-  onClose,
-  onEdit,
-}: AnswerDialogProps) {
+  onDelete,
+  onRefresh,
+}: AnswerFormDialogProps) {
   const { t } = useTranslation();
   const {
     showError,
@@ -49,26 +45,28 @@ export function AnswerFormDialog({
     showDialog,
     closeDialog: closeAppDialog,
   } = useApp();
-  const { createAnswer, updateAnswer, deleteAnswer, loading } =
-    useAnswerStore();
+  const {
+    isDialogOpen,
+    dialogMode,
+    answer,
+    questionId,
+    closeDialog,
+    createAnswer,
+    updateAnswer,
+    loading,
+    isEditMode,
+    setEditMode,
+  } = useAnswerStore();
 
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Determine mode based on answer and isEditMode
-  const mode = useMemo<FormDialogMode>(() => {
-    if (answer) {
-      return isEditMode ? DIALOG_MODES.EDIT : DIALOG_MODES.VIEW;
-    }
-    return DIALOG_MODES.CREATE;
-  }, [answer, isEditMode]);
+  const mode = (dialogMode ||
+    (answer ? DIALOG_MODES.VIEW : DIALOG_MODES.CREATE)) as FormDialogMode;
+  const shouldShow = isDialogOpen && !!dialogMode && !!questionId;
 
   const methods = useForm<AnswerFormData>({
     resolver: zodResolver(answerSchema(t)),
-    defaultValues: {
-      content: "",
-      isCorrect: false,
-      explanation: "",
-    },
+    defaultValues: answerFormBuilder(),
   });
 
   const {
@@ -82,24 +80,13 @@ export function AnswerFormDialog({
 
   const currentValues = watch();
 
-  // Reset form when answer or isOpen changes
   useEffect(() => {
-    if (isOpen) {
-      if (answer) {
-        reset({
-          content: answer.content || "",
-          isCorrect: answer.isCorrect || false,
-          explanation: answer.explanation || "",
-        });
-      } else {
-        reset({
-          content: "",
-          isCorrect: false,
-          explanation: "",
-        });
-      }
+    if (shouldShow && answer) {
+      reset(answerFormBuilder(answer));
+    } else if (shouldShow && mode === DIALOG_MODES.CREATE) {
+      reset(answerFormBuilder());
     }
-  }, [answer, reset, isOpen]);
+  }, [shouldShow, answer, mode, reset]);
 
   const hasChanges = answer
     ? currentValues.content !== answer.content ||
@@ -135,6 +122,8 @@ export function AnswerFormDialog({
   }, [mode, currentValues, isEditMode, hasChanges]);
 
   const onSubmit = async (data: AnswerFormData) => {
+    if (!questionId) return;
+
     try {
       if (mode === DIALOG_MODES.CREATE) {
         await createAnswer(questionId, {
@@ -143,16 +132,22 @@ export function AnswerFormDialog({
           explanation: data.explanation || "",
         });
         showSuccess(t("admin.questions.answers.createSuccess"));
-        onClose();
+        closeDialog();
+        onRefresh && (await onRefresh());
       } else if (answer) {
-        // Handle both VIEW (with edit mode) and EDIT modes
         await updateAnswer(answer.id, {
           content: data.content,
           isCorrect: data.isCorrect || false,
           explanation: data.explanation || "",
         });
         showSuccess(t("admin.questions.answers.updateSuccess"));
-        onClose();
+
+        if (mode === DIALOG_MODES.VIEW) {
+          setEditMode(false);
+        } else {
+          closeDialog();
+        }
+        onRefresh && (await onRefresh());
       }
     } catch (error) {
       const errorMessage =
@@ -162,34 +157,29 @@ export function AnswerFormDialog({
   };
 
   const handleEdit = useCallback(() => {
-    onEdit?.();
-  }, [onEdit]);
+    setEditMode(true);
+  }, [setEditMode]);
 
   const handleCancel = useCallback(() => {
     if (isViewMode && isEditMode && answer) {
-      reset({
-        content: answer.content || "",
-        isCorrect: answer.isCorrect || false,
-        explanation: answer.explanation || "",
-      });
+      reset(answerFormBuilder(answer));
     }
-    onClose();
-  }, [isViewMode, isEditMode, answer, reset, onClose]);
+    closeDialog();
+  }, [isViewMode, isEditMode, answer, reset, closeDialog]);
 
   const handleFormSubmit = useCallback(() => {
     handleSubmit(onSubmit)();
   }, [handleSubmit, onSubmit]);
 
   const handleDeleteClick = useCallback(() => {
-    if (!answer) return;
+    if (!answer || !questionId || !onDelete) return;
 
     const confirmDelete = async () => {
       setIsDeleting(true);
       try {
-        await deleteAnswer(answer.id);
-        showSuccess(t("admin.questions.answers.deleteSuccess"));
+        onDelete(answer);
         closeAppDialog();
-        onClose();
+        closeDialog();
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : t("errors.genericError");
@@ -222,27 +212,27 @@ export function AnswerFormDialog({
     });
   }, [
     answer,
+    questionId,
+    onDelete,
     t,
     showDialog,
     closeAppDialog,
-    onClose,
+    closeDialog,
     showError,
-    showSuccess,
-    deleteAnswer,
   ]);
 
-  if (!isOpen) return null;
+  if (!shouldShow) return null;
 
   return (
     <FormDialog
-      open={isOpen}
-      onOpenChange={(open) => !open && onClose()}
+      open={shouldShow}
+      onOpenChange={(open) => !open && closeDialog()}
       mode={mode}
       isEditMode={isEditMode}
       title={title}
       description={description}
       onEdit={handleEdit}
-      onDelete={answer ? handleDeleteClick : undefined}
+      onDelete={onDelete ? handleDeleteClick : undefined}
       onCancel={handleCancel}
       onSubmit={handleFormSubmit}
       loading={loading}
