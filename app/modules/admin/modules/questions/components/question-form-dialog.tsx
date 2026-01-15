@@ -9,7 +9,7 @@ import {
 } from "@/components/common/form-field";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Folder } from "lucide-react";
+import { CheckCheck, Folder, Pencil } from "lucide-react";
 import { useApp, usePageData } from "@/hooks";
 import { questionSchema, type QuestionFormData } from "../schemas";
 import { useQuestionsStore } from "../hooks";
@@ -27,6 +27,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants/app";
 import type { QuestionProps } from "../types";
+import { questionFormBuilder } from "../schemas/question-schema";
 
 interface QuestionFormDialogProps {
   onDelete?: (question: QuestionProps) => void;
@@ -115,12 +116,7 @@ export function QuestionFormDialog({
 
   const methods = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema(t)),
-    defaultValues: {
-      content: "",
-      testId: "",
-      categoryId: "",
-      isMultipleChoice: false,
-    },
+    defaultValues: questionFormBuilder(),
   });
 
   const {
@@ -153,7 +149,6 @@ export function QuestionFormDialog({
     }
   }, [watchedTestId, tests, setValue]);
 
-
   // Reset form when question or mode changes
   useEffect(() => {
     if (shouldShow && question) {
@@ -163,20 +158,10 @@ export function QuestionFormDialog({
       );
       const testId = questionTest?.id || "";
 
-      reset({
-        content: question.content || "",
-        testId: testId,
-        categoryId: question.category || "",
-        isMultipleChoice: question.isMultipleChoice || false,
-      });
+      reset(questionFormBuilder(testId, question));
       setSelectedTestId(testId);
     } else if (shouldShow && mode === DIALOG_MODES.CREATE) {
-      reset({
-        content: "",
-        testId: "",
-        categoryId: "",
-        isMultipleChoice: false,
-      });
+      reset(questionFormBuilder());
       setSelectedTestId("");
     }
   }, [shouldShow, question, mode, reset, tests]);
@@ -417,7 +402,9 @@ export function QuestionFormDialog({
                     id="categoryId"
                     type="text"
                     value={selectedCategory || ""}
-                    placeholder={t("admin.questions.filters.categoryPlaceholder")}
+                    placeholder={t(
+                      "admin.questions.filters.categoryPlaceholder"
+                    )}
                     disabled={true}
                     readOnly
                     className="mt-1 flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -434,22 +421,34 @@ export function QuestionFormDialog({
 
           {/* Multiple Choice Checkbox */}
           <div className="space-y-2">
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-              {t("admin.questions.columns.isMultipleChoice")}
-            </label>
+            <div className="flex items-center gap-2">
+              <CheckCheck className="h-4 w-4 text-green-500 dark:text-green-400" />
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                {t("admin.questions.columns.isMultipleChoice")}
+              </span>
+            </div>
+
             <div className="flex items-center space-x-2 mt-2">
               <Controller
                 name="isMultipleChoice"
                 control={control}
                 render={({ field }) => (
-                  <Checkbox
-                    id="isMultipleChoice"
-                    checked={field.value}
-                    onCheckedChange={(checked) =>
-                      field.onChange(checked === true)
-                    }
-                    disabled={isDisabled || loading || isSubmitting}
-                  />
+                  <div className="flex items-center space-x-2 mt-2">
+                    <Checkbox
+                      id="isMultipleChoice"
+                      checked={field.value}
+                      onCheckedChange={(checked) =>
+                        field.onChange(checked === true)
+                      }
+                      disabled={isDisabled || loading || isSubmitting}
+                    />
+                    <Label
+                      htmlFor="isMultipleChoice"
+                      className="text-sm text-muted-foreground"
+                    >
+                      {t("admin.questions.multipleChoice")}
+                    </Label>
+                  </div>
                 )}
               />
             </div>

@@ -751,7 +751,7 @@ export function QuestionsList({ roles }: QuestionsListProps) {
         emptyMessage={t("admin.questions.empty")}
         pagination={paginationProps}
       />
-      <QuestionFormDialog />
+      <QuestionFormDialog onClearFilters={handleClearAllFilters} />
     </>
   );
 }

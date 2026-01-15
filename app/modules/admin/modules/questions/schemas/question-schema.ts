@@ -1,5 +1,16 @@
 import { z } from "zod";
 import { createZodSchema, createRequiredString } from "@/lib";
+import type { QuestionProps } from "../types";
+
+export const questionFormBuilder = (
+  testId?: string,
+  question?: QuestionProps
+) => ({
+  content: question?.content || "",
+  testId: testId || "",
+  categoryId: question?.category || "",
+  isMultipleChoice: question?.isMultipleChoice || false,
+});
 
 export const questionSchema = createZodSchema((t) =>
   z.object({
