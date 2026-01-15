@@ -19,6 +19,7 @@ import {
 interface NamespaceFormDialogProps {
   onDelete?: (namespace: Namespace) => void;
   onClearFilters?: (() => void) | null;
+  onRefresh?: () => Promise<void>;
 }
 
 /**
@@ -29,6 +30,7 @@ interface NamespaceFormDialogProps {
 export function NamespaceFormDialog({
   onDelete,
   onClearFilters,
+  onRefresh,
 }: NamespaceFormDialogProps) {
   const { t } = useTranslation();
   const {
@@ -152,7 +154,11 @@ export function NamespaceFormDialog({
         showSuccess(t("admin.namespaces.createSuccess"));
         closeDialog();
         onClearFilters?.();
-        await handleRefresh(1);
+        if (onRefresh) {
+          await onRefresh();
+        } else {
+          await handleRefresh(1);
+        }
       } else if (namespace) {
         // Handle both VIEW (with edit mode) and EDIT modes
         await updateNamespace(namespace.id, data);

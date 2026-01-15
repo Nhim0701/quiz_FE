@@ -3,6 +3,7 @@ import { useTranslation, type TranslationKey } from "@/i18n";
 import { usePaginationStore, useApp } from "@/hooks";
 import { useAdminDeleteDialog } from "./use-admin-delete-dialog";
 import type { Action } from "@/components/common/data-table";
+import { Edit, Eye, Trash2 } from "lucide-react";
 
 export interface UseAdminListActionsConfig<T extends { id: string }> {
   roles: {
@@ -100,7 +101,7 @@ export function useAdminListActions<T extends { id: string }>({
       result.push({
         label: t(viewLabelKey as TranslationKey),
         onClick: handleView,
-        icon: viewIcon,
+        icon: viewIcon ?? <Eye className="h-4 w-4" />,
         actionType: "viewInfo" as const,
       });
     }
@@ -109,7 +110,7 @@ export function useAdminListActions<T extends { id: string }>({
       result.push({
         label: t(editLabelKey as TranslationKey),
         onClick: handleEdit,
-        icon: editIcon,
+        icon: editIcon ?? <Edit className="h-4 w-4" />,
         actionType: "edit" as const,
       });
     }
@@ -122,7 +123,7 @@ export function useAdminListActions<T extends { id: string }>({
         ),
         onClick: handleDelete,
         variant: "destructive" as const,
-        icon: deleteIcon,
+        icon: deleteIcon ?? <Trash2 className="h-4 w-4" />,
         actionType: "delete" as const,
       });
     }

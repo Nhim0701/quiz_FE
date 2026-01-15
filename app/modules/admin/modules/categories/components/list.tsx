@@ -1,40 +1,27 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router";
-import { useTranslation, type TranslationParams } from "@/i18n";
+import { useTranslation } from "@/i18n";
 import { DIALOG_MODES } from "@/constants";
-import {
-  DataTable,
-  type Column,
-  type Action,
-} from "@/components/common/data-table";
+import { type Column } from "@/components/common/data-table";
 import {
   usePaginationStore,
-  useApp,
-  useFilterActions,
-  useFilterHandlers,
-  useFilterIdsConfig,
   createStringConverter,
   createStringFilterHandler,
   useAdminListData,
+  useApp,
 } from "@/hooks";
+import {
+  useAdminListFilters,
+  useAdminListActions,
+} from "@/modules/admin/hooks";
+import { AdminList } from "@/modules/admin/components";
 import { useCategoriesStore, type Category } from "../hooks";
-import { Edit, Trash2, Eye, List } from "lucide-react";
 import { CategoryFormDialog } from "./form-dialog";
 import { CategoriesListSkeleton } from "./list-skeleton";
-import {
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogDescription,
-  AlertDialogFooter,
-} from "@/components/ui/alert-dialog";
-import {
-  SearchInput,
-  ActiveFilters,
-  FilterActions,
-  type ActiveFilter,
-} from "@/components/common/filters";
+import type { ActiveFilter } from "@/components/common/filters";
 import { ROUTES as TESTS_ROUTES } from "../../tests/constants";
 import { FILTER_QUERY_PARAMS } from "@/constants/filters";
+import { List } from "lucide-react";
 
 interface CategoriesListProps {
   roles: {
@@ -52,7 +39,6 @@ export function CategoriesList({
 }: CategoriesListProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { showError, showSuccess, showDialog, closeDialog } = useApp();
   const { page, pageSize, total, setPage } = usePaginationStore();
 
   const [searchInput, setSearchInput] = useState("");
@@ -107,25 +93,11 @@ export function CategoriesList({
       {
         filterId: "name",
         resetValue: resetSearchFilter,
+        color: "blue",
       },
     ],
     [resetSearchFilter]
   );
-
-  const handleFilterChange = useCallback(() => {
-    setPage(1);
-  }, [setPage]);
-
-  const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
-    handlers: filterHandlers,
-    onFilterChange: handleFilterChange,
-  });
-
-  useEffect(() => {
-    if (onClearFiltersReady) {
-      onClearFiltersReady(handleClearAllFilters);
-    }
-  }, [onClearFiltersReady, handleClearAllFilters]);
 
   const activeFilters = useMemo<ActiveFilter[]>(
     () =>
@@ -141,23 +113,21 @@ export function CategoriesList({
     [searchValue, t]
   );
 
-  const filterIdsConfig = useFilterIdsConfig({
-    handlers: filterHandlers,
-    colorMap: {
-      name: "blue",
-    },
+  const {
+    filterIdsConfig,
+    filterActionButtons,
+    handleRemoveFilter,
+    handleClearAllFilters,
+  } = useAdminListFilters({
+    filterHandlers,
+    activeFilters,
+    onClearFiltersReady,
   });
 
   const handleSearch = useCallback(() => {
     setSearchValue(searchInput);
     setPage(1);
   }, [searchInput, setPage]);
-
-  const filterActionButtons = useFilterActions({
-    onSearch: handleSearch,
-    activeFilters,
-    onClearFilters: handleClearAllFilters,
-  });
 
   const paginationProps = useMemo(
     () => ({
@@ -190,58 +160,42 @@ export function CategoriesList({
     [navigate]
   );
 
-  const handleDelete = useCallback(
-    (category: Category) => {
-      const confirmDelete = async () => {
-        try {
-          await deleteCategory(category.id);
-          showSuccess(t("admin.categories.deleteSuccess"));
-          handleClearAllFilters();
-          await refreshCategories(1, pageSize);
-          closeDialog();
-        } catch (error) {
-          showError(
-            error instanceof Error ? error.message : t("errors.genericError")
-          );
-        }
-      };
-
-      showDialog({
-        title: t("admin.categories.delete"),
-        content: (
-          <AlertDialogDescription>
-            {t("admin.categories.confirmDelete", {
-              name: category.name,
-            } as TranslationParams<"admin.categories.confirmDelete">)}
-          </AlertDialogDescription>
-        ),
-        footer: (
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={closeDialog}>
-              {t("common.cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t("admin.categories.delete")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        ),
-      });
+  const refreshCategoriesList = useCallback(
+    async (refreshPage: number, refreshPageSize: number) => {
+      await refreshCategories(refreshPage, refreshPageSize);
     },
-    [
-      deleteCategory,
-      showSuccess,
-      t,
-      handleClearAllFilters,
-      refreshCategories,
-      pageSize,
-      closeDialog,
-      showDialog,
-      showError,
-    ]
+    [refreshCategories]
   );
+
+  const { actions: baseActions } = useAdminListActions<Category>({
+    roles,
+    deleteFunction: deleteCategory,
+    refreshFunction: refreshCategoriesList,
+    successMessageKey: "admin.categories.deleteSuccess",
+    deleteTitleKey: "admin.categories.delete",
+    confirmDeleteKey: "admin.categories.confirmDelete",
+    deleteButtonKey: "admin.categories.delete",
+    onEdit: handleEdit,
+    onView: handleView,
+    onClearFilters: handleClearAllFilters,
+    getItemName: (category) => category.name,
+    confirmDeleteParams: (category) => ({ name: category.name }),
+  });
+
+  const actions = useMemo(() => {
+    const result = [...baseActions];
+    if (roles.read) {
+      result.push({
+        label: t("admin.categories.viewTests"),
+        onClick: handleViewTests,
+        icon: <List className="h-4 w-4" />,
+        className:
+          "border-purple-500/50 text-purple-600 hover:bg-gradient-to-br hover:from-purple-500 hover:to-violet-600 hover:text-white hover:border-purple-600 dark:border-purple-400/50 dark:text-purple-400 dark:hover:from-purple-600 dark:hover:to-violet-700 dark:hover:border-purple-500",
+        actionType: "default" as const,
+      });
+    }
+    return result;
+  }, [baseActions, roles, t, handleViewTests]);
 
   const columns = useMemo<Column<Category>[]>(
     () => [
@@ -276,102 +230,42 @@ export function CategoriesList({
     [t]
   );
 
-  const actions = useMemo<Action<Category>[]>(
-    () => [
-      ...(roles.read
-        ? [
-            {
-              label: t("admin.categories.viewInfo"),
-              onClick: handleView,
-              icon: <Eye className="h-4 w-4" />,
-              actionType: "viewInfo" as const,
-            },
-          ]
-        : []),
-      ...(roles.update
-        ? [
-            {
-              label: t("common.edit"),
-              onClick: handleEdit,
-              icon: <Edit className="h-4 w-4" />,
-              actionType: "edit" as const,
-            },
-          ]
-        : []),
-      ...(roles.delete
-        ? [
-            {
-              label: t("admin.categories.delete"),
-              onClick: handleDelete,
-              variant: "destructive" as const,
-              icon: <Trash2 className="h-4 w-4" />,
-              actionType: "delete" as const,
-            },
-          ]
-        : []),
-      ...(roles.read
-        ? [
-            {
-              label: t("admin.categories.viewTests"),
-              onClick: handleViewTests,
-              icon: <List className="h-4 w-4" />,
-              className:
-                "border-purple-500/50 text-purple-600 hover:bg-gradient-to-br hover:from-purple-500 hover:to-violet-600 hover:text-white hover:border-purple-600 dark:border-purple-400/50 dark:text-purple-400 dark:hover:from-purple-600 dark:hover:to-violet-700 dark:hover:border-purple-500",
-              actionType: "default" as const,
-            },
-          ]
-        : []),
-    ],
-    [roles, t, handleView, handleEdit, handleDelete, handleViewTests]
-  );
+  const handleRefresh = useCallback(async () => {
+    await refreshCategories(page, pageSize, apiFilters);
+  }, [refreshCategories, page, pageSize, apiFilters]);
 
   // Show skeleton on initial load
   if (loading && categories.length === 0 && !hasInitialFetch.current) {
     return (
       <>
         <CategoriesListSkeleton />
-        <CategoryFormDialog onDelete={handleDelete} />
       </>
     );
   }
 
   return (
     <>
-      {/* Filter Bar */}
-      <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 items-center gap-2">
-          <SearchInput
-            value={searchInput}
-            onChange={setSearchInput}
-            onSearch={handleSearch}
-            placeholderKey="common.searchPlaceholder"
-            className="flex-1"
-            searchKey="name"
-          />
-          <FilterActions buttons={filterActionButtons} />
-        </div>
-      </div>
-
-      {/* Active Filters */}
-      {activeFilters.length > 0 && (
-        <div className="mb-4">
-          <ActiveFilters
-            filters={activeFilters}
-            onRemove={handleRemoveFilter}
-            filterIdsConfig={filterIdsConfig}
-          />
-        </div>
-      )}
-
-      <DataTable
+      <AdminList
         columns={columns}
         data={categories}
         actions={actions}
         loading={loading}
         emptyMessage={t("admin.categories.empty")}
+        searchInput={{
+          value: searchInput,
+          onChange: setSearchInput,
+          onSearch: handleSearch,
+          placeholderKey: "common.searchPlaceholder",
+          className: "flex-1",
+          searchKey: "name",
+        }}
+        activeFilters={activeFilters}
+        onRemoveFilter={handleRemoveFilter}
+        filterIdsConfig={filterIdsConfig}
+        filterActionButtons={filterActionButtons}
         pagination={paginationProps}
       />
-      <CategoryFormDialog onDelete={handleDelete} />
+      <CategoryFormDialog onRefresh={handleRefresh} />
     </>
   );
 }

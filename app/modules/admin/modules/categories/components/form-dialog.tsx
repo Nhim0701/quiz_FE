@@ -19,6 +19,7 @@ import {
 interface CategoryFormDialogProps {
   onDelete?: (category: Category) => void;
   onClearFilters?: (() => void) | null;
+  onRefresh?: () => Promise<void>;
 }
 
 /**
@@ -29,6 +30,7 @@ interface CategoryFormDialogProps {
 export function CategoryFormDialog({
   onDelete,
   onClearFilters,
+  onRefresh,
 }: CategoryFormDialogProps) {
   const { t } = useTranslation();
   const {
@@ -127,7 +129,11 @@ export function CategoryFormDialog({
         showSuccess(t("admin.categories.createSuccess"));
         closeDialog();
         onClearFilters?.();
-        await handleRefresh(1);
+        if (onRefresh) {
+          await onRefresh();
+        } else {
+          await handleRefresh(1);
+        }
       } else if (category) {
         // Handle both VIEW (with edit mode) and EDIT modes
         await updateCategory(category.id, data);

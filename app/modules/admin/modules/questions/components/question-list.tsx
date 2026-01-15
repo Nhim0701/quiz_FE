@@ -416,9 +416,11 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     deleteButtonKey: "admin.questions.delete",
     onClearFilters: handleClearAllFilters,
     onView: handleViewInfo,
-    viewIcon: <Eye className="h-4 w-4" />,
-    deleteIcon: <Trash2 className="h-4 w-4" />,
   });
+
+  const handleRefresh = useCallback(async () => {
+    await fetchQuestions(page, pageSize, apiFilters);
+  }, [fetchQuestions, page, pageSize, apiFilters]);
 
   const columns = useMemo<Column<QuestionProps>[]>(
     () => [
@@ -588,7 +590,10 @@ export function QuestionsList({ roles }: QuestionsListProps) {
         pagination={paginationProps}
         filterBarClassName="my-4"
       />
-      <QuestionFormDialog onClearFilters={handleClearAllFilters} />
+      <QuestionFormDialog
+        onClearFilters={handleClearAllFilters}
+        onRefresh={handleRefresh}
+      />
     </>
   );
 }
