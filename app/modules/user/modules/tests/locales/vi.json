@@ -1,15 +1,13 @@
 {
   "test": {
-    "question": "Câu hỏi {{current}} / {{total}}",
-    "timeRemaining": "Thời gian còn lại"
+    "question": "Câu hỏi {{current}} / {{total}}"
   },
   "result": {
     "wrong": "Sai",
     "quiz": "Bài Kiểm Tra",
     "review": {
       "correct": "Đúng",
-      "incorrect": "Sai",
-      "answer": "Câu trả lời"
+      "incorrect": "Sai"
     }
   },
   "tests": {
@@ -18,8 +16,6 @@
     "addQuestionsFirst": "Vui lòng thêm câu hỏi vào cơ sở dữ liệu trước",
     "totalQuestions": "tổng câu hỏi",
     "questions": "câu hỏi",
-    "questionsLabel": "Câu hỏi",
-    "startTest": "Bắt Đầu Bài Kiểm Tra",
     "noTests": "Không có bài kiểm tra nào",
     "timeLimit": "phút"
   },
@@ -47,8 +43,6 @@
       "multipleAnswers": "Nhiều câu trả lời"
     },
     "explanation": {
-      "show": "Hiển thị Giải thích",
-      "hide": "Ẩn Giải thích",
       "title": "Giải thích"
     }
   }

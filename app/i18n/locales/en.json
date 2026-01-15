@@ -4,7 +4,6 @@
     "close": "Close",
     "logout": "Logout",
     "welcome": "Welcome back, {{name}}!",
-    "email": "Email",
     "emailLabel": "Email",
     "emailPlaceholder": "you@example.com",
     "passwordLabel": "Password",
@@ -21,7 +20,6 @@
     "selected": "selected",
     "pagination": {
       "itemsPerPage": "Items per page:",
-      "all": "All",
       "summary": "from {{start}} to {{end}} of {{total}} items",
       "firstPage": "First page",
       "previousPage": "Previous page",
@@ -29,40 +27,27 @@
       "lastPage": "Last page",
       "page": "Page {{page}}"
     },
-    "search": "Search",
-    "searchPlaceholder": "Search by category name...",
     "selectPlaceholder": "Select...",
     "comboboxSearchPlaceholder": "Search...",
     "noResultsFound": "No results found.",
     "noDataAvailable": "No data available",
     "actions": "Actions",
-    "seconds": "seconds",
     "minutes": "minutes"
   },
   "errors": {
     "networkError": "Network error: No response received from server",
     "requestError": "Request error",
     "httpError": "HTTP error! status:",
-    "forbidden": "Access forbidden. You don't have permission to access this resource.",
-    "permissionDenied": "Permission denied. You don't have permission to access this resource.",
     "loginFailed": "Login failed. Please check your email or password.",
     "registrationFailed": "Registration failed. Please try again.",
-    "fetchUserFailed": "Failed to fetch user:",
     "sessionExpired": "Session expired. Please login again.",
-    "fetchQuestionsFailed": "Failed to fetch questions. Please try again.",
     "fetchDashboardFailed": "Failed to fetch dashboard data. Please try again.",
-    "submitResponsesFailed": "Failed to submit responses. Please try again.",
     "genericError": "Something went wrong. Please try again.",
     "noRefreshToken": "No refresh token available",
     "invalidRefreshResponse": "Invalid refresh response: missing access token",
     "tokenRefreshFailed": "Token refresh failed",
     "failedToGetNewToken": "Failed to get new token",
     "tokenExpiredNoRefresh": "Token expired and no refresh token available"
-  },
-  "success": {
-    "loginSuccess": "Login successful!",
-    "registrationSuccess": "Registration successful!",
-    "submitSuccess": "Test submitted successfully!"
   },
   "info": {
     "noResultData": "No result data. Please start a test from your profile.",
@@ -72,9 +57,6 @@
     "dashboard": "Dashboard",
     "tests": "Tests",
     "profile": "Profile",
-    "expand": "Expand",
-    "collapse": "Collapse",
-    "toggleSidebar": "Toggle Sidebar",
     "userMenu": "User Menu",
     "adminMenu": "Admin Menu",
     "admin": {
@@ -88,9 +70,6 @@
       "permissions": "Permissions",
       "namespaces": "Namespaces"
     }
-  },
-  "breadcrumb": {
-    "home": "Home"
   },
   "notFound": {
     "title": "Page Not Found",
@@ -137,15 +116,11 @@
       "viewTitle": "Role Information",
       "viewDescription": "View role details",
       "create": "Create",
-      "update": "Update",
       "delete": "Delete",
       "createSuccess": "Role created successfully",
       "updateSuccess": "Role updated successfully",
-      "deleteSuccess": "Role deleted successfully",
       "confirmDelete": "Are you sure you want to delete role {{name}}?",
-      "searchPlaceholder": "Search by role name...",
       "empty": "No roles found",
-      "noPermission": "You don't have permission to access this page",
       "columns": {
         "id": "ID",
         "name": "Role Name",
@@ -156,9 +131,6 @@
         "namePlaceholder": "Enter role name",
         "descriptionLabel": "Description",
         "descriptionPlaceholder": "Enter role description"
-      },
-      "validation": {
-        "nameRequired": "Role name is required"
       }
     }
   }

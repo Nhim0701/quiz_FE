@@ -4,7 +4,6 @@
     "close": "Đóng",
     "logout": "Đăng xuất",
     "welcome": "Chào mừng trở lại, {{name}}!",
-    "email": "Email",
     "emailLabel": "Email",
     "emailPlaceholder": "you@example.com",
     "passwordLabel": "Mật khẩu",
@@ -21,7 +20,6 @@
     "selected": "đã chọn",
     "pagination": {
       "itemsPerPage": "Số mục mỗi trang:",
-      "all": "Tất cả",
       "summary": "từ {{start}} đến {{end}} trong tổng số {{total}} mục",
       "firstPage": "Trang đầu",
       "previousPage": "Trang trước",
@@ -29,29 +27,21 @@
       "lastPage": "Trang cuối",
       "page": "Trang {{page}}"
     },
-    "search": "Tìm kiếm",
-    "searchPlaceholder": "Tìm kiếm theo tên danh mục...",
     "selectPlaceholder": "Chọn...",
     "comboboxSearchPlaceholder": "Tìm kiếm...",
     "noResultsFound": "Không tìm thấy.",
     "noDataAvailable": "Không có dữ liệu",
     "actions": "Thao tác",
-    "seconds": "giây",
     "minutes": "phút"
   },
   "errors": {
     "networkError": "Lỗi mạng: Không nhận được phản hồi từ máy chủ",
     "requestError": "Lỗi yêu cầu",
     "httpError": "Lỗi HTTP! mã trạng thái:",
-    "forbidden": "Truy cập bị từ chối. Bạn không có quyền truy cập tài nguyên này.",
-    "permissionDenied": "Quyền truy cập bị từ chối. Bạn không có quyền truy cập tài nguyên này.",
     "loginFailed": "Đăng nhập thất bại. Vui lòng kiểm tra email hoặc mật khẩu của bạn.",
     "registrationFailed": "Đăng ký thất bại. Vui lòng thử lại.",
-    "fetchUserFailed": "Không thể lấy thông tin người dùng:",
     "sessionExpired": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
-    "fetchQuestionsFailed": "Không thể tải câu hỏi. Vui lòng thử lại.",
     "fetchDashboardFailed": "Không thể tải dữ liệu bảng điều khiển. Vui lòng thử lại.",
-    "submitResponsesFailed": "Không thể gửi câu trả lời. Vui lòng thử lại.",
     "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
     "noRefreshToken": "Không có refresh token",
     "invalidRefreshResponse": "Phản hồi refresh không hợp lệ: thiếu access token",
@@ -59,17 +49,9 @@
     "failedToGetNewToken": "Không thể lấy token mới",
     "tokenExpiredNoRefresh": "Token đã hết hạn và không có refresh token"
   },
-  "success": {
-    "loginSuccess": "Đăng nhập thành công!",
-    "registrationSuccess": "Đăng ký thành công!",
-    "submitSuccess": "Gửi bài kiểm tra thành công!"
-  },
   "info": {
     "noResultData": "Không có dữ liệu kết quả. Vui lòng bắt đầu bài kiểm tra từ trang cá nhân của bạn.",
     "noQuestions": "Không tìm thấy câu hỏi cho loại bài kiểm tra này."
-  },
-  "breadcrumb": {
-    "home": "Trang chủ"
   },
   "notFound": {
     "title": "Không Tìm Thấy Trang",
@@ -116,15 +98,11 @@
       "viewTitle": "Thông Tin Vai Trò",
       "viewDescription": "Xem chi tiết thông tin vai trò",
       "create": "Tạo",
-      "update": "Cập nhật",
       "delete": "Xóa",
       "createSuccess": "Tạo vai trò thành công",
       "updateSuccess": "Cập nhật vai trò thành công",
-      "deleteSuccess": "Xóa vai trò thành công",
       "confirmDelete": "Bạn có chắc chắn muốn xóa vai trò {{name}}?",
-      "searchPlaceholder": "Tìm kiếm theo tên vai trò...",
       "empty": "Không có vai trò nào",
-      "noPermission": "Bạn không có quyền truy cập trang này",
       "columns": {
         "id": "ID",
         "name": "Tên Vai Trò",
@@ -135,9 +113,6 @@
         "namePlaceholder": "Nhập tên vai trò",
         "descriptionLabel": "Mô Tả",
         "descriptionPlaceholder": "Nhập mô tả vai trò"
-      },
-      "validation": {
-        "nameRequired": "Tên vai trò là bắt buộc"
       }
     }
   },
@@ -145,9 +120,6 @@
     "dashboard": "Bảng Điều Khiển",
     "tests": "Bài Kiểm Tra",
     "profile": "Hồ Sơ",
-    "expand": "Mở rộng",
-    "collapse": "Thu gọn",
-    "toggleSidebar": "Bật/Tắt Thanh Bên",
     "userMenu": "Menu Người dùng",
     "adminMenu": "Menu Admin",
     "admin": {

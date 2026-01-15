@@ -10,13 +10,10 @@
       "viewTitle": "Permission Information",
       "viewDescription": "View permission details",
       "create": "Create",
-      "update": "Update",
       "delete": "Delete",
       "createSuccess": "Permission created successfully",
       "updateSuccess": "Permission updated successfully",
-      "deleteSuccess": "Permission deleted successfully",
       "confirmDelete": "Are you sure you want to delete permission {{name}}?",
-      "searchPlaceholder": "Search by permission name...",
       "empty": "No permissions found",
       "noPermission": "You don't have permission to access this page",
       "columns": {

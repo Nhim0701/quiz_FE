@@ -1,15 +1,13 @@
 {
   "test": {
-    "question": "Question {{current}} of {{total}}",
-    "timeRemaining": "Time Remaining"
+    "question": "Question {{current}} of {{total}}"
   },
   "result": {
     "wrong": "Wrong",
     "quiz": "Quiz",
     "review": {
       "correct": "Correct",
-      "incorrect": "Incorrect",
-      "answer": "Answer"
+      "incorrect": "Incorrect"
     }
   },
   "tests": {
@@ -18,8 +16,6 @@
     "addQuestionsFirst": "Please add questions to the database first",
     "totalQuestions": "total questions",
     "questions": "questions",
-    "questionsLabel": "Questions",
-    "startTest": "Start Test",
     "noTests": "No tests available",
     "timeLimit": "minutes"
   },
@@ -47,8 +43,6 @@
       "multipleAnswers": "Multiple Answers"
     },
     "explanation": {
-      "show": "Show Explanation",
-      "hide": "Hide Explanation",
       "title": "Explanation"
     }
   }

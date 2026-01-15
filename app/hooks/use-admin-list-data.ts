@@ -93,17 +93,6 @@ export function useAdminListData<TData, TMeta extends { total?: number }>({
     hookId,
   });
 
-  const filterValuesString = useMemo(
-    () =>
-      JSON.stringify(
-        filterConfig.map((f) => ({
-          key: f.filterKey,
-          value: f.value,
-        }))
-      ),
-    [filterConfig]
-  );
-
   const apiFilters = useMemo(() => {
     const activeFilters: Array<{ key: string; value: string }> = [];
     filterConfig.forEach((filter) => {

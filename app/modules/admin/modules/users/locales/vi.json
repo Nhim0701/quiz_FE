@@ -6,19 +6,16 @@
       "empty": "Không tìm thấy người dùng nào",
       "noPermission": "Bạn không có quyền truy cập trang này",
       "delete": "Xóa",
-      "deleteSuccess": "Xóa người dùng thành công",
       "confirmDelete": "Bạn có chắc chắn muốn xóa người dùng \"{{name}}\"?",
       "createTitle": "Tạo người dùng mới",
       "editTitle": "Sửa người dùng",
       "createDescription": "Điền thông tin để tạo người dùng mới",
       "editDescription": "Cập nhật thông tin người dùng",
       "create": "Tạo người dùng",
-      "update": "Cập nhật người dùng",
       "createSuccess": "Tạo người dùng thành công",
       "updateSuccess": "Cập nhật người dùng thành công",
       "viewTitle": "Thông tin người dùng",
       "viewDescription": "Xem và chỉnh sửa thông tin người dùng",
-      "searchPlaceholder": "Tìm kiếm theo tên hoặc email...",
       "filters": {
         "rolePlaceholder": "Chọn vai trò",
         "roleSearch": "Tìm kiếm vai trò...",
@@ -41,7 +38,6 @@
         "companyPlaceholder": "Nhập tên công ty"
       },
       "validation": {
-        "fullNameRequired": "Họ và tên là bắt buộc",
         "emailRequired": "Email là bắt buộc",
         "emailInvalid": "Email không hợp lệ"
       },
@@ -59,9 +55,7 @@
         "submit": "Đổi mật khẩu",
         "form": {
           "newPasswordLabel": "Mật khẩu mới",
-          "newPasswordPlaceholder": "Nhập mật khẩu mới",
-          "confirmPasswordLabel": "Xác nhận mật khẩu",
-          "confirmPasswordPlaceholder": "Nhập lại mật khẩu mới"
+          "confirmPasswordLabel": "Xác nhận mật khẩu"
         },
         "validation": {
           "newPasswordRequired": "Mật khẩu mới là bắt buộc",
@@ -76,18 +70,7 @@
         "success": "Gán vai trò thành công",
         "submit": "Lưu",
         "noRoles": "Không có vai trò nào",
-        "roleLabel": "Vai trò",
-        "validation": {
-          "roleIdRequired": "Vai trò là bắt buộc"
-        }
-      },
-      "errors": {
-        "fetchFailed": "Không thể tải danh sách người dùng",
-        "createFailed": "Không thể tạo người dùng",
-        "updateFailed": "Không thể cập nhật người dùng",
-        "deleteFailed": "Không thể xóa người dùng",
-        "changePasswordFailed": "Không thể đổi mật khẩu",
-        "assignRolesFailed": "Không thể gán vai trò"
+        "roleLabel": "Vai trò"
       }
     }
   }

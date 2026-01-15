@@ -6,19 +6,16 @@
       "empty": "No namespaces found",
       "noPermission": "You don't have permission to access this page",
       "delete": "Delete",
-      "deleteSuccess": "Namespace deleted successfully",
       "confirmDelete": "Are you sure you want to delete namespace \"{{name}}\"?",
       "createTitle": "Create New Namespace",
       "editTitle": "Edit Namespace",
       "createDescription": "Fill in the information to create a new namespace",
       "editDescription": "Update namespace information",
       "create": "Create Namespace",
-      "update": "Update Namespace",
       "createSuccess": "Namespace created successfully",
       "updateSuccess": "Namespace updated successfully",
       "viewTitle": "Namespace Information",
       "viewDescription": "View and edit namespace information",
-      "searchPlaceholder": "Search by name...",
       "form": {
         "nameLabel": "Namespace Name",
         "namePlaceholder": "Enter namespace name",
@@ -27,15 +24,15 @@
         "descriptionLabel": "Description",
         "descriptionPlaceholder": "Enter description"
       },
-      "validation": {
-        "nameRequired": "Namespace name is required",
-        "prefixRequired": "Prefix is required"
-      },
       "columns": {
         "id": "ID",
         "name": "Name",
         "prefix": "Prefix",
         "description": "Description"
+      },
+      "validation": {
+        "nameRequired": "Namespace name is required",
+        "prefixRequired": "Prefix is required"
       }
     }
   }

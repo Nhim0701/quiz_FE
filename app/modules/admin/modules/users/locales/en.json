@@ -6,19 +6,16 @@
       "empty": "No users found",
       "noPermission": "You don't have permission to access this page",
       "delete": "Delete",
-      "deleteSuccess": "User deleted successfully",
       "confirmDelete": "Are you sure you want to delete user \"{{name}}\"?",
       "createTitle": "Create New User",
       "editTitle": "Edit User",
       "createDescription": "Fill in the information to create a new user",
       "editDescription": "Update user information",
       "create": "Create User",
-      "update": "Update User",
       "createSuccess": "User created successfully",
       "updateSuccess": "User updated successfully",
       "viewTitle": "User Information",
       "viewDescription": "View and edit user information",
-      "searchPlaceholder": "Search by name or email...",
       "filters": {
         "rolePlaceholder": "Select role",
         "roleSearch": "Search roles...",
@@ -41,7 +38,6 @@
         "companyPlaceholder": "Enter company name"
       },
       "validation": {
-        "fullNameRequired": "Full name is required",
         "emailRequired": "Email is required",
         "emailInvalid": "Invalid email"
       },
@@ -59,9 +55,7 @@
         "submit": "Change Password",
         "form": {
           "newPasswordLabel": "New Password",
-          "newPasswordPlaceholder": "Enter new password",
-          "confirmPasswordLabel": "Confirm Password",
-          "confirmPasswordPlaceholder": "Re-enter new password"
+          "confirmPasswordLabel": "Confirm Password"
         },
         "validation": {
           "newPasswordRequired": "New password is required",
@@ -76,18 +70,7 @@
         "success": "Roles assigned successfully",
         "submit": "Save",
         "noRoles": "No roles available",
-        "roleLabel": "Role",
-        "validation": {
-          "roleIdRequired": "Role is required"
-        }
-      },
-      "errors": {
-        "fetchFailed": "Failed to fetch users",
-        "createFailed": "Failed to create user",
-        "updateFailed": "Failed to update user",
-        "deleteFailed": "Failed to delete user",
-        "changePasswordFailed": "Failed to change password",
-        "assignRolesFailed": "Failed to assign roles"
+        "roleLabel": "Role"
       }
     }
   }

@@ -6,37 +6,25 @@
       "empty": "Không tìm thấy danh mục nào",
       "noPermission": "Bạn không có quyền truy cập trang này",
       "delete": "Xóa",
-      "deleteSuccess": "Xóa danh mục thành công",
       "confirmDelete": "Bạn có chắc chắn muốn xóa danh mục \"{{name}}\"?",
       "createTitle": "Tạo danh mục mới",
       "editTitle": "Sửa danh mục",
       "createDescription": "Điền thông tin để tạo danh mục mới",
       "editDescription": "Cập nhật thông tin danh mục",
       "create": "Tạo danh mục",
-      "update": "Cập nhật danh mục",
       "createSuccess": "Tạo danh mục thành công",
       "updateSuccess": "Cập nhật danh mục thành công",
       "viewTitle": "Thông tin danh mục",
       "viewDescription": "Xem và chỉnh sửa thông tin danh mục",
-      "viewInfo": "Xem thông tin",
       "viewTests": "Xem bài kiểm tra",
       "form": {
         "nameLabel": "Tên danh mục",
         "namePlaceholder": "Nhập tên danh mục"
       },
-      "validation": {
-        "nameRequired": "Tên danh mục là bắt buộc"
-      },
       "columns": {
         "id": "ID",
         "name": "Tên",
         "questionCount": "Câu Hỏi"
-      },
-      "errors": {
-        "fetchFailed": "Không thể tải danh sách danh mục",
-        "createFailed": "Không thể tạo danh mục",
-        "updateFailed": "Không thể cập nhật danh mục",
-        "deleteFailed": "Không thể xóa danh mục"
       }
     }
   }

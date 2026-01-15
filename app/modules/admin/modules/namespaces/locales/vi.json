@@ -6,19 +6,16 @@
       "empty": "Không tìm thấy namespace nào",
       "noPermission": "Bạn không có quyền truy cập trang này",
       "delete": "Xóa",
-      "deleteSuccess": "Xóa namespace thành công",
       "confirmDelete": "Bạn có chắc chắn muốn xóa namespace \"{{name}}\"?",
       "createTitle": "Tạo namespace mới",
       "editTitle": "Sửa namespace",
       "createDescription": "Điền thông tin để tạo namespace mới",
       "editDescription": "Cập nhật thông tin namespace",
       "create": "Tạo namespace",
-      "update": "Cập nhật namespace",
       "createSuccess": "Tạo namespace thành công",
       "updateSuccess": "Cập nhật namespace thành công",
       "viewTitle": "Thông tin namespace",
       "viewDescription": "Xem và chỉnh sửa thông tin namespace",
-      "searchPlaceholder": "Tìm kiếm theo tên...",
       "form": {
         "nameLabel": "Tên namespace",
         "namePlaceholder": "Nhập tên namespace",
@@ -27,15 +24,15 @@
         "descriptionLabel": "Mô tả",
         "descriptionPlaceholder": "Nhập mô tả"
       },
-      "validation": {
-        "nameRequired": "Tên namespace là bắt buộc",
-        "prefixRequired": "Prefix là bắt buộc"
-      },
       "columns": {
         "id": "ID",
         "name": "Tên",
         "prefix": "Prefix",
         "description": "Mô tả"
+      },
+      "validation": {
+        "nameRequired": "Tên namespace là bắt buộc",
+        "prefixRequired": "Prefix là bắt buộc"
       }
     }
   }

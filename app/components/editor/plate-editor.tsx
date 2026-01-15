@@ -57,7 +57,9 @@ export function PlateEditorSheet() {
         ${editorHtml}
       </body>
     </html>`;
-    !newOpen && close(html);
+    if (!newOpen) {
+      close(html);
+    }
   };
 
   return (

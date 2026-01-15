@@ -7,20 +7,15 @@
       "viewTitle": "Thông Tin Câu Hỏi",
       "editTitle": "Chỉnh Sửa Câu Hỏi",
       "createSuccess": "Tạo câu hỏi thành công",
-      "edit": "Chỉnh Sửa",
       "updateSuccess": "Cập nhật câu hỏi thành công",
       "delete": "Xóa",
       "deleteSuccess": "Xóa câu hỏi thành công",
       "confirmDelete": "Bạn có chắc chắn muốn xóa câu hỏi này?",
-      "info": "Thông Tin Câu Hỏi",
       "empty": "Không tìm thấy câu hỏi nào",
       "notFound": "Không tìm thấy câu hỏi",
       "noPermission": "Bạn không có quyền truy cập trang này",
       "fields": {
-        "content": "Nội Dung",
-        "type": "Loại Câu Hỏi",
-        "image": "Hình Ảnh",
-        "answers": "Câu Trả Lời"
+        "content": "Nội Dung"
       },
       "form": {
         "contentPlaceholder": "Nhập nội dung câu hỏi..."
@@ -28,16 +23,6 @@
       "createDescription": "Tạo câu hỏi mới cho bài kiểm tra",
       "viewDescription": "Xem chi tiết câu hỏi",
       "editDescription": "Chỉnh sửa thông tin câu hỏi",
-      "validation": {
-        "contentRequired": "Nội dung câu hỏi là bắt buộc",
-        "testRequired": "Bài kiểm tra là bắt buộc"
-      },
-      "errors": {
-        "fetchFailed": "Không thể tải danh sách câu hỏi",
-        "createFailed": "Không thể tạo câu hỏi",
-        "updateFailed": "Không thể cập nhật câu hỏi",
-        "deleteFailed": "Không thể xóa câu hỏi"
-      },
       "columns": {
         "id": "ID",
         "content": "Nội Dung",
@@ -49,13 +34,6 @@
       "multipleChoice": "Nhiều Lựa Chọn",
       "singleChoice": "Một Lựa Chọn",
       "filters": {
-        "searchPlaceholder": "Tìm kiếm theo nội dung...",
-        "multipleChoice": "Nhiều Lựa Chọn",
-        "singleChoice": "Một Lựa Chọn",
-        "multipleChoicePlaceholder": "Chọn loại...",
-        "multipleChoiceSearch": "Tìm kiếm loại...",
-        "multipleChoiceEmpty": "Không tìm thấy loại nào.",
-        "clear": "Xóa Bộ Lọc",
         "category": "Danh Mục",
         "categoryPlaceholder": "Chọn danh mục...",
         "categorySearch": "Tìm kiếm danh mục...",
@@ -75,7 +53,6 @@
         "viewDescription": "Xem chi tiết câu trả lời",
         "editDescription": "Chỉnh sửa thông tin câu trả lời",
         "delete": "Xóa",
-        "deleteSuccess": "Xóa câu trả lời thành công",
         "confirmDelete": "Bạn có chắc chắn muốn xóa câu trả lời này?",
         "createSuccess": "Tạo câu trả lời thành công",
         "updateSuccess": "Cập nhật câu trả lời thành công",
@@ -92,8 +69,7 @@
           "contentRequired": "Nội dung câu trả lời là bắt buộc"
         },
         "form": {
-          "contentPlaceholder": "Nhập nội dung câu trả lời...",
-          "explanationPlaceholder": "Nhập giải thích (tùy chọn)..."
+          "contentPlaceholder": "Nhập nội dung câu trả lời..."
         }
       }
     }
