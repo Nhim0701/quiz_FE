@@ -21,6 +21,7 @@ import {
 import { useCategoriesStore, type Category } from "../hooks";
 import { Edit, Trash2, Eye, List } from "lucide-react";
 import { CategoryFormDialog } from "./form-dialog";
+import { CategoriesListSkeleton } from "./list-skeleton";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -400,6 +401,16 @@ export function CategoriesList({
     }),
     [page, pageSize, total, handlePageChange, handlePageSizeChange]
   );
+
+  // Show skeleton on initial load
+  if (loading && categories.length === 0 && !hasInitialFetch.current) {
+    return (
+      <>
+        <CategoriesListSkeleton />
+        <CategoryFormDialog onDelete={handleDelete} />
+      </>
+    );
+  }
 
   return (
     <>

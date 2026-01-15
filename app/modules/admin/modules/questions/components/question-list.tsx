@@ -26,6 +26,7 @@ import type { QuestionProps } from "../types";
 import { useCategoriesStore } from "../../categories/hooks";
 import { useTestsStore } from "../../tests/hooks";
 import type { TestProps } from "../../tests/types";
+import { QuestionsListSkeleton } from "./list-skeleton";
 import { Eye, Trash2, CheckSquare, Square } from "lucide-react";
 import {
   AlertDialogAction,
@@ -651,6 +652,20 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     ],
     [roles, t, handleViewInfo, handleDelete]
   );
+
+  // Show skeleton on initial load
+  if (
+    loading &&
+    questionsWithTestNames.length === 0 &&
+    !hasInitialFetch.current
+  ) {
+    return (
+      <>
+        <QuestionsListSkeleton />
+        <QuestionFormDialog />
+      </>
+    );
+  }
 
   return (
     <>

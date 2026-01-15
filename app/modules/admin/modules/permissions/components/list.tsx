@@ -24,6 +24,7 @@ import {
 import { usePermissionsStore, type Permission } from "../hooks";
 import { Edit, Trash2, Eye } from "lucide-react";
 import { PermissionFormDialog } from "./form-dialog";
+import { PermissionsListSkeleton } from "./list-skeleton";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -496,6 +497,16 @@ export function PermissionsList({
     }),
     [page, pageSize, total, handlePageChange, handlePageSizeChange]
   );
+
+  // Show skeleton on initial load
+  if (loading && permissionsList.length === 0 && !hasInitialFetch.current) {
+    return (
+      <>
+        <PermissionsListSkeleton />
+        <PermissionFormDialog onDelete={handleDelete} />
+      </>
+    );
+  }
 
   return (
     <>

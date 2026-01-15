@@ -22,6 +22,7 @@ import { Edit, Trash2, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { RoleFormDialog } from "./form-dialog";
+import { RolesListSkeleton } from "./list-skeleton";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -417,6 +418,16 @@ export function RolesList({ roles, onClearFiltersReady }: RolesListProps) {
     }),
     [page, pageSize, total, handlePageChange, handlePageSizeChange]
   );
+
+  // Show skeleton on initial load
+  if (loading && rolesList.length === 0 && !hasInitialFetch.current) {
+    return (
+      <>
+        <RolesListSkeleton />
+        <RoleFormDialog onDelete={handleDelete} />
+      </>
+    );
+  }
 
   return (
     <>

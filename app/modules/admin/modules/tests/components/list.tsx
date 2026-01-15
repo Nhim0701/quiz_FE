@@ -25,6 +25,7 @@ import { useTestsStore, type TestProps } from "../hooks";
 import { useCategoriesStore } from "../../categories/hooks";
 import { Eye, Trash2, Edit, FileQuestion } from "lucide-react";
 import { TestFormDialog } from "./form-dialog";
+import { TestsListSkeleton } from "./list-skeleton";
 import { DIALOG_MODES } from "@/constants";
 import {
   AlertDialogAction,
@@ -545,6 +546,20 @@ export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
     ],
     [roles, t, handleViewInfo, handleEdit, handleDelete, handleViewQuestions]
   );
+
+  // Show skeleton on initial load (after all hooks)
+  if (
+    loading &&
+    testsWithCategoryNames.length === 0 &&
+    !hasInitialFetch.current
+  ) {
+    return (
+      <>
+        <TestsListSkeleton />
+        <TestFormDialog onDelete={handleDelete} />
+      </>
+    );
+  }
 
   return (
     <>

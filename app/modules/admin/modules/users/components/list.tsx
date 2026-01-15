@@ -12,6 +12,7 @@ import { useUsersStore, useUsersFilters, type User } from "../hooks";
 import { useRolesStore } from "@/modules/admin/modules/roles/hooks";
 import { ChangePasswordDialog } from "./change-password-dialog";
 import { AssignRolesDialog } from "./assign-roles-dialog";
+import { UsersListSkeleton } from "./list-skeleton";
 import { DIALOG_MODES } from "@/constants";
 import {
   AlertDialogAction,
@@ -334,6 +335,25 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
     onChangePassword: handleChangePassword,
     onAssignRoles: handleAssignRoles,
   });
+
+  // Show skeleton on initial load
+  if (loading && users.length === 0 && !hasInitialFetch.current) {
+    return (
+      <>
+        <UsersListSkeleton />
+        <ChangePasswordDialog
+          user={changePasswordUser}
+          open={!!changePasswordUser}
+          onOpenChange={(open) => !open && setChangePasswordUser(null)}
+        />
+        <AssignRolesDialog
+          user={assignRolesUser}
+          open={!!assignRolesUser}
+          onOpenChange={(open) => !open && setAssignRolesUser(null)}
+        />
+      </>
+    );
+  }
 
   return (
     <>

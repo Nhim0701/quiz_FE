@@ -20,6 +20,7 @@ import {
 import { useNamespacesStore, type Namespace } from "../hooks";
 import { Edit, Trash2, Eye } from "lucide-react";
 import { NamespaceFormDialog } from "./form-dialog";
+import { NamespacesListSkeleton } from "./list-skeleton";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -384,6 +385,16 @@ export function NamespacesList({
     }),
     [page, pageSize, total, handlePageChange, handlePageSizeChange]
   );
+
+  // Show skeleton on initial load
+  if (loading && namespaces.length === 0 && !hasInitialFetch.current) {
+    return (
+      <>
+        <NamespacesListSkeleton />
+        <NamespaceFormDialog onDelete={handleDelete} />
+      </>
+    );
+  }
 
   return (
     <>
