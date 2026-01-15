@@ -31,14 +31,6 @@ export function TestQuestion() {
 
   const hasAnswered = selectedAnswers.length > 0;
 
-  React.useEffect(() => {
-    console.log("answers", answers);
-    console.log("revealed", revealed);
-    console.log("hasAnswered", hasAnswered);
-    console.log("selectedAnswers", selectedAnswers);
-    console.log("currentQuestion", currentQuestion);
-  }, [answers, revealed]);
-
   const handleToggleAnswer = (answerId: string) => {
     toggleAnswer(currentQuestion.id, answerId);
   };
@@ -49,6 +41,9 @@ export function TestQuestion() {
 
   const canGoPrevious = currentIndex > 0;
   const canGoNext = currentIndex < questions.length - 1;
+
+  // If the question has been answered, reveal the explanation
+  // toggleRevealed(currentQuestion.id);
 
   return (
     <Card className="p-5 sm:p-8">
