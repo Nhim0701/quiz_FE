@@ -6,6 +6,7 @@ import { PERMISSIONS, RESOURCES } from "@/modules/admin/constants/permissions";
 import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
 import { hasPermission, hasResourcePermission } from "@/lib";
 import { PlateEditorSheet } from "@/components/editor/plate-editor";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 /**
  * Middleware to protect admin-only routes

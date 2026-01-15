@@ -1,11 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "@/i18n";
-import {
-  DataTable,
-  type Column,
-  type Action,
-} from "@/components/common/data-table";
+import { type Column } from "@/components/common/data-table";
 import {
   usePaginationStore,
   useApp,
@@ -19,6 +15,8 @@ import {
   useAdminListData,
   usePageData,
 } from "@/hooks";
+import { useAdminListActions } from "@/modules/admin/hooks";
+import { AdminList } from "@/modules/admin/components";
 import { useQuestionsStore } from "../hooks";
 import type { QuestionProps } from "../types";
 import { useCategoriesStore } from "../../categories/hooks";
@@ -27,15 +25,6 @@ import type { TestProps } from "../../tests/types";
 import { QuestionsListSkeleton } from "./list-skeleton";
 import { Eye, Trash2, CheckSquare, Square } from "lucide-react";
 import {
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogDescription,
-  AlertDialogFooter,
-} from "@/components/ui/alert-dialog";
-import {
-  SearchInput,
-  ActiveFilters,
-  FilterActions,
   MultipleSelectCombobox,
   FilterDropdown,
   type ActiveFilter,
@@ -244,32 +233,6 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     onFilterAppliedFromUrl: setSearchInput,
   });
 
-  const handleFilterChange = useCallback(() => {
-    setPage(1);
-  }, [setPage]);
-
-  const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
-    handlers: filterHandlers,
-    onFilterChange: handleFilterChange,
-  });
-
-  const handleRemoveCategory = useCallback(
-    (categoryId: string) => {
-      setSelectedCategories((prev) => prev.filter((id) => id !== categoryId));
-      setPage(1);
-    },
-    [setPage]
-  );
-
-  const handleRemoveTest = useCallback(
-    (testId: string) => {
-      setSelectedTests((prev) => prev.filter((id) => id !== testId));
-      setPage(1);
-    },
-    [setPage]
-  );
-
-  // Active filters for display
   const activeFilters = useMemo<ActiveFilter[]>(() => {
     const filters: ActiveFilter[] = [];
     if (searchValue) {
@@ -317,21 +280,14 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     t,
   ]);
 
-  // Custom handler for removing filters that handles array items
-  const handleRemoveActiveFilter = useCallback(
-    (filterId: string) => {
-      if (filterId.startsWith("categoryId_")) {
-        const categoryId = filterId.replace("categoryId_", "");
-        handleRemoveCategory(categoryId);
-      } else if (filterId.startsWith("testId_")) {
-        const testId = filterId.replace("testId_", "");
-        handleRemoveTest(testId);
-      } else {
-        handleRemoveFilter(filterId);
-      }
-    },
-    [handleRemoveFilter, handleRemoveCategory, handleRemoveTest]
-  );
+  const handleFilterChange = useCallback(() => {
+    setPage(1);
+  }, [setPage]);
+
+  const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
+    handlers: filterHandlers,
+    onFilterChange: handleFilterChange,
+  });
 
   const filterIdsConfig = useFilterIdsConfig({
     handlers: filterHandlers,
@@ -353,6 +309,37 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     activeFilters,
     onClearFilters: handleClearAllFilters,
   });
+
+  const handleRemoveCategory = useCallback(
+    (categoryId: string) => {
+      setSelectedCategories((prev) => prev.filter((id) => id !== categoryId));
+      setPage(1);
+    },
+    [setPage]
+  );
+
+  const handleRemoveTest = useCallback(
+    (testId: string) => {
+      setSelectedTests((prev) => prev.filter((id) => id !== testId));
+      setPage(1);
+    },
+    [setPage]
+  );
+
+  const handleRemoveActiveFilter = useCallback(
+    (filterId: string) => {
+      if (filterId.startsWith("categoryId_")) {
+        const categoryId = filterId.replace("categoryId_", "");
+        handleRemoveCategory(categoryId);
+      } else if (filterId.startsWith("testId_")) {
+        const testId = filterId.replace("testId_", "");
+        handleRemoveTest(testId);
+      } else {
+        handleRemoveFilter(filterId);
+      }
+    },
+    [handleRemoveFilter, handleRemoveCategory, handleRemoveTest]
+  );
 
   const categoryOptions = useMemo(() => {
     return categories.map((category) => ({
@@ -415,57 +402,23 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     [navigate]
   );
 
-  const handleDelete = useCallback(
-    (question: QuestionProps) => {
-      const confirmDelete = async () => {
-        try {
-          // Delete question (testId is not needed for delete endpoint)
-          await deleteQuestion("", question.id, page, pageSize, apiFilters);
-          showSuccess(t("admin.questions.deleteSuccess"));
-          await fetchQuestions(page, pageSize, apiFilters);
-          closeDialog();
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : t("errors.genericError");
-          showError(errorMessage);
-        }
-      };
-
-      showDialog({
-        title: t("admin.questions.delete"),
-        content: (
-          <AlertDialogDescription>
-            {t("admin.questions.confirmDelete")}
-          </AlertDialogDescription>
-        ),
-        footer: (
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={closeDialog}>
-              {t("common.cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t("admin.questions.delete")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        ),
-      });
+  const { actions } = useAdminListActions<QuestionProps>({
+    roles,
+    deleteFunction: async (id: string) => {
+      await deleteQuestion("", id, page, pageSize, apiFilters);
     },
-    [
-      deleteQuestion,
-      page,
-      pageSize,
-      apiFilters,
-      showSuccess,
-      t,
-      fetchQuestions,
-      closeDialog,
-      showDialog,
-      showError,
-    ]
-  );
+    refreshFunction: async (refreshPage: number, refreshPageSize: number) => {
+      await fetchQuestions(refreshPage, refreshPageSize, apiFilters);
+    },
+    successMessageKey: "admin.questions.deleteSuccess",
+    deleteTitleKey: "admin.questions.delete",
+    confirmDeleteKey: "admin.questions.confirmDelete",
+    deleteButtonKey: "admin.questions.delete",
+    onClearFilters: handleClearAllFilters,
+    onView: handleViewInfo,
+    viewIcon: <Eye className="h-4 w-4" />,
+    deleteIcon: <Trash2 className="h-4 w-4" />,
+  });
 
   const columns = useMemo<Column<QuestionProps>[]>(
     () => [
@@ -544,33 +497,6 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     [t]
   );
 
-  const actions = useMemo<Action<QuestionProps>[]>(
-    () => [
-      ...(roles.read
-        ? [
-            {
-              label: t("common.viewInfo"),
-              onClick: handleViewInfo,
-              icon: <Eye className="h-4 w-4" />,
-              actionType: "viewInfo" as const,
-            },
-          ]
-        : []),
-      ...(roles.delete
-        ? [
-            {
-              label: t("admin.questions.delete"),
-              onClick: handleDelete,
-              variant: "destructive" as const,
-              icon: <Trash2 className="h-4 w-4" />,
-              actionType: "delete" as const,
-            },
-          ]
-        : []),
-    ],
-    [roles, t, handleViewInfo, handleDelete]
-  );
-
   // Show skeleton on initial load
   if (
     loading &&
@@ -585,89 +511,82 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     );
   }
 
+  const additionalFilters = (
+    <>
+      <MultipleSelectCombobox
+        options={categoryOptions}
+        selectedValues={selectedCategories}
+        onSelect={(values) => {
+          setSelectedCategories(values);
+          setPage(1);
+        }}
+        placeholder={t("admin.questions.filters.categoryPlaceholder")}
+        searchPlaceholder={t("admin.questions.filters.categorySearch")}
+        emptyMessage={t("admin.questions.filters.categoryEmpty")}
+        className="w-full sm:w-[250px]"
+        filterColor="green"
+      />
+      <MultipleSelectCombobox
+        options={testOptions}
+        selectedValues={selectedTests}
+        onSelect={(values) => {
+          setSelectedTests(values);
+          setPage(1);
+        }}
+        placeholder={t("admin.questions.filters.testPlaceholder")}
+        searchPlaceholder={t("admin.questions.filters.testSearch")}
+        emptyMessage={t("admin.questions.filters.testEmpty")}
+        className="w-full sm:w-[250px]"
+        filterColor="purple"
+      />
+      <FilterDropdown
+        labelKey="admin.questions.filters.multipleChoicePlaceholder"
+        options={[
+          {
+            value: "true",
+            labelKey: "admin.questions.multipleChoice",
+          },
+          {
+            value: "false",
+            labelKey: "admin.questions.singleChoice",
+          },
+        ]}
+        selectedValue={selectedQuestionType}
+        buttonClassName="w-full sm:w-[200px] justify-between"
+        filterColor="yellow"
+        onSelect={(value) => {
+          setSelectedQuestionType(
+            value === selectedQuestionType ? undefined : value
+          );
+          setPage(1);
+        }}
+      />
+    </>
+  );
+
   return (
     <>
-      {/* Filter Bar */}
-      <div className="my-4 flex flex-col gap-4">
-        <div className="flex flex-1 flex-wrap items-center gap-2">
-          <SearchInput
-            value={searchInput}
-            onChange={setSearchInput}
-            onSearch={handleSearch}
-            placeholderKey="admin.questions.filters.searchPlaceholder"
-            className="flex-1 min-w-[200px]"
-            searchKey="content"
-          />
-          <MultipleSelectCombobox
-            options={categoryOptions}
-            selectedValues={selectedCategories}
-            onSelect={(values) => {
-              setSelectedCategories(values);
-              setPage(1);
-            }}
-            placeholder={t("admin.questions.filters.categoryPlaceholder")}
-            searchPlaceholder={t("admin.questions.filters.categorySearch")}
-            emptyMessage={t("admin.questions.filters.categoryEmpty")}
-            className="w-full sm:w-[250px]"
-            filterColor="green"
-          />
-          <MultipleSelectCombobox
-            options={testOptions}
-            selectedValues={selectedTests}
-            onSelect={(values) => {
-              setSelectedTests(values);
-              setPage(1);
-            }}
-            placeholder={t("admin.questions.filters.testPlaceholder")}
-            searchPlaceholder={t("admin.questions.filters.testSearch")}
-            emptyMessage={t("admin.questions.filters.testEmpty")}
-            className="w-full sm:w-[250px]"
-            filterColor="purple"
-          />
-          <FilterDropdown
-            labelKey="admin.questions.filters.multipleChoicePlaceholder"
-            options={[
-              {
-                value: "true",
-                labelKey: "admin.questions.multipleChoice",
-              },
-              {
-                value: "false",
-                labelKey: "admin.questions.singleChoice",
-              },
-            ]}
-            selectedValue={selectedQuestionType}
-            buttonClassName="w-full sm:w-[200px] justify-between"
-            filterColor="yellow"
-            onSelect={(value) => {
-              setSelectedQuestionType(
-                value === selectedQuestionType ? undefined : value
-              );
-              setPage(1);
-            }}
-          />
-          <FilterActions buttons={filterActionButtons} />
-        </div>
-      </div>
-
-      {/* Active Filters */}
-      {activeFilters.length > 0 && (
-        <div className="mb-4">
-          <ActiveFilters
-            filters={activeFilters}
-            onRemove={handleRemoveActiveFilter}
-            filterIdsConfig={filterIdsConfig}
-          />
-        </div>
-      )}
-
-      <DataTable
+      <AdminList
         columns={columns}
         data={questionsWithTestNames}
         actions={actions}
         loading={loading}
         emptyMessage={t("admin.questions.empty")}
+        searchInput={{
+          value: searchInput,
+          onChange: setSearchInput,
+          onSearch: handleSearch,
+          placeholderKey: "admin.questions.filters.searchPlaceholder",
+          className: "flex-1 min-w-[200px]",
+          searchKey: "content",
+        }}
+        additionalFilters={additionalFilters}
+        activeFilters={activeFilters}
+        onRemoveFilter={handleRemoveActiveFilter}
+        filterIdsConfig={filterIdsConfig}
+        filterActionButtons={filterActionButtons}
         pagination={paginationProps}
+        filterBarClassName="my-4"
       />
       <QuestionFormDialog onClearFilters={handleClearAllFilters} />
     </>

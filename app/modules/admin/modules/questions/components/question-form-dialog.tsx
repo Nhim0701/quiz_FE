@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button";
 interface QuestionFormDialogProps {
   onDelete?: (question: QuestionProps) => void;
   onClearFilters?: (() => void) | null;
+  onRefresh?: () => Promise<void>;
 }
 
 /**
@@ -43,6 +44,7 @@ interface QuestionFormDialogProps {
 export function QuestionFormDialog({
   onDelete,
   onClearFilters,
+  onRefresh,
 }: QuestionFormDialogProps) {
   const { t } = useTranslation();
   const {
@@ -217,6 +219,7 @@ export function QuestionFormDialog({
         showSuccess(t("admin.questions.createSuccess"));
         closeDialog();
         onClearFilters?.();
+        onRefresh && (await onRefresh());
       } else if (question) {
         // Handle both VIEW (with edit mode) and EDIT modes
         // Note: updateQuestion requires testId and questionId
