@@ -7,18 +7,6 @@ interface QuestionExplanationProps {
 }
 
 export const QuestionExplanation = ({ question }: QuestionExplanationProps) => {
-  const hasExplanation = question.answers.some(
-    (a) => a.isCorrect && a.explanation
-  );
-
-  if (!hasExplanation) {
-    return null;
-  }
-
-  const correctAnswersWithExplanation = question.answers.filter(
-    (a) => a.isCorrect && a.explanation
-  );
-
   return (
     <div className="mt-5 sm:mt-6 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
       <div className="flex items-start gap-2 sm:gap-3">
@@ -38,14 +26,11 @@ export const QuestionExplanation = ({ question }: QuestionExplanationProps) => {
             {t("ui.explanation.title")}
           </h4>
           <div className="text-xs sm:text-sm text-blue-800 dark:text-blue-300 space-y-2 sm:space-y-3">
-            {correctAnswersWithExplanation.map((answer) => (
+            {question.answers.map((answer, index) => (
               <TestAnswerOptionExplanation
                 key={answer.id}
-                answer={answer}
-                allAnswers={question.answers}
-                hasMultipleExplanations={
-                  correctAnswersWithExplanation.length > 1
-                }
+                index={index}
+                content={answer.explanation || ""}
               />
             ))}
           </div>
