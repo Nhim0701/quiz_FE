@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { useSearchParams, useNavigate } from "react-router";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useNavigate } from "react-router";
 import { useTranslation } from "@/i18n";
 import {
   DataTable,
@@ -14,11 +14,9 @@ import {
   useFilterIdsConfig,
   createStringConverter,
   createArrayConverter,
-  useSyncFilterToUrl,
-  useApplyFilterFromUrl,
-  FilterManager,
   createStringFilterHandler,
   createArrayFilterHandler,
+  useAdminListData,
   usePageData,
 } from "@/hooks";
 import { useQuestionsStore } from "../hooks";
@@ -64,12 +62,9 @@ interface QuestionsListProps {
 export function QuestionsList({ roles }: QuestionsListProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { showError, showSuccess, showDialog, closeDialog } = useApp();
-  const { page, pageSize, total, setPage, setPageSize, setTotal } =
-    usePaginationStore();
+  const { page, pageSize, total, setPage, setTotal } = usePaginationStore();
 
-  // Filter states
   const [searchInput, setSearchInput] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -77,10 +72,6 @@ export function QuestionsList({ roles }: QuestionsListProps) {
   const [selectedQuestionType, setSelectedQuestionType] = useState<
     string | undefined
   >(undefined);
-
-  // Track if filters are being applied from URL
-  const isApplyingFiltersFromUrl = useRef(false);
-  const hasInitialFetch = useRef(false);
 
   const {
     questions,
@@ -212,66 +203,71 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     [searchValue, selectedCategories, selectedTests, selectedQuestionType]
   );
 
-  // Apply filters from URL
-  const { hasFilterParams } = useApplyFilterFromUrl({
+  const fetchQuestionsRef = useRef(fetchQuestions);
+  useEffect(() => {
+    fetchQuestionsRef.current = fetchQuestions;
+  }, [fetchQuestions]);
+
+  const fetchQuestionsWrapper = useCallback(
+    async (
+      page: number,
+      pageSize: number,
+      filters?: Record<string, string>
+    ) => {
+      await fetchQuestionsRef.current(page, pageSize, filters);
+      const state = useQuestionsStore.getState();
+      return {
+        data: state.questions,
+        meta: { total: state.total },
+      };
+    },
+    []
+  );
+
+  const {
+    apiFilters,
+    hasInitialFetch,
+    handlePageChange,
+    handlePageSizeChange,
+  } = useAdminListData({
+    hookId: "questions",
+    filterConfig,
     filterHandlers: {
-      content: createStringFilterHandler(setSearchValue),
+      content: createStringFilterHandler((value) => {
+        setSearchValue(value);
+      }),
       categoryId: createArrayFilterHandler(setSelectedCategories),
       testId: createArrayFilterHandler(setSelectedTests),
       isMultipleChoice: createStringFilterHandler(setSelectedQuestionType),
     },
-    onFilterApplied: async () => {
-      isApplyingFiltersFromUrl.current = true;
-      hasInitialFetch.current = true;
-      setPage(1);
-
-      const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
-      const contentFilter = urlFilters.find((f) => f.key === "content");
-      if (contentFilter) {
-        setSearchInput(contentFilter.value);
-      }
-
-      try {
-        const apiFilters = FilterManager.convertFiltersToApiParams(urlFilters);
-        await fetchQuestions(1, pageSize, apiFilters);
-        // Note: total will be set from the store
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t("errors.fetchDashboardFailed");
-        showError(errorMessage);
-      } finally {
-        isApplyingFiltersFromUrl.current = false;
-      }
-    },
-    hookId: "questions",
+    fetchFunction: fetchQuestionsWrapper,
+    onFilterAppliedFromUrl: setSearchInput,
   });
 
-  // Sync filters to URL
-  useSyncFilterToUrl({
-    filters: filterConfig,
-    hookId: "questions",
-  });
+  const handleFilterChange = useCallback(() => {
+    setPage(1);
+  }, [setPage]);
 
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
     handlers: filterHandlers,
-    onFilterChange: () => {
-      setPage(1);
-    },
+    onFilterChange: handleFilterChange,
   });
 
-  // Handler to remove a specific category from the array
-  const handleRemoveCategory = useCallback((categoryId: string) => {
-    setSelectedCategories((prev) => prev.filter((id) => id !== categoryId));
-    setPage(1);
-  }, []);
+  const handleRemoveCategory = useCallback(
+    (categoryId: string) => {
+      setSelectedCategories((prev) => prev.filter((id) => id !== categoryId));
+      setPage(1);
+    },
+    [setPage]
+  );
 
-  // Handler to remove a specific test from the array
-  const handleRemoveTest = useCallback((testId: string) => {
-    setSelectedTests((prev) => prev.filter((id) => id !== testId));
-    setPage(1);
-  }, []);
+  const handleRemoveTest = useCallback(
+    (testId: string) => {
+      setSelectedTests((prev) => prev.filter((id) => id !== testId));
+      setPage(1);
+    },
+    [setPage]
+  );
 
   // Active filters for display
   const activeFilters = useMemo<ActiveFilter[]>(() => {
@@ -347,10 +343,10 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     },
   });
 
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     setSearchValue(searchInput);
     setPage(1);
-  };
+  }, [searchInput, setPage]);
 
   const filterActionButtons = useFilterActions({
     onSearch: handleSearch,
@@ -358,37 +354,6 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     onClearFilters: handleClearAllFilters,
   });
 
-  // Convert filters to API params
-  const apiFilters = useMemo(() => {
-    const activeFilters: Array<{ key: string; value: string }> = [];
-    filterConfig.forEach((filter) => {
-      const converted = filter.converter(filter.value as any);
-      if (converted === null) return;
-
-      let isActive = false;
-      if (Array.isArray(converted)) {
-        isActive = converted.length > 0;
-      } else if (filter.defaultValue !== undefined) {
-        const defaultConverted = filter.converter(filter.defaultValue as any);
-        isActive = converted !== defaultConverted;
-      } else {
-        isActive = converted !== "";
-      }
-
-      if (isActive) {
-        const filterValue = Array.isArray(converted)
-          ? converted.join(",")
-          : converted;
-        activeFilters.push({
-          key: filter.filterKey,
-          value: filterValue,
-        });
-      }
-    });
-    return FilterManager.convertFiltersToApiParams(activeFilters);
-  }, [filterConfig]);
-
-  // Category and test options for combobox
   const categoryOptions = useMemo(() => {
     return categories.map((category) => ({
       value: category.id,
@@ -419,7 +384,6 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     }));
   }, [tests, selectedCategories]);
 
-  // Enrich questions with test names
   const questionsWithTestNames = useMemo(() => {
     return questions.map((question: QuestionProps) => ({
       ...question,
@@ -429,55 +393,9 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     }));
   }, [questions, testMap]);
 
-  // Fetch questions
-  useEffect(() => {
-    if (
-      (hasFilterParams && !hasInitialFetch.current) ||
-      isApplyingFiltersFromUrl.current
-    ) {
-      return;
-    }
-
-    const loadQuestions = async () => {
-      try {
-        await fetchQuestions(page, pageSize, apiFilters);
-        // Note: total is set in the store
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t("errors.fetchDashboardFailed");
-        showError(errorMessage);
-      } finally {
-        hasInitialFetch.current = true;
-      }
-    };
-
-    loadQuestions();
-  }, [
-    page,
-    pageSize,
-    apiFilters,
-    hasFilterParams,
-    fetchQuestions,
-    showError,
-    t,
-  ]);
-
-  // Update total from store
   useEffect(() => {
     setTotal(questionsTotal);
   }, [questionsTotal, setTotal]);
-
-  const handlePageChange = useCallback(
-    (newPage: number) => setPage(newPage),
-    [setPage]
-  );
-
-  const handlePageSizeChange = useCallback(
-    (newPageSize: number) => setPageSize(newPageSize),
-    [setPageSize]
-  );
 
   const paginationProps = useMemo(
     () => ({

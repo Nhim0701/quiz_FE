@@ -1,5 +1,4 @@
-import { useEffect, useState, useMemo, useRef, useCallback } from "react";
-import { useSearchParams } from "react-router";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useTranslation, type TranslationParams } from "@/i18n";
 import {
   DataTable,
@@ -13,9 +12,8 @@ import {
   useFilterHandlers,
   useFilterIdsConfig,
   createStringConverter,
-  useSyncFilterToUrl,
-  useApplyFilterFromUrl,
-  FilterManager,
+  createStringFilterHandler,
+  useAdminListData,
 } from "@/hooks";
 import { useNamespacesStore, type Namespace } from "../hooks";
 import { Edit, Trash2, Eye } from "lucide-react";
@@ -49,19 +47,12 @@ export function NamespacesList({
   onClearFiltersReady,
 }: NamespacesListProps) {
   const { t } = useTranslation();
-  const [searchParams] = useSearchParams();
   const { showError, showSuccess, showDialog, closeDialog } = useApp();
-  const { page, pageSize, total, setPage, setPageSize, setTotal } =
-    usePaginationStore();
+  const { page, pageSize, total, setPage } = usePaginationStore();
 
-  // Search input state (for typing)
   const [searchInput, setSearchInput] = useState("");
-  // Search value state (for filtering - only updates on Enter/button click)
   const [searchValue, setSearchValue] = useState("");
 
-  // Track if filters are being applied from URL to skip initial fetch
-  const isApplyingFiltersFromUrl = useRef(false);
-  const hasInitialFetch = useRef(false);
   const {
     namespaces,
     loading,
@@ -72,6 +63,32 @@ export function NamespacesList({
     refreshNamespaces,
     viewingNamespace,
   } = useNamespacesStore();
+
+  const filterConfig = useMemo(
+    () => [
+      {
+        filterKey: "name",
+        value: searchValue,
+        defaultValue: "",
+        converter: createStringConverter(),
+      },
+    ],
+    [searchValue]
+  );
+
+  const { hasInitialFetch, handlePageChange, handlePageSizeChange } =
+    useAdminListData({
+      hookId: "namespaces",
+      filterConfig,
+      filterHandlers: {
+        name: createStringFilterHandler((value) => {
+          setSearchInput(value);
+          setSearchValue(value);
+        }),
+      },
+      fetchFunction: fetchNamespaces,
+      onFilterAppliedFromUrl: setSearchInput,
+    });
 
   const resetSearchFilter = useCallback(() => {
     setSearchInput("");
@@ -88,54 +105,6 @@ export function NamespacesList({
     [resetSearchFilter]
   );
 
-  const filterConfig = useMemo(
-    () => [
-      {
-        filterKey: "name",
-        value: searchValue,
-        defaultValue: "",
-        converter: createStringConverter(),
-      },
-    ],
-    [searchValue]
-  );
-
-  const { hasFilterParams } = useApplyFilterFromUrl({
-    filterHandlers: {
-      name: (_, value) => {
-        setSearchInput(value);
-        setSearchValue(value);
-      },
-    },
-    onFilterApplied: async () => {
-      isApplyingFiltersFromUrl.current = true;
-      hasInitialFetch.current = true;
-      setPage(1);
-
-      try {
-        const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
-        const apiFilters = FilterManager.convertFiltersToApiParams(urlFilters);
-        const result = await fetchNamespaces(1, pageSize, apiFilters);
-        const totalCount = result?.meta?.total ?? result?.data?.length ?? 0;
-        setTotal(totalCount);
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t("errors.fetchDashboardFailed");
-        showError(errorMessage);
-      } finally {
-        isApplyingFiltersFromUrl.current = false;
-      }
-    },
-    hookId: "namespaces",
-  });
-
-  useSyncFilterToUrl({
-    filters: filterConfig,
-    hookId: "namespaces",
-  });
-
   const handleFilterChange = useCallback(() => {
     setPage(1);
   }, [setPage]);
@@ -145,13 +114,11 @@ export function NamespacesList({
     onFilterChange: handleFilterChange,
   });
 
-  // Expose clearFilters function to parent component (only once on mount)
   useEffect(() => {
     if (onClearFiltersReady) {
       onClearFiltersReady(handleClearAllFilters);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
+  }, [onClearFiltersReady, handleClearAllFilters]);
 
   const activeFilters = useMemo<ActiveFilter[]>(
     () =>
@@ -185,53 +152,15 @@ export function NamespacesList({
     onClearFilters: handleClearAllFilters,
   });
 
-  const apiFilters = useMemo(
-    () =>
-      searchValue
-        ? FilterManager.convertFiltersToApiParams([
-            { key: "name", value: searchValue },
-          ])
-        : {},
-    [searchValue]
-  );
-
-  useEffect(() => {
-    // Skip initial fetch if filters are being applied from URL
-    if (
-      (hasFilterParams && !hasInitialFetch.current) ||
-      isApplyingFiltersFromUrl.current
-    ) {
-      return;
-    }
-
-    const loadNamespaces = async () => {
-      try {
-        const result = await fetchNamespaces(page, pageSize, apiFilters);
-        const totalCount = result?.meta?.total ?? result?.data?.length ?? 0;
-        setTotal(totalCount);
-      } catch (error) {
-        showError(
-          error instanceof Error
-            ? error.message
-            : t("errors.fetchDashboardFailed")
-        );
-      } finally {
-        hasInitialFetch.current = true;
-      }
-    };
-
-    loadNamespaces();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, pageSize, apiFilters]);
-
-  const handlePageChange = useCallback(
-    (newPage: number) => setPage(newPage),
-    [setPage]
-  );
-
-  const handlePageSizeChange = useCallback(
-    (newPageSize: number) => setPageSize(newPageSize),
-    [setPageSize]
+  const paginationProps = useMemo(
+    () => ({
+      page,
+      pageSize,
+      total,
+      onPageChange: handlePageChange,
+      onPageSizeChange: handlePageSizeChange,
+    }),
+    [page, pageSize, total, handlePageChange, handlePageSizeChange]
   );
 
   const handleEdit = useCallback(
@@ -373,17 +302,6 @@ export function NamespacesList({
         : []),
     ],
     [roles, t, handleView, handleEdit, handleDelete]
-  );
-
-  const paginationProps = useMemo(
-    () => ({
-      page,
-      pageSize,
-      total,
-      onPageChange: handlePageChange,
-      onPageSizeChange: handlePageSizeChange,
-    }),
-    [page, pageSize, total, handlePageChange, handlePageSizeChange]
   );
 
   // Show skeleton on initial load

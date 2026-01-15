@@ -1,5 +1,4 @@
-import { useEffect, useState, useMemo, useRef, useCallback } from "react";
-import { useSearchParams } from "react-router";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useTranslation, type TranslationParams } from "@/i18n";
 import {
   DataTable,
@@ -16,9 +15,7 @@ import {
   createArrayConverter,
   createStringFilterHandler,
   createArrayFilterHandler,
-  useSyncFilterToUrl,
-  useApplyFilterFromUrl,
-  FilterManager,
+  useAdminListData,
   usePageData,
 } from "@/hooks";
 import { usePermissionsStore, type Permission } from "../hooks";
@@ -56,28 +53,21 @@ export function PermissionsList({
   onClearFiltersReady,
 }: PermissionsListProps) {
   const { t } = useTranslation();
-  const [searchParams] = useSearchParams();
   const { showError, showSuccess, showDialog, closeDialog } = useApp();
-  const { page, pageSize, total, setPage, setPageSize, setTotal } =
-    usePaginationStore();
+  const { page, pageSize, total, setPage } = usePaginationStore();
 
-  // Search input state (for typing)
   const [searchInput, setSearchInput] = useState("");
-  // Search value state (for filtering - only updates on Enter/button click)
   const [searchValue, setSearchValue] = useState("");
-  // Role filter state
   const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
 
-  // Fetch roles for filter
   const { fetchRoles, roles } = useRolesStore();
 
   usePageData(() => fetchRoles(1, MAX_PAGE_SIZE_FOR_ALL), {
     errorKey: "errors.fetchRolesFailed",
-    showLoading: false, // Don't show global loading for filter data
-    showError: false, // Handle error silently for filter data
+    showLoading: false,
+    showError: false,
   });
 
-  // Create role map for efficient lookup
   const roleMap = useMemo(() => {
     const map = new Map<string, string>();
     roles.forEach((role) => {
@@ -86,9 +76,6 @@ export function PermissionsList({
     return map;
   }, [roles]);
 
-  // Track if filters are being applied from URL to skip initial fetch
-  const isApplyingFiltersFromUrl = useRef(false);
-  const hasInitialFetch = useRef(false);
   const {
     permissions: permissionsList,
     loading,
@@ -99,26 +86,6 @@ export function PermissionsList({
     refreshPermissions,
     viewingPermission,
   } = usePermissionsStore();
-
-  // Filter handlers
-  const filterHandlers = useMemo(
-    () => [
-      {
-        filterId: "name",
-        resetValue: () => {
-          setSearchInput("");
-          setSearchValue("");
-        },
-      },
-      {
-        filterId: "roleId",
-        resetValue: () => {
-          setSelectedRoleIds([]);
-        },
-      },
-    ],
-    []
-  );
 
   const filterConfig = useMemo(
     () => [
@@ -138,45 +105,42 @@ export function PermissionsList({
     [searchValue, selectedRoleIds]
   );
 
-  const { hasFilterParams } = useApplyFilterFromUrl({
+  const {
+    apiFilters,
+    hasInitialFetch,
+    handlePageChange,
+    handlePageSizeChange,
+  } = useAdminListData({
+    hookId: "permissions",
+    filterConfig,
     filterHandlers: {
-      name: createStringFilterHandler(setSearchValue),
+      name: createStringFilterHandler((value) => {
+        setSearchValue(value);
+      }),
       roleId: createArrayFilterHandler(setSelectedRoleIds),
     },
-    onFilterApplied: async () => {
-      isApplyingFiltersFromUrl.current = true;
-      hasInitialFetch.current = true;
-      setPage(1);
-
-      // Also set search input from URL
-      const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
-      const nameFilter = urlFilters.find((f) => f.key === "name");
-      if (nameFilter) {
-        setSearchInput(nameFilter.value);
-      }
-
-      try {
-        const apiFilters = FilterManager.convertFiltersToApiParams(urlFilters);
-        const result = await fetchPermissions(1, pageSize, apiFilters);
-        const totalCount = result?.meta?.total ?? result?.data?.length ?? 0;
-        setTotal(totalCount);
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t("errors.fetchDashboardFailed");
-        showError(errorMessage);
-      } finally {
-        isApplyingFiltersFromUrl.current = false;
-      }
-    },
-    hookId: "permissions",
+    fetchFunction: fetchPermissions,
+    onFilterAppliedFromUrl: setSearchInput,
   });
 
-  useSyncFilterToUrl({
-    filters: filterConfig,
-    hookId: "permissions",
-  });
+  const filterHandlers = useMemo(
+    () => [
+      {
+        filterId: "name",
+        resetValue: () => {
+          setSearchInput("");
+          setSearchValue("");
+        },
+      },
+      {
+        filterId: "roleId",
+        resetValue: () => {
+          setSelectedRoleIds([]);
+        },
+      },
+    ],
+    []
+  );
 
   const handleFilterChange = useCallback(() => {
     setPage(1);
@@ -187,21 +151,20 @@ export function PermissionsList({
     onFilterChange: handleFilterChange,
   });
 
-  // Expose clearFilters function to parent component (only once on mount)
   useEffect(() => {
     if (onClearFiltersReady) {
       onClearFiltersReady(handleClearAllFilters);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
+  }, [onClearFiltersReady, handleClearAllFilters]);
 
-  // Handler to remove a specific role from the array
-  const handleRemoveRole = useCallback((roleId: string) => {
-    setSelectedRoleIds((prev) => prev.filter((id) => id !== roleId));
-    setPage(1);
-  }, []);
+  const handleRemoveRole = useCallback(
+    (roleId: string) => {
+      setSelectedRoleIds((prev) => prev.filter((id) => id !== roleId));
+      setPage(1);
+    },
+    [setPage]
+  );
 
-  // Active filters for display
   const activeFilters = useMemo<ActiveFilter[]>(() => {
     const filters: ActiveFilter[] = [];
     if (searchValue) {
@@ -211,7 +174,6 @@ export function PermissionsList({
         value: searchValue,
       });
     }
-    // Create separate filter for each selected role
     selectedRoleIds.forEach((roleId) => {
       const roleName = roleMap.get(roleId) || roleId;
       filters.push({
@@ -223,15 +185,12 @@ export function PermissionsList({
     return filters;
   }, [searchValue, selectedRoleIds, roleMap, t]);
 
-  // Custom handler for removing filters that handles array items
   const handleRemoveActiveFilter = useCallback(
     (filterId: string) => {
-      // Check if it's a role filter (format: roleId_<id>)
       if (filterId.startsWith("roleId_")) {
         const roleId = filterId.replace("roleId_", "");
         handleRemoveRole(roleId);
       } else {
-        // Use default handler for other filters
         handleRemoveFilter(filterId);
       }
     },
@@ -266,72 +225,15 @@ export function PermissionsList({
     onClearFilters: handleClearAllFilters,
   });
 
-  const apiFilters = useMemo(() => {
-    const activeFilters: Array<{ key: string; value: string }> = [];
-    filterConfig.forEach((filter: any) => {
-      const converted = filter.converter(filter.value);
-      if (converted === null) return;
-
-      let isActive = false;
-      if (Array.isArray(converted)) {
-        isActive = converted.length > 0;
-      } else if (filter.defaultValue !== undefined) {
-        const defaultConverted = filter.converter(filter.defaultValue);
-        isActive = converted !== defaultConverted;
-      } else {
-        isActive = converted !== "";
-      }
-
-      if (isActive) {
-        const filterValue = Array.isArray(converted)
-          ? converted.join(",")
-          : converted;
-        activeFilters.push({
-          key: filter.filterKey,
-          value: filterValue,
-        });
-      }
-    });
-    return FilterManager.convertFiltersToApiParams(activeFilters);
-  }, [filterConfig]);
-
-  useEffect(() => {
-    // Skip initial fetch if filters are being applied from URL
-    if (
-      (hasFilterParams && !hasInitialFetch.current) ||
-      isApplyingFiltersFromUrl.current
-    ) {
-      return;
-    }
-
-    const loadPermissions = async () => {
-      try {
-        const result = await fetchPermissions(page, pageSize, apiFilters);
-        const totalCount = result?.meta?.total ?? result?.data?.length ?? 0;
-        setTotal(totalCount);
-      } catch (error) {
-        showError(
-          error instanceof Error
-            ? error.message
-            : t("errors.fetchDashboardFailed")
-        );
-      } finally {
-        hasInitialFetch.current = true;
-      }
-    };
-
-    loadPermissions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, pageSize, apiFilters]);
-
-  const handlePageChange = useCallback(
-    (newPage: number) => setPage(newPage),
-    [setPage]
-  );
-
-  const handlePageSizeChange = useCallback(
-    (newPageSize: number) => setPageSize(newPageSize),
-    [setPageSize]
+  const paginationProps = useMemo(
+    () => ({
+      page,
+      pageSize,
+      total,
+      onPageChange: handlePageChange,
+      onPageSizeChange: handlePageSizeChange,
+    }),
+    [page, pageSize, total, handlePageChange, handlePageSizeChange]
   );
 
   const handleEdit = useCallback(
@@ -485,17 +387,6 @@ export function PermissionsList({
         : []),
     ],
     [permissions, t, handleView, handleEdit, handleDelete]
-  );
-
-  const paginationProps = useMemo(
-    () => ({
-      page,
-      pageSize,
-      total,
-      onPageChange: handlePageChange,
-      onPageSizeChange: handlePageSizeChange,
-    }),
-    [page, pageSize, total, handlePageChange, handlePageSizeChange]
   );
 
   // Show skeleton on initial load

@@ -1,15 +1,22 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useTranslation } from "@/i18n";
-import { DataTable, Pagination } from "@/components/common/data-table";
+import { DataTable } from "@/components/common/data-table";
 import {
   usePaginationStore,
   useApp,
   useFilterActions,
   useFilterHandlers,
   useFilterIdsConfig,
+  createStringConverter,
+  createArrayConverter,
+  createStringFilterHandler,
+  createArrayFilterHandler,
+  useAdminListData,
+  usePageData,
 } from "@/hooks";
-import { useUsersStore, useUsersFilters, type User } from "../hooks";
+import { useUsersStore, type User } from "../hooks";
 import { useRolesStore } from "@/modules/admin/modules/roles/hooks";
+import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants";
 import { ChangePasswordDialog } from "./change-password-dialog";
 import { AssignRolesDialog } from "./assign-roles-dialog";
 import { UsersListSkeleton } from "./list-skeleton";
@@ -42,8 +49,7 @@ interface UsersListProps {
 export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
   const { t } = useTranslation();
   const { showError, showSuccess, showDialog, closeDialog } = useApp();
-  const { page, pageSize, total, setPage, setPageSize, setTotal } =
-    usePaginationStore();
+  const { page, pageSize, total, setPage } = usePaginationStore();
 
   const { users, loading, fetchUsers, openDialog, deleteUser, refreshUsers } =
     useUsersStore();
@@ -55,26 +61,16 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
   );
   const [assignRolesUser, setAssignRolesUser] = useState<User | null>(null);
 
-  const {
-    searchInput,
-    setSearchInput,
-    searchValue,
-    setSearchValue,
-    selectedRoleIds,
-    setSelectedRoleIds,
-    handleSearch: handleSearchBase,
-    apiFilters,
-    hasFilterParams,
-    isApplyingFiltersFromUrl,
-    hasInitialFetch,
-  } = useUsersFilters(onClearFiltersReady);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchValue, setSearchValue] = useState("");
+  const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
 
-  // Fetch roles on mount
-  useEffect(() => {
-    fetchRoles(1, 100);
-  }, [fetchRoles]);
+  usePageData(() => fetchRoles(1, MAX_PAGE_SIZE_FOR_ALL), {
+    errorKey: "errors.fetchRolesFailed",
+    showLoading: false,
+    showError: false,
+  });
 
-  // Create role map for efficient lookup
   const roleMap = useMemo(() => {
     const map = new Map<string, string>();
     rolesList.forEach((role) => {
@@ -83,7 +79,6 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
     return map;
   }, [rolesList]);
 
-  // Role options for combobox
   const roleOptions = useMemo(
     () =>
       rolesList.map((role) => ({
@@ -93,7 +88,42 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
     [rolesList]
   );
 
-  // Filter handlers
+  const filterConfig = useMemo(
+    () => [
+      {
+        filterKey: "fullName",
+        value: searchValue,
+        defaultValue: "",
+        converter: createStringConverter(),
+      },
+      {
+        filterKey: "roleId",
+        value: selectedRoleIds,
+        defaultValue: [],
+        converter: createArrayConverter([]),
+      },
+    ],
+    [searchValue, selectedRoleIds]
+  );
+
+  const {
+    apiFilters,
+    hasInitialFetch,
+    handlePageChange,
+    handlePageSizeChange,
+  } = useAdminListData({
+    hookId: "users",
+    filterConfig,
+    filterHandlers: {
+      fullName: createStringFilterHandler((value) => {
+        setSearchValue(value);
+      }),
+      roleId: createArrayFilterHandler(setSelectedRoleIds),
+    },
+    fetchFunction: fetchUsers,
+    onFilterAppliedFromUrl: setSearchInput,
+  });
+
   const filterHandlers = useMemo(
     () => [
       {
@@ -110,34 +140,32 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
         },
       },
     ],
-    [setSearchInput, setSelectedRoleIds]
+    []
   );
+
+  const handleFilterChange = useCallback(() => {
+    setPage(1);
+  }, [setPage]);
 
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
     handlers: filterHandlers,
-    onFilterChange: () => {
-      setPage(1);
-    },
+    onFilterChange: handleFilterChange,
   });
 
-  // Expose clearFilters function to parent component (only once on mount)
   useEffect(() => {
     if (onClearFiltersReady) {
       onClearFiltersReady(handleClearAllFilters);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
+  }, [onClearFiltersReady, handleClearAllFilters]);
 
-  // Handler to remove a specific role from the array
   const handleRemoveRole = useCallback(
     (roleId: string) => {
       setSelectedRoleIds((prev) => prev.filter((id) => id !== roleId));
       setPage(1);
     },
-    [setSelectedRoleIds, setPage]
+    [setPage]
   );
 
-  // Active filters for display
   const activeFilters = useMemo<ActiveFilter[]>(() => {
     const filters: ActiveFilter[] = [];
     if (searchValue) {
@@ -147,7 +175,6 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
         value: searchValue,
       });
     }
-    // Create separate filter for each selected role
     selectedRoleIds.forEach((roleId) => {
       const roleName = roleMap.get(roleId) || roleId;
       filters.push({
@@ -159,15 +186,12 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
     return filters;
   }, [searchValue, selectedRoleIds, roleMap, t]);
 
-  // Custom handler for removing filters that handles array items
   const handleRemoveActiveFilter = useCallback(
     (filterId: string) => {
-      // Check if it's a role filter (format: roleId_<id>)
       if (filterId.startsWith("roleId_")) {
         const roleId = filterId.replace("roleId_", "");
         handleRemoveRole(roleId);
       } else {
-        // Use default handler for other filters
         handleRemoveFilter(filterId);
       }
     },
@@ -183,68 +207,15 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
   });
 
   const handleSearch = useCallback(() => {
-    handleSearchBase();
-  }, [handleSearchBase]);
+    setSearchValue(searchInput);
+    setPage(1);
+  }, [searchInput, setPage]);
 
   const filterActionButtons = useFilterActions({
     onSearch: handleSearch,
     activeFilters,
     onClearFilters: handleClearAllFilters,
   });
-
-  // Fetch users when filters or pagination changes
-  useEffect(() => {
-    // Skip initial fetch if filters are being applied from URL
-    if (
-      (hasFilterParams && !hasInitialFetch.current) ||
-      isApplyingFiltersFromUrl.current
-    ) {
-      return;
-    }
-
-    const loadUsers = async () => {
-      try {
-        const result = await fetchUsers(page, pageSize, apiFilters);
-        const totalCount = result?.meta?.total ?? result?.data?.length ?? 0;
-        setTotal(totalCount);
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t("errors.fetchDashboardFailed");
-        showError(errorMessage);
-      } finally {
-        hasInitialFetch.current = true;
-      }
-    };
-
-    loadUsers();
-  }, [
-    page,
-    pageSize,
-    apiFilters,
-    hasFilterParams,
-    fetchUsers,
-    setTotal,
-    showError,
-    t,
-    isApplyingFiltersFromUrl,
-    hasInitialFetch,
-  ]);
-
-  const handlePageChange = useCallback(
-    (newPage: number) => {
-      setPage(newPage);
-    },
-    [setPage]
-  );
-
-  const handlePageSizeChange = useCallback(
-    (newPageSize: number) => {
-      setPageSize(newPageSize);
-    },
-    [setPageSize]
-  );
 
   const handleEdit = useCallback(
     (user: User) => {
@@ -278,6 +249,7 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
         try {
           await deleteUser(user.id);
           showSuccess(t("admin.users.deleteSuccess"));
+          handleClearAllFilters();
           await refreshUsers(1, pageSize);
           closeDialog();
         } catch (error) {
@@ -320,6 +292,7 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
       showError,
       showDialog,
       closeDialog,
+      handleClearAllFilters,
       refreshUsers,
       pageSize,
       t,
@@ -402,13 +375,13 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
         actions={actions}
         loading={loading}
         emptyMessage={t("admin.users.empty")}
-      />
-      <Pagination
-        page={page}
-        pageSize={pageSize}
-        total={total}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
+        pagination={{
+          page,
+          pageSize,
+          total,
+          onPageChange: handlePageChange,
+          onPageSizeChange: handlePageSizeChange,
+        }}
       />
       <ChangePasswordDialog
         user={changePasswordUser}

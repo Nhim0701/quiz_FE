@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, useRef, useCallback } from "react";
-import { useSearchParams, useNavigate } from "react-router";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import { useNavigate } from "react-router";
 import { useTranslation, type TranslationParams } from "@/i18n";
 import {
   DataTable,
@@ -14,11 +14,9 @@ import {
   useFilterIdsConfig,
   createStringConverter,
   createArrayConverter,
-  useSyncFilterToUrl,
-  useApplyFilterFromUrl,
-  FilterManager,
   createStringFilterHandler,
   createArrayFilterHandler,
+  useAdminListData,
   usePageData,
 } from "@/hooks";
 import { useTestsStore, type TestProps } from "../hooks";
@@ -58,36 +56,26 @@ interface TestsListProps {
 export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { showError, showSuccess, showDialog, closeDialog } = useApp();
-  const { page, pageSize, total, setPage, setPageSize, setTotal } =
-    usePaginationStore();
+  const { page, pageSize, total, setPage } = usePaginationStore();
 
-  // Filter states
   const [searchInput, setSearchInput] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-
-  // Track if filters are being applied from URL
-  const isApplyingFiltersFromUrl = useRef(false);
-  const hasInitialFetch = useRef(false);
 
   const { tests, loading, fetchTests, deleteTest, refreshTests, openDialog } =
     useTestsStore();
   const { categories, fetchCategories } = useCategoriesStore();
 
-  // Fetch categories to map categoryId to categoryName
   usePageData(() => fetchCategories(1, MAX_PAGE_SIZE_FOR_ALL), {
     errorKey: "errors.fetchCategoriesFailed",
-    showLoading: false, // Don't show global loading for filter data
-    showError: false, // Handle error silently for filter data
+    showLoading: false,
+    showError: false,
     onError: (error) => {
-      // Silently fail - category names are optional
       console.error("Failed to fetch categories:", error);
     },
   });
 
-  // Create category map
   const categoryMap = useMemo(() => {
     const map = new Map<string, string>();
     categories.forEach((category) => {
@@ -96,7 +84,6 @@ export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
     return map;
   }, [categories]);
 
-  // Enrich tests with category names
   const testsWithCategoryNames = useMemo(() => {
     return tests.map((test) => ({
       ...test,
@@ -107,7 +94,58 @@ export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
     }));
   }, [tests, categoryMap]);
 
-  // Filter handlers
+  const filterConfig = useMemo(
+    () => [
+      {
+        filterKey: "name",
+        value: searchValue,
+        defaultValue: "",
+        converter: createStringConverter(),
+      },
+      {
+        filterKey: "categoryId",
+        value: selectedCategories,
+        defaultValue: [],
+        converter: createArrayConverter([]),
+      },
+    ],
+    [searchValue, selectedCategories]
+  );
+
+  const fetchTestsRef = useRef(fetchTests);
+  useEffect(() => {
+    fetchTestsRef.current = fetchTests;
+  }, [fetchTests]);
+
+  const memoizedFetchTests = useCallback(
+    (page: number, pageSize: number, filters?: Record<string, string>) => {
+      return fetchTestsRef.current(page, pageSize, filters);
+    },
+    []
+  );
+
+  const { hasInitialFetch, handlePageChange, handlePageSizeChange } =
+    useAdminListData({
+      hookId: "tests",
+      filterConfig,
+      filterHandlers: {
+        name: createStringFilterHandler((value) => {
+          setSearchValue(value);
+        }),
+        categoryId: createArrayFilterHandler(setSelectedCategories),
+      },
+      fetchFunction: memoizedFetchTests,
+      onFilterAppliedFromUrl: setSearchInput,
+      getTotalFromResult: (result) => {
+        if (result?.meta) {
+          return result.meta.total || 0;
+        } else if (result?.data) {
+          return result.data.length;
+        }
+        return 0;
+      },
+    });
+
   const filterHandlers = useMemo(
     () => [
       {
@@ -127,92 +165,29 @@ export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
     []
   );
 
-  // Filter config for URL sync
-  const filterConfig = useMemo(
-    () => [
-      {
-        filterKey: "name",
-        value: searchValue,
-        defaultValue: "",
-        converter: createStringConverter(),
-      },
-      {
-        filterKey: "categoryId",
-        value: selectedCategories,
-        defaultValue: [],
-        converter: createArrayConverter([]),
-      },
-    ],
-    [searchValue, selectedCategories]
-  );
-
-  // Apply filters from URL
-  const { hasFilterParams } = useApplyFilterFromUrl({
-    filterHandlers: {
-      name: createStringFilterHandler(setSearchValue),
-      categoryId: createArrayFilterHandler(setSelectedCategories),
-    },
-    onFilterApplied: async () => {
-      isApplyingFiltersFromUrl.current = true;
-      hasInitialFetch.current = true;
-      setPage(1);
-
-      // Also set search input from URL
-      const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
-      const nameFilter = urlFilters.find((f) => f.key === "name");
-      if (nameFilter) {
-        setSearchInput(nameFilter.value);
-      }
-
-      try {
-        const apiFilters = FilterManager.convertFiltersToApiParams(urlFilters);
-        const result = await fetchTests(1, pageSize, apiFilters);
-        if (result?.meta) {
-          setTotal(result.meta.total || 0);
-        } else if (result?.data) {
-          setTotal(result.data.length);
-        }
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t("errors.fetchDashboardFailed");
-        showError(errorMessage);
-      } finally {
-        isApplyingFiltersFromUrl.current = false;
-      }
-    },
-    hookId: "tests",
-  });
-
-  // Sync filters to URL
-  useSyncFilterToUrl({
-    filters: filterConfig,
-    hookId: "tests",
-  });
+  const handleFilterChange = useCallback(() => {
+    setPage(1);
+  }, [setPage]);
 
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
     handlers: filterHandlers,
-    onFilterChange: () => {
-      setPage(1);
-    },
+    onFilterChange: handleFilterChange,
   });
 
-  // Expose clearFilters function to parent component (only once on mount)
   useEffect(() => {
     if (onClearFiltersReady) {
       onClearFiltersReady(handleClearAllFilters);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
+  }, [onClearFiltersReady, handleClearAllFilters]);
 
-  // Handler to remove a specific category from the array
-  const handleRemoveCategory = useCallback((categoryId: string) => {
-    setSelectedCategories((prev) => prev.filter((id) => id !== categoryId));
-    setPage(1);
-  }, []);
+  const handleRemoveCategory = useCallback(
+    (categoryId: string) => {
+      setSelectedCategories((prev) => prev.filter((id) => id !== categoryId));
+      setPage(1);
+    },
+    [setPage]
+  );
 
-  // Active filters for display
   const activeFilters = useMemo<ActiveFilter[]>(() => {
     const filters: ActiveFilter[] = [];
     if (searchValue) {
@@ -222,7 +197,6 @@ export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
         value: searchValue,
       });
     }
-    // Create separate filter for each selected category
     selectedCategories.forEach((categoryId) => {
       const categoryLabel = categoryMap.get(categoryId) || categoryId;
       filters.push({
@@ -234,15 +208,12 @@ export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
     return filters;
   }, [searchValue, selectedCategories, categoryMap, t]);
 
-  // Custom handler for removing filters that handles array items
   const handleRemoveActiveFilter = useCallback(
     (filterId: string) => {
-      // Check if it's a category filter (format: categoryId_<id>)
       if (filterId.startsWith("categoryId_")) {
         const categoryId = filterId.replace("categoryId_", "");
         handleRemoveCategory(categoryId);
       } else {
-        // Use default handler for other filters
         handleRemoveFilter(filterId);
       }
     },
@@ -268,93 +239,12 @@ export function TestsList({ roles, onClearFiltersReady }: TestsListProps) {
     onClearFilters: handleClearAllFilters,
   });
 
-  // Convert filters to API params
-  const apiFilters = useMemo(() => {
-    const activeFilters: Array<{ key: string; value: string }> = [];
-    filterConfig.forEach((filter) => {
-      const converted = filter.converter(filter.value as any);
-      if (converted === null) return;
-
-      let isActive = false;
-      if (Array.isArray(converted)) {
-        isActive = converted.length > 0;
-      } else if (filter.defaultValue !== undefined) {
-        const defaultConverted = filter.converter(filter.defaultValue as any);
-        isActive = converted !== defaultConverted;
-      } else {
-        isActive = converted !== "";
-      }
-
-      if (isActive) {
-        const filterValue = Array.isArray(converted)
-          ? converted.join(",")
-          : converted;
-        activeFilters.push({
-          key: filter.filterKey,
-          value: filterValue,
-        });
-      }
-    });
-    return FilterManager.convertFiltersToApiParams(activeFilters);
-  }, [filterConfig]);
-
-  // Category options for combobox
   const categoryOptions = useMemo(() => {
     return categories.map((category) => ({
       value: category.id,
       label: category.name,
     }));
   }, [categories]);
-
-  useEffect(() => {
-    // Skip initial fetch if filters are being applied from URL
-    if (
-      (hasFilterParams && !hasInitialFetch.current) ||
-      isApplyingFiltersFromUrl.current
-    ) {
-      return;
-    }
-
-    const loadTests = async () => {
-      try {
-        const result = await fetchTests(page, pageSize, apiFilters);
-        if (result?.meta) {
-          setTotal(result.meta.total || 0);
-        } else if (result?.data) {
-          setTotal(result.data.length);
-        }
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t("errors.fetchDashboardFailed");
-        showError(errorMessage);
-      } finally {
-        hasInitialFetch.current = true;
-      }
-    };
-
-    loadTests();
-  }, [
-    page,
-    pageSize,
-    apiFilters,
-    hasFilterParams,
-    fetchTests,
-    setTotal,
-    showError,
-    t,
-  ]);
-
-  const handlePageChange = useCallback(
-    (newPage: number) => setPage(newPage),
-    [setPage]
-  );
-
-  const handlePageSizeChange = useCallback(
-    (newPageSize: number) => setPageSize(newPageSize),
-    [setPageSize]
-  );
 
   const paginationProps = useMemo(
     () => ({
