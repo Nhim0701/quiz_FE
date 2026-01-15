@@ -29,7 +29,6 @@ import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants/app";
 import type { QuestionProps } from "../types";
 import { questionFormBuilder } from "../schemas/question-schema";
 import { Button } from "@/components/ui/button";
-import Markdown from "@/components/common/markdown";
 
 interface QuestionFormDialogProps {
   onDelete?: (question: QuestionProps) => void;
@@ -335,10 +334,15 @@ export function QuestionFormDialog({
 
   const handleEditContent = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    openEditor(getValues("content") || "", (content) => {
+    openEditor(getValues("content") || "", false, (content) => {
       console.log(content);
       setValue("content", content);
     });
+  };
+
+  const handlePreviewContent = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    openEditor(getValues("content") || "", true);
   };
 
   if (!shouldShow) return null;
@@ -381,14 +385,11 @@ export function QuestionFormDialog({
               disabled
               labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
-            {/* <Markdown content={getValues("content") || ""} /> */}
-            <div
-              dangerouslySetInnerHTML={{ __html: getValues("content") || "" }}
-            />
             <Button variant="outline" onClick={handleEditContent}>
               <Pencil className="h-4 w-4 text-green-500 dark:text-green-400" />
               {t("common.edit")}
             </Button>
+            <Button variant="outline" onClick={handlePreviewContent}></Button>
           </div>
 
           <ComboboxField

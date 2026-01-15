@@ -3,7 +3,12 @@ import { create } from "zustand";
 interface EditorState {
   isOpen: boolean;
   title: string;
-  open: (content: string, onCloseCallback: (content: string) => void) => void;
+  readonly: boolean;
+  open: (
+    content: string,
+    readonly?: boolean,
+    onCloseCallback?: (content: string) => void
+  ) => void;
   close: (content: string) => void;
   content: string;
   onCloseCallback: (content: string) => void;
@@ -12,6 +17,7 @@ interface EditorState {
 const DEFAULT_VALUES = {
   isOpen: false,
   title: "Editor",
+  readonly: false,
   side: "right" as const,
   content: "",
   onCloseCallback: () => {},
@@ -19,10 +25,13 @@ const DEFAULT_VALUES = {
 
 export const useEditorStore = create<EditorState>((set, get) => ({
   ...DEFAULT_VALUES,
-  open: (content: string, onCloseCallback: (content: string) => void) =>
-    set({ isOpen: true, content, onCloseCallback }),
+  open: (
+    content: string,
+    readonly: boolean = false,
+    onCloseCallback?: (content: string) => void
+  ) => set({ isOpen: true, content, readonly, onCloseCallback }),
   close: (content) => {
-    set({ isOpen: false });
+    set({ isOpen: false, readonly: false });
     get().onCloseCallback(content);
   },
   toggle: () => set((state) => ({ isOpen: !state.isOpen })),

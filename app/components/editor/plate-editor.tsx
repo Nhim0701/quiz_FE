@@ -11,25 +11,11 @@ import { EditorStatic } from "../ui/editor-static";
 import { serializeHtml } from "platejs/static";
 import { BaseEditorKit } from "./editor-base-kit";
 
-export function PlateEditor() {
-  const editor = usePlateEditor({
-    plugins: [...EditorKit],
-  });
-  return (
-    <Plate editor={editor}>
-      <EditorContainer>
-        {/* <Toolbar /> */}
-        <Editor variant="demo" placeholder="Type..." />
-      </EditorContainer>
-    </Plate>
-  );
-}
-
 export function PlateEditorSheet() {
   const editor = usePlateEditor({
     plugins: [...EditorKit],
   });
-  const { isOpen, title, content, close } = useEditorStore();
+  const { isOpen, title, content, close, readonly } = useEditorStore();
 
   const handleOpenChange = async (newOpen: boolean) => {
     const siteUrl = "https://platejs.org";
@@ -84,7 +70,12 @@ export function PlateEditorSheet() {
           <Plate editor={editor}>
             <EditorContainer>
               {/* <Toolbar /> */}
-              <Editor variant="demo" placeholder="Type..." value={content} />
+              <Editor
+                variant="demo"
+                placeholder="Type..."
+                value={content}
+                readOnly={readonly}
+              />
             </EditorContainer>
           </Plate>
         </div>
