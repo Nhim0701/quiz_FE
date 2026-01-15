@@ -2,6 +2,8 @@ import { create } from "zustand";
 import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
 import { apiClient } from "@/lib";
 import { ENDPOINTS } from "../constants";
+import type { FormDialogMode } from "@/constants";
+import { DIALOG_MODES } from "@/constants";
 
 export interface Namespace {
   id: string;
@@ -11,21 +13,17 @@ export interface Namespace {
 }
 
 interface NamespacesState {
-  // Namespaces list
   namespaces: Namespace[];
   loading: boolean;
   error: string | null;
 
-  // Form state
   isDialogOpen: boolean;
-  editingNamespace: Namespace | null;
-  viewingNamespace: Namespace | null;
+  dialogMode: FormDialogMode | null;
+  namespace: Namespace | null;
   isEditMode: boolean;
 
-  // Actions
-  openDialog: (namespace?: Namespace | null) => void;
+  openDialog: (mode: FormDialogMode, namespace?: Namespace | null) => void;
   closeDialog: () => void;
-  openViewDialog: (namespace: Namespace) => void;
   setEditMode: (isEdit: boolean) => void;
 
   // API methods
@@ -52,32 +50,27 @@ interface NamespacesState {
 }
 
 export const useNamespacesStore = create<NamespacesState>((set, get) => ({
-  // Initial state
   namespaces: [],
   loading: false,
   error: null,
   isDialogOpen: false,
-  editingNamespace: null,
-  viewingNamespace: null,
+  dialogMode: null,
+  namespace: null,
   isEditMode: false,
 
-  // Form actions
-  openDialog: (namespace = null) => {
-    set({ isDialogOpen: true, editingNamespace: namespace, isEditMode: false });
+  openDialog: (mode: FormDialogMode, namespace?: Namespace | null) => {
+    set({
+      isDialogOpen: true,
+      dialogMode: mode,
+      namespace: namespace ?? null,
+      isEditMode: mode === DIALOG_MODES.EDIT,
+    });
   },
   closeDialog: () => {
     set({
       isDialogOpen: false,
-      editingNamespace: null,
-      viewingNamespace: null,
-      isEditMode: false,
-    });
-  },
-  openViewDialog: (namespace) => {
-    set({
-      isDialogOpen: true,
-      viewingNamespace: namespace,
-      editingNamespace: null,
+      dialogMode: null,
+      namespace: null,
       isEditMode: false,
     });
   },
@@ -183,17 +176,14 @@ export const useNamespacesStore = create<NamespacesState>((set, get) => ({
     pageSize = 10,
     filters?: Record<string, string>
   ) => {
-    const { viewingNamespace } = get();
+    const { namespace, dialogMode } = get();
     await get().fetchNamespaces(page, pageSize, filters);
 
-    // Update viewingNamespace if it exists and dialog is still open
-    if (viewingNamespace) {
+    if (namespace && dialogMode) {
       const { namespaces } = get();
-      const updatedNamespace = namespaces.find(
-        (n) => n.id === viewingNamespace.id
-      );
+      const updatedNamespace = namespaces.find((n) => n.id === namespace.id);
       if (updatedNamespace) {
-        set({ viewingNamespace: updatedNamespace });
+        set({ namespace: updatedNamespace });
       }
     }
   },

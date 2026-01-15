@@ -80,6 +80,14 @@
         "validation": {
           "roleIdRequired": "Vai trò là bắt buộc"
         }
+      },
+      "errors": {
+        "fetchFailed": "Không thể tải danh sách người dùng",
+        "createFailed": "Không thể tạo người dùng",
+        "updateFailed": "Không thể cập nhật người dùng",
+        "deleteFailed": "Không thể xóa người dùng",
+        "changePasswordFailed": "Không thể đổi mật khẩu",
+        "assignRolesFailed": "Không thể gán vai trò"
       }
     }
   }

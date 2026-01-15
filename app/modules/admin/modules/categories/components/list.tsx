@@ -261,15 +261,7 @@ export function CategoriesList({ roles }: CategoriesListProps) {
 
   // Show skeleton on initial load
   if (loading && categories.length === 0 && !hasInitialFetch.current) {
-    return (
-      <>
-        <CategoriesListSkeleton />
-        <CategoryFormDialog
-          onClearFilters={handleClearAllFilters}
-          onRefresh={handleRefresh}
-        />
-      </>
-    );
+    return <CategoriesListSkeleton />;
   }
 
   return (

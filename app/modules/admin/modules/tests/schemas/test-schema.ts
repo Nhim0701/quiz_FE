@@ -5,6 +5,14 @@ import {
   createOptionalString,
   createNumberField,
 } from "@/lib";
+import type { TestProps } from "../types";
+
+export const testFormBuilder = (test?: TestProps) => ({
+  name: test?.name || "",
+  categoryId: test?.categoryId || "",
+  description: test?.description || "",
+  timeLimit: test?.timeLimit || undefined,
+});
 
 export const testSchema = createZodSchema((t) =>
   z.object({

@@ -80,6 +80,14 @@
         "validation": {
           "roleIdRequired": "Role is required"
         }
+      },
+      "errors": {
+        "fetchFailed": "Failed to fetch users",
+        "createFailed": "Failed to create user",
+        "updateFailed": "Failed to update user",
+        "deleteFailed": "Failed to delete user",
+        "changePasswordFailed": "Failed to change password",
+        "assignRolesFailed": "Failed to assign roles"
       }
     }
   }

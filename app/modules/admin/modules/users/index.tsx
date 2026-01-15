@@ -1,4 +1,3 @@
-import { useState, useCallback } from "react";
 import type { Route } from "./+types/index";
 import { useTranslation, t } from "@/i18n";
 import { useRole } from "@/modules/common/auth/hooks/use-role";
@@ -23,7 +22,6 @@ export default function AdminUsers() {
   const { t } = useTranslation();
   const { getNamespaceRoles } = useRole();
   const { openDialog } = useUsersStore();
-  const [clearFilters, setClearFilters] = useState<(() => void) | null>(null);
 
   const roles = getNamespaceRoles(RESOURCES.USER);
 
@@ -40,10 +38,6 @@ export default function AdminUsers() {
     ],
     [t]
   );
-
-  const handleClearFiltersReady = useCallback((clearFiltersFn: () => void) => {
-    setClearFilters(() => clearFiltersFn);
-  }, []);
 
   if (!roles.read) {
     return (
@@ -78,13 +72,10 @@ export default function AdminUsers() {
           )}
         </CardHeader>
         <CardContent>
-          <UsersList
-            roles={roles}
-            onClearFiltersReady={handleClearFiltersReady}
-          />
+          <UsersList roles={roles} />
         </CardContent>
       </Card>
-      <UserFormDialog onClearFilters={clearFilters} />
+      <UserFormDialog />
     </Container>
   );
 }

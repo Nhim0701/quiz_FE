@@ -1,13 +1,8 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
-import { useTranslation, type TranslationParams } from "@/i18n";
-import {
-  DataTable,
-  type Column,
-  type Action,
-} from "@/components/common/data-table";
+import { useMemo, useState, useCallback, useRef, useEffect } from "react";
+import { useTranslation } from "@/i18n";
+import { type Column } from "@/components/common/data-table";
 import {
   usePaginationStore,
-  useApp,
   useFilterActions,
   useFilterHandlers,
   useFilterIdsConfig,
@@ -18,20 +13,13 @@ import {
   useAdminListData,
   usePageData,
 } from "@/hooks";
+import { useAdminListActions } from "@/modules/admin/hooks";
+import { AdminList } from "@/modules/admin/components";
 import { usePermissionsStore, type Permission } from "../hooks";
-import { Edit, Trash2, Eye } from "lucide-react";
 import { PermissionFormDialog } from "./form-dialog";
 import { PermissionsListSkeleton } from "./list-skeleton";
+import { DIALOG_MODES } from "@/constants";
 import {
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogDescription,
-  AlertDialogFooter,
-} from "@/components/ui/alert-dialog";
-import {
-  SearchInput,
-  ActiveFilters,
-  FilterActions,
   MultipleSelectCombobox,
   type ActiveFilter,
 } from "@/components/common/filters";
@@ -45,16 +33,11 @@ interface PermissionsListProps {
     update: boolean;
     delete: boolean;
   };
-  onClearFiltersReady?: (clearFilters: () => void) => void;
 }
 
-export function PermissionsList({
-  permissions,
-  onClearFiltersReady,
-}: PermissionsListProps) {
+export function PermissionsList({ permissions }: PermissionsListProps) {
   const { t } = useTranslation();
-  const { showError, showSuccess, showDialog, closeDialog } = useApp();
-  const { page, pageSize, total, setPage } = usePaginationStore();
+  const { page, pageSize, total, setPage, setTotal } = usePaginationStore();
 
   const [searchInput, setSearchInput] = useState("");
   const [searchValue, setSearchValue] = useState("");
@@ -62,11 +45,27 @@ export function PermissionsList({
 
   const { fetchRoles, roles } = useRolesStore();
 
-  usePageData(() => fetchRoles(1, MAX_PAGE_SIZE_FOR_ALL), {
-    errorKey: "errors.fetchRolesFailed",
-    showLoading: false,
-    showError: false,
-  });
+  usePageData(
+    async () => {
+      await fetchRoles(1, MAX_PAGE_SIZE_FOR_ALL);
+    },
+    {
+      errorKey: "errors.fetchFilterDataFailed",
+      showLoading: false,
+      showError: false,
+      onError: (error) => {
+        console.error("Failed to fetch filter data:", error);
+      },
+    }
+  );
+
+  const {
+    permissions: permissionsList,
+    loading,
+    fetchPermissions,
+    deletePermission,
+    openDialog,
+  } = usePermissionsStore();
 
   const roleMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -76,16 +75,15 @@ export function PermissionsList({
     return map;
   }, [roles]);
 
-  const {
-    permissions: permissionsList,
-    loading,
-    fetchPermissions,
-    openDialog,
-    openViewDialog,
-    deletePermission,
-    refreshPermissions,
-    viewingPermission,
-  } = usePermissionsStore();
+  const permissionsWithRoleNames = useMemo(() => {
+    return permissionsList.map((permission) => ({
+      ...permission,
+      roleName:
+        permission.roleName ||
+        (permission.roleId ? roleMap.get(permission.roleId) : undefined) ||
+        permission.roleId,
+    }));
+  }, [permissionsList, roleMap]);
 
   const filterConfig = useMemo(
     () => [
@@ -105,6 +103,27 @@ export function PermissionsList({
     [searchValue, selectedRoleIds]
   );
 
+  const fetchPermissionsRef = useRef(fetchPermissions);
+  useEffect(() => {
+    fetchPermissionsRef.current = fetchPermissions;
+  }, [fetchPermissions]);
+
+  const fetchPermissionsWrapper = useCallback(
+    async (
+      page: number,
+      pageSize: number,
+      filters?: Record<string, string>
+    ) => {
+      const result = await fetchPermissionsRef.current(page, pageSize, filters);
+      const state = usePermissionsStore.getState();
+      return {
+        data: state.permissions,
+        meta: result?.meta || { total: 0 },
+      };
+    },
+    []
+  );
+
   const {
     apiFilters,
     hasInitialFetch,
@@ -119,7 +138,7 @@ export function PermissionsList({
       }),
       roleId: createArrayFilterHandler(setSelectedRoleIds),
     },
-    fetchFunction: fetchPermissions,
+    fetchFunction: fetchPermissionsWrapper,
     onFilterAppliedFromUrl: setSearchInput,
   });
 
@@ -150,12 +169,6 @@ export function PermissionsList({
     handlers: filterHandlers,
     onFilterChange: handleFilterChange,
   });
-
-  useEffect(() => {
-    if (onClearFiltersReady) {
-      onClearFiltersReady(handleClearAllFilters);
-    }
-  }, [onClearFiltersReady, handleClearAllFilters]);
 
   const handleRemoveRole = useCallback(
     (roleId: string) => {
@@ -236,68 +249,31 @@ export function PermissionsList({
     [page, pageSize, total, handlePageChange, handlePageSizeChange]
   );
 
-  const handleEdit = useCallback(
-    (permission: Permission) => openDialog(permission),
+  const handleViewInfo = useCallback(
+    (permission: Permission) => openDialog(DIALOG_MODES.VIEW, permission),
     [openDialog]
   );
 
-  const handleView = useCallback(
-    (permission: Permission) => openViewDialog(permission),
-    [openViewDialog]
-  );
-
-  const handleDelete = useCallback(
-    (permission: Permission) => {
-      const confirmDelete = async () => {
-        try {
-          await deletePermission(permission.id);
-          showSuccess(t("admin.permissions.deleteSuccess"));
-          handleClearAllFilters();
-          await refreshPermissions(1, pageSize);
-          closeDialog();
-        } catch (error) {
-          showError(
-            error instanceof Error ? error.message : t("errors.genericError")
-          );
-        }
-      };
-
-      showDialog({
-        title: t("admin.permissions.delete"),
-        content: (
-          <AlertDialogDescription>
-            {t("admin.permissions.confirmDelete", {
-              name: permission.name,
-            } as TranslationParams<"admin.permissions.confirmDelete">)}
-          </AlertDialogDescription>
-        ),
-        footer: (
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={closeDialog}>
-              {t("common.cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t("admin.permissions.delete")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        ),
-      });
+  const { actions: baseActions } = useAdminListActions<Permission>({
+    roles: permissions,
+    deleteFunction: async (id: string) => {
+      await deletePermission(id);
+      await fetchPermissions(page, pageSize, apiFilters);
     },
-    [
-      deletePermission,
-      showSuccess,
-      t,
-      handleClearAllFilters,
-      refreshPermissions,
-      pageSize,
-      closeDialog,
-      showDialog,
-      showError,
-    ]
-  );
+    refreshFunction: async (refreshPage: number, refreshPageSize: number) => {
+      await fetchPermissions(refreshPage, refreshPageSize, apiFilters);
+    },
+    successMessageKey: "admin.permissions.deleteSuccess",
+    deleteTitleKey: "admin.permissions.delete",
+    confirmDeleteKey: "admin.permissions.confirmDelete",
+    deleteButtonKey: "admin.permissions.delete",
+    onClearFilters: handleClearAllFilters,
+    onView: handleViewInfo,
+    onEdit: (permission: Permission) =>
+      openDialog(DIALOG_MODES.EDIT, permission),
+  });
+
+  const actions = useMemo(() => baseActions, [baseActions]);
 
   const columns = useMemo<Column<Permission>[]>(
     () => [
@@ -339,116 +315,74 @@ export function PermissionsList({
       {
         key: "roleName",
         header: t("admin.permissions.columns.role"),
-        render: (permission) => {
-          const roleName =
-            permission.roleName ||
-            (permission.roleId ? roleMap.get(permission.roleId) : undefined);
-          return (
-            <span className="text-muted-foreground">{roleName || "-"}</span>
-          );
-        },
+        render: (permission) => (
+          <span className="text-muted-foreground">
+            {permission.roleName || "-"}
+          </span>
+        ),
       },
     ],
-    [t, roleMap]
+    [t]
   );
 
-  const actions = useMemo<Action<Permission>[]>(
-    () => [
-      ...(permissions.read
-        ? [
-            {
-              label: t("common.viewInfo"),
-              onClick: handleView,
-              icon: <Eye className="h-4 w-4" />,
-              actionType: "viewInfo" as const,
-            },
-          ]
-        : []),
-      ...(permissions.update
-        ? [
-            {
-              label: t("common.edit"),
-              onClick: handleEdit,
-              icon: <Edit className="h-4 w-4" />,
-              actionType: "edit" as const,
-            },
-          ]
-        : []),
-      ...(permissions.delete
-        ? [
-            {
-              label: t("admin.permissions.delete"),
-              onClick: handleDelete,
-              variant: "destructive" as const,
-              icon: <Trash2 className="h-4 w-4" />,
-              actionType: "delete" as const,
-            },
-          ]
-        : []),
-    ],
-    [permissions, t, handleView, handleEdit, handleDelete]
-  );
+  const handleRefresh = useCallback(async () => {
+    await fetchPermissions(page, pageSize, apiFilters);
+  }, [fetchPermissions, page, pageSize, apiFilters]);
 
-  // Show skeleton on initial load
-  if (loading && permissionsList.length === 0 && !hasInitialFetch.current) {
-    return (
-      <>
-        <PermissionsListSkeleton />
-        <PermissionFormDialog onDelete={handleDelete} />
-      </>
-    );
+  if (
+    loading &&
+    permissionsWithRoleNames.length === 0 &&
+    !hasInitialFetch.current
+  ) {
+    return <PermissionsListSkeleton />;
   }
+
+  const additionalFilters = (
+    <>
+      <MultipleSelectCombobox
+        options={roleOptions}
+        selectedValues={selectedRoleIds}
+        onSelect={(values) => {
+          setSelectedRoleIds(values);
+          setPage(1);
+        }}
+        placeholder={t("admin.permissions.filters.rolePlaceholder")}
+        searchPlaceholder={t("admin.permissions.filters.roleSearch")}
+        emptyMessage={t("admin.permissions.filters.roleEmpty")}
+        className="w-full sm:w-[250px]"
+        filterColor="green"
+      />
+    </>
+  );
 
   return (
     <>
-      {/* Filter Bar */}
-      <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 flex-wrap items-center gap-2">
-          <SearchInput
-            value={searchInput}
-            onChange={setSearchInput}
-            onSearch={handleSearch}
-            placeholderKey="admin.permissions.searchPlaceholder"
-            className="flex-1 min-w-[200px]"
-            searchKey="name"
-          />
-          <MultipleSelectCombobox
-            options={roleOptions}
-            selectedValues={selectedRoleIds}
-            onSelect={(values) => {
-              setSelectedRoleIds(values);
-              setPage(1);
-            }}
-            placeholder={t("admin.permissions.filters.rolePlaceholder")}
-            searchPlaceholder={t("admin.permissions.filters.roleSearch")}
-            emptyMessage={t("admin.permissions.filters.roleEmpty")}
-            className="w-full sm:w-[250px]"
-            filterColor="green"
-          />
-          <FilterActions buttons={filterActionButtons} />
-        </div>
-      </div>
-
-      {/* Active Filters */}
-      {activeFilters.length > 0 && (
-        <div className="mb-4">
-          <ActiveFilters
-            filters={activeFilters}
-            onRemove={handleRemoveActiveFilter}
-            filterIdsConfig={filterIdsConfig}
-          />
-        </div>
-      )}
-
-      <DataTable
+      <AdminList
         columns={columns}
-        data={permissionsList}
+        data={permissionsWithRoleNames}
         actions={actions}
         loading={loading}
         emptyMessage={t("admin.permissions.empty")}
+        searchInput={{
+          value: searchInput,
+          onChange: setSearchInput,
+          onSearch: handleSearch,
+          placeholderKey: "admin.permissions.searchPlaceholder",
+          className: "flex-1 min-w-[200px]",
+          searchKey: "name",
+        }}
+        additionalFilters={additionalFilters}
+        activeFilters={activeFilters}
+        onRemoveFilter={handleRemoveActiveFilter}
+        filterIdsConfig={filterIdsConfig}
+        filterActionButtons={filterActionButtons}
         pagination={paginationProps}
+        filterBarClassName="my-4"
       />
-      <PermissionFormDialog onDelete={handleDelete} />
+      <PermissionFormDialog
+        onClearFilters={handleClearAllFilters}
+        onRefresh={handleRefresh}
+      />
     </>
   );
 }

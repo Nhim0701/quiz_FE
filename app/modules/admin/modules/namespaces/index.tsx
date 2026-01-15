@@ -1,4 +1,3 @@
-import { useState, useCallback } from "react";
 import type { Route } from "./+types/index";
 import { useTranslation, t } from "@/i18n";
 import { useRole } from "@/modules/common/auth/hooks/use-role";
@@ -10,9 +9,10 @@ import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { NamespacesList, NamespaceFormDialog } from "./components";
+import { NamespacesList } from "./components";
 import { useNamespacesStore } from "./hooks";
 import { pageMeta } from "@/lib";
+import { DIALOG_MODES } from "@/constants";
 
 export const meta: Route.MetaFunction = () => {
   return pageMeta(t("admin.namespaces.title"))();
@@ -21,8 +21,6 @@ export const meta: Route.MetaFunction = () => {
 export default function AdminNamespaces() {
   const { t } = useTranslation();
   const { getNamespaceRoles } = useRole();
-  const { openDialog } = useNamespacesStore();
-  const [clearFilters, setClearFilters] = useState<(() => void) | null>(null);
 
   const roles = getNamespaceRoles(RESOURCES.NAMESPACE);
 
@@ -40,9 +38,11 @@ export default function AdminNamespaces() {
     [t]
   );
 
-  const handleClearFiltersReady = useCallback((clearFiltersFn: () => void) => {
-    setClearFilters(() => clearFiltersFn);
-  }, []);
+  const { openDialog } = useNamespacesStore();
+
+  const handleCreateNamespace = () => {
+    openDialog(DIALOG_MODES.CREATE);
+  };
 
   if (!roles.read) {
     return (
@@ -67,7 +67,7 @@ export default function AdminNamespaces() {
           <CardTitle>{t("admin.namespaces.cardTitle")}</CardTitle>
           {roles.create && (
             <Button
-              onClick={() => openDialog()}
+              onClick={handleCreateNamespace}
               size="sm"
               className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 dark:from-emerald-600 dark:to-green-700 dark:hover:from-emerald-700 dark:hover:to-green-800 text-white shadow-md hover:shadow-lg transition-all duration-200 font-medium"
             >
@@ -77,13 +77,9 @@ export default function AdminNamespaces() {
           )}
         </CardHeader>
         <CardContent>
-          <NamespacesList
-            roles={roles}
-            onClearFiltersReady={handleClearFiltersReady}
-          />
+          <NamespacesList roles={roles} />
         </CardContent>
       </Card>
-      <NamespaceFormDialog onClearFilters={clearFilters} />
     </Container>
   );
 }

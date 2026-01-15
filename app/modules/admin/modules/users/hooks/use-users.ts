@@ -2,15 +2,18 @@ import { create } from "zustand";
 import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
 import type { User } from "@/modules/common/auth/types";
 import { apiClient } from "@/lib";
-import { ENDPOINTS } from "../constants";
+import { ENDPOINTS, ERROR_MESSAGES, DEFAULT_VALUES } from "../constants";
 import type { FormDialogMode } from "@/constants";
 import { DIALOG_MODES } from "@/constants";
+import { t } from "@/i18n/utils";
 
 interface UsersState {
   // Users list
   users: User[];
   loading: boolean;
   error: string | null;
+  total: number;
+  meta?: ApiResponseMeta;
 
   // Form state
   isDialogOpen: boolean;
@@ -28,7 +31,7 @@ interface UsersState {
     page?: number,
     pageSize?: number,
     filters?: Record<string, string>
-  ) => Promise<{ data: User[]; meta?: ApiResponseMeta } | undefined>;
+  ) => Promise<void>;
   createUser: (data: {
     fullName: string;
     email: string;
@@ -65,6 +68,8 @@ export const useUsersStore = create<UsersState>((set, get) => ({
   users: [],
   loading: false,
   error: null,
+  total: 0,
+  meta: undefined,
   isDialogOpen: false,
   dialogMode: null,
   user: null,
@@ -93,8 +98,8 @@ export const useUsersStore = create<UsersState>((set, get) => ({
 
   // API methods
   fetchUsers: async (
-    page = 1,
-    pageSize = 10,
+    page = DEFAULT_VALUES.PAGE,
+    pageSize = DEFAULT_VALUES.PAGE_SIZE,
     filters?: Record<string, string>
   ) => {
     set({ loading: true, error: null });
@@ -126,13 +131,18 @@ export const useUsersStore = create<UsersState>((set, get) => ({
       set({
         users: data,
         loading: false,
+        total: meta?.total || data.length || 0,
+        meta: meta,
       });
-
-      return { data, meta };
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch users";
-      set({ error: errorMessage, loading: false });
+        error instanceof Error ? error.message : t(ERROR_MESSAGES.FETCH_FAILED);
+      set({
+        error: errorMessage,
+        loading: false,
+        users: [],
+        total: 0,
+      });
       throw error;
     }
   },
@@ -148,7 +158,9 @@ export const useUsersStore = create<UsersState>((set, get) => ({
       return response.data.data;
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to create user";
+        error instanceof Error
+          ? error.message
+          : t(ERROR_MESSAGES.CREATE_FAILED);
       set({ error: errorMessage, loading: false });
       throw error;
     }
@@ -165,7 +177,9 @@ export const useUsersStore = create<UsersState>((set, get) => ({
       return response.data.data;
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to update user";
+        error instanceof Error
+          ? error.message
+          : t(ERROR_MESSAGES.UPDATE_FAILED);
       set({ error: errorMessage, loading: false });
       throw error;
     }
@@ -178,15 +192,17 @@ export const useUsersStore = create<UsersState>((set, get) => ({
       set({ loading: false });
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to delete user";
+        error instanceof Error
+          ? error.message
+          : t(ERROR_MESSAGES.DELETE_FAILED);
       set({ error: errorMessage, loading: false });
       throw error;
     }
   },
 
   refreshUsers: async (
-    page = 1,
-    pageSize = 10,
+    page = DEFAULT_VALUES.PAGE,
+    pageSize = DEFAULT_VALUES.PAGE_SIZE,
     filters?: Record<string, string>
   ) => {
     const { user, dialogMode } = get();
@@ -211,7 +227,9 @@ export const useUsersStore = create<UsersState>((set, get) => ({
       set({ loading: false });
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to change password";
+        error instanceof Error
+          ? error.message
+          : t(ERROR_MESSAGES.CHANGE_PASSWORD_FAILED);
       set({ error: errorMessage, loading: false });
       throw error;
     }
@@ -226,7 +244,9 @@ export const useUsersStore = create<UsersState>((set, get) => ({
       set({ loading: false });
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to assign roles";
+        error instanceof Error
+          ? error.message
+          : t(ERROR_MESSAGES.ASSIGN_ROLES_FAILED);
       set({ error: errorMessage, loading: false });
       throw error;
     }

@@ -114,42 +114,60 @@ export function CategoryFormDialog({
     return false;
   }, [mode, currentValues, isEditMode, hasChanges]);
 
-  const onSubmit = async (data: CategoryFormData) => {
-    try {
-      if (mode === DIALOG_MODES.CREATE) {
-        await createCategory(data);
-        showSuccess(t("admin.categories.createSuccess"));
-        closeDialog();
-        onClearFilters?.();
-        onRefresh && (await onRefresh());
-      } else if (category) {
-        await updateCategory(category.id, data);
-        showSuccess(t("admin.categories.updateSuccess"));
-
-        if (mode === DIALOG_MODES.VIEW) {
-          setEditMode(false);
-        } else {
+  const onSubmit = useCallback(
+    async (data: CategoryFormData) => {
+      try {
+        if (mode === DIALOG_MODES.CREATE) {
+          await createCategory(data);
+          showSuccess(t("admin.categories.createSuccess"));
           closeDialog();
+          onClearFilters?.();
+          onRefresh && (await onRefresh());
+        } else if (category) {
+          await updateCategory(category.id, data);
+          showSuccess(t("admin.categories.updateSuccess"));
+
+          if (mode === DIALOG_MODES.VIEW) {
+            setEditMode(false);
+          } else {
+            closeDialog();
+          }
+          onRefresh && (await onRefresh());
         }
-        onRefresh && (await onRefresh());
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : t("errors.genericError");
+        showError(errorMessage);
       }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : t("errors.genericError");
-      showError(errorMessage);
-    }
-  };
+    },
+    [
+      mode,
+      createCategory,
+      showSuccess,
+      t,
+      closeDialog,
+      onClearFilters,
+      onRefresh,
+      category,
+      updateCategory,
+      setEditMode,
+      showError,
+    ]
+  );
 
   const handleEdit = useCallback(() => {
     setEditMode(true);
   }, [setEditMode]);
 
   const handleCancel = useCallback(() => {
-    if (isViewMode && isEditMode && category) {
-      reset(categoryFormBuilder(category));
+    if (isViewMode && isEditMode) {
+      setEditMode(false);
+      if (category) {
+        reset(categoryFormBuilder(category));
+      }
     }
     closeDialog();
-  }, [isViewMode, isEditMode, category, reset, closeDialog]);
+  }, [isViewMode, isEditMode, category, setEditMode, reset, closeDialog]);
 
   const handleFormSubmit = useCallback(() => {
     handleSubmit(onSubmit)();

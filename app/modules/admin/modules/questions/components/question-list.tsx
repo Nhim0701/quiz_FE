@@ -105,8 +105,6 @@ export function QuestionsList({ roles }: QuestionsListProps) {
           prev.filter((testId) => validTestIds.includes(testId))
         );
       }
-    } else if (selectedCategories.length === 0) {
-      // If no categories selected, keep all selected tests
     }
   }, [selectedCategories, tests, selectedTests]);
 
@@ -503,12 +501,7 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     questionsWithTestNames.length === 0 &&
     !hasInitialFetch.current
   ) {
-    return (
-      <>
-        <QuestionsListSkeleton />
-        <QuestionFormDialog />
-      </>
-    );
+    return <QuestionsListSkeleton />;
   }
 
   const additionalFilters = (

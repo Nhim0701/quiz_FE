@@ -361,15 +361,7 @@ export function TestsList({ roles }: TestsListProps) {
     testsWithCategoryNames.length === 0 &&
     !hasInitialFetch.current
   ) {
-    return (
-      <>
-        <TestsListSkeleton />
-        <TestFormDialog
-          onClearFilters={handleClearAllFilters}
-          onRefresh={handleRefresh}
-        />
-      </>
-    );
+    return <TestsListSkeleton />;
   }
 
   const additionalFilters = (

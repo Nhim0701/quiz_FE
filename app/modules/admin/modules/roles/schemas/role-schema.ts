@@ -1,5 +1,11 @@
 import { z } from "zod";
 import { createZodSchema, createRequiredString } from "@/lib";
+import type { Role } from "../hooks";
+
+export const roleFormBuilder = (role?: Role) => ({
+  name: role?.name || "",
+  description: role?.description || "",
+});
 
 export const roleSchema = createZodSchema((t) =>
   z.object({

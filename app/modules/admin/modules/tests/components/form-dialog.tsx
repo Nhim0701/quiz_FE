@@ -22,6 +22,7 @@ import {
 import { useCategoriesStore } from "../../categories/hooks";
 import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants";
 import { usePageData } from "@/hooks";
+import { testFormBuilder } from "../schemas/test-schema";
 
 interface TestFormDialogProps {
   onDelete?: (test: TestProps) => void;
@@ -88,12 +89,7 @@ export function TestFormDialog({
 
   const methods = useForm<TestFormData>({
     resolver: zodResolver(testSchema(t)),
-    defaultValues: {
-      name: "",
-      categoryId: "",
-      description: "",
-      timeLimit: undefined,
-    },
+    defaultValues: testFormBuilder(),
   });
 
   const {
@@ -108,19 +104,9 @@ export function TestFormDialog({
   // Reset form when test or mode changes
   useEffect(() => {
     if (shouldShow && test) {
-      reset({
-        name: test.name || "",
-        categoryId: test.categoryId || "",
-        description: test.description || "",
-        timeLimit: test.timeLimit,
-      });
+      reset(testFormBuilder(test));
     } else if (shouldShow && mode === DIALOG_MODES.CREATE) {
-      reset({
-        name: "",
-        categoryId: "",
-        description: "",
-        timeLimit: undefined,
-      });
+      reset(testFormBuilder());
     }
   }, [shouldShow, test, mode, reset]);
 
@@ -164,32 +150,46 @@ export function TestFormDialog({
     return false;
   }, [mode, currentValues, isEditMode, hasChanges]);
 
-  const onSubmit = async (data: TestFormData) => {
-    try {
-      if (mode === DIALOG_MODES.CREATE) {
-        await createTest(data);
-        showSuccess(t("admin.tests.createSuccess"));
-        closeDialog();
-        onClearFilters?.();
-        onRefresh && (await onRefresh());
-      } else if (test) {
-        await updateTest(test.id, data);
-        showSuccess(t("admin.tests.updateSuccess"));
-
-        if (mode === DIALOG_MODES.VIEW) {
-          setEditMode(false);
-        } else {
+  const onSubmit = useCallback(
+    async (data: TestFormData) => {
+      try {
+        if (mode === DIALOG_MODES.CREATE) {
+          await createTest(data);
+          showSuccess(t("admin.tests.createSuccess"));
           closeDialog();
-        }
+          onClearFilters?.();
+          onRefresh && (await onRefresh());
+        } else if (test) {
+          await updateTest(test.id, data);
+          showSuccess(t("admin.tests.updateSuccess"));
 
-        onRefresh && (await onRefresh());
+          if (mode === DIALOG_MODES.VIEW) {
+            setEditMode(false);
+          } else {
+            closeDialog();
+          }
+          onRefresh && (await onRefresh());
+        }
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : t("errors.genericError");
+        showError(errorMessage);
       }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : t("errors.genericError");
-      showError(errorMessage);
-    }
-  };
+    },
+    [
+      mode,
+      createTest,
+      showSuccess,
+      t,
+      closeDialog,
+      onClearFilters,
+      onRefresh,
+      test,
+      updateTest,
+      setEditMode,
+      showError,
+    ]
+  );
 
   const handleEdit = useCallback(() => {
     setEditMode(true);

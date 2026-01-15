@@ -2,6 +2,14 @@ import { z } from "zod";
 import { createZodSchema, createRequiredString } from "@/lib";
 import { isValidPermissionFormat } from "@/lib/permissions";
 import type { TranslationKey } from "@/i18n";
+import type { Permission } from "../hooks";
+
+export const permissionFormBuilder = (permission?: Permission) => ({
+  name: permission?.name || "",
+  permission: permission?.permission || "",
+  description: permission?.description || "",
+  roleId: permission?.roleId || "",
+});
 
 export const permissionSchema = createZodSchema((t) =>
   z.object({

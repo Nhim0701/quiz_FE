@@ -3,8 +3,8 @@ import { useForm, FormProvider, Form } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation, type TranslationParams } from "@/i18n";
 import { FormField, DatePickerField } from "@/components/common/form-field";
-import { useApp, usePaginationStore } from "@/hooks";
-import { userSchema, type UserFormData } from "../schemas";
+import { useApp } from "@/hooks";
+import { userSchema, userFormBuilder, type UserFormData } from "../schemas";
 import { useUsersStore, type User } from "../hooks";
 import { FormDialog } from "@/components/common/form-dialog";
 import type { FormDialogMode } from "@/constants";
@@ -19,6 +19,7 @@ import {
 interface UserFormDialogProps {
   onDelete?: (user: User) => void;
   onClearFilters?: (() => void) | null;
+  onRefresh?: () => Promise<void>;
 }
 
 /**
@@ -29,6 +30,7 @@ interface UserFormDialogProps {
 export function UserFormDialog({
   onDelete,
   onClearFilters,
+  onRefresh,
 }: UserFormDialogProps) {
   const { t } = useTranslation();
   const {
@@ -37,7 +39,6 @@ export function UserFormDialog({
     showDialog,
     closeDialog: closeAppDialog,
   } = useApp();
-  const { page, pageSize } = usePaginationStore();
   const {
     isDialogOpen,
     dialogMode,
@@ -45,7 +46,6 @@ export function UserFormDialog({
     closeDialog,
     createUser,
     updateUser,
-    refreshUsers,
     loading,
     isEditMode,
     setEditMode,
@@ -60,15 +60,7 @@ export function UserFormDialog({
 
   const methods = useForm<UserFormData>({
     resolver: zodResolver(userSchema(t)),
-    defaultValues: {
-      fullName: "",
-      email: "",
-      phone: "",
-      birthday: "",
-      address: "",
-      jobTitle: "",
-      company: "",
-    },
+    defaultValues: userFormBuilder(),
   });
 
   const {
@@ -83,37 +75,15 @@ export function UserFormDialog({
   // Reset form when user or mode changes
   useEffect(() => {
     if (shouldShow && user) {
-      reset({
-        fullName: user.fullName || "",
-        email: user.email || "",
-        phone: user.phone || "",
-        birthday: user.birthday || "",
-        address: user.address || "",
-        jobTitle: user.jobTitle || "",
-        company: user.company || "",
-      });
+      reset(userFormBuilder(user));
     } else if (shouldShow && mode === DIALOG_MODES.CREATE) {
-      reset({
-        fullName: "",
-        email: "",
-        phone: "",
-        birthday: "",
-        address: "",
-        jobTitle: "",
-        company: "",
-      });
+      reset(userFormBuilder());
     }
   }, [shouldShow, user, mode, reset]);
 
   const currentData = watch();
   const hasChanges = user
-    ? currentData.fullName !== (user.fullName || "") ||
-      currentData.email !== (user.email || "") ||
-      currentData.phone !== (user.phone || "") ||
-      currentData.birthday !== (user.birthday || "") ||
-      currentData.address !== (user.address || "") ||
-      currentData.jobTitle !== (user.jobTitle || "") ||
-      currentData.company !== (user.company || "")
+    ? JSON.stringify(currentData) !== JSON.stringify(userFormBuilder(user))
     : false;
   const isViewMode = mode === DIALOG_MODES.VIEW;
   const isDisabled = isViewMode && !isEditMode;
@@ -144,41 +114,46 @@ export function UserFormDialog({
     return false;
   }, [mode, currentData, isEditMode, hasChanges]);
 
-  // Helper to refresh users after mutation
-  const handleRefresh = useCallback(
-    async (refreshPage: number = page) => {
-      await refreshUsers(refreshPage, pageSize);
-    },
-    [refreshUsers, page, pageSize]
-  );
-
-  const onSubmit = async (data: UserFormData) => {
-    try {
-      if (mode === DIALOG_MODES.CREATE) {
-        await createUser(data);
-        showSuccess(t("admin.users.createSuccess"));
-        closeDialog();
-        onClearFilters?.();
-        await handleRefresh(1);
-      } else if (user) {
-        // Handle both VIEW (with edit mode) and EDIT modes
-        await updateUser(user.id, data);
-        showSuccess(t("admin.users.updateSuccess"));
-
-        if (mode === DIALOG_MODES.VIEW) {
-          setEditMode(false);
-        } else {
+  const onSubmit = useCallback(
+    async (data: UserFormData) => {
+      try {
+        if (mode === DIALOG_MODES.CREATE) {
+          await createUser(data);
+          showSuccess(t("admin.users.createSuccess"));
           closeDialog();
-        }
+          onClearFilters?.();
+          onRefresh && (await onRefresh());
+        } else if (user) {
+          await updateUser(user.id, data);
+          showSuccess(t("admin.users.updateSuccess"));
 
-        await handleRefresh();
+          if (mode === DIALOG_MODES.VIEW) {
+            setEditMode(false);
+          } else {
+            closeDialog();
+          }
+          onRefresh && (await onRefresh());
+        }
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : t("errors.genericError");
+        showError(errorMessage);
       }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : t("errors.genericError");
-      showError(errorMessage);
-    }
-  };
+    },
+    [
+      mode,
+      createUser,
+      showSuccess,
+      t,
+      closeDialog,
+      onClearFilters,
+      onRefresh,
+      user,
+      updateUser,
+      setEditMode,
+      showError,
+    ]
+  );
 
   const handleEdit = useCallback(() => {
     setEditMode(true);
@@ -188,15 +163,7 @@ export function UserFormDialog({
     if (isViewMode && isEditMode) {
       setEditMode(false);
       if (user) {
-        reset({
-          fullName: user.fullName || "",
-          email: user.email || "",
-          phone: user.phone || "",
-          birthday: user.birthday || "",
-          address: user.address || "",
-          jobTitle: user.jobTitle || "",
-          company: user.company || "",
-        });
+        reset(userFormBuilder(user));
       }
     }
     closeDialog();

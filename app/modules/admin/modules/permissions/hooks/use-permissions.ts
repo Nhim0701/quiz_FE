@@ -2,6 +2,8 @@ import { create } from "zustand";
 import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
 import { apiClient } from "@/lib";
 import { ENDPOINTS } from "../constants";
+import type { FormDialogMode } from "@/constants";
+import { DIALOG_MODES } from "@/constants";
 
 export interface Permission {
   id: string;
@@ -15,21 +17,17 @@ export interface Permission {
 }
 
 interface PermissionsState {
-  // Permissions list
   permissions: Permission[];
   loading: boolean;
   error: string | null;
 
-  // Form state
   isDialogOpen: boolean;
-  editingPermission: Permission | null;
-  viewingPermission: Permission | null;
+  dialogMode: FormDialogMode | null;
+  permission: Permission | null;
   isEditMode: boolean;
 
-  // Actions
-  openDialog: (permission?: Permission | null) => void;
+  openDialog: (mode: FormDialogMode, permission?: Permission | null) => void;
   closeDialog: () => void;
-  openViewDialog: (permission: Permission) => void;
   setEditMode: (isEdit: boolean) => void;
 
   // API methods
@@ -62,36 +60,27 @@ interface PermissionsState {
 }
 
 export const usePermissionsStore = create<PermissionsState>((set, get) => ({
-  // Initial state
   permissions: [],
   loading: false,
   error: null,
   isDialogOpen: false,
-  editingPermission: null,
-  viewingPermission: null,
+  dialogMode: null,
+  permission: null,
   isEditMode: false,
 
-  // Form actions
-  openDialog: (permission = null) => {
+  openDialog: (mode: FormDialogMode, permission?: Permission | null) => {
     set({
       isDialogOpen: true,
-      editingPermission: permission,
-      isEditMode: false,
+      dialogMode: mode,
+      permission: permission ?? null,
+      isEditMode: mode === DIALOG_MODES.EDIT,
     });
   },
   closeDialog: () => {
     set({
       isDialogOpen: false,
-      editingPermission: null,
-      viewingPermission: null,
-      isEditMode: false,
-    });
-  },
-  openViewDialog: (permission) => {
-    set({
-      isDialogOpen: true,
-      viewingPermission: permission,
-      editingPermission: null,
+      dialogMode: null,
+      permission: null,
       isEditMode: false,
     });
   },
@@ -197,17 +186,14 @@ export const usePermissionsStore = create<PermissionsState>((set, get) => ({
     pageSize = 10,
     filters?: Record<string, string>
   ) => {
-    const { viewingPermission } = get();
+    const { permission, dialogMode } = get();
     await get().fetchPermissions(page, pageSize, filters);
 
-    // Update viewingPermission if it exists and dialog is still open
-    if (viewingPermission) {
+    if (permission && dialogMode) {
       const { permissions } = get();
-      const updatedPermission = permissions.find(
-        (p) => p.id === viewingPermission.id
-      );
+      const updatedPermission = permissions.find((p) => p.id === permission.id);
       if (updatedPermission) {
-        set({ viewingPermission: updatedPermission });
+        set({ permission: updatedPermission });
       }
     }
   },
