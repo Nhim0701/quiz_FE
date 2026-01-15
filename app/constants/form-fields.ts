@@ -36,7 +36,7 @@ export const FORM_FIELD_LABEL_CLASSES = {
 
 // Form field input styles
 export const FORM_FIELD_INPUT_CLASSES = {
-  BASE: "mt-1",
+  BASE: "mt-2",
 } as const;
 
 // Icon configuration type

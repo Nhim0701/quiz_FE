@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { FormField, DatePickerField } from "@/components/common/form-field";
 import { useProfile } from "../hooks";
 import { updateUserSchema, type UpdateUserFormData } from "../schemas";
+import { initialUpdateUserFormData } from "../schemas/update-user-schema";
 
 interface UserInfoProps {
   isEditMode?: boolean;
@@ -40,44 +41,20 @@ export function UserInfo({
     reset: resetUpdate,
   } = useForm<UpdateUserFormData>({
     resolver: zodResolver(updateUserSchema(t)),
-    defaultValues: {
-      userId: user?.userId || "",
-      fullName: user?.fullName || "",
-      phone: user?.phone || "",
-      birthday: user?.birthday || "",
-      address: user?.address || "",
-      jobTitle: user?.jobTitle || "",
-      company: user?.company || "",
-    },
+    defaultValues: initialUpdateUserFormData(user),
   });
 
   // Update form values when user data changes
   useEffect(() => {
     if (user) {
-      resetUpdate({
-        userId: user.userId || "",
-        fullName: user.fullName || "",
-        phone: user.phone || "",
-        birthday: user.birthday || "",
-        address: user.address || "",
-        jobTitle: user.jobTitle || "",
-        company: user.company || "",
-      });
+      resetUpdate(initialUpdateUserFormData(user));
     }
   }, [user, resetUpdate]);
 
   // Reset form with current user values when entering edit mode
   useEffect(() => {
     if (isEditMode && user) {
-      resetUpdate({
-        userId: user.userId || "",
-        fullName: user.fullName || "",
-        phone: user.phone || "",
-        birthday: user.birthday || "",
-        address: user.address || "",
-        jobTitle: user.jobTitle || "",
-        company: user.company || "",
-      });
+      resetUpdate(initialUpdateUserFormData(user));
     }
   }, [isEditMode, user, resetUpdate]);
 
@@ -180,7 +157,6 @@ export function UserInfo({
               </h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <Phone className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0" />
                   <div className="flex-1">
                     {isEditMode ? (
                       <FormField
@@ -192,19 +168,19 @@ export function UserInfo({
                         disabled={isUpdating}
                       />
                     ) : (
-                      <>
+                      <div className="flex items-center gap-2">
+                        <Phone className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0" />
                         <span className="text-xs text-slate-500 dark:text-slate-400">
                           {t("profile.basicInfo.phone")}:
                         </span>
                         <span className="text-sm text-slate-600 dark:text-slate-400 ml-2">
                           {user.phone || "-"}
                         </span>
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Calendar className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0" />
                   <div className="flex-1">
                     {isEditMode ? (
                       <DatePickerField
@@ -218,19 +194,19 @@ export function UserInfo({
                         placeholder={t("profile.basicInfo.birthday")}
                       />
                     ) : (
-                      <>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0" />
                         <span className="text-xs text-slate-500 dark:text-slate-400">
                           {t("profile.basicInfo.birthday")}:
                         </span>
                         <span className="text-sm text-slate-600 dark:text-slate-400 ml-2">
                           {user.birthday || "-"}
                         </span>
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
                     {isEditMode ? (
                       <FormField
@@ -241,14 +217,15 @@ export function UserInfo({
                         disabled={isUpdating}
                       />
                     ) : (
-                      <>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0 mt-0.5" />
                         <span className="text-xs text-slate-500 dark:text-slate-400">
                           {t("profile.basicInfo.address")}:
                         </span>
                         <span className="text-sm text-slate-600 dark:text-slate-400 ml-2 block">
                           {user.address || "-"}
                         </span>
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -265,7 +242,6 @@ export function UserInfo({
           <CardContent className="space-y-6">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <Briefcase className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0" />
                 <div className="flex-1">
                   {isEditMode ? (
                     <FormField
@@ -276,20 +252,20 @@ export function UserInfo({
                       disabled={isUpdating}
                     />
                   ) : (
-                    <>
+                    <div className="flex items-center gap-2">
+                      <Briefcase className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0" />
                       <span className="text-xs text-slate-500 dark:text-slate-400">
                         {t("profile.professional.jobTitle")}:
                       </span>
                       <span className="text-sm text-slate-600 dark:text-slate-400 ml-2">
                         {user.jobTitle || "-"}
                       </span>
-                    </>
+                    </div>
                   )}
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <Building2 className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0" />
                 <div className="flex-1">
                   {isEditMode ? (
                     <FormField
@@ -300,14 +276,15 @@ export function UserInfo({
                       disabled={isUpdating}
                     />
                   ) : (
-                    <>
+                    <div className="flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0" />
                       <span className="text-xs text-slate-500 dark:text-slate-400">
                         {t("profile.professional.company")}:
                       </span>
                       <span className="text-sm text-slate-600 dark:text-slate-400 ml-2">
                         {user.company || "-"}
                       </span>
-                    </>
+                    </div>
                   )}
                 </div>
               </div>

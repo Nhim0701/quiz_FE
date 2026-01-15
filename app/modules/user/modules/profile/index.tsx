@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { Edit, Lock } from "lucide-react";
 import type { Route } from "./+types/index";
-import { useBreadcrumb, usePageData } from "@/hooks";
+import { useBreadcrumb, usePageData, useApp } from "@/hooks";
 import { PageHeader } from "@/components/common/page-header";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
-import { UserInfo } from "./components";
+import { UserInfo, ProfileSkeleton } from "./components";
 import { ChangePasswordModal } from "./components/change-password-modal";
 import { useProfile } from "./hooks";
 import { ROUTES } from "./constants";
-import { useTranslation, t } from "@/i18n";
+import { t } from "@/i18n";
 import { pageMeta } from "@/lib";
 
 export const meta: Route.MetaFunction = () => {
@@ -17,7 +17,8 @@ export const meta: Route.MetaFunction = () => {
 };
 
 export default function Profile() {
-  const { t, setLoading, getCurrentUser } = useProfile();
+  const { t, setLoading, getCurrentUser, user } = useProfile();
+  const { loading } = useApp();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
@@ -31,7 +32,12 @@ export default function Profile() {
     [t]
   );
 
-  usePageData(() => getCurrentUser(setLoading), "errors.fetchUserFailed", []);
+  usePageData(() => getCurrentUser(setLoading), {
+    errorKey: "errors.fetchUserFailed",
+    showLoading: false,
+  });
+
+  const isLoading = loading || !user;
 
   return (
     <Container>
@@ -42,6 +48,7 @@ export default function Profile() {
             onClick={() => setIsEditMode(!isEditMode)}
             variant={isEditMode ? "default" : "outline"}
             className="gap-2 shadow-sm hover:shadow-md transition-all duration-200 bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-500 dark:to-indigo-500 hover:from-purple-700 hover:to-indigo-700 dark:hover:from-purple-600 dark:hover:to-indigo-600 text-white border-0 data-[variant=outline]:bg-transparent data-[variant=outline]:text-current data-[variant=outline]:border"
+            disabled={isLoading}
           >
             <Edit className="w-4 h-4" />
             <span className="hidden sm:inline">
@@ -57,6 +64,7 @@ export default function Profile() {
             onClick={() => setIsPasswordModalOpen(true)}
             variant="outline"
             className="gap-2 shadow-sm hover:shadow-md transition-all duration-200 border-purple-200 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-950/20 hover:border-purple-300 dark:hover:border-purple-700"
+            disabled={isLoading}
           >
             <Lock className="w-4 h-4" />
             <span className="hidden sm:inline">
@@ -66,7 +74,11 @@ export default function Profile() {
           </Button>
         </div>
       </div>
-      <UserInfo isEditMode={isEditMode} onEditModeChange={setIsEditMode} />
+      {isLoading ? (
+        <ProfileSkeleton />
+      ) : (
+        <UserInfo isEditMode={isEditMode} onEditModeChange={setIsEditMode} />
+      )}
       <ChangePasswordModal
         open={isPasswordModalOpen}
         onOpenChange={setIsPasswordModalOpen}
