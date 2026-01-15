@@ -1,4 +1,4 @@
-import { TestAnswerOptionExplanation } from "./test-anwser-option";
+import { TestAnswerOptionExplanation } from "./test-anwser-option-explanation";
 import type { QuestionProps } from "@/hooks";
 import { t } from "@/i18n";
 

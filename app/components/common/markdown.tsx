@@ -1,24 +1,8 @@
 import ReactMarkdown from "react-markdown";
-import type { AnswerProps } from "@/modules/admin/modules/questions/types";
 
-interface TestAnswerOptionExplanationProps {
-  answer: AnswerProps;
-  allAnswers: AnswerProps[];
-  hasMultipleExplanations: boolean;
-}
-
-export function TestAnswerOptionExplanation({
-  answer,
-  allAnswers,
-  hasMultipleExplanations,
-}: TestAnswerOptionExplanationProps) {
+export default function Markdown({ content }: { content: string }) {
   return (
     <div className="prose prose-sm dark:prose-invert max-w-none">
-      {hasMultipleExplanations && (
-        <strong className="block mb-1 text-blue-900 dark:text-blue-200">
-          Answer {String.fromCharCode(65 + allAnswers.indexOf(answer))}:
-        </strong>
-      )}
       <ReactMarkdown
         components={{
           p: ({ node, ...props }) => (
@@ -96,7 +80,7 @@ export function TestAnswerOptionExplanation({
           ),
         }}
       >
-        {answer.explanation ?? ""}
+        {content}
       </ReactMarkdown>
     </div>
   );

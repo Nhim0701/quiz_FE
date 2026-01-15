@@ -10,7 +10,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { CheckCheck, Folder, Pencil } from "lucide-react";
-import { useApp, usePageData } from "@/hooks";
+import { useApp, useEditorStore, usePageData } from "@/hooks";
 import { questionSchema, type QuestionFormData } from "../schemas";
 import { useQuestionsStore } from "../hooks";
 import { useTestsStore } from "../../tests/hooks";
@@ -28,6 +28,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants/app";
 import type { QuestionProps } from "../types";
 import { questionFormBuilder } from "../schemas/question-schema";
+import { Button } from "@/components/ui/button";
+import Markdown from "@/components/common/markdown";
 
 interface QuestionFormDialogProps {
   onDelete?: (question: QuestionProps) => void;
@@ -66,6 +68,7 @@ export function QuestionFormDialog({
 
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedTestId, setSelectedTestId] = useState<string>("");
+  const { open: openEditor } = useEditorStore();
 
   // Fetch tests and categories when dialog opens
   usePageData(
@@ -124,9 +127,10 @@ export function QuestionFormDialog({
     handleSubmit,
     control,
     formState: { errors, isSubmitting },
+    setValue,
+    getValues,
     reset,
     watch,
-    setValue,
   } = methods;
 
   const watchedTestId = watch("testId");
@@ -329,6 +333,14 @@ export function QuestionFormDialog({
     showError,
   ]);
 
+  const handleEditContent = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    openEditor(getValues("content") || "", (content) => {
+      console.log(content);
+      setValue("content", content);
+    });
+  };
+
   if (!shouldShow) return null;
 
   return (
@@ -356,17 +368,28 @@ export function QuestionFormDialog({
     >
       <FormProvider {...methods}>
         <Form className="mt-6 space-y-4">
-          <TextareaField
-            id="content"
-            label={t("admin.questions.fields.content")}
-            rows={4}
-            placeholder={t("admin.questions.form.contentPlaceholder")}
-            register={register("content")}
-            error={errors.content}
-            required
-            disabled={isDisabled || loading || isSubmitting}
-            labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
-          />
+          <div className="space-y-2">
+            <TextareaField
+              id="content"
+              label={t("admin.questions.fields.content")}
+              rows={4}
+              className="hidden"
+              placeholder={t("admin.questions.form.contentPlaceholder")}
+              register={register("content")}
+              error={errors.content}
+              required
+              disabled
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+            />
+            {/* <Markdown content={getValues("content") || ""} /> */}
+            <div
+              dangerouslySetInnerHTML={{ __html: getValues("content") || "" }}
+            />
+            <Button variant="outline" onClick={handleEditContent}>
+              <Pencil className="h-4 w-4 text-green-500 dark:text-green-400" />
+              {t("common.edit")}
+            </Button>
+          </div>
 
           <ComboboxField
             id="testId"

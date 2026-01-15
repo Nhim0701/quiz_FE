@@ -5,6 +5,7 @@ import { ROUTES } from "@/constants";
 import { PERMISSIONS, RESOURCES } from "@/modules/admin/constants/permissions";
 import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
 import { hasPermission, hasResourcePermission } from "@/lib";
+import { PlateEditorSheet } from "@/components/editor/plate-editor";
 
 /**
  * Middleware to protect admin-only routes
@@ -48,5 +49,10 @@ export const clientMiddleware: Route.ClientMiddlewareFunction[] = [
 ];
 
 export default function Layout() {
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      <PlateEditorSheet />
+    </>
+  );
 }

@@ -35,3 +35,4 @@ export {
 } from "./use-filter";
 export { usePageData } from "./use-page-data";
 export { usePaginationStore, type PaginationState } from "./use-pagination";
+export { useEditorStore } from "./use-editor";
