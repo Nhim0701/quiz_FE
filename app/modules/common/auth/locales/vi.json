@@ -1,1 +1,33 @@
-{}
+{
+  "login": {
+    "title": "Chào Mừng Trở Lại",
+    "subtitle": "Đăng nhập để tiếp tục hành trình quiz của bạn",
+    "signIn": "Đăng Nhập",
+    "signingIn": "Đang đăng nhập...",
+    "rememberMe": "Ghi nhớ đăng nhập",
+    "footer": "Bằng cách tiếp tục, bạn đồng ý với Điều khoản Dịch vụ và Chính sách Bảo mật của chúng tôi",
+    "newToQuiz": "Mới tham gia Quiz?",
+    "createAccount": "Tạo Tài Khoản"
+  },
+  "register": {
+    "title": "Tạo Tài Khoản",
+    "subtitle": "Tham gia cùng chúng tôi và bắt đầu hành trình quiz của bạn",
+    "nameLabel": "Họ và Tên",
+    "namePlaceholder": "Nguyễn Văn A",
+    "confirmPasswordLabel": "Xác nhận Mật khẩu",
+    "createAccount": "Tạo Tài Khoản",
+    "creatingAccount": "Đang tạo tài khoản...",
+    "footer": "Đã có tài khoản? Đăng nhập",
+    "alreadyHaveAccount": "Đã có tài khoản?",
+    "signInInstead": "Đăng Nhập"
+  },
+  "validation": {
+    "emailRequired": "Email là bắt buộc",
+    "emailInvalid": "Vui lòng nhập địa chỉ email hợp lệ",
+    "passwordRequired": "Mật khẩu là bắt buộc",
+    "passwordMinLength": "Mật khẩu phải có ít nhất 6 ký tự",
+    "nameRequired": "Tên là bắt buộc",
+    "confirmPasswordRequired": "Vui lòng xác nhận mật khẩu",
+    "passwordsNotMatch": "Mật khẩu không khớp"
+  }
+}
