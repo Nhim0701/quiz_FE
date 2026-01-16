@@ -2,6 +2,7 @@
   "common": {
     "loading": "Loading...",
     "close": "Close",
+    "clickToPreview": "Click to preview",
     "logout": "Logout",
     "welcome": "Welcome back, {{name}}!",
     "email": "Email",
@@ -30,14 +31,23 @@
       "page": "Page {{page}}"
     },
     "search": "Search",
-    "searchPlaceholder": "Search by category name...",
     "selectPlaceholder": "Select...",
     "comboboxSearchPlaceholder": "Search...",
     "noResultsFound": "No results found.",
     "noDataAvailable": "No data available",
     "actions": "Actions",
     "seconds": "seconds",
-    "minutes": "minutes"
+    "minutes": "minutes",
+    "preview": "Preview",
+    "editorPlaceholder": "Type your content here...",
+    "searchPlaceholder": "Search by name...",
+    "saving": "Saving...",
+    "clickToShow": "Click to show"
+  },
+  "editor": {
+    "dialog": {
+      "description": "Editor dialog for editing content"
+    }
   },
   "errors": {
     "networkError": "Network error: No response received from server",
