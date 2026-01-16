@@ -361,7 +361,11 @@ export function TestsList({ roles }: TestsListProps) {
     testsWithCategoryNames.length === 0 &&
     !hasInitialFetch.current
   ) {
-    return <TestsListSkeleton />;
+    return (
+      <>
+        <TestsListSkeleton />
+      </>
+    );
   }
 
   const additionalFilters = (
@@ -394,7 +398,7 @@ export function TestsList({ roles }: TestsListProps) {
           value: searchInput,
           onChange: setSearchInput,
           onSearch: handleSearch,
-          placeholderKey: "admin.tests.filters.searchPlaceholder",
+          placeholderKey: "common.searchPlaceholder",
           className: "flex-1 min-w-[200px]",
           searchKey: "name",
         }}

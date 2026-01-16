@@ -1,1 +1,58 @@
-{}
+{
+  "stats": {
+    "totalTests": "Tổng Số Bài Kiểm Tra",
+    "averageScore": "Điểm Trung Bình",
+    "totalQuestions": "Tổng Số Câu Hỏi",
+    "correctAnswers": "Câu Trả Lời Đúng"
+  },
+  "basicInfo": {
+    "title": "Thông Tin Cơ Bản",
+    "id": "ID",
+    "about": "Giới Thiệu",
+    "address": "Địa Chỉ",
+    "details": "Chi Tiết Nhân Viên",
+    "phone": "Điện Thoại",
+    "birthday": "Ngày Sinh"
+  },
+  "professional": {
+    "title": "Thông Tin Nghề Nghiệp",
+    "jobTitle": "Chức Danh",
+    "company": "Công Ty",
+    "joinDate": "Ngày Tham Gia",
+    "noInfo": "Chưa có thông tin nghề nghiệp"
+  },
+  "edit": {
+    "title": "Chỉnh Sửa Thông Tin",
+    "updateInfo": "Cập Nhật Thông Tin",
+    "changePassword": "Đổi Mật Khẩu",
+    "userId": "ID Người Dùng",
+    "fullName": "Họ và Tên",
+    "currentPassword": "Mật Khẩu Hiện Tại",
+    "newPassword": "Mật Khẩu Mới",
+    "save": "Lưu Thay Đổi",
+    "updatePassword": "Cập Nhật Mật Khẩu"
+  },
+  "update": {
+    "success": "Cập nhật thông tin thành công!",
+    "error": "Không thể cập nhật thông tin. Vui lòng thử lại."
+  },
+  "changePassword": {
+    "success": "Đổi mật khẩu thành công!",
+    "error": "Không thể đổi mật khẩu. Vui lòng kiểm tra lại mật khẩu hiện tại.",
+    "description": "Nhập mật khẩu hiện tại và mật khẩu mới của bạn"
+  },
+  "buttons": {
+    "editInfo": "Chỉnh Sửa Thông Tin",
+    "cancelEdit": "Hủy Chỉnh Sửa",
+    "changePassword": "Đổi Mật Khẩu",
+    "save": "Lưu",
+    "cancel": "Hủy"
+  },
+  "validation": {
+    "userIdRequired": "ID người dùng là bắt buộc",
+    "fullNameRequired": "Họ và tên là bắt buộc",
+    "currentPasswordRequired": "Mật khẩu hiện tại là bắt buộc",
+    "newPasswordRequired": "Mật khẩu mới là bắt buộc",
+    "newPasswordMustBeDifferent": "Mật khẩu mới phải khác mật khẩu hiện tại"
+  }
+}

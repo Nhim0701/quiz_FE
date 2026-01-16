@@ -9,7 +9,7 @@ import {
 } from "@/components/common/form-field";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { CheckCheck, Folder, Pencil } from "lucide-react";
+import { CheckCheck, Eye, Folder, Pencil } from "lucide-react";
 import { useApp, useEditorStore, usePageData } from "@/hooks";
 import { questionSchema, type QuestionFormData } from "../schemas";
 import { useQuestionsStore } from "../hooks";
@@ -337,15 +337,27 @@ export function QuestionFormDialog({
 
   const handleEditContent = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    openEditor(getValues("content") || "", false, (content) => {
-      console.log(content);
-      setValue("content", content);
+    const value = getValues("content") || "";
+    openEditor({
+      content: value,
+      mode: "editor",
+      title: `${t("common.edit")}: ${t("admin.questions.fields.content")}`,
+      loadingLabel: t("common.saving"),
+      callback: (content) => {
+        setValue("content", content || "");
+      },
     });
   };
 
-  const handlePreviewContent = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handlePreviewContent = async (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
     e.preventDefault();
-    openEditor(getValues("content") || "", true);
+    openEditor({
+      content: getValues("content") || "",
+      mode: "html",
+      title: `${t("common.preview")}: ${t("admin.questions.fields.content")}`,
+    });
   };
 
   if (!shouldShow) return null;
@@ -388,11 +400,16 @@ export function QuestionFormDialog({
               disabled
               labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
             />
-            <Button variant="outline" onClick={handleEditContent}>
-              <Pencil className="h-4 w-4 text-green-500 dark:text-green-400" />
-              {t("common.edit")}
-            </Button>
-            <Button variant="outline" onClick={handlePreviewContent}></Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={handleEditContent}>
+                <Pencil className="h-4 w-4 text-green-500 dark:text-green-400" />
+                {t("common.edit")}
+              </Button>
+              <Button variant="outline" onClick={handlePreviewContent}>
+                <Eye className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+                {t("common.preview")}
+              </Button>
+            </div>
           </div>
 
           <ComboboxField

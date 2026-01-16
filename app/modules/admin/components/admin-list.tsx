@@ -99,6 +99,7 @@ export function AdminList<T extends { id: string | number }>({
         loading={loading}
         emptyMessage={emptyMessage}
         pagination={pagination}
+        scroll
       />
     </>
   );

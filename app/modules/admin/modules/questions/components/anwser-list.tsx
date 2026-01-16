@@ -20,6 +20,7 @@ import { useAdminListActions } from "@/modules/admin/hooks";
 import { AdminList } from "@/modules/admin/components";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DIALOG_MODES } from "@/constants";
+import { extractContentFromHtml } from "@/lib/utils";
 
 export function AnswerList() {
   const { t } = useTranslation();
@@ -109,7 +110,9 @@ export function AnswerList() {
         header: t("admin.questions.answers.columns.content"),
         className: "w-[400px]",
         render: (answer) => (
-          <span className="font-medium line-clamp-2">{answer.content}</span>
+          <span className="font-medium line-clamp-2">
+            {extractContentFromHtml(answer.content)}
+          </span>
         ),
       },
       {
@@ -144,7 +147,7 @@ export function AnswerList() {
         header: t("admin.questions.answers.columns.explanation"),
         render: (answer) => (
           <span className="text-muted-foreground">
-            {answer.explanation || "-"}
+            {extractContentFromHtml(answer.explanation || "-")}
           </span>
         ),
       },

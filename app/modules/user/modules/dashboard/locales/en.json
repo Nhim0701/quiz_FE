@@ -1,1 +1,26 @@
-{}
+{
+  "stats": {
+    "totalAnswered": "Total Answered",
+    "correctAnswers": "Correct Answers",
+    "wrongAnswers": "Wrong Answers",
+    "accuracy": "Accuracy"
+  },
+  "categoryStats": {
+    "title": "Stats by Category",
+    "correct": "correct",
+    "wrong": "wrong"
+  },
+  "testStats": {
+    "title": "Stats by Test",
+    "correct": "correct",
+    "wrong": "wrong",
+    "submissions": "submissions"
+  },
+  "recentActivity": {
+    "title": "Recent Activity",
+    "noActivity": "No activity yet. Start a test to see your progress!",
+    "notAvailable": "N/A",
+    "category": "Category",
+    "test": "Test"
+  }
+}

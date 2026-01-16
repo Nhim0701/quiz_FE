@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { format, fromUnixTime } from "date-fns";
 import packageJson from "package.json";
+import { convert } from "html-to-text";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -75,4 +76,14 @@ export function getDOMNodeByBlockId(blockId: string) {
   return window.document.querySelector(
     `[data-slate-node="element"][data-block-id="${blockId}"]`
   );
+}
+
+/**
+ * Extract content from HTML string
+ * @param html The HTML string to extract content from
+ * @returns The content from the HTML string
+ */
+export function extractContentFromHtml(html: string) {
+  const text = convert(html);
+  return text;
 }

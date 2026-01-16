@@ -4,10 +4,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "@/i18n";
 import { TextareaField } from "@/components/common/form-field";
 import { Label } from "@/components/ui/label";
-import { useApp } from "@/hooks";
+import { useApp, useEditorStore } from "@/hooks";
 import type { AnswerProps } from "../types";
 import { useAnswerStore } from "../hooks";
-import { FileText, CheckSquare, MessageSquare } from "lucide-react";
+import {
+  FileText,
+  CheckSquare,
+  MessageSquare,
+  Pencil,
+  Eye,
+} from "lucide-react";
 import {
   answerSchema,
   answerFormBuilder,
@@ -23,6 +29,7 @@ import {
   AlertDialogFooter as AlertDialogFooterComponent,
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 
 interface AnswerFormDialogProps {
   onDelete?: (answer: AnswerProps) => void;
@@ -59,6 +66,7 @@ export function AnswerFormDialog({
   } = useAnswerStore();
 
   const [isDeleting, setIsDeleting] = useState(false);
+  const { open: openEditor } = useEditorStore();
 
   const mode = (dialogMode ||
     (answer ? DIALOG_MODES.VIEW : DIALOG_MODES.CREATE)) as FormDialogMode;
@@ -76,6 +84,8 @@ export function AnswerFormDialog({
     formState: { errors, isSubmitting },
     reset,
     watch,
+    getValues,
+    setValue,
   } = methods;
 
   const currentValues = watch();
@@ -221,6 +231,64 @@ export function AnswerFormDialog({
     showError,
   ]);
 
+  const handleEditContent = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      const value = getValues("content") || "";
+      openEditor({
+        content: value,
+        mode: "editor",
+        title: `${t("common.edit")}: ${t("admin.questions.answers.columns.content")}`,
+        loadingLabel: t("common.saving"),
+        callback: (content) => {
+          setValue("content", content || "");
+        },
+      });
+    },
+    [getValues, openEditor, setValue, t]
+  );
+
+  const handlePreviewContent = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      openEditor({
+        content: getValues("content") || "",
+        mode: "html",
+        title: `${t("common.preview")}: ${t("admin.questions.answers.columns.content")}`,
+      });
+    },
+    [getValues, openEditor, t]
+  );
+
+  const handleEditExplanation = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      const value = getValues("explanation") || "";
+      openEditor({
+        content: value,
+        mode: "editor",
+        title: `${t("common.edit")}: ${t("admin.questions.answers.columns.explanation")}`,
+        loadingLabel: t("common.saving"),
+        callback: (content) => {
+          setValue("explanation", content || "");
+        },
+      });
+    },
+    [getValues, openEditor, setValue, t]
+  );
+
+  const handlePreviewExplanation = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      openEditor({
+        content: getValues("explanation") || "",
+        mode: "html",
+        title: `${t("common.preview")}: ${t("admin.questions.answers.columns.explanation")}`,
+      });
+    },
+    [getValues, openEditor, t]
+  );
+
   if (!shouldShow) return null;
 
   return (
@@ -263,12 +331,30 @@ export function AnswerFormDialog({
             <TextareaField
               id="content"
               rows={4}
+              className="hidden"
               placeholder={t("admin.questions.answers.form.contentPlaceholder")}
               register={register("content")}
               error={errors.content}
               required
-              disabled={loading || isSubmitting || isDisabled}
+              disabled
             />
+            <div className="flex items-center gap-2">
+              {(!isViewMode || isEditMode) && (
+                <Button variant="outline" onClick={handleEditContent}>
+                  <Pencil className="h-4 w-4 text-green-500 dark:text-green-400" />
+                  {t("common.edit")}
+                </Button>
+              )}
+              <Button variant="outline" onClick={handlePreviewContent}>
+                <Eye className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+                {t("common.preview")}
+              </Button>
+            </div>
+            {errors.content && (
+              <p className="text-xs text-red-600 dark:text-red-400">
+                {errors.content.message}
+              </p>
+            )}
           </div>
 
           {/* Is Correct Field */}
@@ -317,13 +403,31 @@ export function AnswerFormDialog({
             <TextareaField
               id="explanation"
               rows={3}
+              className="hidden"
               placeholder={t(
                 "admin.questions.answers.form.explanationPlaceholder"
               )}
               register={register("explanation")}
               error={errors.explanation}
-              disabled={loading || isSubmitting || isDisabled}
+              disabled
             />
+            <div className="flex items-center gap-2">
+              {(!isViewMode || isEditMode) && (
+                <Button variant="outline" onClick={handleEditExplanation}>
+                  <Pencil className="h-4 w-4 text-green-500 dark:text-green-400" />
+                  {t("common.edit")}
+                </Button>
+              )}
+              <Button variant="outline" onClick={handlePreviewExplanation}>
+                <Eye className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+                {t("common.preview")}
+              </Button>
+            </div>
+            {errors.explanation && (
+              <p className="text-xs text-red-600 dark:text-red-400">
+                {errors.explanation.message}
+              </p>
+            )}
           </div>
         </Form>
       </FormProvider>

@@ -2,6 +2,7 @@ import { Flag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { t } from "@/i18n";
 import type { QuestionProps } from "@/hooks";
+import Html from "@/components/editor/html";
 
 interface QuestionHeaderProps {
   currentIndex: number;
@@ -42,7 +43,7 @@ export const QuestionHeader = ({
           )}
         </div>
         <p className="text-base sm:text-lg text-slate-800 dark:text-slate-100 leading-relaxed">
-          {currentQuestion.content}
+          <Html content={currentQuestion.content} />
         </p>
       </div>
     </div>

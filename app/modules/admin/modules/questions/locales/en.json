@@ -41,7 +41,8 @@
         "test": "Test",
         "testPlaceholder": "Select tests...",
         "testSearch": "Search tests...",
-        "testEmpty": "No tests found."
+        "testEmpty": "No tests found.",
+        "multipleChoicePlaceholder": "Select type..."
       },
       "questionInfo": "Question Info",
       "generalInfo": "General Information",
@@ -69,7 +70,8 @@
           "contentRequired": "Answer content is required"
         },
         "form": {
-          "contentPlaceholder": "Enter answer content..."
+          "contentPlaceholder": "Enter answer content...",
+          "explanationPlaceholder": "Enter answer explanation..."
         }
       }
     }

@@ -13,9 +13,9 @@ export default function Layout() {
   return (
     <SidebarProvider className="w-screen h-screen overflow-x-hidden bg-background">
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="overflow-y-auto">
         <AppHeader />
-        <div className="h-full w-full bg-background p-6">
+        <div className="w-full bg-background p-6">
           <Outlet />
         </div>
       </SidebarInset>

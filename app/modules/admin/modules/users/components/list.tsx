@@ -402,7 +402,7 @@ export function UsersList({ roles }: UsersListProps) {
           value: searchInput,
           onChange: setSearchInput,
           onSearch: handleSearch,
-          placeholderKey: "admin.users.searchPlaceholder",
+          placeholderKey: "common.searchPlaceholder",
           className: "flex-1 min-w-[200px]",
           searchKey: "fullName",
         }}

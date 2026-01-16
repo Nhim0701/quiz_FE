@@ -279,7 +279,7 @@ export function RolesList({ roles }: RolesListProps) {
           value: searchInput,
           onChange: setSearchInput,
           onSearch: handleSearch,
-          placeholderKey: "admin.roles.searchPlaceholder",
+          placeholderKey: "common.searchPlaceholder",
           className: "flex-1 min-w-[200px]",
           searchKey: "name",
         }}

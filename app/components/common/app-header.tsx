@@ -41,7 +41,7 @@ export function AppHeader() {
   const breadcrumbs = useBreadcrumbStore((state) => state.breadcrumbs);
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-2 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b sticky top-0 z-10">
+    <header className="flex h-16 shrink-0 items-center gap-2 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b sticky top-0 z-50">
       <div className="flex items-center gap-2 px-4 flex-1 min-w-0">
         <SidebarTriggerIcon state={state} toggleSidebar={toggleSidebar} />
         <Separator

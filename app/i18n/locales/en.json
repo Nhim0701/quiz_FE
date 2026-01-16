@@ -1,6 +1,7 @@
 {
   "common": {
     "loading": "Loading...",
+    "clickToPreview": "Click to preview",
     "close": "Close",
     "logout": "Logout",
     "welcome": "Welcome back, {{name}}!",
@@ -32,7 +33,12 @@
     "noResultsFound": "No results found.",
     "noDataAvailable": "No data available",
     "actions": "Actions",
-    "minutes": "minutes"
+    "preview": "Preview",
+    "editorPlaceholder": "Type your content here...",
+    "minutes": "minutes",
+    "searchPlaceholder": "Search by name...",
+    "saving": "Saving...",
+    "clickToShow": "Click to show"
   },
   "errors": {
     "networkError": "Network error: No response received from server",
@@ -48,6 +54,11 @@
     "tokenRefreshFailed": "Token refresh failed",
     "failedToGetNewToken": "Failed to get new token",
     "tokenExpiredNoRefresh": "Token expired and no refresh token available"
+  },
+  "editor": {
+    "dialog": {
+      "description": "Editor dialog for editing content"
+    }
   },
   "info": {
     "noResultData": "No result data. Please start a test from your profile.",

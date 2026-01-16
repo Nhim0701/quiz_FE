@@ -240,7 +240,7 @@ export function NamespacesList({ roles }: NamespacesListProps) {
           value: searchInput,
           onChange: setSearchInput,
           onSearch: handleSearch,
-          placeholderKey: "admin.namespaces.searchPlaceholder",
+          placeholderKey: "common.searchPlaceholder",
           className: "flex-1 min-w-[200px]",
           searchKey: "name",
         }}

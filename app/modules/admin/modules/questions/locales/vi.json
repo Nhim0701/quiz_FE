@@ -41,7 +41,8 @@
         "test": "Bài Kiểm Tra",
         "testPlaceholder": "Chọn bài kiểm tra...",
         "testSearch": "Tìm kiếm bài kiểm tra...",
-        "testEmpty": "Không tìm thấy bài kiểm tra nào."
+        "testEmpty": "Không tìm thấy bài kiểm tra nào.",
+        "multipleChoicePlaceholder": "Chọn loại..."
       },
       "questionInfo": "Thông Tin Câu Hỏi",
       "generalInfo": "Thông Tin Chung",
@@ -69,7 +70,8 @@
           "contentRequired": "Nội dung câu trả lời là bắt buộc"
         },
         "form": {
-          "contentPlaceholder": "Nhập nội dung câu trả lời..."
+          "contentPlaceholder": "Nhập nội dung câu trả lời...",
+          "explanationPlaceholder": "Nhập giải thích câu trả lời..."
         }
       }
     }

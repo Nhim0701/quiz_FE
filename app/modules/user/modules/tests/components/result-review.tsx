@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ResultSidebar } from "./result-sidebar";
 import { TestAnswerOptionExplanation } from "./test-anwser-option-explanation";
+import Html from "@/components/editor/html";
 
 export function ResultReview() {
   const { t } = useTranslation();
@@ -96,7 +97,7 @@ export function ResultReview() {
                         </Badge>
                         <div className="flex-1 min-w-0">
                           <p className="text-slate-800 dark:text-slate-100 text-sm sm:text-base pr-4">
-                            {question.content}
+                            <Html content={question.content} />
                           </p>
                           <div className="flex items-center gap-2 mt-2">
                             {userSelectedAllCorrect ? (
@@ -167,7 +168,7 @@ export function ResultReview() {
                                       {String.fromCharCode(65 + ansIdx)}
                                     </Badge>
                                     <span className="text-slate-700 dark:text-slate-200 text-sm sm:text-base flex-1 break-words whitespace-normal">
-                                      {answer.content}
+                                      <Html content={answer.content} />
                                     </span>
                                     {isCorrect && (
                                       <Check className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />

@@ -82,6 +82,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "dedent": "^1.0.0",
+    "html-to-text": "^9.0.5",
     "html2canvas-pro": "^1.6.4",
     "i18next": "^25.7.3",
     "i18next-browser-languagedetector": "^8.2.0",
@@ -122,6 +123,7 @@
   "devDependencies": {
     "@eslint/js": "^9.36.0",
     "@react-router/dev": "^7.11.0",
+    "@types/html-to-text": "^9.0.4",
     "@types/node": "^22.10.5",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",

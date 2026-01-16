@@ -1,5 +1,6 @@
 import type { AnswerProps } from "@/modules/admin/modules/questions/types";
 import Markdown from "@/components/common/markdown";
+import Html from "@/components/editor/html";
 
 interface TestAnswerOptionExplanationProps {
   content: string;
@@ -15,7 +16,7 @@ export function TestAnswerOptionExplanation({
       <strong className="block mb-1 text-blue-900 dark:text-blue-200">
         Answer {String.fromCharCode(65 + index)}:
       </strong>
-      <Markdown content={content} />
+      <Html content={content} />
     </div>
   );
 }

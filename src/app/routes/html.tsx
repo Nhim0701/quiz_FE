@@ -1,8 +1,6 @@
 import * as React from "react";
 
 import { cva } from "class-variance-authority";
-import fs from "node:fs/promises";
-import path from "node:path";
 import { type Value, normalizeNodeId } from "platejs";
 import { createStaticEditor, serializeHtml } from "platejs/static";
 
@@ -16,6 +14,12 @@ import {
 import { createHtmlDocument } from "@/lib/create-html-document";
 import { EditorStatic } from "@/components/ui/editor-static";
 
+// const getCachedTailwindCss = React.cache(async () => {
+//   const cssPath = path.join(process.cwd(), "public", "tailwind.css");
+
+//   return await fs.readFile(cssPath, "utf8");
+// });
+
 export default async function SlateToHtmlBlock() {
   const createValue = (): Value =>
     normalizeNodeId([
@@ -28,6 +32,7 @@ export default async function SlateToHtmlBlock() {
     value: createValue(),
   });
 
+  // const tailwindCss = await getCachedTailwindCss();
   const katexCDN = `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.18/dist/katex.css" integrity="sha384-9PvLvaiSKCPkFKB1ZsEoTjgnJn+O3KvEwtsz37/XrkYft3DTk2gHdYvd9oWgW3tV" crossorigin="anonymous">`;
 
   // const cookieStore = await cookies();
@@ -44,6 +49,7 @@ export default async function SlateToHtmlBlock() {
   const html = createHtmlDocument({
     editorHtml,
     katexCDN,
+    // tailwindCss,
     theme,
   });
 

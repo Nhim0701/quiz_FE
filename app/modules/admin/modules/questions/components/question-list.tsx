@@ -13,6 +13,7 @@ import {
   createArrayFilterHandler,
   useAdminListData,
   usePageData,
+  useEditorStore,
 } from "@/hooks";
 import { useAdminListActions } from "@/modules/admin/hooks";
 import { AdminList } from "@/modules/admin/components";
@@ -37,6 +38,7 @@ import {
 import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants/app";
 import { QuestionFormDialog } from "./question-form-dialog";
 import { ROUTES } from "../constants";
+import { extractContentFromHtml } from "@/lib/utils";
 
 interface QuestionsListProps {
   roles: {
@@ -59,6 +61,7 @@ export function QuestionsList({ roles }: QuestionsListProps) {
   const [selectedQuestionType, setSelectedQuestionType] = useState<
     string | undefined
   >(undefined);
+  const { open: openEditor, close: closeEditor } = useEditorStore();
 
   const {
     questions,
@@ -414,6 +417,21 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     onView: handleViewInfo,
   });
 
+  const handleViewContent = useCallback(
+    (question: QuestionProps) => {
+      openEditor({
+        content: question.content,
+        mode: "html",
+        title: t("common.preview"),
+        titleAction: () => {
+          handleViewInfo(question);
+          closeEditor();
+        },
+      });
+    },
+    [t, openEditor, handleViewInfo]
+  );
+
   const handleRefresh = useCallback(async () => {
     await fetchQuestions(page, pageSize, apiFilters);
   }, [fetchQuestions, page, pageSize, apiFilters]);
@@ -435,7 +453,17 @@ export function QuestionsList({ roles }: QuestionsListProps) {
         header: t("admin.questions.columns.content"),
         className: "w-[600px]",
         render: (question) => (
-          <span className="font-medium line-clamp-2">{question.content}</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                className="font-medium line-clamp-2 hover:cursor-pointer"
+                onClick={() => handleViewContent(question)}
+              >
+                {extractContentFromHtml(question.content)}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{t("common.clickToPreview")}</TooltipContent>
+          </Tooltip>
         ),
       },
       {
@@ -569,7 +597,7 @@ export function QuestionsList({ roles }: QuestionsListProps) {
           value: searchInput,
           onChange: setSearchInput,
           onSearch: handleSearch,
-          placeholderKey: "admin.questions.filters.searchPlaceholder",
+          placeholderKey: "common.searchPlaceholder",
           className: "flex-1 min-w-[200px]",
           searchKey: "content",
         }}

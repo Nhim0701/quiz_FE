@@ -1,6 +1,7 @@
 {
   "common": {
     "loading": "Đang tải...",
+    "clickToPreview": "Click để xem trước",
     "close": "Đóng",
     "logout": "Đăng xuất",
     "welcome": "Chào mừng trở lại, {{name}}!",
@@ -32,7 +33,12 @@
     "noResultsFound": "Không tìm thấy.",
     "noDataAvailable": "Không có dữ liệu",
     "actions": "Thao tác",
-    "minutes": "phút"
+    "minutes": "phút",
+    "preview": "Xem trước",
+    "editorPlaceholder": "Nhập nội dung của bạn ở đây...",
+    "searchPlaceholder": "Tìm kiếm theo tên...",
+    "saving": "Đang lưu...",
+    "clickToShow": "Click để xem"
   },
   "errors": {
     "networkError": "Lỗi mạng: Không nhận được phản hồi từ máy chủ",
@@ -48,6 +54,11 @@
     "tokenRefreshFailed": "Làm mới token thất bại",
     "failedToGetNewToken": "Không thể lấy token mới",
     "tokenExpiredNoRefresh": "Token đã hết hạn và không có refresh token"
+  },
+  "editor": {
+    "dialog": {
+      "description": "Hộp thoại editor cho việc chỉnh sửa nội dung"
+    }
   },
   "info": {
     "noResultData": "Không có dữ liệu kết quả. Vui lòng bắt đầu bài kiểm tra từ trang cá nhân của bạn.",
