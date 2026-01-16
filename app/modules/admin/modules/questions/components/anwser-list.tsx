@@ -147,9 +147,15 @@ export function AnswerList() {
         header: t("admin.questions.answers.columns.explanation"),
         render: (answer) => (
           <span className="text-muted-foreground">
-            {extractContentFromHtml(answer.explanation || "-")}
+            {extractContentFromHtml(answer.explanation || "-").length > 200
+              ? extractContentFromHtml(answer.explanation || "-").slice(
+                  0,
+                  200
+                ) + "..."
+              : extractContentFromHtml(answer.explanation || "-")}
           </span>
         ),
+        size: 400,
       },
     ],
     [t]

@@ -14,6 +14,7 @@ import {
   type TestProps,
 } from "@/modules/admin/modules/tests/hooks";
 import { FILTER_QUERY_PARAMS } from "@/constants";
+import { shuffleQuestionsAndAnswers } from "../utils";
 
 interface TestQuestionsState {
   test: TestProps | null;
@@ -106,6 +107,7 @@ export const useTestQuestionsStore = create<TestQuestionsState>((set) => ({
 
     try {
       const allQuestions = await fetchAllQuestions(testId);
+      const shuffledQuestions = shuffleQuestionsAndAnswers(allQuestions);
       const getTestById = useTestsStore.getState().getTestById;
       const test = await getTestById(testId);
 
@@ -115,7 +117,7 @@ export const useTestQuestionsStore = create<TestQuestionsState>((set) => ({
 
       const { initializeTest } = useTestQuestionsStore.getState();
       set({ test });
-      initializeTest(allQuestions, test.timeLimit);
+      initializeTest(shuffledQuestions, test.timeLimit);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to fetch questions";
