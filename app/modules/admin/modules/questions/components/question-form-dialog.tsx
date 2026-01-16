@@ -1,12 +1,8 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useForm, Controller, FormProvider, Form } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslation, type TranslationParams } from "@/i18n";
-import {
-  TextareaField,
-  ComboboxField,
-  FormField,
-} from "@/components/common/form-field";
+import { useTranslation } from "@/i18n";
+import { TextareaField, ComboboxField } from "@/components/common/form-field";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { CheckCheck, Eye, Folder, Pencil } from "lucide-react";
@@ -26,9 +22,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants/app";
+import { ROUTES } from "../constants";
 import type { QuestionProps } from "../types";
 import { questionFormBuilder } from "../schemas/question-schema";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router";
 
 interface QuestionFormDialogProps {
   onDelete?: (question: QuestionProps) => void;
@@ -47,6 +45,7 @@ export function QuestionFormDialog({
   onRefresh,
 }: QuestionFormDialogProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const {
     showError,
     showSuccess,
@@ -210,7 +209,8 @@ export function QuestionFormDialog({
   const onSubmit = async (data: QuestionFormData) => {
     try {
       if (mode === DIALOG_MODES.CREATE) {
-        await createQuestion({
+        // Specifically create question logic: will redirect to the question info page
+        const createdQuestion = await createQuestion({
           testId: data.testId,
           content: data.content,
           isMultipleChoice: data.isMultipleChoice || false,
@@ -218,8 +218,9 @@ export function QuestionFormDialog({
         });
         showSuccess(t("admin.questions.createSuccess"));
         closeDialog();
-        onClearFilters?.();
-        onRefresh && (await onRefresh());
+        return navigate(ROUTES.VIEW(createdQuestion.id));
+        // onClearFilters?.();
+        // onRefresh && (await onRefresh());
       } else if (question) {
         // Handle both VIEW (with edit mode) and EDIT modes
         // Note: updateQuestion requires testId and questionId
