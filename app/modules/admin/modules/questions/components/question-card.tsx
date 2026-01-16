@@ -334,7 +334,6 @@ export function QuestionCard() {
   const handleEditContent = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
-      console.log("DEBUG: handleEditContent", question?.content || "");
       openEditor({
         content: question?.content || "",
         mode: "editor",

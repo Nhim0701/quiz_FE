@@ -1,93 +1,84 @@
-import * as React from 'react';
+import { API_CONFIG } from "@/constants";
+import { apiClient } from "@/lib";
+import { UPLOAD_FILE_CONSTANTS } from "@/modules/user/modules/tests/constants";
+import type { ApiSuccessResponse } from "@/types";
+import axios from "axios";
+import { useState } from "react";
 
-import type { OurFileRouter } from '@/lib/uploadthing';
-import type {
-  ClientUploadedFileData,
-  UploadFilesOptions,
-} from 'uploadthing/types';
+interface UploadFileResponse {
+  url: string;
+  key: string;
+  expires_in: number;
+}
 
-import { generateReactHelpers } from '@uploadthing/react';
-import { toast } from 'sonner';
-import { z } from 'zod';
-
-export type UploadedFile<T = unknown> = ClientUploadedFileData<T>;
-
-interface UseUploadFileProps
-  extends Pick<
-    UploadFilesOptions<OurFileRouter['editorUploader']>,
-    'headers' | 'onUploadBegin' | 'onUploadProgress' | 'skipPolling'
-  > {
+interface UseUploadFileProps {
   onUploadComplete?: (file: UploadedFile) => void;
   onUploadError?: (error: unknown) => void;
+  headers?: Record<string, string>;
+  onUploadBegin?: (fileName: string) => void;
+  onUploadProgress?: (progress: { progress: number }) => void;
+  skipPolling?: boolean;
+}
+
+interface UploadedFile {
+  key: string; // Unique identifier
+  url: string; // Public URL of the uploaded file
+  name: string; // Original filename
+  size: number; // File size in bytes
+  type: string; // MIME type
 }
 
 export function useUploadFile({
   onUploadComplete,
   onUploadError,
-  ...props
+  onUploadProgress,
 }: UseUploadFileProps = {}) {
-  const [uploadedFile, setUploadedFile] = React.useState<UploadedFile>();
-  const [uploadingFile, setUploadingFile] = React.useState<File>();
-  const [progress, setProgress] = React.useState<number>(0);
-  const [isUploading, setIsUploading] = React.useState(false);
+  const [uploadedFile, setUploadedFile] = useState<UploadedFile>();
+  const [uploadingFile, setUploadingFile] = useState<File>();
+  const [progress, setProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
 
-  async function uploadThing(file: File) {
+  async function uploadFile(file: File) {
     setIsUploading(true);
     setUploadingFile(file);
 
     try {
-      const res = await uploadFiles('editorUploader', {
-        ...props,
-        files: [file],
-        onUploadProgress: ({ progress }) => {
-          setProgress(Math.min(progress, 100));
+      // Get presigned URL and final URL from your backend
+      const response = await apiClient.post<
+        ApiSuccessResponse<UploadFileResponse>
+      >(API_CONFIG.UPLOAD_FILE, {
+        content_type: file.type,
+        expires_in: 3600,
+        filename: file.name,
+        prefix: UPLOAD_FILE_CONSTANTS.PREFIX,
+      });
+
+      // Upload to R2 using presigned URL
+      await axios.put(response.data.data.url, file, {
+        headers: { "content-type": file.type },
+        onUploadProgress: (progressEvent) => {
+          const progress =
+            (progressEvent.loaded / (progressEvent.total || 1)) * 100;
+          setProgress(progress);
+          onUploadProgress?.({ progress });
         },
       });
 
-      setUploadedFile(res[0]);
-
-      onUploadComplete?.(res[0]);
-
-      return uploadedFile;
-    } catch (error) {
-      const errorMessage = getErrorMessage(error);
-
-      const message =
-        errorMessage.length > 0
-          ? errorMessage
-          : 'Something went wrong, please try again later.';
-
-      toast.error(message);
-
-      onUploadError?.(error);
-
-      // Mock upload for unauthenticated users
-      // toast.info('User not logged in. Mocking upload process.');
-      const mockUploadedFile = {
-        key: 'mock-key-0',
-        appUrl: `https://mock-app-url.com/${file.name}`,
+      const uploadedFile = {
+        key: response.data.data.key,
+        url: response.data.data.url,
         name: file.name,
         size: file.size,
         type: file.type,
-        url: URL.createObjectURL(file),
-      } as UploadedFile;
-
-      // Simulate upload progress
-      let progress = 0;
-
-      const simulateProgress = async () => {
-        while (progress < 100) {
-          await new Promise((resolve) => setTimeout(resolve, 50));
-          progress += 2;
-          setProgress(Math.min(progress, 100));
-        }
       };
 
-      await simulateProgress();
+      setUploadedFile(uploadedFile);
+      onUploadComplete?.(uploadedFile);
 
-      setUploadedFile(mockUploadedFile);
-
-      return mockUploadedFile;
+      return uploadedFile;
+    } catch (error) {
+      onUploadError?.(error);
+      throw error;
     } finally {
       setProgress(0);
       setIsUploading(false);
@@ -98,31 +89,8 @@ export function useUploadFile({
   return {
     isUploading,
     progress,
+    uploadFile,
     uploadedFile,
-    uploadFile: uploadThing,
     uploadingFile,
   };
-}
-
-export const { uploadFiles, useUploadThing } =
-  generateReactHelpers<OurFileRouter>();
-
-export function getErrorMessage(err: unknown) {
-  const unknownError = 'Something went wrong, please try again later.';
-
-  if (err instanceof z.ZodError) {
-    const errors = err.issues.map((issue) => issue.message);
-
-    return errors.join('\n');
-  }
-  if (err instanceof Error) {
-    return err.message;
-  }
-  return unknownError;
-}
-
-export function showErrorToast(err: unknown) {
-  const errorMessage = getErrorMessage(err);
-
-  return toast.error(errorMessage);
 }

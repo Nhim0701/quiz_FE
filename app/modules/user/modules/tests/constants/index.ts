@@ -24,3 +24,11 @@ export const ROUTES = {
 export const TIME_CONSTANTS = {
   TIMER_INTERVAL: 1000, // 1 second
 } as const;
+
+/**
+ * Upload file constants
+ */
+export const UPLOAD_FILE_CONSTANTS = {
+  PREFIX: import.meta.env.VITE_QUESTION_ASSET_PREFIX || "questions/uploads",
+  EXPIRES_IN: import.meta.env.VITE_QUESTION_ASSET_EXPIRES_IN || 3600, // 1 hour
+} as const;
