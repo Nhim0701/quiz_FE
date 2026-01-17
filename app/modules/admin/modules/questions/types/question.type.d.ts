@@ -15,6 +15,7 @@ export interface QuestionProps {
   category: string;
   test: string;
   isMultipleChoice: boolean;
+  answer_count: number;
   answers: AnswerProps[];
 }
 
