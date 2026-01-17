@@ -515,7 +515,7 @@ export function QuestionsList({ roles }: QuestionsListProps) {
         meta: { center: true },
         render: (question) => (
           <span className="text-muted-foreground">
-            {question.answer_count || 0}
+            {question.answerCount || 0}
           </span>
         ),
       },
