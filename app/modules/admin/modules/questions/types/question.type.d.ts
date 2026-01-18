@@ -15,8 +15,8 @@ export interface QuestionProps {
   category: string;
   test: string;
   isMultipleChoice: boolean;
-  answer_count: number;
   answerCount: number;
+  answers: AnswerProps[];
 }
 
 export interface QuestionState {

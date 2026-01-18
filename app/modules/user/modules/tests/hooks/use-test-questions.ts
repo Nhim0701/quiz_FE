@@ -1,8 +1,9 @@
 import { create } from "zustand";
 import type { ApiSuccessResponse, PaginationMeta } from "@/types";
-import type { QuestionProps } from "@/modules/admin/modules/questions/types";
+import type { QuestionProps, AnswerProps } from "@/modules/admin/modules/questions/types";
 import { apiClient } from "@/lib";
 import { ENDPOINTS } from "../constants";
+import { ENDPOINTS as QUESTION_ENDPOINTS } from "@/modules/admin/modules/questions/constants";
 import { useTestNavigationStore } from "./use-test-navigation";
 import { useTestAnswersStore } from "./use-test-answers";
 import { useTestFlagsStore } from "./use-test-flags";
@@ -66,6 +67,21 @@ const extractTotalPages = (meta: unknown): number => {
   return 1;
 };
 
+const fetchAnswersForQuestion = async (
+  questionId: string
+): Promise<AnswerProps[]> => {
+  const response = await apiClient.get<ApiSuccessResponse<AnswerProps[]>>(
+    QUESTION_ENDPOINTS.ANSWERS.LIST,
+    {
+      params: {
+        [FILTER_QUERY_PARAMS.FILTER_KEY(1)]: "question_id",
+        [FILTER_QUERY_PARAMS.FILTER_VALUE(1)]: questionId,
+      },
+    }
+  );
+  return response.data.data || [];
+};
+
 const fetchAllQuestions = async (testId: string): Promise<QuestionProps[]> => {
   const firstResponse = await fetchQuestionsPage(testId, 1);
   const firstPageData = firstResponse.data || [];
@@ -85,7 +101,15 @@ const fetchAllQuestions = async (testId: string): Promise<QuestionProps[]> => {
     allQuestions.push(...remainingData);
   }
 
-  return allQuestions;
+  // Fetch answers for all questions in parallel
+  const questionsWithAnswers = await Promise.all(
+    allQuestions.map(async (question) => {
+      const answers = await fetchAnswersForQuestion(question.id);
+      return { ...question, answers };
+    })
+  );
+
+  return questionsWithAnswers;
 };
 
 export const useTestQuestionsStore = create<TestQuestionsState>((set) => ({
