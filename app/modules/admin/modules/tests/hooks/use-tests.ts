@@ -4,7 +4,7 @@ import { apiClient } from "@/lib";
 import { ENDPOINTS, ERROR_MESSAGES, DEFAULT_VALUES } from "../constants";
 import type { TestProps } from "../types";
 import type { FormDialogMode } from "@/constants";
-import { DIALOG_MODES, FILTER_QUERY_PARAMS } from "@/constants";
+import { DIALOG_MODES } from "@/constants";
 import { PAGINATION } from "@/constants";
 import { t } from "@/i18n/utils";
 
@@ -118,8 +118,7 @@ export const useTestsStore = create<TestsState>((set, get) => ({
       const params: Record<string, any> = {
         page: 1,
         pageSize: PAGINATION.MAX_PAGE_SIZE_FOR_ALL,
-        [FILTER_QUERY_PARAMS.FILTER_KEY(1)]: "category_id",
-        [FILTER_QUERY_PARAMS.FILTER_VALUE(1)]: categoryId,
+        category_id: categoryId,
       };
 
       const response = await apiClient.get<

@@ -14,7 +14,6 @@ import {
   useTestsStore,
   type TestProps,
 } from "@/modules/admin/modules/tests/hooks";
-import { FILTER_QUERY_PARAMS } from "@/constants";
 import { shuffleQuestionsAndAnswers } from "../utils";
 
 interface TestQuestionsState {
@@ -52,8 +51,7 @@ const fetchQuestionsPage = async (
       params: {
         page,
         pageSize: PAGE_SIZE,
-        [FILTER_QUERY_PARAMS.FILTER_KEY(1)]: "test_id",
-        [FILTER_QUERY_PARAMS.FILTER_VALUE(1)]: testId,
+        test_id: testId,
       },
     }
   );
@@ -74,8 +72,7 @@ const fetchAnswersForQuestion = async (
     QUESTION_ENDPOINTS.ANSWERS.LIST,
     {
       params: {
-        [FILTER_QUERY_PARAMS.FILTER_KEY(1)]: "question_id",
-        [FILTER_QUERY_PARAMS.FILTER_VALUE(1)]: questionId,
+        question_id: questionId,
       },
     }
   );

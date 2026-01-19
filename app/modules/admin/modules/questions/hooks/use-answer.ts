@@ -3,7 +3,6 @@ import type { ApiSuccessResponse } from "@/types";
 import { apiClient } from "@/lib";
 import { ENDPOINTS } from "../constants";
 import type { AnswerProps } from "../types";
-import { FILTER_QUERY_PARAMS } from "@/constants";
 import type { FormDialogMode } from "@/constants";
 import { DIALOG_MODES } from "@/constants";
 
@@ -81,8 +80,7 @@ export const useAnswerStore = create<AnswerState>((set, get) => ({
         ENDPOINTS.ANSWERS.LIST,
         {
           params: {
-            [FILTER_QUERY_PARAMS.FILTER_KEY(1)]: "question_id",
-            [FILTER_QUERY_PARAMS.FILTER_VALUE(1)]: questionId,
+            question_id: questionId,
           },
         }
       );

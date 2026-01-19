@@ -19,7 +19,6 @@ import { CategoryFormDialog } from "./form-dialog";
 import { CategoriesListSkeleton } from "./list-skeleton";
 import type { ActiveFilter } from "@/components/common/filters";
 import { ROUTES as TESTS_ROUTES } from "../../tests/constants";
-import { FILTER_QUERY_PARAMS } from "@/constants/filters";
 import { List } from "lucide-react";
 
 interface CategoriesListProps {
@@ -171,8 +170,7 @@ export function CategoriesList({ roles }: CategoriesListProps) {
   const handleViewTests = useCallback(
     (category: Category) => {
       const searchParams = new URLSearchParams();
-      searchParams.set(FILTER_QUERY_PARAMS.FILTER_KEY(1), "categoryId");
-      searchParams.set(FILTER_QUERY_PARAMS.FILTER_VALUE(1), category.id);
+      searchParams.set("category_id", category.id);
       navigate(`${TESTS_ROUTES.INDEX}?${searchParams.toString()}`);
     },
     [navigate]

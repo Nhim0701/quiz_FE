@@ -47,6 +47,12 @@
         "categoryPlaceholder": "Chọn danh mục...",
         "categorySearch": "Tìm kiếm danh mục...",
         "categoryEmpty": "Không tìm thấy danh mục nào."
+      },
+      "errors": {
+        "fetchFailed": "Không thể tải danh sách bài kiểm tra",
+        "createFailed": "Không thể tạo bài kiểm tra",
+        "updateFailed": "Không thể cập nhật bài kiểm tra",
+        "deleteFailed": "Không thể xóa bài kiểm tra"
       }
     }
   }

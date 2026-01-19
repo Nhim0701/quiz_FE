@@ -16,6 +16,7 @@
       "confirmDelete": "Are you sure you want to delete permission {{name}}?",
       "empty": "No permissions found",
       "noPermission": "You don't have permission to access this page",
+      "searchPlaceholder": "Search permissions...",
       "columns": {
         "id": "ID",
         "name": "Permission Name",

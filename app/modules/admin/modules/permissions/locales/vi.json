@@ -16,6 +16,7 @@
       "confirmDelete": "Bạn có chắc chắn muốn xóa quyền {{name}}?",
       "empty": "Không có quyền nào",
       "noPermission": "Bạn không có quyền truy cập trang này",
+      "searchPlaceholder": "Tìm kiếm quyền...",
       "columns": {
         "id": "ID",
         "name": "Tên Quyền",

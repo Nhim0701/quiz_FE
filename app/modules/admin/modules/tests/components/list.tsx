@@ -29,7 +29,6 @@ import {
 import { ROUTES } from "../constants";
 import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants/app";
 import { ROUTES as QUESTIONS_ROUTES } from "../../questions/constants";
-import { FILTER_QUERY_PARAMS } from "@/constants/filters";
 
 interface TestsListProps {
   roles: {
@@ -251,8 +250,7 @@ export function TestsList({ roles }: TestsListProps) {
   const handleViewQuestions = useCallback(
     (test: TestProps) => {
       const searchParams = new URLSearchParams();
-      searchParams.set(FILTER_QUERY_PARAMS.FILTER_KEY(1), "testId");
-      searchParams.set(FILTER_QUERY_PARAMS.FILTER_VALUE(1), test.id);
+      searchParams.set("test_id", test.id);
       navigate(`${QUESTIONS_ROUTES.INDEX}?${searchParams.toString()}`);
     },
     [navigate]
