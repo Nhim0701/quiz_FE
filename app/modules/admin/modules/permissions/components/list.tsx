@@ -2,14 +2,14 @@ import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "@/i18n";
 import { type Column } from "@/components/common/data-table";
 import {
-  usePaginationStore,
+
   useFilterActions,
   useFilterHandlers,
   useFilterIdsConfig,
+  useFilterParams,
   createStringConverter,
   createArrayConverter,
-  createStringFilterHandler,
-  createArrayFilterHandler,
+
   useAdminListData,
   usePageData,
 } from "@/hooks";
@@ -37,11 +37,12 @@ interface PermissionsListProps {
 
 export function PermissionsList({ permissions }: PermissionsListProps) {
   const { t } = useTranslation();
-  const { page, pageSize, total, setPage, setTotal } = usePaginationStore();
+
+  const { getFilter, setFilter } = useFilterParams();
 
   const [searchInput, setSearchInput] = useState("");
-  const [searchValue, setSearchValue] = useState("");
-  const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
+  const searchValue = getFilter("name") || "";
+  const selectedRoleIds = useMemo(() => getFilter("roleId")?.split(",").filter(Boolean) || [], [getFilter]);
 
   const { fetchRoles, roles } = useRolesStore();
 
@@ -129,15 +130,14 @@ export function PermissionsList({ permissions }: PermissionsListProps) {
     hasInitialFetch,
     handlePageChange,
     handlePageSizeChange,
+    page,
+    pageSize,
+    total,
+    setPage,
   } = useAdminListData({
-    hookId: "permissions",
+
     filterConfig,
-    filterHandlers: {
-      name: createStringFilterHandler((value) => {
-        setSearchValue(value);
-      }),
-      roleId: createArrayFilterHandler(setSelectedRoleIds),
-    },
+
     fetchFunction: fetchPermissionsWrapper,
     onFilterAppliedFromUrl: setSearchInput,
   });
@@ -148,34 +148,31 @@ export function PermissionsList({ permissions }: PermissionsListProps) {
         filterId: "name",
         resetValue: () => {
           setSearchInput("");
-          setSearchValue("");
+          setFilter("name", null);
         },
       },
       {
         filterId: "roleId",
         resetValue: () => {
-          setSelectedRoleIds([]);
+          setFilter("roleId", null);
         },
       },
     ],
     []
   );
 
-  const handleFilterChange = useCallback(() => {
-    setPage(1);
-  }, [setPage]);
+
 
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
     handlers: filterHandlers,
-    onFilterChange: handleFilterChange,
   });
 
   const handleRemoveRole = useCallback(
     (roleId: string) => {
-      setSelectedRoleIds((prev) => prev.filter((id) => id !== roleId));
-      setPage(1);
+      const newRoles = selectedRoleIds.filter((id) => id !== roleId);
+      setFilter("roleId", newRoles.length ? newRoles.join(",") : null);
     },
-    [setPage]
+    [selectedRoleIds, setFilter]
   );
 
   const activeFilters = useMemo<ActiveFilter[]>(() => {
@@ -228,9 +225,8 @@ export function PermissionsList({ permissions }: PermissionsListProps) {
   );
 
   const handleSearch = useCallback(() => {
-    setSearchValue(searchInput);
-    setPage(1);
-  }, [searchInput, setPage]);
+    setFilter("name", searchInput);
+  }, [searchInput, setFilter]);
 
   const filterActionButtons = useFilterActions({
     onSearch: handleSearch,
@@ -332,7 +328,7 @@ export function PermissionsList({ permissions }: PermissionsListProps) {
   if (
     loading &&
     permissionsWithRoleNames.length === 0 &&
-    !hasInitialFetch.current
+    !hasInitialFetch
   ) {
     return <PermissionsListSkeleton />;
   }
@@ -343,8 +339,7 @@ export function PermissionsList({ permissions }: PermissionsListProps) {
         options={roleOptions}
         selectedValues={selectedRoleIds}
         onSelect={(values) => {
-          setSelectedRoleIds(values);
-          setPage(1);
+          setFilter("roleId", values.length ? values.join(",") : null);
         }}
         placeholder={t("admin.permissions.filters.rolePlaceholder")}
         searchPlaceholder={t("admin.permissions.filters.roleSearch")}

@@ -1,27 +1,25 @@
-import { useEffect, useMemo, useRef, useCallback } from "react";
-import { useSearchParams } from "react-router";
+import { useEffect, useMemo, useRef, useCallback, useState } from "react";
 import { useTranslation } from "@/i18n";
 import {
-  usePaginationStore,
+  usePagination,
+  useFilterParams,
   useApp,
-  FilterManager,
-  useSyncFilterToUrl,
-  useApplyFilterFromUrl,
   type FilterValueConverter,
-  type FilterHandler,
+
 } from "@/hooks";
+import { camelToSnake } from "@/lib";
 
 export interface FilterSyncConfig<T> {
   filterKey: string;
-  value: T;
+  value: T; // Used for initial value or controlled state, but we prefer URL.
   converter: FilterValueConverter<T>;
   defaultValue: T;
 }
 
 interface UseAdminListDataOptions<TData, TMeta> {
-  hookId: string;
+
   filterConfig: FilterSyncConfig<any>[];
-  filterHandlers: Record<string, FilterHandler>;
+
   fetchFunction: (
     page: number,
     pageSize: number,
@@ -34,164 +32,96 @@ interface UseAdminListDataOptions<TData, TMeta> {
 }
 
 export function useAdminListData<TData, TMeta extends { total?: number }>({
-  hookId,
+
   filterConfig,
-  filterHandlers,
+
   fetchFunction,
   onFilterAppliedFromUrl,
   getTotalFromResult,
 }: UseAdminListDataOptions<TData, TMeta>) {
   const { t } = useTranslation();
-  const [searchParams] = useSearchParams();
   const { showError } = useApp();
-  const { page, pageSize, setPage, setPageSize, setTotal } =
-    usePaginationStore();
+  const { page, pageSize, setPage, setPageSize } = usePagination();
+  const { searchParams } = useFilterParams();
 
-  const isApplyingFiltersFromUrl = useRef(false);
-  const hasInitialFetch = useRef(false);
+  const [total, setTotal] = useState(0); 
+  const [loading, setLoading] = useState(false);
+  const [hasInitialFetch, setHasInitialFetch] = useState(false);
 
-  const { hasFilterParams } = useApplyFilterFromUrl({
-    filterHandlers,
-    onFilterApplied: async () => {
-      isApplyingFiltersFromUrl.current = true;
-      hasInitialFetch.current = true;
-      setPage(1);
-
-      const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
-
-      if (onFilterAppliedFromUrl) {
-        const nameFilter = urlFilters.find(
-          (f) => f.key === "name" || f.key === "fullName" || f.key === "content"
-        );
-        if (nameFilter) {
-          onFilterAppliedFromUrl(nameFilter.value);
-        }
-      }
-
-      try {
-        const apiFilters = FilterManager.convertFiltersToApiParams(urlFilters);
-        const result = await fetchFunction(1, pageSize, apiFilters);
-        const totalCount = getTotalFromResult
-          ? getTotalFromResult(result)
-          : (result?.meta?.total ?? result?.data?.length ?? 0);
-        setTotal(totalCount);
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t("errors.fetchDashboardFailed");
-        showError(errorMessage);
-      } finally {
-        isApplyingFiltersFromUrl.current = false;
-      }
-    },
-    hookId,
-  });
-
-  useSyncFilterToUrl({
-    filters: filterConfig,
-    hookId,
-  });
-
+  // Derive API filters from URL params based on config
   const apiFilters = useMemo(() => {
-    const activeFilters: Array<{ key: string; value: string }> = [];
-    filterConfig.forEach((filter) => {
-      const converted = filter.converter(filter.value);
-      if (converted === null) return;
-
-      const isActive = Array.isArray(converted)
-        ? converted.length > 0
-        : filter.defaultValue !== undefined
-          ? converted !== filter.converter(filter.defaultValue)
-          : converted !== "";
-
-      if (isActive) {
-        const filterValue = Array.isArray(converted)
-          ? converted.join(",")
-          : converted;
-        activeFilters.push({
-          key: filter.filterKey,
-          value: filterValue,
-        });
-      }
+    const filters: Record<string, string> = {};
+    
+    // Iterate over config to allow specific keys
+    filterConfig.forEach((config) => {
+        const key = config.filterKey;
+        const value = searchParams.get(key);
+        
+        if (value !== null && value !== "") {
+            filters[camelToSnake(key)] = value;
+        }
     });
-    return FilterManager.convertFiltersToApiParams(activeFilters);
-  }, [filterConfig]);
 
-  const apiFiltersString = useMemo(
-    () => JSON.stringify(apiFilters),
-    [apiFilters]
-  );
+    return filters;
+  }, [filterConfig, searchParams]);
 
-  const memoizedFetchFunction = useRef(fetchFunction);
-  const getTotalFromResultRef = useRef(getTotalFromResult);
+  const apiFiltersString = JSON.stringify(apiFilters);
 
+  // Sync URL filters to local state (for search inputs etc)
   useEffect(() => {
-    memoizedFetchFunction.current = fetchFunction;
-    getTotalFromResultRef.current = getTotalFromResult;
-  }, [fetchFunction, getTotalFromResult]);
+      if (onFilterAppliedFromUrl) {
+           // Common pattern: "name" or "fullName" or "content" is the main search
+          const searchKey = filterConfig.find(
+              f => f.filterKey === "name" || f.filterKey === "fullName" || f.filterKey === "content"
+          )?.filterKey;
 
-  useEffect(() => {
-    if (
-      (hasFilterParams && !hasInitialFetch.current) ||
-      isApplyingFiltersFromUrl.current
-    ) {
-      return;
-    }
-
-    const loadData = async () => {
-      try {
-        const result = await memoizedFetchFunction.current(
-          page,
-          pageSize,
-          apiFilters
-        );
-        const totalCount = getTotalFromResultRef.current
-          ? getTotalFromResultRef.current(result)
-          : (result?.meta?.total ?? result?.data?.length ?? 0);
-        setTotal(totalCount);
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t("errors.fetchDashboardFailed");
-        showError(errorMessage);
-      } finally {
-        hasInitialFetch.current = true;
+          if (searchKey) {
+             const val = searchParams.get(searchKey);
+             if (val) onFilterAppliedFromUrl(val);
+          }
       }
-    };
+  }, [searchParams, filterConfig, onFilterAppliedFromUrl]);
 
-    loadData();
-  }, [
-    page,
-    pageSize,
-    apiFiltersString,
-    hasFilterParams,
-    setTotal,
-    showError,
-    t,
-  ]);
 
-  const handlePageChange = useCallback(
-    (newPage: number) => {
-      setPage(newPage);
-    },
-    [setPage]
-  );
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await fetchFunction(page, pageSize, apiFilters);
+      const totalCount = getTotalFromResult
+        ? getTotalFromResult(result)
+        : (result?.meta?.total ?? result?.data?.length ?? 0);
+      setTotal(totalCount);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : t("errors.fetchDashboardFailed");
+      showError(errorMessage);
+    } finally {
+      setLoading(false);
+      setHasInitialFetch(true);
+    }
+  }, [page, pageSize, apiFiltersString, fetchFunction, getTotalFromResult, showError, t]);
 
-  const handlePageSizeChange = useCallback(
-    (newPageSize: number) => {
-      setPageSize(newPageSize);
-    },
-    [setPageSize]
-  );
+  // Initial fetch and on params change
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   return {
     apiFilters,
-    hasFilterParams,
-    isApplyingFiltersFromUrl,
+    // Expose pagination state to consumers
+    page,
+    pageSize,
+    total,
+    setPage,
+    setPageSize,
+    setTotal, // Optional, but usually auto-set
+    handlePageChange: setPage,
+    handlePageSizeChange: setPageSize,
+    loading,
+    refresh: fetchData,
     hasInitialFetch,
-    handlePageChange,
-    handlePageSizeChange,
+    setHasInitialFetch,
   };
 }

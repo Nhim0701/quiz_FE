@@ -3,14 +3,12 @@ import { useNavigate } from "react-router";
 import { useTranslation } from "@/i18n";
 import { type Column } from "@/components/common/data-table";
 import {
-  usePaginationStore,
   useFilterActions,
   useFilterHandlers,
   useFilterIdsConfig,
+  useFilterParams,
   createStringConverter,
   createArrayConverter,
-  createStringFilterHandler,
-  createArrayFilterHandler,
   useAdminListData,
   usePageData,
   useEditorStore,
@@ -52,15 +50,15 @@ interface QuestionsListProps {
 export function QuestionsList({ roles }: QuestionsListProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { page, pageSize, total, setPage, setTotal } = usePaginationStore();
+  const { getFilter, setFilter } = useFilterParams();
 
   const [searchInput, setSearchInput] = useState("");
-  const [searchValue, setSearchValue] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedTests, setSelectedTests] = useState<string[]>([]);
-  const [selectedQuestionType, setSelectedQuestionType] = useState<
-    string | undefined
-  >(undefined);
+  const searchValue = getFilter("content") || "";
+  
+  const selectedCategories = useMemo(() => getFilter("categoryId")?.split(",").filter(Boolean) || [], [getFilter]);
+  const selectedTests = useMemo(() => getFilter("testId")?.split(",").filter(Boolean) || [], [getFilter]);
+  const selectedQuestionType = getFilter("isMultipleChoice") || undefined;
+
   const { open: openEditor, close: closeEditor } = useEditorStore();
 
   const {
@@ -104,9 +102,9 @@ export function QuestionsList({ roles }: QuestionsListProps) {
         (testId) => !validTestIds.includes(testId)
       );
       if (invalidTests.length > 0) {
-        setSelectedTests((prev) =>
-          prev.filter((testId) => validTestIds.includes(testId))
-        );
+        // Update URL directly
+        const valid = selectedTests.filter((testId) => validTestIds.includes(testId));
+        setFilter("testId", valid.length ? valid.join(",") : null);
       }
     }
   }, [selectedCategories, tests, selectedTests]);
@@ -135,25 +133,25 @@ export function QuestionsList({ roles }: QuestionsListProps) {
         filterId: "content",
         resetValue: () => {
           setSearchInput("");
-          setSearchValue("");
+          setFilter("content", null);
         },
       },
       {
         filterId: "categoryId",
         resetValue: () => {
-          setSelectedCategories([]);
+          setFilter("categoryId", null);
         },
       },
       {
         filterId: "testId",
         resetValue: () => {
-          setSelectedTests([]);
+          setFilter("testId", null);
         },
       },
       {
         filterId: "isMultipleChoice",
         resetValue: () => {
-          setSelectedQuestionType(undefined);
+          setFilter("isMultipleChoice", null);
         },
       },
     ],
@@ -217,17 +215,14 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     hasInitialFetch,
     handlePageChange,
     handlePageSizeChange,
+    page,
+    pageSize,
+    total,
+    setPage,
   } = useAdminListData({
-    hookId: "questions",
+
     filterConfig,
-    filterHandlers: {
-      content: createStringFilterHandler((value) => {
-        setSearchValue(value);
-      }),
-      categoryId: createArrayFilterHandler(setSelectedCategories),
-      testId: createArrayFilterHandler(setSelectedTests),
-      isMultipleChoice: createStringFilterHandler(setSelectedQuestionType),
-    },
+
     fetchFunction: fetchQuestionsWrapper,
     onFilterAppliedFromUrl: setSearchInput,
   });
@@ -279,13 +274,8 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     t,
   ]);
 
-  const handleFilterChange = useCallback(() => {
-    setPage(1);
-  }, [setPage]);
-
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
     handlers: filterHandlers,
-    onFilterChange: handleFilterChange,
   });
 
   const filterIdsConfig = useFilterIdsConfig({
@@ -299,9 +289,8 @@ export function QuestionsList({ roles }: QuestionsListProps) {
   });
 
   const handleSearch = useCallback(() => {
-    setSearchValue(searchInput);
-    setPage(1);
-  }, [searchInput, setPage]);
+    setFilter("content", searchInput);
+  }, [searchInput, setFilter]);
 
   const filterActionButtons = useFilterActions({
     onSearch: handleSearch,
@@ -311,18 +300,18 @@ export function QuestionsList({ roles }: QuestionsListProps) {
 
   const handleRemoveCategory = useCallback(
     (categoryId: string) => {
-      setSelectedCategories((prev) => prev.filter((id) => id !== categoryId));
-      setPage(1);
+      const newCats = selectedCategories.filter((id) => id !== categoryId);
+      setFilter("categoryId", newCats.length ? newCats.join(",") : null);
     },
-    [setPage]
+    [selectedCategories, setFilter]
   );
 
   const handleRemoveTest = useCallback(
     (testId: string) => {
-      setSelectedTests((prev) => prev.filter((id) => id !== testId));
-      setPage(1);
+      const newTests = selectedTests.filter((id) => id !== testId);
+      setFilter("testId", newTests.length ? newTests.join(",") : null);
     },
-    [setPage]
+    [selectedTests, setFilter]
   );
 
   const handleRemoveActiveFilter = useCallback(
@@ -379,9 +368,7 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     }));
   }, [questions, testMap]);
 
-  useEffect(() => {
-    setTotal(questionsTotal);
-  }, [questionsTotal, setTotal]);
+
 
   const paginationProps = useMemo(
     () => ({
@@ -527,7 +514,7 @@ export function QuestionsList({ roles }: QuestionsListProps) {
   if (
     loading &&
     questionsWithTestNames.length === 0 &&
-    !hasInitialFetch.current
+    !hasInitialFetch
   ) {
     return <QuestionsListSkeleton />;
   }
@@ -538,8 +525,7 @@ export function QuestionsList({ roles }: QuestionsListProps) {
         options={categoryOptions}
         selectedValues={selectedCategories}
         onSelect={(values) => {
-          setSelectedCategories(values);
-          setPage(1);
+          setFilter("categoryId", values.length ? values.join(",") : null);
         }}
         placeholder={t("admin.questions.filters.categoryPlaceholder")}
         searchPlaceholder={t("admin.questions.filters.categorySearch")}
@@ -551,8 +537,7 @@ export function QuestionsList({ roles }: QuestionsListProps) {
         options={testOptions}
         selectedValues={selectedTests}
         onSelect={(values) => {
-          setSelectedTests(values);
-          setPage(1);
+          setFilter("testId", values.length ? values.join(",") : null);
         }}
         placeholder={t("admin.questions.filters.testPlaceholder")}
         searchPlaceholder={t("admin.questions.filters.testSearch")}
@@ -576,10 +561,8 @@ export function QuestionsList({ roles }: QuestionsListProps) {
         buttonClassName="w-full sm:w-[200px] justify-between"
         filterColor="yellow"
         onSelect={(value) => {
-          setSelectedQuestionType(
-            value === selectedQuestionType ? undefined : value
-          );
-          setPage(1);
+          const newValue = value === selectedQuestionType ? undefined : value;
+          setFilter("isMultipleChoice", newValue || null);
         }}
       />
     </>

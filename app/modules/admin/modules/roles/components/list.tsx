@@ -2,13 +2,13 @@ import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "@/i18n";
 import { type Column } from "@/components/common/data-table";
 import {
-  usePaginationStore,
+  createStringConverter,
+
+  useAdminListData,
+  useFilterParams,
   useFilterActions,
   useFilterHandlers,
   useFilterIdsConfig,
-  createStringConverter,
-  createStringFilterHandler,
-  useAdminListData,
 } from "@/hooks";
 import { useAdminListActions } from "@/modules/admin/hooks";
 import { AdminList } from "@/modules/admin/components";
@@ -31,10 +31,11 @@ interface RolesListProps {
 
 export function RolesList({ roles }: RolesListProps) {
   const { t } = useTranslation();
-  const { page, pageSize, total, setPage, setTotal } = usePaginationStore();
+
+  const { getFilter, setFilter } = useFilterParams();
 
   const [searchInput, setSearchInput] = useState("");
-  const [searchValue, setSearchValue] = useState("");
+  const searchValue = getFilter("name") || "";
 
   const {
     roles: rolesList,
@@ -82,14 +83,14 @@ export function RolesList({ roles }: RolesListProps) {
     hasInitialFetch,
     handlePageChange,
     handlePageSizeChange,
+    page,
+    pageSize,
+    total,
+    setPage,
   } = useAdminListData({
-    hookId: "roles",
+
     filterConfig,
-    filterHandlers: {
-      name: createStringFilterHandler((value) => {
-        setSearchValue(value);
-      }),
-    },
+
     fetchFunction: fetchRolesWrapper,
     onFilterAppliedFromUrl: setSearchInput,
   });
@@ -100,20 +101,17 @@ export function RolesList({ roles }: RolesListProps) {
         filterId: "name",
         resetValue: () => {
           setSearchInput("");
-          setSearchValue("");
+          setFilter("name", null);
         },
       },
     ],
-    []
+    [setFilter]
   );
 
-  const handleFilterChange = useCallback(() => {
-    setPage(1);
-  }, [setPage]);
+
 
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
     handlers: filterHandlers,
-    onFilterChange: handleFilterChange,
   });
 
   const activeFilters = useMemo<ActiveFilter[]>(
@@ -138,9 +136,8 @@ export function RolesList({ roles }: RolesListProps) {
   });
 
   const handleSearch = useCallback(() => {
-    setSearchValue(searchInput);
-    setPage(1);
-  }, [searchInput, setPage]);
+    setFilter("name", searchInput);
+  }, [searchInput, setFilter]);
 
   const filterActionButtons = useFilterActions({
     onSearch: handleSearch,
@@ -263,7 +260,7 @@ export function RolesList({ roles }: RolesListProps) {
     await fetchRoles(page, pageSize, apiFilters);
   }, [fetchRoles, page, pageSize, apiFilters]);
 
-  if (loading && rolesList.length === 0 && !hasInitialFetch.current) {
+  if (loading && rolesList.length === 0 && !hasInitialFetch) {
     return <RolesListSkeleton />;
   }
 

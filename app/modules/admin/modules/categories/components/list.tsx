@@ -4,13 +4,13 @@ import { useTranslation } from "@/i18n";
 import { DIALOG_MODES } from "@/constants";
 import { type Column } from "@/components/common/data-table";
 import {
-  usePaginationStore,
   createStringConverter,
-  createStringFilterHandler,
+
   useAdminListData,
   useFilterActions,
   useFilterHandlers,
   useFilterIdsConfig,
+  useFilterParams,
 } from "@/hooks";
 import { useAdminListActions } from "@/modules/admin/hooks";
 import { AdminList } from "@/modules/admin/components";
@@ -34,10 +34,10 @@ interface CategoriesListProps {
 export function CategoriesList({ roles }: CategoriesListProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { page, pageSize, total, setPage, setTotal } = usePaginationStore();
+  const { getFilter, setFilter } = useFilterParams();
 
   const [searchInput, setSearchInput] = useState("");
-  const [searchValue, setSearchValue] = useState("");
+  const searchValue = getFilter("name") || "";
 
   const {
     categories,
@@ -86,14 +86,13 @@ export function CategoriesList({ roles }: CategoriesListProps) {
     hasInitialFetch,
     handlePageChange,
     handlePageSizeChange,
+    page,
+    pageSize,
+    total,
+    setPage,
   } = useAdminListData({
-    hookId: "categories",
+
     filterConfig,
-    filterHandlers: {
-      name: createStringFilterHandler((value) => {
-        setSearchValue(value);
-      }),
-    },
     fetchFunction: fetchCategoriesWrapper,
     onFilterAppliedFromUrl: setSearchInput,
   });
@@ -104,11 +103,11 @@ export function CategoriesList({ roles }: CategoriesListProps) {
         filterId: "name",
         resetValue: () => {
           setSearchInput("");
-          setSearchValue("");
+          setFilter("name", null);
         },
       },
     ],
-    []
+    [setFilter]
   );
 
   const activeFilters = useMemo<ActiveFilter[]>(
@@ -125,13 +124,10 @@ export function CategoriesList({ roles }: CategoriesListProps) {
     [searchValue, t]
   );
 
-  const handleFilterChange = useCallback(() => {
-    setPage(1);
-  }, [setPage]);
+
 
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
     handlers: filterHandlers,
-    onFilterChange: handleFilterChange,
   });
 
   const filterIdsConfig = useFilterIdsConfig({
@@ -142,9 +138,8 @@ export function CategoriesList({ roles }: CategoriesListProps) {
   });
 
   const handleSearch = useCallback(() => {
-    setSearchValue(searchInput);
-    setPage(1);
-  }, [searchInput, setPage]);
+    setFilter("name", searchInput);
+  }, [searchInput, setFilter]);
 
   const filterActionButtons = useFilterActions({
     onSearch: handleSearch,
@@ -251,16 +246,14 @@ export function CategoriesList({ roles }: CategoriesListProps) {
     [t]
   );
 
-  useEffect(() => {
-    setTotal(categoriesTotal);
-  }, [categoriesTotal, setTotal]);
+
 
   const handleRefresh = useCallback(async () => {
     await fetchCategories(page, pageSize, apiFilters);
   }, [fetchCategories, page, pageSize, apiFilters]);
 
   // Show skeleton on initial load
-  if (loading && categories.length === 0 && !hasInitialFetch.current) {
+  if (loading && categories.length === 0 && !hasInitialFetch) {
     return <CategoriesListSkeleton />;
   }
 

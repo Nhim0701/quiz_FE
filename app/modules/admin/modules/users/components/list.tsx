@@ -2,14 +2,14 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useTranslation } from "@/i18n";
 import { type Column } from "@/components/common/data-table";
 import {
-  usePaginationStore,
+
   useFilterActions,
   useFilterHandlers,
   useFilterIdsConfig,
+  useFilterParams,
   createStringConverter,
   createArrayConverter,
-  createStringFilterHandler,
-  createArrayFilterHandler,
+
   useAdminListData,
   usePageData,
 } from "@/hooks";
@@ -40,11 +40,12 @@ interface UsersListProps {
 
 export function UsersList({ roles }: UsersListProps) {
   const { t } = useTranslation();
-  const { page, pageSize, total, setPage, setTotal } = usePaginationStore();
+
+  const { getFilter, setFilter } = useFilterParams();
 
   const [searchInput, setSearchInput] = useState("");
-  const [searchValue, setSearchValue] = useState("");
-  const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
+  const searchValue = getFilter("fullName") || "";
+  const selectedRoleIds = useMemo(() => getFilter("roleId")?.split(",").filter(Boolean) || [], [getFilter]);
 
   const {
     users,
@@ -98,13 +99,13 @@ export function UsersList({ roles }: UsersListProps) {
         filterId: "fullName",
         resetValue: () => {
           setSearchInput("");
-          setSearchValue("");
+          setFilter("fullName", null);
         },
       },
       {
         filterId: "roleId",
         resetValue: () => {
-          setSelectedRoleIds([]);
+          setFilter("roleId", null);
         },
       },
     ],
@@ -155,34 +156,30 @@ export function UsersList({ roles }: UsersListProps) {
     hasInitialFetch,
     handlePageChange,
     handlePageSizeChange,
+    page,
+    pageSize,
+    total,
+    setPage,
   } = useAdminListData({
-    hookId: "users",
+
     filterConfig,
-    filterHandlers: {
-      fullName: createStringFilterHandler((value) => {
-        setSearchValue(value);
-      }),
-      roleId: createArrayFilterHandler(setSelectedRoleIds),
-    },
+
     fetchFunction: fetchUsersWrapper,
     onFilterAppliedFromUrl: setSearchInput,
   });
 
-  const handleFilterChange = useCallback(() => {
-    setPage(1);
-  }, [setPage]);
+
 
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
     handlers: filterHandlers,
-    onFilterChange: handleFilterChange,
   });
 
   const handleRemoveRole = useCallback(
     (roleId: string) => {
-      setSelectedRoleIds((prev) => prev.filter((id) => id !== roleId));
-      setPage(1);
+      const newRoles = selectedRoleIds.filter((id) => id !== roleId);
+      setFilter("roleId", newRoles.length ? newRoles.join(",") : null);
     },
-    [setPage]
+    [selectedRoleIds, setFilter]
   );
 
   const activeFilters = useMemo<ActiveFilter[]>(() => {
@@ -226,9 +223,8 @@ export function UsersList({ roles }: UsersListProps) {
   });
 
   const handleSearch = useCallback(() => {
-    setSearchValue(searchInput);
-    setPage(1);
-  }, [searchInput, setPage]);
+    setFilter("fullName", searchInput);
+  }, [searchInput, setFilter]);
 
   const filterActionButtons = useFilterActions({
     onSearch: handleSearch,
@@ -236,9 +232,7 @@ export function UsersList({ roles }: UsersListProps) {
     onClearFilters: handleClearAllFilters,
   });
 
-  useEffect(() => {
-    setTotal(usersTotal);
-  }, [usersTotal, setTotal]);
+
 
   const paginationProps = useMemo(
     () => ({
@@ -370,7 +364,7 @@ export function UsersList({ roles }: UsersListProps) {
     await fetchUsers(page, pageSize, apiFilters);
   }, [fetchUsers, page, pageSize, apiFilters]);
 
-  if (loading && users.length === 0 && !hasInitialFetch.current) {
+  if (loading && users.length === 0 && !hasInitialFetch) {
     return <UsersListSkeleton />;
   }
 
@@ -379,8 +373,7 @@ export function UsersList({ roles }: UsersListProps) {
       options={roleOptions}
       selectedValues={selectedRoleIds}
       onSelect={(values) => {
-        setSelectedRoleIds(values);
-        setPage(1);
+        setFilter("roleId", values.length ? values.join(",") : null);
       }}
       placeholder={t("admin.users.filters.rolePlaceholder")}
       searchPlaceholder={t("admin.users.filters.roleSearch")}

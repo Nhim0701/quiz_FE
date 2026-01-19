@@ -2,13 +2,12 @@ import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "@/i18n";
 import { type Column } from "@/components/common/data-table";
 import {
-  usePaginationStore,
+  createStringConverter,
+  useAdminListData,
+  useFilterParams,
   useFilterActions,
   useFilterHandlers,
   useFilterIdsConfig,
-  createStringConverter,
-  createStringFilterHandler,
-  useAdminListData,
 } from "@/hooks";
 import { useAdminListActions } from "@/modules/admin/hooks";
 import { AdminList } from "@/modules/admin/components";
@@ -29,10 +28,10 @@ interface NamespacesListProps {
 
 export function NamespacesList({ roles }: NamespacesListProps) {
   const { t } = useTranslation();
-  const { page, pageSize, total, setPage, setTotal } = usePaginationStore();
 
+  const { getFilter, setFilter } = useFilterParams();
   const [searchInput, setSearchInput] = useState("");
-  const [searchValue, setSearchValue] = useState("");
+  const searchValue = getFilter("name") || "";
 
   const { namespaces, loading, fetchNamespaces, deleteNamespace, openDialog } =
     useNamespacesStore();
@@ -75,14 +74,11 @@ export function NamespacesList({ roles }: NamespacesListProps) {
     hasInitialFetch,
     handlePageChange,
     handlePageSizeChange,
+    page,
+    pageSize,
+    total,
   } = useAdminListData({
-    hookId: "namespaces",
     filterConfig,
-    filterHandlers: {
-      name: createStringFilterHandler((value) => {
-        setSearchValue(value);
-      }),
-    },
     fetchFunction: fetchNamespacesWrapper,
     onFilterAppliedFromUrl: setSearchInput,
   });
@@ -93,20 +89,15 @@ export function NamespacesList({ roles }: NamespacesListProps) {
         filterId: "name",
         resetValue: () => {
           setSearchInput("");
-          setSearchValue("");
+          setFilter("name", null);
         },
       },
     ],
-    []
+    [setFilter]
   );
-
-  const handleFilterChange = useCallback(() => {
-    setPage(1);
-  }, [setPage]);
 
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
     handlers: filterHandlers,
-    onFilterChange: handleFilterChange,
   });
 
   const activeFilters = useMemo<ActiveFilter[]>(
@@ -131,9 +122,8 @@ export function NamespacesList({ roles }: NamespacesListProps) {
   });
 
   const handleSearch = useCallback(() => {
-    setSearchValue(searchInput);
-    setPage(1);
-  }, [searchInput, setPage]);
+    setFilter("name", searchInput);
+  }, [searchInput, setFilter]);
 
   const filterActionButtons = useFilterActions({
     onSearch: handleSearch,
@@ -224,7 +214,7 @@ export function NamespacesList({ roles }: NamespacesListProps) {
     await fetchNamespaces(page, pageSize, apiFilters);
   }, [fetchNamespaces, page, pageSize, apiFilters]);
 
-  if (loading && namespaces.length === 0 && !hasInitialFetch.current) {
+  if (loading && namespaces.length === 0 && !hasInitialFetch) {
     return <NamespacesListSkeleton />;
   }
 

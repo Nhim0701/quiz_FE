@@ -3,14 +3,14 @@ import { useNavigate } from "react-router";
 import { useTranslation } from "@/i18n";
 import { type Column } from "@/components/common/data-table";
 import {
-  usePaginationStore,
+
   useFilterActions,
   useFilterHandlers,
   useFilterIdsConfig,
+  useFilterParams,
   createStringConverter,
   createArrayConverter,
-  createStringFilterHandler,
-  createArrayFilterHandler,
+
   useAdminListData,
   usePageData,
 } from "@/hooks";
@@ -43,11 +43,12 @@ interface TestsListProps {
 export function TestsList({ roles }: TestsListProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { page, pageSize, total, setPage, setTotal } = usePaginationStore();
+
+  const { getFilter, setFilter } = useFilterParams();
 
   const [searchInput, setSearchInput] = useState("");
-  const [searchValue, setSearchValue] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const searchValue = getFilter("name") || "";
+  const selectedCategories = useMemo(() => getFilter("categoryId")?.split(",").filter(Boolean) || [], [getFilter]);
 
   const { tests, loading, fetchTests, deleteTest, openDialog } =
     useTestsStore();
@@ -129,15 +130,14 @@ export function TestsList({ roles }: TestsListProps) {
     hasInitialFetch,
     handlePageChange,
     handlePageSizeChange,
+    page,
+    pageSize,
+    total,
+    setPage,
   } = useAdminListData({
-    hookId: "tests",
+
     filterConfig,
-    filterHandlers: {
-      name: createStringFilterHandler((value) => {
-        setSearchValue(value);
-      }),
-      categoryId: createArrayFilterHandler(setSelectedCategories),
-    },
+
     fetchFunction: fetchTestsWrapper,
     onFilterAppliedFromUrl: setSearchInput,
   });
@@ -148,34 +148,31 @@ export function TestsList({ roles }: TestsListProps) {
         filterId: "name",
         resetValue: () => {
           setSearchInput("");
-          setSearchValue("");
+          setFilter("name", null);
         },
       },
       {
         filterId: "categoryId",
         resetValue: () => {
-          setSelectedCategories([]);
+          setFilter("categoryId", null);
         },
       },
     ],
     []
   );
 
-  const handleFilterChange = useCallback(() => {
-    setPage(1);
-  }, [setPage]);
+
 
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
     handlers: filterHandlers,
-    onFilterChange: handleFilterChange,
   });
 
   const handleRemoveCategory = useCallback(
     (categoryId: string) => {
-      setSelectedCategories((prev) => prev.filter((id) => id !== categoryId));
-      setPage(1);
+      const newCats = selectedCategories.filter((id) => id !== categoryId);
+      setFilter("categoryId", newCats.length ? newCats.join(",") : null);
     },
-    [setPage]
+    [selectedCategories, setFilter]
   );
 
   const activeFilters = useMemo<ActiveFilter[]>(() => {
@@ -219,9 +216,8 @@ export function TestsList({ roles }: TestsListProps) {
   });
 
   const handleSearch = useCallback(() => {
-    setSearchValue(searchInput);
-    setPage(1);
-  }, [searchInput, setPage]);
+    setFilter("name", searchInput);
+  }, [searchInput, setFilter]);
 
   const filterActionButtons = useFilterActions({
     onSearch: handleSearch,
@@ -359,7 +355,7 @@ export function TestsList({ roles }: TestsListProps) {
   if (
     loading &&
     testsWithCategoryNames.length === 0 &&
-    !hasInitialFetch.current
+    !hasInitialFetch
   ) {
     return (
       <>
@@ -374,8 +370,7 @@ export function TestsList({ roles }: TestsListProps) {
         options={categoryOptions}
         selectedValues={selectedCategories}
         onSelect={(values) => {
-          setSelectedCategories(values);
-          setPage(1);
+          setFilter("categoryId", values.length ? values.join(",") : null);
         }}
         placeholder={t("admin.tests.filters.categoryPlaceholder")}
         searchPlaceholder={t("admin.tests.filters.categorySearch")}

@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useTranslation, type TranslationKey } from "@/i18n";
-import { usePaginationStore, useApp } from "@/hooks";
+import { usePagination, useApp } from "@/hooks";
 import { useAdminDeleteDialog } from "./use-admin-delete-dialog";
 import type { Action } from "@/components/common/data-table";
 import { Edit, Eye, Trash2 } from "lucide-react";
@@ -54,7 +54,7 @@ export function useAdminListActions<T extends { id: string }>({
   deleteIcon,
 }: UseAdminListActionsConfig<T>) {
   const { t } = useTranslation();
-  const { pageSize } = usePaginationStore();
+  const { pageSize } = usePagination();
 
   const { handleDelete: handleDeleteInternal } = useAdminDeleteDialog<T>({
     deleteFunction,

@@ -1,60 +1,52 @@
-import { create } from "zustand";
+import { useSearchParams } from "react-router";
+import { useCallback } from "react";
 import { PAGINATION } from "@/constants";
 
 export interface PaginationState {
   page: number;
   pageSize: number;
-  total: number;
-  currentRoute: string | null;
   setPage: (page: number) => void;
   setPageSize: (pageSize: number) => void;
-  setTotal: (total: number) => void;
-  setCurrentRoute: (route: string) => void;
-  reset: () => void;
 }
 
-// Default pagination values
-const DEFAULT_VALUES = {
-  page: PAGINATION.DEFAULT_PAGE,
-  pageSize: PAGINATION.DEFAULT_PAGE_SIZE,
-  total: 0,
-  currentRoute: null as string | null,
-} as const;
+export const usePagination = (): PaginationState => {
+  const [searchParams, setSearchParams] = useSearchParams();
 
-// Helper to get reset state
-const getResetState = () => ({
-  page: DEFAULT_VALUES.page,
-  pageSize: DEFAULT_VALUES.pageSize,
-  total: DEFAULT_VALUES.total,
-  currentRoute: DEFAULT_VALUES.currentRoute,
-});
+  const page = Number(searchParams.get("page")) || PAGINATION.DEFAULT_PAGE;
+  const pageSize =
+    Number(searchParams.get("pageSize")) || PAGINATION.DEFAULT_PAGE_SIZE;
 
-export const usePaginationStore = create<PaginationState>((set, get) => ({
-  ...DEFAULT_VALUES,
-  setPage: (page) => set({ page }),
-  setPageSize: (pageSize) => {
-    set({
-      pageSize,
-      page: DEFAULT_VALUES.page,
-    });
-  },
-  setTotal: (total) => set({ total }),
-  setCurrentRoute: (route: string) => {
-    const { currentRoute } = get();
-    const isRouteChanged = currentRoute !== null && currentRoute !== route;
+  const setPage = useCallback(
+    (newPage: number) => {
+      setSearchParams(
+        (prev) => {
+          prev.set("page", String(newPage));
+          return prev;
+        },
+        { preventScrollReset: true }
+      );
+    },
+    [setSearchParams]
+  );
 
-    if (isRouteChanged) {
-      // Route changed - reset pagination
-      set({
-        currentRoute: route,
-        page: DEFAULT_VALUES.page,
-        pageSize: DEFAULT_VALUES.pageSize,
-        total: DEFAULT_VALUES.total,
-      });
-    } else {
-      // Same route - just update the route
-      set({ currentRoute: route });
-    }
-  },
-  reset: () => set(getResetState()),
-}));
+  const setPageSize = useCallback(
+    (newPageSize: number) => {
+      setSearchParams(
+        (prev) => {
+          prev.set("pageSize", String(newPageSize));
+          prev.set("page", String(PAGINATION.DEFAULT_PAGE)); // Reset to page 1 on page size change
+          return prev;
+        },
+        { preventScrollReset: true }
+      );
+    },
+    [setSearchParams]
+  );
+
+  return {
+    page,
+    pageSize,
+    setPage,
+    setPageSize,
+  };
+};
