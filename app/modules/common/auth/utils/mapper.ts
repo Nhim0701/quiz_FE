@@ -38,9 +38,9 @@ export class AuthMapper {
    */
   static toRegisterPayload(formData: RegisterFormData) {
     return {
-      email: formData.email,
+      userEmail: formData.email,      // Backend expects user_email
       fullName: formData.fullName,
-      password: formData.password,
+      userPassword: formData.password, // Backend expects user_password
       // confirmPassword is NOT sent to API - it's only for UI validation
     };
   }
