@@ -53,8 +53,8 @@ export class AuthMapper {
    */
   static toLoginPayload(formData: LoginFormData) {
     return {
-      email: formData.email,
-      password: formData.password,
+      userEmail: formData.email,      // Backend expects user_email
+      userPassword: formData.password, // Backend expects user_password
       rememberMe: formData.rememberMe ?? false,
     };
   }
