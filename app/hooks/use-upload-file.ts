@@ -6,9 +6,10 @@ import axios from "axios";
 import { useState } from "react";
 
 interface UploadFileResponse {
-  url: string;
+  uploadUrl: string;   // Presigned URL for uploading to S3
+  publicUrl: string;   // CloudFront URL for accessing the file
   key: string;
-  expires_in: number;
+  expiresIn: number;
 }
 
 interface UseUploadFileProps {
@@ -53,8 +54,8 @@ export function useUploadFile({
         prefix: UPLOAD_FILE_CONSTANTS.PREFIX,
       });
 
-      // Upload to R2 using presigned URL
-      await axios.put(response.data.data.url, file, {
+      // Upload to S3 using presigned URL
+      await axios.put(response.data.data.uploadUrl, file, {
         headers: { "content-type": file.type },
         onUploadProgress: (progressEvent) => {
           const progress =
@@ -66,7 +67,7 @@ export function useUploadFile({
 
       const uploadedFile = {
         key: response.data.data.key,
-        url: response.data.data.url,
+        url: response.data.data.publicUrl, // Use CloudFront URL for accessing the file
         name: file.name,
         size: file.size,
         type: file.type,
