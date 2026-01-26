@@ -28,7 +28,9 @@
       "previous": "Trước",
       "prev": "Trước",
       "next": "Tiếp",
-      "flag": "Đánh Dấu"
+      "flag": "Đánh Dấu",
+      "pause": "Tạm Dừng",
+      "resume": "Tiếp Tục"
     },
     "headers": {
       "testCompleted": "Hoàn Thành Bài Kiểm Tra!",

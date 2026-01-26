@@ -28,7 +28,9 @@
       "previous": "Previous",
       "prev": "Prev",
       "next": "Next",
-      "flag": "Flag"
+      "flag": "Flag",
+      "pause": "Pause",
+      "resume": "Resume"
     },
     "headers": {
       "testCompleted": "Test Completed!",

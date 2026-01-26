@@ -1,9 +1,9 @@
 import { create } from "zustand";
 
 interface TestFlagsState {
-  // Flags
-  flags: Record<string, boolean>; // questionId -> true/false
+  flags: Record<string, boolean>;
   toggleFlag: (questionId: string) => void;
+  setFlags: (flags: Record<string, boolean>) => void;
   resetFlags: () => void;
 }
 
@@ -22,5 +22,6 @@ export const useTestFlagsStore = create<TestFlagsState>((set, get) => ({
     });
   },
 
+  setFlags: (flags) => set({ flags }),
   resetFlags: () => set({ flags: {} }),
 }));

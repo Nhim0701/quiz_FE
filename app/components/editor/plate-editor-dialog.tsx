@@ -22,6 +22,7 @@ import { useTranslation } from "@/i18n/hooks";
 import { ACTION_TYPE_CLASSES } from "../common/data-table/constants";
 import { cn } from "@/lib";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import isHtml from "is-html";
 
 export function PlateEditorDialog() {
   const { t } = useTranslation();
@@ -46,7 +47,7 @@ export function PlateEditorDialog() {
       return new Promise((resolve) => {
         setTimeout(() => {
           const deserializedContent = editor.api.html.deserialize({
-            element: content,
+            element: isHtml(content) ? content : `<div>${content}</div>`,
           });
           editor.tf.setValue(deserializedContent as Value);
           resolve(deserializedContent);

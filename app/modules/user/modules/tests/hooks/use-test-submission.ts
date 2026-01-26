@@ -10,6 +10,7 @@ import { ENDPOINTS } from "../constants";
 import { useTestQuestionsStore } from "./use-test-questions";
 import { useTestAnswersStore } from "./use-test-answers";
 import { useTestTimerStore } from "./use-test-timer";
+import { useTestPauseStore } from "./use-test-pause";
 import { useTestsStore } from "@/modules/admin/modules/tests/hooks";
 
 interface TestSubmissionState {
@@ -79,10 +80,11 @@ export const useTestSubmissionStore = create<TestSubmissionState>((set) => ({
     const questionsStore = useTestQuestionsStore.getState();
     const answersStore = useTestAnswersStore.getState();
     const timerStore = useTestTimerStore.getState();
+    const pauseStore = useTestPauseStore.getState();
     const { setSubmitting, submit } = useTestSubmissionStore.getState();
 
-    // Stop timer
     timerStore.setTimeStarted(false);
+    pauseStore.clearPause();
 
     // Get test to get timeLimit
     const getTestById = useTestsStore.getState().getTestById;

@@ -9,6 +9,7 @@ import { useTestFlagsStore } from "./use-test-flags";
 import { useTestRevealedStore } from "./use-test-revealed";
 import { useTestTimerStore } from "./use-test-timer";
 import { useTestSubmissionStore } from "./use-test-submission";
+import { useTestPauseStore } from "./use-test-pause";
 
 /**
  * Hook to access all test stores in one place
@@ -22,6 +23,7 @@ export function useTestStore() {
   const revealedStore = useTestRevealedStore();
   const timerStore = useTestTimerStore();
   const submissionStore = useTestSubmissionStore();
+  const pauseStore = useTestPauseStore();
 
   return {
     // Questions
@@ -63,6 +65,12 @@ export function useTestStore() {
     setSubmitting: submissionStore.setSubmitting,
     submit: submissionStore.submit,
     finishTest: submissionStore.finishTest,
+
+    // Pause
+    isPaused: pauseStore.isPaused,
+    pauseTest: pauseStore.pauseTest,
+    resumeTest: pauseStore.resumeTest,
+    clearPause: pauseStore.clearPause,
   };
 }
 
@@ -76,6 +84,7 @@ export const useTestStoreState = {
     const revealedState = useTestRevealedStore.getState();
     const timerState = useTestTimerStore.getState();
     const submissionState = useTestSubmissionStore.getState();
+    const pauseState = useTestPauseStore.getState();
 
     return {
       test: questionsState.test,
@@ -88,6 +97,7 @@ export const useTestStoreState = {
       timeRemaining: timerState.timeRemaining,
       timeStarted: timerState.timeStarted,
       submitting: submissionState.submitting,
+      isPaused: pauseState.isPaused,
     };
   },
 };

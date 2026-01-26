@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { Clock, X } from "lucide-react";
+import { Clock, X, Pause, Play } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { useTestStore } from "../hooks";
 import {
@@ -24,8 +24,12 @@ export function TestHeader() {
     loading,
     finishTest,
     timeRemaining,
+    timeStarted,
     startTimer,
     setTimeRemaining,
+    isPaused,
+    pauseTest,
+    resumeTest,
   } = useTestStore();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const finishTestRef = useRef(finishTest);
@@ -35,9 +39,8 @@ export function TestHeader() {
     finishTestRef.current = finishTest;
   }, [finishTest]);
 
-  // Start timer when test and questions are ready
   useEffect(() => {
-    if (test && !loading && questions.length > 0) {
+    if (test && !loading && questions.length > 0 && !isPaused && timeStarted) {
       startTimer();
 
       intervalRef.current = setInterval(() => {
@@ -53,17 +56,38 @@ export function TestHeader() {
           });
         }
       }, TIME_CONSTANTS.TIMER_INTERVAL);
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current as NodeJS.Timeout);
+        intervalRef.current = null;
+      }
     }
     return () => {
-      intervalRef.current &&
+      if (intervalRef.current) {
         clearInterval(intervalRef.current as NodeJS.Timeout);
-      intervalRef.current = null;
+        intervalRef.current = null;
+      }
     };
-  }, [test, loading, questions.length, startTimer, navigate, testId]);
+  }, [test, loading, questions.length, startTimer, navigate, testId, isPaused, timeStarted, setTimeRemaining]);
 
   const handleClose = useCallback(() => {
+    if (testId && !isPaused) {
+      pauseTest(testId);
+    }
     navigate(ROUTES.INDEX);
-  }, [navigate]);
+  }, [navigate, testId, isPaused, pauseTest]);
+
+  const handlePause = useCallback(() => {
+    if (testId) {
+      pauseTest(testId);
+    }
+  }, [testId, pauseTest]);
+
+  const handleResume = useCallback(() => {
+    if (testId) {
+      resumeTest(testId);
+    }
+  }, [testId, resumeTest]);
 
   const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -118,6 +142,29 @@ export function TestHeader() {
               <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mr-1.5" />
               <span>{formattedTime}</span>
             </Badge>
+            {isPaused ? (
+              <Button
+                onClick={handleResume}
+                variant="outline"
+                size="icon"
+                className="flex-shrink-0 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700 hover:bg-green-200 dark:hover:bg-green-900/70"
+                aria-label={t("ui.buttons.resume")}
+                title={t("ui.buttons.resume")}
+              >
+                <Play className="w-4 h-4 sm:w-5 sm:h-5" />
+              </Button>
+            ) : (
+              <Button
+                onClick={handlePause}
+                variant="outline"
+                size="icon"
+                className="flex-shrink-0 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-700 hover:bg-amber-200 dark:hover:bg-amber-900/70"
+                aria-label={t("ui.buttons.pause")}
+                title={t("ui.buttons.pause")}
+              >
+                <Pause className="w-4 h-4 sm:w-5 sm:h-5" />
+              </Button>
+            )}
             <Button
               onClick={handleClose}
               variant="ghost"

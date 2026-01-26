@@ -4,6 +4,7 @@ import { useTestQuestionsStore } from "./use-test-questions";
 interface TestAnswersState {
   answers: Record<string, string[]>; // questionId -> array of answer ids
   toggleAnswer: (questionId: string, answerId: string) => void;
+  setAnswers: (answers: Record<string, string[]>) => void;
   resetAnswers: () => void;
 }
 
@@ -42,5 +43,6 @@ export const useTestAnswersStore = create<TestAnswersState>((set, get) => ({
     }));
   },
 
+  setAnswers: (answers) => set({ answers }),
   resetAnswers: () => set({ answers: {} }),
 }));

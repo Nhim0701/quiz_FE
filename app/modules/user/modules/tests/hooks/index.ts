@@ -6,6 +6,7 @@ export { useTestFlagsStore } from "./use-test-flags";
 export { useTestRevealedStore } from "./use-test-revealed";
 export { useTestTimerStore } from "./use-test-timer";
 export { useTestSubmissionStore } from "./use-test-submission";
+export { useTestPauseStore } from "./use-test-pause";
 export { useResultStore } from "./use-result";
 
 // Export main combined store for backward compatibility

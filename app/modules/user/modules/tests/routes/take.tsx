@@ -26,8 +26,14 @@ export default function Test() {
   const { testId } = useParams<{ testId: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { test, questions, loading, fetchAndInitializeTest, setLoading } =
-    useTestStore();
+  const {
+    test,
+    questions,
+    loading,
+    fetchAndInitializeTest,
+    setLoading,
+    resumeTest,
+  } = useTestStore();
 
   // Memoize breadcrumbs to prevent unnecessary re-renders
   const breadcrumbs = useMemo(() => {
@@ -58,8 +64,12 @@ export default function Test() {
     }
     fetchAndInitializeTest(testId, setLoading, (errorMessage) => {
       console.error(errorMessage);
+    }).then(() => {
+      if (testId) {
+        resumeTest(testId);
+      }
     });
-  }, [testId, navigate, fetchAndInitializeTest, setLoading]);
+  }, [testId, navigate, fetchAndInitializeTest, setLoading, resumeTest]);
 
   if (loading) {
     return <TestTakeSkeleton />;

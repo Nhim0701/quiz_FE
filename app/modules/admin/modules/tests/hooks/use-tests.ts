@@ -1,12 +1,12 @@
 import { create } from "zustand";
-import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
-import { apiClient } from "@/lib";
-import { ENDPOINTS, ERROR_MESSAGES, DEFAULT_VALUES } from "../constants";
+import { ERROR_MESSAGES, DEFAULT_VALUES } from "../constants";
 import type { TestProps } from "../types";
 import type { FormDialogMode } from "@/constants";
 import { DIALOG_MODES } from "@/constants";
 import { PAGINATION } from "@/constants";
 import { t } from "@/i18n/utils";
+import { testsService } from "../services/tests.service";
+import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
 
 interface TestsState {
   // Tests by category ID
@@ -115,17 +115,11 @@ export const useTestsStore = create<TestsState>((set, get) => ({
     }));
 
     try {
-      const params: Record<string, any> = {
-        page: 1,
-        pageSize: PAGINATION.MAX_PAGE_SIZE_FOR_ALL,
-        category_id: categoryId,
-      };
-
-      const response = await apiClient.get<
-        ApiSuccessResponse<Array<TestProps>>
-      >(ENDPOINTS.LIST, { params });
-
-      const tests = response.data.data || [];
+      const tests = await testsService.getTestsByCategory(
+        categoryId,
+        1,
+        PAGINATION.MAX_PAGE_SIZE_FOR_ALL
+      );
 
       set((state) => ({
         testsByCategory: {
@@ -172,11 +166,7 @@ export const useTestsStore = create<TestsState>((set, get) => ({
 
     // If not found in cache, fetch from API
     try {
-      const response = await apiClient.get<ApiSuccessResponse<TestProps>>(
-        ENDPOINTS.GET(testId)
-      );
-
-      const test = response.data.data;
+      const test = await testsService.getTestById(testId);
 
       if (test) {
         // Cache it
@@ -225,29 +215,11 @@ export const useTestsStore = create<TestsState>((set, get) => ({
   ) => {
     set({ loading: true, error: null });
     try {
-      const params: Record<string, any> = {
+      const { data, meta } = await testsService.fetchTests(
         page,
         pageSize,
-      };
-
-      // Add filter params if provided
-      if (filters) {
-        Object.entries(filters).forEach(([key, value]) => {
-          if (value && typeof value === "string" && value.trim()) {
-            params[key] = value;
-          }
-        });
-      }
-
-      const response = await apiClient.get<ApiSuccessResponse<TestProps[]>>(
-        ENDPOINTS.LIST,
-        {
-          params,
-        }
+        filters
       );
-
-      const data = response.data.data || [];
-      const meta = response.data.meta;
 
       set({
         tests: data,
@@ -266,12 +238,9 @@ export const useTestsStore = create<TestsState>((set, get) => ({
   createTest: async (data) => {
     set({ loading: true, error: null });
     try {
-      const response = await apiClient.post<ApiSuccessResponse<TestProps>>(
-        ENDPOINTS.CREATE,
-        data
-      );
+      const newTest = await testsService.createTest(data);
       set({ loading: false });
-      return response.data.data;
+      return newTest;
     } catch (error) {
       const errorMessage =
         error instanceof Error
@@ -285,11 +254,7 @@ export const useTestsStore = create<TestsState>((set, get) => ({
   updateTest: async (id, data) => {
     set({ loading: true, error: null });
     try {
-      const response = await apiClient.put<ApiSuccessResponse<TestProps>>(
-        ENDPOINTS.UPDATE(id),
-        data
-      );
-      const updatedTest = response.data.data;
+      const updatedTest = await testsService.updateTest(id, data);
 
       // Update cache
       set((state) => {
@@ -336,7 +301,7 @@ export const useTestsStore = create<TestsState>((set, get) => ({
   deleteTest: async (id) => {
     set({ loading: true, error: null });
     try {
-      await apiClient.delete(ENDPOINTS.DELETE(id));
+      await testsService.deleteTest(id);
       set({ loading: false });
     } catch (error) {
       const errorMessage =
