@@ -7,16 +7,7 @@ import { ROUTES } from "../constants";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TestTimerBadge } from "./test-timer-badge";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { TestAlertDialog } from "./test-alert-dialog";
 
 export function TestHeader() {
   const { t } = useTranslation();
@@ -173,65 +164,53 @@ export function TestHeader() {
         </div>
       </CardContent>
 
-      <AlertDialog open={showTimeExpiredDialog} onOpenChange={setShowTimeExpiredDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("ui.timerExpired.title")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("ui.timerExpired.description")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction
-              onClick={handleTimeExpiredSubmit}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t("ui.timerExpired.submit")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <TestAlertDialog
+        open={showTimeExpiredDialog}
+        onOpenChange={setShowTimeExpiredDialog}
+        title={t("ui.timerExpired.title")}
+        description={t("ui.timerExpired.description")}
+        actions={[
+          {
+            label: t("ui.timerExpired.submit"),
+            onClick: handleTimeExpiredSubmit,
+            variant: "destructive",
+          },
+        ]}
+      />
 
-      <AlertDialog open={showPausedDialog} onOpenChange={setShowPausedDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("ui.paused.title")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("ui.paused.description")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={handleResumeFromDialog} className="bg-green-500 text-white hover:bg-green-600">
-              {t("ui.paused.resumeTest")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <TestAlertDialog
+        open={showPausedDialog}
+        onOpenChange={setShowPausedDialog}
+        title={t("ui.paused.title")}
+        description={t("ui.paused.description")}
+        actions={[
+          {
+            label: t("ui.paused.resumeTest"),
+            onClick: handleResumeFromDialog,
+            variant: "green",
+          },
+        ]}
+      />
 
-      <AlertDialog open={showCloseDialog} onOpenChange={setShowCloseDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("ui.closeTest.title")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("ui.closeTest.description")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowCloseDialog(false)}>
-              {t("ui.closeTest.cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleCloseDiscardProgress}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t("ui.closeTest.discardProgress")}
-            </AlertDialogAction>
-            <AlertDialogAction onClick={handleCloseKeepProgress} className="bg-green-500 text-white hover:bg-green-600">
-              {t("ui.closeTest.keepProgress")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <TestAlertDialog
+        open={showCloseDialog}
+        onOpenChange={setShowCloseDialog}
+        title={t("ui.closeTest.title")}
+        description={t("ui.closeTest.description")}
+        cancelLabel={t("ui.closeTest.cancel")}
+        actions={[
+          {
+            label: t("ui.closeTest.discardProgress"),
+            onClick: handleCloseDiscardProgress,
+            variant: "destructive",
+          },
+          {
+            label: t("ui.closeTest.keepProgress"),
+            onClick: handleCloseKeepProgress,
+            variant: "green",
+          },
+        ]}
+      />
     </Card>
   );
 }

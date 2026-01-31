@@ -11,6 +11,7 @@ import { useTestQuestionsStore } from "./use-test-questions";
 import { useTestAnswersStore } from "./use-test-answers";
 import { useTestTimerStore } from "./use-test-timer";
 import { useTestPauseStore } from "./use-test-pause";
+import { useTestFlagsStore } from "./use-test-flags";
 import { useTestsStore } from "@/modules/admin/modules/tests/hooks";
 
 interface TestSubmissionState {
@@ -96,6 +97,7 @@ export const useTestSubmissionStore = create<TestSubmissionState>((set) => ({
 
     const { questions } = questionsStore;
     const { answers } = answersStore;
+    const { flags } = useTestFlagsStore.getState();
     const { timeRemaining } = timerStore;
 
     const submissions = buildSubmissions(answers, questions);
@@ -118,6 +120,7 @@ export const useTestSubmissionStore = create<TestSubmissionState>((set) => ({
       state: {
         answers,
         questions,
+        flags,
         summary: {
           total: questions.length,
           answered: Object.keys(answers).length,

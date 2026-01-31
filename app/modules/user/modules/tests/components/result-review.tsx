@@ -1,9 +1,11 @@
-import ReactMarkdown from "react-markdown";
 import { Check, X, Info } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useResultStore } from "../hooks/use-result";
 import { useTranslation } from "@/i18n";
-import type { AnswerProps } from "@/modules/admin/modules/questions/types";
+import type {
+  AnswerProps,
+  QuestionProps,
+} from "@/modules/admin/modules/questions/types";
 import {
   Accordion,
   AccordionContent,
@@ -13,35 +15,91 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ResultSidebar } from "./result-sidebar";
+import {
+  ResultSidebar,
+  type ResultFilterType,
+  type FilteredQuestionItem,
+} from "./result-sidebar";
 import { TestAnswerOptionExplanation } from "./test-anwser-option-explanation";
 import Html from "@/components/editor/html";
+import { isQuestionAnsweredCorrectly } from "../utils";
+import {
+  type ResultQuestionStatus,
+  RESULT_FILTERS,
+  RESULT_QUESTION_STATUS,
+} from "../constants";
 
-export function ResultReview() {
+const getQuestionStatus = (
+  question: QuestionProps,
+  userAnswerIds: string[]
+): ResultQuestionStatus => {
+  if (userAnswerIds.length === 0) return RESULT_QUESTION_STATUS.NOT_ANSWERED;
+  return isQuestionAnsweredCorrectly(question, userAnswerIds)
+    ? RESULT_QUESTION_STATUS.CORRECT
+    : RESULT_QUESTION_STATUS.INCORRECT;
+}
+
+const filterQuestions = (
+  items: FilteredQuestionItem[],
+  filter: ResultFilterType
+): FilteredQuestionItem[] => {
+  if (filter === RESULT_FILTERS.ALL) return items;
+  return items.filter((item) => {
+    if (filter === RESULT_FILTERS.FLAGGED) return item.isFlagged;
+    if (filter === RESULT_FILTERS.CORRECT) return item.status === RESULT_QUESTION_STATUS.CORRECT;
+    if (filter === RESULT_FILTERS.INCORRECT) return item.status === RESULT_QUESTION_STATUS.INCORRECT;
+    if (filter === RESULT_FILTERS.NOT_ANSWERED) return item.status === RESULT_QUESTION_STATUS.NOT_ANSWERED;
+    return true;
+  });
+};
+
+export const ResultReview = () => {
   const { t } = useTranslation();
-  const { questions, answers } = useResultStore();
+  const { questions, answers, flags = {} } = useResultStore();
   const [openQuestion, setOpenQuestion] = useState<string | undefined>(
     undefined
   );
+  const [filter, setFilter] = useState<ResultFilterType>(RESULT_FILTERS.ALL);
 
-  if (!questions || questions.length === 0 || !answers) {
-    return null;
-  }
+  const questionsWithMeta = useMemo((): FilteredQuestionItem[] => {
+    if (!questions?.length || !answers) return [];
+    return questions.map((question, idx) => {
+      const userAnswerIds = answers[question.id] || [];
+      const status = getQuestionStatus(question, userAnswerIds);
+      const isFlagged = !!flags[question.id];
+      return { question, originalIndex: idx, status, isFlagged };
+    });
+  }, [questions, answers, flags]);
 
-  const handleQuestionClick = (questionId: string) => {
+  const filteredQuestions = useMemo(
+    () => filterQuestions(questionsWithMeta, filter),
+    [questionsWithMeta, filter]
+  );
+
+  const hasNotAnswered = useMemo(
+    () =>
+      questionsWithMeta.some(
+        (item) => item.status === RESULT_QUESTION_STATUS.NOT_ANSWERED
+      ),
+    [questionsWithMeta]
+  );
+
+  const handleQuestionClick = useCallback((questionId: string) => {
     setOpenQuestion(`question-${questionId}`);
-    // Scroll after a short delay to ensure accordion is open
     setTimeout(() => {
       const element = document.getElementById(`question-${questionId}`);
       if (element) {
         element.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     }, 100);
-  };
+  }, []);
+
+  if (!questions || questions.length === 0 || !answers) {
+    return null;
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
-      {/* Main Review Area */}
       <div className="lg:col-span-3 w-full">
         <Card className="p-4 sm:p-8">
           <CardHeader className="p-0 pb-4 sm:pb-6">
@@ -57,7 +115,7 @@ export function ResultReview() {
               value={openQuestion}
               onValueChange={setOpenQuestion}
             >
-              {questions.map((question, idx) => {
+              {filteredQuestions.map(({ question, originalIndex: idx }) => {
                 const userAnswerIds = answers[question.id] || [];
                 const userAnswers = question.answers.filter((a: AnswerProps) =>
                   userAnswerIds.includes(a.id)
@@ -85,13 +143,12 @@ export function ResultReview() {
                       <div className="flex items-start gap-2 sm:gap-3 w-full text-left">
                         <Badge
                           variant="outline"
-                          className={`flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-lg font-semibold flex items-center justify-center text-sm sm:text-base ${
-                            userSelectedAllCorrect
-                              ? "bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700"
-                              : userAnswers.length > 0
-                                ? "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700"
-                                : "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-700"
-                          }`}
+                          className={`flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-lg font-semibold flex items-center justify-center text-sm sm:text-base ${userSelectedAllCorrect
+                            ? "bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700"
+                            : userAnswers.length > 0
+                              ? "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700"
+                              : "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-700"
+                            }`}
                         >
                           {idx + 1}
                         </Badge>
@@ -142,28 +199,26 @@ export function ResultReview() {
                               return (
                                 <Card
                                   key={answer.id}
-                                  className={`p-2.5 sm:p-3 border-2 ${
-                                    isSelected && isCorrect
-                                      ? "border-green-500 dark:border-green-600 bg-green-50 dark:bg-green-900/30"
-                                      : isSelected && !isCorrect
-                                        ? "border-red-500 dark:border-red-600 bg-red-50 dark:bg-red-900/30"
-                                        : isCorrect
-                                          ? "border-green-300 dark:border-green-700 bg-green-50/50 dark:bg-green-900/20"
-                                          : "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30"
-                                  }`}
+                                  className={`p-2.5 sm:p-3 border-2 ${isSelected && isCorrect
+                                    ? "border-green-500 dark:border-green-600 bg-green-50 dark:bg-green-900/30"
+                                    : isSelected && !isCorrect
+                                      ? "border-red-500 dark:border-red-600 bg-red-50 dark:bg-red-900/30"
+                                      : isCorrect
+                                        ? "border-green-300 dark:border-green-700 bg-green-50/50 dark:bg-green-900/20"
+                                        : "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30"
+                                    }`}
                                 >
                                   <div className="flex items-center gap-2 sm:gap-3">
                                     <Badge
                                       variant="outline"
-                                      className={`flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center text-xs sm:text-sm font-medium p-0 ${
-                                        isSelected && isCorrect
-                                          ? "bg-green-600 dark:bg-green-500 text-white border-green-600 dark:border-green-500"
-                                          : isSelected && !isCorrect
-                                            ? "bg-red-600 dark:bg-red-500 text-white border-red-600 dark:border-red-500"
-                                            : isCorrect
-                                              ? "bg-green-200 dark:bg-green-800 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800"
-                                              : "bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600"
-                                      }`}
+                                      className={`flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center text-xs sm:text-sm font-medium p-0 ${isSelected && isCorrect
+                                        ? "bg-green-600 dark:bg-green-500 text-white border-green-600 dark:border-green-500"
+                                        : isSelected && !isCorrect
+                                          ? "bg-red-600 dark:bg-red-500 text-white border-red-600 dark:border-red-500"
+                                          : isCorrect
+                                            ? "bg-green-200 dark:bg-green-800 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800"
+                                            : "bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600"
+                                        }`}
                                     >
                                       {String.fromCharCode(65 + ansIdx)}
                                     </Badge>
@@ -187,30 +242,30 @@ export function ResultReview() {
                         {question.answers.some(
                           (a: AnswerProps) => a.isCorrect && a.explanation
                         ) && (
-                          <Alert className="bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800">
-                            <Info className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
-                            <AlertTitle className="text-sm sm:text-base">
-                              {t("ui.explanation.title")}
-                            </AlertTitle>
-                            <AlertDescription className="text-xs sm:text-sm">
-                              <div className="space-y-2 sm:space-y-3 text-blue-800 dark:text-blue-300">
-                                {question.answers.map(
-                                  (answer: AnswerProps, index: number) => (
-                                    <div
-                                      key={answer.id}
-                                      className="prose prose-sm dark:prose-invert max-w-none"
-                                    >
-                                      <TestAnswerOptionExplanation
-                                        content={answer.explanation || ""}
-                                        index={index}
-                                      />
-                                    </div>
-                                  )
-                                )}
-                              </div>
-                            </AlertDescription>
-                          </Alert>
-                        )}
+                            <Alert className="bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800">
+                              <Info className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
+                              <AlertTitle className="text-sm sm:text-base">
+                                {t("ui.explanation.title")}
+                              </AlertTitle>
+                              <AlertDescription className="text-xs sm:text-sm">
+                                <div className="space-y-2 sm:space-y-3 text-blue-800 dark:text-blue-300">
+                                  {question.answers.map(
+                                    (answer: AnswerProps, index: number) => (
+                                      <div
+                                        key={answer.id}
+                                        className="prose prose-sm dark:prose-invert max-w-none"
+                                      >
+                                        <TestAnswerOptionExplanation
+                                          content={answer.explanation || ""}
+                                          index={index}
+                                        />
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              </AlertDescription>
+                            </Alert>
+                          )}
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -221,8 +276,13 @@ export function ResultReview() {
         </Card>
       </div>
 
-      {/* Sidebar - Desktop: sticky, Mobile: floating button with sheet */}
-      <ResultSidebar onQuestionClick={handleQuestionClick} />
+      <ResultSidebar
+        filter={filter}
+        setFilter={setFilter}
+        filteredQuestions={filteredQuestions}
+        hasNotAnswered={hasNotAnswered}
+        onQuestionClick={handleQuestionClick}
+      />
     </div>
   );
-}
+};

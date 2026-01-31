@@ -1,6 +1,12 @@
 {
   "test": {
-    "question": "Câu hỏi {{current}} / {{total}}"
+    "question": "Câu hỏi {{current}} / {{total}}",
+    "filters": {
+      "all": "Tất cả",
+      "answered": "Đã trả lời",
+      "notAnswered": "Chưa trả lời",
+      "flagged": "Đã đánh dấu"
+    }
   },
   "result": {
     "wrong": "Sai",
@@ -8,6 +14,13 @@
     "review": {
       "correct": "Đúng",
       "incorrect": "Sai"
+    },
+    "filters": {
+      "all": "Tất cả",
+      "flagged": "Đã đánh dấu",
+      "correct": "Đúng",
+      "incorrect": "Sai",
+      "notAnswered": "Chưa trả lời"
     }
   },
   "tests": {
@@ -63,6 +76,13 @@
       "description": "Bạn có muốn lưu tiến độ để tiếp tục sau không?",
       "keepProgress": "Giữ tiến độ",
       "discardProgress": "Không giữ",
+      "cancel": "Hủy"
+    },
+    "finishTestConfirm": {
+      "title": "Hoàn thành bài kiểm tra?",
+      "withUnanswered": "Bạn còn {{count}} câu hỏi chưa trả lời. Vẫn nộp bài?",
+      "allAnswered": "Bạn có chắc muốn hoàn thành và nộp bài kiểm tra?",
+      "submit": "Nộp bài",
       "cancel": "Hủy"
     }
   }

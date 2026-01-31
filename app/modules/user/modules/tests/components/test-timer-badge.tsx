@@ -18,6 +18,7 @@ interface TestTimerBadgeProps {
 export const TestTimerBadge = ({ onExpired }: TestTimerBadgeProps) => {
   const timeRemaining = useTestTimerStore((s) => s.timeRemaining);
   const timeStarted = useTestTimerStore((s) => s.timeStarted);
+  const finishDialogOpen = useTestTimerStore((s) => s.finishDialogOpen);
   const setTimeRemaining = useTestTimerStore((s) => s.setTimeRemaining);
   const isPaused = useTestPauseStore((s) => s.isPaused);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -25,7 +26,7 @@ export const TestTimerBadge = ({ onExpired }: TestTimerBadgeProps) => {
   onExpiredRef.current = onExpired;
 
   useEffect(() => {
-    if (!timeStarted || isPaused) {
+    if (!timeStarted || isPaused || finishDialogOpen) {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -50,7 +51,7 @@ export const TestTimerBadge = ({ onExpired }: TestTimerBadgeProps) => {
         intervalRef.current = null;
       }
     };
-  }, [timeStarted, isPaused, setTimeRemaining]);
+  }, [timeStarted, isPaused, finishDialogOpen, setTimeRemaining]);
 
   const isTimeLow = timeRemaining <= 5 * 60;
   const formattedTime = formatTime(timeRemaining);

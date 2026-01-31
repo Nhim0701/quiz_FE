@@ -1,6 +1,12 @@
 {
   "test": {
-    "question": "Question {{current}} of {{total}}"
+    "question": "Question {{current}} of {{total}}",
+    "filters": {
+      "all": "All",
+      "answered": "Answered",
+      "notAnswered": "Not answered",
+      "flagged": "Flagged"
+    }
   },
   "result": {
     "wrong": "Wrong",
@@ -8,6 +14,13 @@
     "review": {
       "correct": "Correct",
       "incorrect": "Incorrect"
+    },
+    "filters": {
+      "all": "All",
+      "flagged": "Flagged",
+      "correct": "Correct",
+      "incorrect": "Incorrect",
+      "notAnswered": "Not answered"
     }
   },
   "tests": {
@@ -63,6 +76,13 @@
       "description": "Do you want to save your progress so you can resume later?",
       "keepProgress": "Keep progress",
       "discardProgress": "Don't keep",
+      "cancel": "Cancel"
+    },
+    "finishTestConfirm": {
+      "title": "Finish test?",
+      "withUnanswered": "You have {{count}} unanswered question(s). Submit anyway?",
+      "allAnswered": "Are you sure you want to finish and submit your test?",
+      "submit": "Submit",
       "cancel": "Cancel"
     }
   }

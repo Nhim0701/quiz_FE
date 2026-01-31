@@ -15,6 +15,7 @@ export function useTestStore() {
   const revealedStore = useTestRevealedStore();
   const timeStarted = useTestTimerStore((s) => s.timeStarted);
   const startTimer = useTestTimerStore((s) => s.startTimer);
+  const setFinishDialogOpen = useTestTimerStore((s) => s.setFinishDialogOpen);
   const submissionStore = useTestSubmissionStore();
   const pauseStore = useTestPauseStore();
 
@@ -49,6 +50,7 @@ export function useTestStore() {
     // Timer (timeRemaining excluded so only timer UI subscribes and re-renders on tick)
     timeStarted,
     startTimer,
+    setFinishDialogOpen,
 
     // Submission
     submitting: submissionStore.submitting,

@@ -15,10 +15,12 @@ interface ResultState {
   summary: ResultSummary | null;
   answers: Record<string, string[]>;
   questions: QuestionProps[];
+  flags: Record<string, boolean>;
   setResult: (
     summary: ResultSummary,
     answers: Record<string, string[]>,
-    questions: QuestionProps[]
+    questions: QuestionProps[],
+    flags?: Record<string, boolean>
   ) => void;
   getCorrectCount: () => number;
   getWrongCount: () => number;
@@ -29,8 +31,9 @@ export const useResultStore = create<ResultState>((set, get) => ({
   summary: null,
   answers: {},
   questions: [],
-  setResult: (summary, answers, questions) =>
-    set({ summary, answers, questions }),
+  flags: {},
+  setResult: (summary, answers, questions, flags = {}) =>
+    set({ summary, answers, questions, flags }),
   getCorrectCount: () => {
     const { questions, answers } = get();
     return questions.filter((q) =>
