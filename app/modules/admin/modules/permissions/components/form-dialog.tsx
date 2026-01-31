@@ -3,7 +3,7 @@ import { useForm, FormProvider, Form } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation, type TranslationParams } from "@/i18n";
 import { FormField, ComboboxField } from "@/components/common/form-field";
-import { useApp, usePaginationStore, usePageData } from "@/hooks";
+import { useApp, usePageData } from "@/hooks";
 import { permissionSchema, type PermissionFormData } from "../schemas";
 import { usePermissionsStore, type Permission } from "../hooks";
 import { useRolesStore } from "../../roles/hooks";
@@ -16,10 +16,12 @@ import {
   AlertDialogDescription,
   AlertDialogFooter as AlertDialogFooterComponent,
 } from "@/components/ui/alert-dialog";
+import { permissionFormBuilder } from "../schemas/permission-schema";
 
 interface PermissionFormDialogProps {
   onDelete?: (permission: Permission) => void;
   onClearFilters?: (() => void) | null;
+  onRefresh?: () => Promise<void>;
 }
 
 /**
@@ -30,6 +32,7 @@ interface PermissionFormDialogProps {
 export function PermissionFormDialog({
   onDelete,
   onClearFilters,
+  onRefresh,
 }: PermissionFormDialogProps) {
   const { t } = useTranslation();
   const {
@@ -38,15 +41,13 @@ export function PermissionFormDialog({
     showDialog,
     closeDialog: closeAppDialog,
   } = useApp();
-  const { page, pageSize } = usePaginationStore();
   const {
     isDialogOpen,
-    editingPermission,
-    viewingPermission,
+    dialogMode,
+    permission,
     closeDialog,
     createPermission,
     updatePermission,
-    refreshPermissions,
     loading,
     isEditMode,
     setEditMode,
@@ -55,32 +56,22 @@ export function PermissionFormDialog({
 
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Determine mode and permission from store state
-  const permission = viewingPermission || editingPermission;
-  const mode: FormDialogMode = useMemo(() => {
-    if (viewingPermission) return DIALOG_MODES.VIEW;
-    if (editingPermission) return DIALOG_MODES.EDIT;
-    return DIALOG_MODES.CREATE;
-  }, [viewingPermission, editingPermission]);
+  const mode = (dialogMode ||
+    (permission ? DIALOG_MODES.VIEW : DIALOG_MODES.CREATE)) as FormDialogMode;
+  const shouldShow = isDialogOpen && !!dialogMode;
 
-  const shouldShow = isDialogOpen;
-
-  // Fetch roles when dialog opens
   usePageData(() => fetchRoles(1, MAX_PAGE_SIZE_FOR_ALL), {
     errorKey: "errors.fetchRolesFailed",
     showLoading: false,
     showError: false,
-    deps: [shouldShow],
+    onError: (error) => {
+      console.error("Failed to fetch roles:", error);
+    },
   });
 
   const methods = useForm<PermissionFormData>({
     resolver: zodResolver(permissionSchema(t)),
-    defaultValues: {
-      name: "",
-      permission: "",
-      description: "",
-      roleId: "",
-    },
+    defaultValues: permissionFormBuilder(),
   });
 
   const {
@@ -95,32 +86,19 @@ export function PermissionFormDialog({
   // Reset form when permission or mode changes
   useEffect(() => {
     if (shouldShow && permission) {
-      reset({
-        name: permission.name || "",
-        permission: permission.permission || "",
-        description: permission.description || "",
-        roleId: permission.roleId || "",
-      });
+      reset(permissionFormBuilder(permission));
     } else if (shouldShow && mode === DIALOG_MODES.CREATE) {
-      reset({
-        name: "",
-        permission: "",
-        description: "",
-        roleId: "",
-      });
+      reset(permissionFormBuilder());
     }
   }, [shouldShow, permission, mode, reset]);
 
-  const currentData = watch();
-  const hasChanges = useMemo(() => {
-    if (!permission) return false;
-    return (
-      currentData.name !== permission.name ||
-      currentData.permission !== permission.permission ||
-      currentData.description !== (permission.description || "") ||
-      currentData.roleId !== (permission.roleId || "")
-    );
-  }, [currentData, permission]);
+  const currentValues = watch();
+  const hasChanges = permission
+    ? currentValues.name !== permission.name ||
+      currentValues.permission !== permission.permission ||
+      currentValues.description !== (permission.description || "") ||
+      currentValues.roleId !== (permission.roleId || "")
+    : false;
 
   const isViewMode = mode === DIALOG_MODES.VIEW;
   const isDisabled = isViewMode && !isEditMode;
@@ -143,19 +121,6 @@ export function PermissionFormDialog({
     [t]
   );
 
-  const canSubmit = useMemo(() => {
-    if (mode === DIALOG_MODES.CREATE) {
-      return !!(
-        currentData.name?.trim() &&
-        currentData.permission?.trim() &&
-        currentData.roleId?.trim()
-      );
-    }
-    if (mode === DIALOG_MODES.VIEW && isEditMode) return hasChanges;
-    if (mode === DIALOG_MODES.EDIT) return true;
-    return false;
-  }, [mode, currentData, isEditMode, hasChanges]);
-
   const roleOptions = useMemo(
     () =>
       roles.map((role) => ({
@@ -165,48 +130,66 @@ export function PermissionFormDialog({
     [roles]
   );
 
-  // Helper to refresh permissions after mutation
-  const handleRefresh = useCallback(
-    async (refreshPage: number = page) => {
-      await refreshPermissions(refreshPage, pageSize);
-    },
-    [refreshPermissions, page, pageSize]
-  );
-
-  const onSubmit = async (data: PermissionFormData) => {
-    try {
-      const submitData = {
-        name: data.name,
-        permission: data.permission,
-        description: data.description || undefined,
-        roleId: data.roleId,
-      };
-
-      if (mode === DIALOG_MODES.CREATE) {
-        await createPermission(submitData);
-        showSuccess(t("admin.permissions.createSuccess"));
-        closeDialog();
-        onClearFilters?.();
-        await handleRefresh(1);
-      } else if (permission) {
-        // Handle both VIEW (with edit mode) and EDIT modes
-        await updatePermission(permission.id, submitData);
-        showSuccess(t("admin.permissions.updateSuccess"));
-
-        if (mode === DIALOG_MODES.VIEW) {
-          setEditMode(false);
-        } else {
-          closeDialog();
-        }
-
-        await handleRefresh();
-      }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : t("errors.genericError");
-      showError(errorMessage);
+  const canSubmit = useMemo(() => {
+    if (mode === DIALOG_MODES.CREATE) {
+      return !!(
+        currentValues.name?.trim() &&
+        currentValues.permission?.trim() &&
+        currentValues.roleId?.trim()
+      );
     }
-  };
+    if (mode === DIALOG_MODES.VIEW && isEditMode) return hasChanges;
+    if (mode === DIALOG_MODES.EDIT) return true;
+    return false;
+  }, [mode, currentValues, isEditMode, hasChanges]);
+
+  const onSubmit = useCallback(
+    async (data: PermissionFormData) => {
+      try {
+        const submitData = {
+          name: data.name,
+          permission: data.permission,
+          description: data.description || undefined,
+          roleId: data.roleId,
+        };
+
+        if (mode === DIALOG_MODES.CREATE) {
+          await createPermission(submitData);
+          showSuccess(t("admin.permissions.createSuccess"));
+          closeDialog();
+          onClearFilters?.();
+          onRefresh && (await onRefresh());
+        } else if (permission) {
+          await updatePermission(permission.id, submitData);
+          showSuccess(t("admin.permissions.updateSuccess"));
+
+          if (mode === DIALOG_MODES.VIEW) {
+            setEditMode(false);
+          } else {
+            closeDialog();
+          }
+          onRefresh && (await onRefresh());
+        }
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : t("errors.genericError");
+        showError(errorMessage);
+      }
+    },
+    [
+      mode,
+      createPermission,
+      showSuccess,
+      t,
+      closeDialog,
+      onClearFilters,
+      onRefresh,
+      permission,
+      updatePermission,
+      setEditMode,
+      showError,
+    ]
+  );
 
   const handleEdit = useCallback(() => {
     setEditMode(true);

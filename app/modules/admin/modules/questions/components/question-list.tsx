@@ -1,43 +1,28 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { useSearchParams, useNavigate } from "react-router";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useNavigate } from "react-router";
 import { useTranslation } from "@/i18n";
+import { type Column } from "@/components/common/data-table";
 import {
-  DataTable,
-  type Column,
-  type Action,
-} from "@/components/common/data-table";
-import {
-  usePaginationStore,
-  useApp,
   useFilterActions,
   useFilterHandlers,
   useFilterIdsConfig,
+  useFilterParams,
   createStringConverter,
   createArrayConverter,
-  useSyncFilterToUrl,
-  useApplyFilterFromUrl,
-  FilterManager,
-  createStringFilterHandler,
-  createArrayFilterHandler,
+  useAdminListData,
   usePageData,
+  useEditorStore,
 } from "@/hooks";
+import { useAdminListActions } from "@/modules/admin/hooks";
+import { AdminList } from "@/modules/admin/components";
 import { useQuestionsStore } from "../hooks";
 import type { QuestionProps } from "../types";
 import { useCategoriesStore } from "../../categories/hooks";
 import { useTestsStore } from "../../tests/hooks";
 import type { TestProps } from "../../tests/types";
 import { QuestionsListSkeleton } from "./list-skeleton";
-import { Eye, Trash2, CheckSquare, Square } from "lucide-react";
+import { CheckSquare, Square } from "lucide-react";
 import {
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogDescription,
-  AlertDialogFooter,
-} from "@/components/ui/alert-dialog";
-import {
-  SearchInput,
-  ActiveFilters,
-  FilterActions,
   MultipleSelectCombobox,
   FilterDropdown,
   type ActiveFilter,
@@ -51,6 +36,7 @@ import {
 import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants/app";
 import { QuestionFormDialog } from "./question-form-dialog";
 import { ROUTES } from "../constants";
+import { extractContentFromHtml } from "@/lib/utils";
 
 interface QuestionsListProps {
   roles: {
@@ -64,23 +50,16 @@ interface QuestionsListProps {
 export function QuestionsList({ roles }: QuestionsListProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { showError, showSuccess, showDialog, closeDialog } = useApp();
-  const { page, pageSize, total, setPage, setPageSize, setTotal } =
-    usePaginationStore();
+  const { getFilter, setFilter } = useFilterParams();
 
-  // Filter states
   const [searchInput, setSearchInput] = useState("");
-  const [searchValue, setSearchValue] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedTests, setSelectedTests] = useState<string[]>([]);
-  const [selectedQuestionType, setSelectedQuestionType] = useState<
-    string | undefined
-  >(undefined);
+  const searchValue = getFilter("content") || "";
+  
+  const selectedCategories = useMemo(() => getFilter("categoryId")?.split(",").filter(Boolean) || [], [getFilter]);
+  const selectedTests = useMemo(() => getFilter("testId")?.split(",").filter(Boolean) || [], [getFilter]);
+  const selectedQuestionType = getFilter("isMultipleChoice") || undefined;
 
-  // Track if filters are being applied from URL
-  const isApplyingFiltersFromUrl = useRef(false);
-  const hasInitialFetch = useRef(false);
+  const { open: openEditor, close: closeEditor } = useEditorStore();
 
   const {
     questions,
@@ -123,12 +102,10 @@ export function QuestionsList({ roles }: QuestionsListProps) {
         (testId) => !validTestIds.includes(testId)
       );
       if (invalidTests.length > 0) {
-        setSelectedTests((prev) =>
-          prev.filter((testId) => validTestIds.includes(testId))
-        );
+        // Update URL directly
+        const valid = selectedTests.filter((testId) => validTestIds.includes(testId));
+        setFilter("testId", valid.length ? valid.join(",") : null);
       }
-    } else if (selectedCategories.length === 0) {
-      // If no categories selected, keep all selected tests
     }
   }, [selectedCategories, tests, selectedTests]);
 
@@ -156,25 +133,25 @@ export function QuestionsList({ roles }: QuestionsListProps) {
         filterId: "content",
         resetValue: () => {
           setSearchInput("");
-          setSearchValue("");
+          setFilter("content", null);
         },
       },
       {
         filterId: "categoryId",
         resetValue: () => {
-          setSelectedCategories([]);
+          setFilter("categoryId", null);
         },
       },
       {
         filterId: "testId",
         resetValue: () => {
-          setSelectedTests([]);
+          setFilter("testId", null);
         },
       },
       {
         filterId: "isMultipleChoice",
         resetValue: () => {
-          setSelectedQuestionType(undefined);
+          setFilter("isMultipleChoice", null);
         },
       },
     ],
@@ -212,68 +189,44 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     [searchValue, selectedCategories, selectedTests, selectedQuestionType]
   );
 
-  // Apply filters from URL
-  const { hasFilterParams } = useApplyFilterFromUrl({
-    filterHandlers: {
-      content: createStringFilterHandler(setSearchValue),
-      categoryId: createArrayFilterHandler(setSelectedCategories),
-      testId: createArrayFilterHandler(setSelectedTests),
-      isMultipleChoice: createStringFilterHandler(setSelectedQuestionType),
-    },
-    onFilterApplied: async () => {
-      isApplyingFiltersFromUrl.current = true;
-      hasInitialFetch.current = true;
-      setPage(1);
+  const fetchQuestionsRef = useRef(fetchQuestions);
+  useEffect(() => {
+    fetchQuestionsRef.current = fetchQuestions;
+  }, [fetchQuestions]);
 
-      const urlFilters = FilterManager.extractFiltersFromUrl(searchParams);
-      const contentFilter = urlFilters.find((f) => f.key === "content");
-      if (contentFilter) {
-        setSearchInput(contentFilter.value);
-      }
-
-      try {
-        const apiFilters = FilterManager.convertFiltersToApiParams(urlFilters);
-        await fetchQuestions(1, pageSize, apiFilters);
-        // Note: total will be set from the store
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t("errors.fetchDashboardFailed");
-        showError(errorMessage);
-      } finally {
-        isApplyingFiltersFromUrl.current = false;
-      }
+  const fetchQuestionsWrapper = useCallback(
+    async (
+      page: number,
+      pageSize: number,
+      filters?: Record<string, string>
+    ) => {
+      await fetchQuestionsRef.current(page, pageSize, filters);
+      const state = useQuestionsStore.getState();
+      return {
+        data: state.questions,
+        meta: { total: state.total },
+      };
     },
-    hookId: "questions",
+    []
+  );
+
+  const {
+    apiFilters,
+    hasInitialFetch,
+    handlePageChange,
+    handlePageSizeChange,
+    page,
+    pageSize,
+    total,
+    setPage,
+  } = useAdminListData({
+
+    filterConfig,
+
+    fetchFunction: fetchQuestionsWrapper,
+    onFilterAppliedFromUrl: setSearchInput,
   });
 
-  // Sync filters to URL
-  useSyncFilterToUrl({
-    filters: filterConfig,
-    hookId: "questions",
-  });
-
-  const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
-    handlers: filterHandlers,
-    onFilterChange: () => {
-      setPage(1);
-    },
-  });
-
-  // Handler to remove a specific category from the array
-  const handleRemoveCategory = useCallback((categoryId: string) => {
-    setSelectedCategories((prev) => prev.filter((id) => id !== categoryId));
-    setPage(1);
-  }, []);
-
-  // Handler to remove a specific test from the array
-  const handleRemoveTest = useCallback((testId: string) => {
-    setSelectedTests((prev) => prev.filter((id) => id !== testId));
-    setPage(1);
-  }, []);
-
-  // Active filters for display
   const activeFilters = useMemo<ActiveFilter[]>(() => {
     const filters: ActiveFilter[] = [];
     if (searchValue) {
@@ -321,7 +274,46 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     t,
   ]);
 
-  // Custom handler for removing filters that handles array items
+  const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
+    handlers: filterHandlers,
+  });
+
+  const filterIdsConfig = useFilterIdsConfig({
+    handlers: filterHandlers,
+    colorMap: {
+      content: "blue",
+      categoryId: "green",
+      testId: "purple",
+      isMultipleChoice: "yellow",
+    },
+  });
+
+  const handleSearch = useCallback(() => {
+    setFilter("content", searchInput);
+  }, [searchInput, setFilter]);
+
+  const filterActionButtons = useFilterActions({
+    onSearch: handleSearch,
+    activeFilters,
+    onClearFilters: handleClearAllFilters,
+  });
+
+  const handleRemoveCategory = useCallback(
+    (categoryId: string) => {
+      const newCats = selectedCategories.filter((id) => id !== categoryId);
+      setFilter("categoryId", newCats.length ? newCats.join(",") : null);
+    },
+    [selectedCategories, setFilter]
+  );
+
+  const handleRemoveTest = useCallback(
+    (testId: string) => {
+      const newTests = selectedTests.filter((id) => id !== testId);
+      setFilter("testId", newTests.length ? newTests.join(",") : null);
+    },
+    [selectedTests, setFilter]
+  );
+
   const handleRemoveActiveFilter = useCallback(
     (filterId: string) => {
       if (filterId.startsWith("categoryId_")) {
@@ -337,58 +329,6 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     [handleRemoveFilter, handleRemoveCategory, handleRemoveTest]
   );
 
-  const filterIdsConfig = useFilterIdsConfig({
-    handlers: filterHandlers,
-    colorMap: {
-      content: "blue",
-      categoryId: "green",
-      testId: "purple",
-      isMultipleChoice: "yellow",
-    },
-  });
-
-  const handleSearch = () => {
-    setSearchValue(searchInput);
-    setPage(1);
-  };
-
-  const filterActionButtons = useFilterActions({
-    onSearch: handleSearch,
-    activeFilters,
-    onClearFilters: handleClearAllFilters,
-  });
-
-  // Convert filters to API params
-  const apiFilters = useMemo(() => {
-    const activeFilters: Array<{ key: string; value: string }> = [];
-    filterConfig.forEach((filter) => {
-      const converted = filter.converter(filter.value as any);
-      if (converted === null) return;
-
-      let isActive = false;
-      if (Array.isArray(converted)) {
-        isActive = converted.length > 0;
-      } else if (filter.defaultValue !== undefined) {
-        const defaultConverted = filter.converter(filter.defaultValue as any);
-        isActive = converted !== defaultConverted;
-      } else {
-        isActive = converted !== "";
-      }
-
-      if (isActive) {
-        const filterValue = Array.isArray(converted)
-          ? converted.join(",")
-          : converted;
-        activeFilters.push({
-          key: filter.filterKey,
-          value: filterValue,
-        });
-      }
-    });
-    return FilterManager.convertFiltersToApiParams(activeFilters);
-  }, [filterConfig]);
-
-  // Category and test options for combobox
   const categoryOptions = useMemo(() => {
     return categories.map((category) => ({
       value: category.id,
@@ -419,7 +359,6 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     }));
   }, [tests, selectedCategories]);
 
-  // Enrich questions with test names
   const questionsWithTestNames = useMemo(() => {
     return questions.map((question: QuestionProps) => ({
       ...question,
@@ -429,55 +368,7 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     }));
   }, [questions, testMap]);
 
-  // Fetch questions
-  useEffect(() => {
-    if (
-      (hasFilterParams && !hasInitialFetch.current) ||
-      isApplyingFiltersFromUrl.current
-    ) {
-      return;
-    }
 
-    const loadQuestions = async () => {
-      try {
-        await fetchQuestions(page, pageSize, apiFilters);
-        // Note: total is set in the store
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t("errors.fetchDashboardFailed");
-        showError(errorMessage);
-      } finally {
-        hasInitialFetch.current = true;
-      }
-    };
-
-    loadQuestions();
-  }, [
-    page,
-    pageSize,
-    apiFilters,
-    hasFilterParams,
-    fetchQuestions,
-    showError,
-    t,
-  ]);
-
-  // Update total from store
-  useEffect(() => {
-    setTotal(questionsTotal);
-  }, [questionsTotal, setTotal]);
-
-  const handlePageChange = useCallback(
-    (newPage: number) => setPage(newPage),
-    [setPage]
-  );
-
-  const handlePageSizeChange = useCallback(
-    (newPageSize: number) => setPageSize(newPageSize),
-    [setPageSize]
-  );
 
   const paginationProps = useMemo(
     () => ({
@@ -497,57 +388,40 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     [navigate]
   );
 
-  const handleDelete = useCallback(
-    (question: QuestionProps) => {
-      const confirmDelete = async () => {
-        try {
-          // Delete question (testId is not needed for delete endpoint)
-          await deleteQuestion("", question.id, page, pageSize, apiFilters);
-          showSuccess(t("admin.questions.deleteSuccess"));
-          await fetchQuestions(page, pageSize, apiFilters);
-          closeDialog();
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : t("errors.genericError");
-          showError(errorMessage);
-        }
-      };
+  const { actions } = useAdminListActions<QuestionProps>({
+    roles,
+    deleteFunction: async (id: string) => {
+      await deleteQuestion("", id, page, pageSize, apiFilters);
+    },
+    refreshFunction: async (refreshPage: number, refreshPageSize: number) => {
+      await fetchQuestions(refreshPage, refreshPageSize, apiFilters);
+    },
+    successMessageKey: "admin.questions.deleteSuccess",
+    deleteTitleKey: "admin.questions.delete",
+    confirmDeleteKey: "admin.questions.confirmDelete",
+    deleteButtonKey: "admin.questions.delete",
+    onClearFilters: handleClearAllFilters,
+    onView: handleViewInfo,
+  });
 
-      showDialog({
-        title: t("admin.questions.delete"),
-        content: (
-          <AlertDialogDescription>
-            {t("admin.questions.confirmDelete")}
-          </AlertDialogDescription>
-        ),
-        footer: (
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={closeDialog}>
-              {t("common.cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t("admin.questions.delete")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        ),
+  const handleViewContent = useCallback(
+    (question: QuestionProps) => {
+      openEditor({
+        content: question.content,
+        mode: "html",
+        title: t("common.preview"),
+        titleAction: () => {
+          handleViewInfo(question);
+          closeEditor();
+        },
       });
     },
-    [
-      deleteQuestion,
-      page,
-      pageSize,
-      apiFilters,
-      showSuccess,
-      t,
-      fetchQuestions,
-      closeDialog,
-      showDialog,
-      showError,
-    ]
+    [t, openEditor, handleViewInfo]
   );
+
+  const handleRefresh = useCallback(async () => {
+    await fetchQuestions(page, pageSize, apiFilters);
+  }, [fetchQuestions, page, pageSize, apiFilters]);
 
   const columns = useMemo<Column<QuestionProps>[]>(
     () => [
@@ -566,7 +440,17 @@ export function QuestionsList({ roles }: QuestionsListProps) {
         header: t("admin.questions.columns.content"),
         className: "w-[600px]",
         render: (question) => (
-          <span className="font-medium line-clamp-2">{question.content}</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                className="font-medium line-clamp-2 hover:cursor-pointer"
+                onClick={() => handleViewContent(question)}
+              >
+                {extractContentFromHtml(question.content)}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{t("common.clickToPreview")}</TooltipContent>
+          </Tooltip>
         ),
       },
       {
@@ -618,7 +502,7 @@ export function QuestionsList({ roles }: QuestionsListProps) {
         meta: { center: true },
         render: (question) => (
           <span className="text-muted-foreground">
-            {question.answers?.length || 0}
+            {question.answerCount || 0}
           </span>
         ),
       },
@@ -626,132 +510,92 @@ export function QuestionsList({ roles }: QuestionsListProps) {
     [t]
   );
 
-  const actions = useMemo<Action<QuestionProps>[]>(
-    () => [
-      ...(roles.read
-        ? [
-            {
-              label: t("common.viewInfo"),
-              onClick: handleViewInfo,
-              icon: <Eye className="h-4 w-4" />,
-              actionType: "viewInfo" as const,
-            },
-          ]
-        : []),
-      ...(roles.delete
-        ? [
-            {
-              label: t("admin.questions.delete"),
-              onClick: handleDelete,
-              variant: "destructive" as const,
-              icon: <Trash2 className="h-4 w-4" />,
-              actionType: "delete" as const,
-            },
-          ]
-        : []),
-    ],
-    [roles, t, handleViewInfo, handleDelete]
-  );
-
   // Show skeleton on initial load
   if (
     loading &&
     questionsWithTestNames.length === 0 &&
-    !hasInitialFetch.current
+    !hasInitialFetch
   ) {
-    return (
-      <>
-        <QuestionsListSkeleton />
-        <QuestionFormDialog />
-      </>
-    );
+    return <QuestionsListSkeleton />;
   }
+
+  const additionalFilters = (
+    <>
+      <MultipleSelectCombobox
+        options={categoryOptions}
+        selectedValues={selectedCategories}
+        onSelect={(values) => {
+          setFilter("categoryId", values.length ? values.join(",") : null);
+        }}
+        placeholder={t("admin.questions.filters.categoryPlaceholder")}
+        searchPlaceholder={t("admin.questions.filters.categorySearch")}
+        emptyMessage={t("admin.questions.filters.categoryEmpty")}
+        className="w-full sm:w-[250px]"
+        filterColor="green"
+      />
+      <MultipleSelectCombobox
+        options={testOptions}
+        selectedValues={selectedTests}
+        onSelect={(values) => {
+          setFilter("testId", values.length ? values.join(",") : null);
+        }}
+        placeholder={t("admin.questions.filters.testPlaceholder")}
+        searchPlaceholder={t("admin.questions.filters.testSearch")}
+        emptyMessage={t("admin.questions.filters.testEmpty")}
+        className="w-full sm:w-[250px]"
+        filterColor="purple"
+      />
+      <FilterDropdown
+        labelKey="admin.questions.filters.multipleChoicePlaceholder"
+        options={[
+          {
+            value: "true",
+            labelKey: "admin.questions.multipleChoice",
+          },
+          {
+            value: "false",
+            labelKey: "admin.questions.singleChoice",
+          },
+        ]}
+        selectedValue={selectedQuestionType}
+        buttonClassName="w-full sm:w-[200px] justify-between"
+        filterColor="yellow"
+        onSelect={(value) => {
+          const newValue = value === selectedQuestionType ? undefined : value;
+          setFilter("isMultipleChoice", newValue || null);
+        }}
+      />
+    </>
+  );
 
   return (
     <>
-      {/* Filter Bar */}
-      <div className="my-4 flex flex-col gap-4">
-        <div className="flex flex-1 flex-wrap items-center gap-2">
-          <SearchInput
-            value={searchInput}
-            onChange={setSearchInput}
-            onSearch={handleSearch}
-            placeholderKey="admin.questions.filters.searchPlaceholder"
-            className="flex-1 min-w-[200px]"
-            searchKey="content"
-          />
-          <MultipleSelectCombobox
-            options={categoryOptions}
-            selectedValues={selectedCategories}
-            onSelect={(values) => {
-              setSelectedCategories(values);
-              setPage(1);
-            }}
-            placeholder={t("admin.questions.filters.categoryPlaceholder")}
-            searchPlaceholder={t("admin.questions.filters.categorySearch")}
-            emptyMessage={t("admin.questions.filters.categoryEmpty")}
-            className="w-full sm:w-[250px]"
-            filterColor="green"
-          />
-          <MultipleSelectCombobox
-            options={testOptions}
-            selectedValues={selectedTests}
-            onSelect={(values) => {
-              setSelectedTests(values);
-              setPage(1);
-            }}
-            placeholder={t("admin.questions.filters.testPlaceholder")}
-            searchPlaceholder={t("admin.questions.filters.testSearch")}
-            emptyMessage={t("admin.questions.filters.testEmpty")}
-            className="w-full sm:w-[250px]"
-            filterColor="purple"
-          />
-          <FilterDropdown
-            labelKey="admin.questions.filters.multipleChoicePlaceholder"
-            options={[
-              {
-                value: "true",
-                labelKey: "admin.questions.multipleChoice",
-              },
-              {
-                value: "false",
-                labelKey: "admin.questions.singleChoice",
-              },
-            ]}
-            selectedValue={selectedQuestionType}
-            buttonClassName="w-full sm:w-[200px] justify-between"
-            filterColor="yellow"
-            onSelect={(value) => {
-              setSelectedQuestionType(
-                value === selectedQuestionType ? undefined : value
-              );
-              setPage(1);
-            }}
-          />
-          <FilterActions buttons={filterActionButtons} />
-        </div>
-      </div>
-
-      {/* Active Filters */}
-      {activeFilters.length > 0 && (
-        <div className="mb-4">
-          <ActiveFilters
-            filters={activeFilters}
-            onRemove={handleRemoveActiveFilter}
-            filterIdsConfig={filterIdsConfig}
-          />
-        </div>
-      )}
-
-      <DataTable
+      <AdminList
         columns={columns}
         data={questionsWithTestNames}
         actions={actions}
         loading={loading}
         emptyMessage={t("admin.questions.empty")}
+        searchInput={{
+          value: searchInput,
+          onChange: setSearchInput,
+          onSearch: handleSearch,
+          placeholderKey: "common.searchPlaceholder",
+          className: "flex-1 min-w-[200px]",
+          searchKey: "content",
+        }}
+        additionalFilters={additionalFilters}
+        activeFilters={activeFilters}
+        onRemoveFilter={handleRemoveActiveFilter}
+        filterIdsConfig={filterIdsConfig}
+        filterActionButtons={filterActionButtons}
         pagination={paginationProps}
+        filterBarClassName="my-4"
       />
-      <QuestionFormDialog onClearFilters={handleClearAllFilters} />
+      <QuestionFormDialog
+        onClearFilters={handleClearAllFilters}
+        onRefresh={handleRefresh}
+      />
     </>
   );
 }

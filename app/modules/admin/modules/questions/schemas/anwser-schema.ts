@@ -1,5 +1,12 @@
 import { z } from "zod";
 import { createZodSchema } from "@/lib";
+import type { AnswerProps } from "../types";
+
+export const answerFormBuilder = (answer?: AnswerProps) => ({
+  content: answer?.content || "",
+  isCorrect: answer?.isCorrect || false,
+  explanation: answer?.explanation || "",
+});
 
 const answerSchema = createZodSchema((t) =>
   z.object({

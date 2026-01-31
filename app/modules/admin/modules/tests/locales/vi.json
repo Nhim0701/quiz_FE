@@ -7,18 +7,14 @@
       "noPermission": "Bạn không có quyền truy cập trang này",
       "delete": "Xóa",
       "create": "Tạo bài kiểm tra",
-      "update": "Cập nhật bài kiểm tra",
       "createTitle": "Tạo bài kiểm tra mới",
       "createDescription": "Điền thông tin để tạo bài kiểm tra mới",
       "createSuccess": "Tạo bài kiểm tra thành công",
       "updateSuccess": "Cập nhật bài kiểm tra thành công",
       "viewTitle": "Thông tin bài kiểm tra",
       "viewDescription": "Xem và chỉnh sửa thông tin bài kiểm tra",
-      "viewInfo": "Xem thông tin",
       "viewQuestions": "Xem câu hỏi",
-      "deleteSuccess": "Xóa bài kiểm tra thành công",
       "confirmDelete": "Bạn có chắc chắn muốn xóa bài kiểm tra \"{{name}}\"?",
-      "edit": "Chỉnh Sửa",
       "editTitle": "Chỉnh Sửa Bài Kiểm Tra",
       "editDescription": "Cập nhật thông tin bài kiểm tra",
       "form": {
@@ -39,12 +35,6 @@
         "timeLimitRequired": "Thời gian giới hạn là bắt buộc",
         "timeLimitMin": "Thời gian giới hạn phải ít nhất 1 phút"
       },
-      "errors": {
-        "fetchFailed": "Không thể tải danh sách bài kiểm tra",
-        "createFailed": "Không thể tạo bài kiểm tra",
-        "updateFailed": "Không thể cập nhật bài kiểm tra",
-        "deleteFailed": "Không thể xóa bài kiểm tra"
-      },
       "columns": {
         "id": "ID",
         "name": "Tên",
@@ -54,30 +44,15 @@
         "timeLimit": "Thời Gian Giới Hạn"
       },
       "filters": {
-        "searchPlaceholder": "Tìm kiếm theo tên...",
         "categoryPlaceholder": "Chọn danh mục...",
         "categorySearch": "Tìm kiếm danh mục...",
-        "categoryEmpty": "Không tìm thấy danh mục nào.",
-        "createDatePlaceholder": "Chọn ngày tạo",
-        "updateDatePlaceholder": "Chọn ngày cập nhật"
+        "categoryEmpty": "Không tìm thấy danh mục nào."
       },
-      "info": {
-        "title": "Thông Tin Bài Kiểm Tra",
-        "cardTitle": "Chi Tiết Bài Kiểm Tra",
-        "loading": "Đang tải thông tin bài kiểm tra...",
-        "notFound": "Không tìm thấy bài kiểm tra",
-        "backToList": "Quay Lại Danh Sách",
-        "fields": {
-          "id": "ID",
-          "name": "Tên",
-          "category": "Danh Mục",
-          "description": "Mô Tả",
-          "timeLimit": "Thời Gian Giới Hạn",
-          "questionCount": "Số Câu Hỏi",
-          "createdAt": "Ngày Tạo",
-          "updatedAt": "Ngày Cập Nhật"
-        },
-        "noDescription": "Không có mô tả"
+      "errors": {
+        "fetchFailed": "Không thể tải danh sách bài kiểm tra",
+        "createFailed": "Không thể tạo bài kiểm tra",
+        "updateFailed": "Không thể cập nhật bài kiểm tra",
+        "deleteFailed": "Không thể xóa bài kiểm tra"
       }
     }
   }

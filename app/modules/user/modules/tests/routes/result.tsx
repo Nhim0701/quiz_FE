@@ -95,10 +95,16 @@ export default function Result() {
       summary: locationSummary,
       answers: locationAnswers,
       questions: locationQuestions = [],
+      flags: locationFlags = {},
     } = (location.state as TestResultLocationState) || {};
 
     if (locationSummary && locationAnswers && locationQuestions) {
-      setResult(locationSummary, locationAnswers, locationQuestions);
+      setResult(
+        locationSummary,
+        locationAnswers,
+        locationQuestions,
+        locationFlags
+      );
     }
   }, [location.state, setResult]);
 

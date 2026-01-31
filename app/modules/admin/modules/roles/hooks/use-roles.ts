@@ -2,6 +2,8 @@ import { create } from "zustand";
 import type { ApiSuccessResponse, ApiResponseMeta } from "@/types";
 import { apiClient } from "@/lib";
 import { ENDPOINTS } from "../constants";
+import type { FormDialogMode } from "@/constants";
+import { DIALOG_MODES } from "@/constants";
 
 export interface Role {
   id: string;
@@ -14,24 +16,19 @@ export interface Role {
 }
 
 interface RolesState {
-  // Roles list
   roles: Role[];
   loading: boolean;
   error: string | null;
 
-  // Form state
   isDialogOpen: boolean;
-  editingRole: Role | null;
-  viewingRole: Role | null;
+  dialogMode: FormDialogMode | null;
+  role: Role | null;
   isEditMode: boolean;
 
-  // Actions
-  openDialog: (role?: Role | null) => void;
+  openDialog: (mode: FormDialogMode, role?: Role | null) => void;
   closeDialog: () => void;
-  openViewDialog: (role: Role) => void;
   setEditMode: (isEdit: boolean) => void;
 
-  // API methods
   fetchRoles: (
     page?: number,
     pageSize?: number,
@@ -54,32 +51,27 @@ interface RolesState {
 }
 
 export const useRolesStore = create<RolesState>((set, get) => ({
-  // Initial state
   roles: [],
   loading: false,
   error: null,
   isDialogOpen: false,
-  editingRole: null,
-  viewingRole: null,
+  dialogMode: null,
+  role: null,
   isEditMode: false,
 
-  // Form actions
-  openDialog: (role = null) => {
-    set({ isDialogOpen: true, editingRole: role, isEditMode: false });
+  openDialog: (mode: FormDialogMode, role?: Role | null) => {
+    set({
+      isDialogOpen: true,
+      dialogMode: mode,
+      role: role ?? null,
+      isEditMode: mode === DIALOG_MODES.EDIT,
+    });
   },
   closeDialog: () => {
     set({
       isDialogOpen: false,
-      editingRole: null,
-      viewingRole: null,
-      isEditMode: false,
-    });
-  },
-  openViewDialog: (role) => {
-    set({
-      isDialogOpen: true,
-      viewingRole: role,
-      editingRole: null,
+      dialogMode: null,
+      role: null,
       isEditMode: false,
     });
   },
@@ -185,15 +177,14 @@ export const useRolesStore = create<RolesState>((set, get) => ({
     pageSize = 10,
     filters?: Record<string, string>
   ) => {
-    const { viewingRole } = get();
+    const { role, dialogMode } = get();
     await get().fetchRoles(page, pageSize, filters);
 
-    // Update viewingRole if it exists and dialog is still open
-    if (viewingRole) {
+    if (role && dialogMode) {
       const { roles } = get();
-      const updatedRole = roles.find((r) => r.id === viewingRole.id);
+      const updatedRole = roles.find((r) => r.id === role.id);
       if (updatedRole) {
-        set({ viewingRole: updatedRole });
+        set({ role: updatedRole });
       }
     }
   },

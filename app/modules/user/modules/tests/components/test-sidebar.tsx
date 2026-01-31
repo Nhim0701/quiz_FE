@@ -1,39 +1,25 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useTranslation } from "@/i18n";
-import { useTestStore } from "../hooks";
+import { useTestStore, useIsMobileOrTablet } from "../hooks";
 import { useNavigate, useParams } from "react-router";
+import type { QuestionProps } from "@/modules/admin/modules/questions/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { type TestFilterType, TEST_FILTERS } from "../constants";
+import { TestAlertDialog } from "./test-alert-dialog";
+import { TestFilterButtons } from "./test-filter-buttons";
+import { SidebarShell } from "./sidebar-shell";
 
-// Hook to detect mobile and tablet (< 1024px)
-function useIsMobileOrTablet() {
-  const [isMobileOrTablet, setIsMobileOrTablet] = useState<boolean>(false);
-
-  useEffect(() => {
-    const checkSize = () => {
-      setIsMobileOrTablet(window.innerWidth < 1024); // lg breakpoint
-    };
-
-    checkSize();
-    window.addEventListener("resize", checkSize);
-    return () => window.removeEventListener("resize", checkSize);
-  }, []);
-
-  return isMobileOrTablet;
+interface FilteredQuestionItem {
+  question: QuestionProps;
+  originalIndex: number;
 }
 
 function TestSidebarContent() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { testId } = useParams<{ testId: string }>();
+  const [filter, setFilter] = useState<TestFilterType>(TEST_FILTERS.ALL);
   const {
     questions,
     answers,
@@ -43,19 +29,58 @@ function TestSidebarContent() {
     submitting,
     goToQuestion,
     finishTest,
+    setFinishDialogOpen,
   } = useTestStore();
 
-  const handleFinish = async () => {
+  const [showFinishDialog, setShowFinishDialog] = useState(false);
+  const answeredCount = Object.keys(answers).length;
+  const flaggedCount = Object.values(flags).filter(Boolean).length;
+  const hasNotAnswered = answeredCount < questions.length;
+  const unansweredCount = questions.length - answeredCount;
+
+  useEffect(() => {
+    setFinishDialogOpen(false);
+  }, [testId, setFinishDialogOpen]);
+
+  const handleFinishClick = () => {
+    setFinishDialogOpen(true);
+    setShowFinishDialog(true);
+  };
+
+  const handleFinishDialogOpenChange = (open: boolean) => {
+    setShowFinishDialog(open);
+    if (!open) setFinishDialogOpen(false);
+  };
+
+  const handleFinishConfirm = async () => {
+    setShowFinishDialog(false);
+    setFinishDialogOpen(false);
     await finishTest(navigate, testId || "", (errorMessage) => {
       console.error(errorMessage);
     });
   };
-  const answeredCount = Object.keys(answers).length;
-  const flaggedCount = Object.values(flags).filter(Boolean).length;
+
+  const filteredQuestions = useMemo((): FilteredQuestionItem[] => {
+    return questions
+      .map((q, idx) => ({ question: q, originalIndex: idx }))
+      .filter(({ question }) => {
+        const hasAnswer = !!answers[question.id]?.length;
+        const isFlagged = !!flags[question.id];
+        switch (filter) {
+          case TEST_FILTERS.ANSWERED:
+            return hasAnswer;
+          case TEST_FILTERS.NOT_ANSWERED:
+            return !hasAnswer;
+          case TEST_FILTERS.FLAGGED:
+            return isFlagged;
+          default:
+            return true;
+        }
+      });
+  }, [questions, answers, flags, filter]);
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Summary Card */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base sm:text-lg">
@@ -82,9 +107,9 @@ function TestSidebarContent() {
             </div>
           </div>
           <Button
-            onClick={handleFinish}
+            onClick={handleFinishClick}
             disabled={submitting}
-            className="w-full mt-4 sm:mt-6 bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-500 dark:to-emerald-500 hover:from-green-700 hover:to-emerald-700 dark:hover:from-green-600 dark:hover:to-emerald-600"
+            className="w-full mt-4 sm:mt-6 bg-gradient-to-r from-amber-500 to-yellow-600 dark:from-amber-500 dark:to-yellow-500 hover:from-amber-600 hover:to-yellow-700 dark:hover:from-amber-600 dark:hover:to-yellow-600 shadow-sm"
           >
             {submitting ? (
               <>
@@ -98,16 +123,42 @@ function TestSidebarContent() {
         </CardContent>
       </Card>
 
-      {/* Question Navigator */}
+      <TestAlertDialog
+        open={showFinishDialog}
+        onOpenChange={handleFinishDialogOpenChange}
+        title={t("ui.finishTestConfirm.title")}
+        description={
+          hasNotAnswered
+            ? t("ui.finishTestConfirm.withUnanswered" as any, {
+                count: unansweredCount,
+              })
+            : t("ui.finishTestConfirm.allAnswered")
+        }
+        cancelLabel={t("ui.finishTestConfirm.cancel")}
+        actions={[
+          {
+            label: t("ui.finishTestConfirm.submit"),
+            onClick: handleFinishConfirm,
+            variant: "amber",
+            disabled: submitting,
+          },
+        ]}
+      />
+
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base sm:text-lg">
             {t("ui.headers.questions")}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <TestFilterButtons
+            filter={filter}
+            setFilter={setFilter}
+            hasNotAnswered={hasNotAnswered}
+          />
           <div className="grid grid-cols-5 gap-2">
-            {questions.map((q, idx) => {
+            {filteredQuestions.map(({ question: q, originalIndex: idx }) => {
               const hasAnswer = !!answers[q.id]?.length;
               const isCurrentQ = idx === currentIndex;
               const isFlaggedQ = !!flags[q.id];
@@ -171,42 +222,15 @@ export function TestSidebar() {
   const isMobileOrTablet = useIsMobileOrTablet();
   const [open, setOpen] = useState(false);
 
-  // Mobile/Tablet: Floating button with sheet
-  if (isMobileOrTablet) {
-    return (
-      <>
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
-            <Button
-              size="icon"
-              className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white"
-              aria-label="Open test navigator"
-            >
-              <Menu className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent
-            side="right"
-            className="w-full sm:max-w-sm overflow-y-auto"
-          >
-            <SheetHeader>
-              <SheetTitle>{t("ui.headers.progress")}</SheetTitle>
-            </SheetHeader>
-            <div className="mt-6">
-              <TestSidebarContent />
-            </div>
-          </SheetContent>
-        </Sheet>
-        {/* Empty div to maintain grid structure on mobile/tablet */}
-        <div className="hidden lg:block" />
-      </>
-    );
-  }
-
-  // Desktop (≥ 1024px): Sticky sidebar
   return (
-    <div className="lg:col-span-1 space-y-4 sm:space-y-6 lg:sticky lg:top-[88px] lg:z-40 lg:self-start">
+    <SidebarShell
+      isMobileOrTablet={isMobileOrTablet}
+      open={open}
+      onOpenChange={setOpen}
+      sheetTitle={t("ui.headers.progress")}
+      sheetAriaLabel="Open test navigator"
+    >
       <TestSidebarContent />
-    </div>
+    </SidebarShell>
   );
 }

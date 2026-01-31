@@ -1,4 +1,4 @@
-// Export individual stores
+export { useIsMobileOrTablet } from "./use-is-mobile-or-tablet";
 export { useTestQuestionsStore } from "./use-test-questions";
 export { useTestNavigationStore } from "./use-test-navigation";
 export { useTestAnswersStore } from "./use-test-answers";
@@ -6,7 +6,6 @@ export { useTestFlagsStore } from "./use-test-flags";
 export { useTestRevealedStore } from "./use-test-revealed";
 export { useTestTimerStore } from "./use-test-timer";
 export { useTestSubmissionStore } from "./use-test-submission";
+export { useTestPauseStore } from "./use-test-pause";
 export { useResultStore } from "./use-result";
-
-// Export main combined store for backward compatibility
 export { useTestStore, useTestStoreState } from "./use-test";

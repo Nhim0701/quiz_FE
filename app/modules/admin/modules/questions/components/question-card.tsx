@@ -25,12 +25,14 @@ import {
   Loader2,
   Check,
   CheckCheck,
+  Eye,
+  PencilIcon,
 } from "lucide-react";
 import type { QuestionProps } from "../types";
 import { useQuestionsStore } from "../hooks";
 import { useTestsStore } from "../../tests/hooks";
 import { useCategoriesStore } from "../../categories/hooks";
-import { useApp } from "@/hooks";
+import { useApp, useEditorStore } from "@/hooks";
 import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants/app";
 
 // Helper function to find test by name
@@ -59,6 +61,7 @@ export function QuestionCard() {
   const [question, setQuestion] = useState<QuestionProps | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const isLoadingRef = useRef(false);
+  const { open: openEditor } = useEditorStore();
 
   const roles = getNamespaceRoles(RESOURCES.QUESTION);
 
@@ -70,6 +73,7 @@ export function QuestionCard() {
     reset,
     watch,
     setValue,
+    getValues,
   } = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema(t)),
     defaultValues: {
@@ -315,6 +319,32 @@ export function QuestionCard() {
     loading,
   ]);
 
+  const handlePreviewContent = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      openEditor({
+        content: getValues("content") || "",
+        mode: "html",
+        title: `${t("common.preview")}: ${t("admin.questions.fields.content")}`,
+      });
+    },
+    [question, t]
+  );
+
+  const handleEditContent = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      openEditor({
+        content: question?.content || "",
+        mode: "editor",
+        title: `${t("common.edit")}: ${t("admin.questions.fields.content")}`,
+        loadingLabel: t("common.saving"),
+        callback: (content) => setValue("content", content),
+      });
+    },
+    [question, t]
+  );
+
   if (!question) {
     return null;
   }
@@ -397,21 +427,33 @@ export function QuestionCard() {
                 <span className="text-red-500 dark:text-red-400 ml-1">*</span>
               </span>
             </div>
-            {isEditMode ? (
-              <TextareaField
-                id="content"
-                label=""
-                rows={4}
-                placeholder={t("admin.questions.form.contentPlaceholder")}
-                register={register("content")}
-                error={errors.content}
-                disabled={loading || isSubmitting}
-              />
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                {question.content}
-              </p>
+
+            {isEditMode && (
+              <>
+                <TextareaField
+                  id="content"
+                  label=""
+                  rows={4}
+                  placeholder={t("admin.questions.form.contentPlaceholder")}
+                  register={register("content")}
+                  error={errors.content}
+                  disabled={loading || isSubmitting}
+                  className="hidden"
+                />
+                <Button
+                  variant="outline"
+                  onClick={handleEditContent}
+                  className="mr-2"
+                >
+                  <PencilIcon className="h-4 w-4 text-green-500 dark:text-green-400" />
+                  {t("common.edit")}
+                </Button>
+              </>
             )}
+            <Button variant="outline" onClick={handlePreviewContent}>
+              <Eye className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+              {t("common.preview")}
+            </Button>
           </div>
 
           {/* Test */}

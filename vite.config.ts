@@ -8,6 +8,9 @@ import devtoolsJson from "vite-plugin-devtools-json";
 export default defineConfig({
   base: "/",
   plugins: [devtoolsJson(), tailwindcss(), reactRouter(), tsconfigPaths()],
+  ssr: {
+    noExternal: ["katex", "@platejs/math", "react-tweet"],
+  },
   server: {
     host: true,
     port: 5173,

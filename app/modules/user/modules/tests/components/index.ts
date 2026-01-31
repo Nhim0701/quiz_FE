@@ -6,6 +6,7 @@ export { TestCard } from "./test-card";
 export { TestHeader } from "./test-header";
 export { TestQuestion } from "./test-question";
 export { TestSidebar } from "./test-sidebar";
+export { TestAlertDialog } from "./test-alert-dialog";
 export { TestEmpty } from "./test-empty";
 export { TestTakeSkeleton } from "./test-take-skeleton";
 export { ResultEmpty } from "./result-empty";

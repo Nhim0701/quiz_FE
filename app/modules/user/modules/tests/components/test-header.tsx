@@ -1,17 +1,13 @@
-import { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { Clock, X } from "lucide-react";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { X, Pause, Play } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { useTestStore } from "../hooks";
-import {
-  useTestsStore,
-  type TestProps,
-} from "@/modules/admin/modules/tests/hooks";
 import { useNavigate, useParams } from "react-router";
-import { ROUTES, TIME_CONSTANTS } from "../constants";
+import { ROUTES } from "../constants";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useTestTimerStore } from "../hooks/use-test-timer";
+import { TestTimerBadge } from "./test-timer-badge";
+import { TestAlertDialog } from "./test-alert-dialog";
 
 export function TestHeader() {
   const { t } = useTranslation();
@@ -23,67 +19,83 @@ export function TestHeader() {
     questions,
     loading,
     finishTest,
-    timeRemaining,
+    timeStarted,
     startTimer,
-    setTimeRemaining,
+    isPaused,
+    pauseTest,
+    resumeTest,
+    clearPause,
   } = useTestStore();
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const finishTestRef = useRef(finishTest);
+  const [showTimeExpiredDialog, setShowTimeExpiredDialog] = useState(false);
+  const [showPausedDialog, setShowPausedDialog] = useState(false);
+  const [showCloseDialog, setShowCloseDialog] = useState(false);
 
-  // Update ref when finishTest changes
   useEffect(() => {
-    finishTestRef.current = finishTest;
-  }, [finishTest]);
+    setShowTimeExpiredDialog(false);
+  }, [testId]);
 
-  // Start timer when test and questions are ready
   useEffect(() => {
-    if (test && !loading && questions.length > 0) {
+    if (
+      test &&
+      !loading &&
+      questions.length > 0 &&
+      !isPaused &&
+      !timeStarted
+    ) {
       startTimer();
-
-      intervalRef.current = setInterval(() => {
-        const currentTime = useTestTimerStore.getState().timeRemaining;
-
-        setTimeRemaining(currentTime - 1);
-        if (currentTime == 0) {
-          intervalRef.current &&
-            clearInterval(intervalRef.current as NodeJS.Timeout);
-          intervalRef.current = null;
-          finishTestRef.current(navigate, testId || "", (errorMessage) => {
-            console.error(errorMessage);
-          });
-        }
-      }, TIME_CONSTANTS.TIMER_INTERVAL);
     }
-    return () => {
-      intervalRef.current &&
-        clearInterval(intervalRef.current as NodeJS.Timeout);
-      intervalRef.current = null;
-    };
-  }, [test, loading, questions.length, startTimer, navigate, testId]);
+  }, [test, loading, questions.length, isPaused, timeStarted, startTimer]);
 
-  const handleClose = useCallback(() => {
-    navigate(ROUTES.INDEX);
-  }, [navigate]);
-
-  const formatTime = useCallback((seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs
-      .toString()
-      .padStart(2, "0")}`;
+  const handleCloseClick = useCallback(() => {
+    setShowCloseDialog(true);
   }, []);
 
-  const isTimeLow = useMemo(() => timeRemaining <= 5 * 60, [timeRemaining]);
+  const handleCloseKeepProgress = useCallback(() => {
+    setShowCloseDialog(false);
+    if (testId && !isPaused) {
+      pauseTest(testId);
+    }
+    navigate(ROUTES.INDEX);
+  }, [navigate, testId, isPaused, pauseTest]);
+
+  const handleCloseDiscardProgress = useCallback(() => {
+    setShowCloseDialog(false);
+    if (testId) {
+      clearPause(testId);
+    }
+    navigate(ROUTES.INDEX);
+  }, [navigate, testId, clearPause]);
+
+  const handlePause = useCallback(() => {
+    if (testId) {
+      pauseTest(testId);
+      setShowPausedDialog(true);
+    }
+  }, [testId, pauseTest]);
+
+  const handleResume = useCallback(() => {
+    if (testId) {
+      resumeTest(testId);
+    }
+  }, [testId, resumeTest]);
+
+  const handleResumeFromDialog = useCallback(() => {
+    if (testId && resumeTest(testId)) {
+      setShowPausedDialog(false);
+    }
+  }, [testId, resumeTest]);
+
+  const handleTimeExpiredSubmit = useCallback(() => {
+    setShowTimeExpiredDialog(false);
+    finishTest(navigate, testId || "", (errorMessage) => {
+      console.error(errorMessage);
+    });
+  }, [finishTest, navigate, testId]);
 
   const progressValue = useMemo(
     () =>
       questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0,
     [currentIndex, questions.length]
-  );
-
-  const formattedTime = useMemo(
-    () => formatTime(timeRemaining),
-    [formatTime, timeRemaining]
   );
 
   return (
@@ -107,19 +119,32 @@ export function TestHeader() {
             </p>
           </div>
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            <Badge
-              variant="outline"
-              className={`font-mono text-xs sm:text-sm font-semibold whitespace-nowrap ${
-                isTimeLow
-                  ? "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700 animate-pulse"
-                  : "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700"
-              }`}
-            >
-              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mr-1.5" />
-              <span>{formattedTime}</span>
-            </Badge>
+            <TestTimerBadge onExpired={() => setShowTimeExpiredDialog(true)} />
+            {isPaused ? (
+              <Button
+                onClick={handleResume}
+                variant="outline"
+                size="icon"
+                className="flex-shrink-0 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700 hover:bg-green-200 dark:hover:bg-green-900/70"
+                aria-label={t("ui.buttons.resume")}
+                title={t("ui.buttons.resume")}
+              >
+                <Play className="w-4 h-4 sm:w-5 sm:h-5" />
+              </Button>
+            ) : (
+              <Button
+                onClick={handlePause}
+                variant="outline"
+                size="icon"
+                className="flex-shrink-0 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-700 hover:bg-amber-200 dark:hover:bg-amber-900/70"
+                aria-label={t("ui.buttons.pause")}
+                title={t("ui.buttons.pause")}
+              >
+                <Pause className="w-4 h-4 sm:w-5 sm:h-5" />
+              </Button>
+            )}
             <Button
-              onClick={handleClose}
+              onClick={handleCloseClick}
               variant="ghost"
               size="icon"
               className="flex-shrink-0"
@@ -138,6 +163,54 @@ export function TestHeader() {
           ></div>
         </div>
       </CardContent>
+
+      <TestAlertDialog
+        open={showTimeExpiredDialog}
+        onOpenChange={setShowTimeExpiredDialog}
+        title={t("ui.timerExpired.title")}
+        description={t("ui.timerExpired.description")}
+        actions={[
+          {
+            label: t("ui.timerExpired.submit"),
+            onClick: handleTimeExpiredSubmit,
+            variant: "destructive",
+          },
+        ]}
+      />
+
+      <TestAlertDialog
+        open={showPausedDialog}
+        onOpenChange={setShowPausedDialog}
+        title={t("ui.paused.title")}
+        description={t("ui.paused.description")}
+        actions={[
+          {
+            label: t("ui.paused.resumeTest"),
+            onClick: handleResumeFromDialog,
+            variant: "green",
+          },
+        ]}
+      />
+
+      <TestAlertDialog
+        open={showCloseDialog}
+        onOpenChange={setShowCloseDialog}
+        title={t("ui.closeTest.title")}
+        description={t("ui.closeTest.description")}
+        cancelLabel={t("ui.closeTest.cancel")}
+        actions={[
+          {
+            label: t("ui.closeTest.discardProgress"),
+            onClick: handleCloseDiscardProgress,
+            variant: "destructive",
+          },
+          {
+            label: t("ui.closeTest.keepProgress"),
+            onClick: handleCloseKeepProgress,
+            variant: "green",
+          },
+        ]}
+      />
     </Card>
   );
 }

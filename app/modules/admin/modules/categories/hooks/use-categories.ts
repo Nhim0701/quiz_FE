@@ -5,6 +5,7 @@ import { ENDPOINTS, ERROR_MESSAGES, DEFAULT_VALUES } from "../constants";
 import type { FormDialogMode } from "@/constants";
 import { DIALOG_MODES } from "@/constants";
 import { t } from "@/i18n/utils";
+import type { TranslationKey } from "@/i18n";
 
 export interface Category {
   id: string;
@@ -17,6 +18,8 @@ interface CategoriesState {
   categories: Category[];
   loading: boolean;
   error: string | null;
+  total: number;
+  meta?: ApiResponseMeta;
 
   // Form state
   isDialogOpen: boolean;
@@ -50,6 +53,8 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
   categories: [],
   loading: false,
   error: null,
+  total: 0,
+  meta: undefined,
   isDialogOpen: false,
   dialogMode: null,
   category: null,
@@ -90,7 +95,6 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
       };
 
       // Add filter params if provided
-      // Filters are already in format: {filter-key-1: "name", filter-value-1: "C02", ...}
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
           if (value && typeof value === "string" && value.trim()) {
@@ -107,11 +111,16 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
       const data = response.data.data || [];
       const meta = response.data.meta;
 
-      set({ categories: data, loading: false });
+      set({
+        categories: data,
+        loading: false,
+        total: meta?.total || data.length || 0,
+        meta,
+      });
       return { data, meta };
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : t(ERROR_MESSAGES.FETCH_FAILED);
+        error instanceof Error ? error.message : t(ERROR_MESSAGES.FETCH_FAILED as TranslationKey);
       set({ error: errorMessage, loading: false });
       throw error;
     }
@@ -130,7 +139,7 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
       const errorMessage =
         error instanceof Error
           ? error.message
-          : t(ERROR_MESSAGES.CREATE_FAILED);
+          : t(ERROR_MESSAGES.CREATE_FAILED as TranslationKey);
       set({ error: errorMessage, loading: false });
       throw error;
     }
@@ -149,7 +158,7 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
       const errorMessage =
         error instanceof Error
           ? error.message
-          : t(ERROR_MESSAGES.UPDATE_FAILED);
+          : t(ERROR_MESSAGES.UPDATE_FAILED as TranslationKey);
       set({ error: errorMessage, loading: false });
       throw error;
     }
@@ -164,7 +173,7 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => ({
       const errorMessage =
         error instanceof Error
           ? error.message
-          : t(ERROR_MESSAGES.DELETE_FAILED);
+          : t(ERROR_MESSAGES.DELETE_FAILED as TranslationKey);
       set({ error: errorMessage, loading: false });
       throw error;
     }

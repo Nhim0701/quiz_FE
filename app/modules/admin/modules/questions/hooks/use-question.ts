@@ -6,6 +6,7 @@ import type { QuestionProps } from "../types";
 import type { FormDialogMode } from "@/constants";
 import { DIALOG_MODES } from "@/constants";
 import { t } from "@/i18n/utils";
+import type { TranslationKey } from "@/i18n";
 
 interface QuestionsState {
   // Questions list state
@@ -131,7 +132,9 @@ export const useQuestionsStore = create<QuestionsState>((set, get) => ({
       });
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : t(ERROR_MESSAGES.FETCH_FAILED);
+        error instanceof Error
+          ? error.message
+          : t(ERROR_MESSAGES.FETCH_FAILED as TranslationKey);
       set({
         error: errorMessage,
         loading: false,
@@ -160,7 +163,7 @@ export const useQuestionsStore = create<QuestionsState>((set, get) => ({
       const errorMessage =
         error instanceof Error
           ? error.message
-          : t(ERROR_MESSAGES.CREATE_FAILED);
+          : t(ERROR_MESSAGES.CREATE_FAILED as TranslationKey);
       set({ error: errorMessage, loading: false });
       throw error;
     }
@@ -188,7 +191,7 @@ export const useQuestionsStore = create<QuestionsState>((set, get) => ({
       const errorMessage =
         error instanceof Error
           ? error.message
-          : t(ERROR_MESSAGES.UPDATE_FAILED);
+          : t(ERROR_MESSAGES.UPDATE_FAILED as TranslationKey);
       set({ error: errorMessage, loading: false });
       throw error;
     }
@@ -204,7 +207,9 @@ export const useQuestionsStore = create<QuestionsState>((set, get) => ({
       return response.data.data;
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : t(ERROR_MESSAGES.FETCH_FAILED);
+        error instanceof Error
+          ? error.message
+          : t(ERROR_MESSAGES.FETCH_FAILED as TranslationKey);
       set({ error: errorMessage, loading: false });
       throw error;
     }
@@ -227,7 +232,7 @@ export const useQuestionsStore = create<QuestionsState>((set, get) => ({
       const errorMessage =
         error instanceof Error
           ? error.message
-          : t(ERROR_MESSAGES.DELETE_FAILED);
+          : t(ERROR_MESSAGES.DELETE_FAILED as TranslationKey);
       set({ error: errorMessage, loading: false });
       throw error;
     }

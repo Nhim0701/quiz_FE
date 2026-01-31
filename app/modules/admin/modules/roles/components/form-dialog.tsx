@@ -3,7 +3,7 @@ import { useForm, FormProvider, Form } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation, type TranslationParams } from "@/i18n";
 import { FormField } from "@/components/common/form-field";
-import { useApp, usePaginationStore } from "@/hooks";
+import { useApp } from "@/hooks";
 import { roleSchema, type RoleFormData } from "../schemas";
 import { useRolesStore, type Role } from "../hooks";
 import { FormDialog } from "@/components/common/form-dialog";
@@ -17,10 +17,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { roleFormBuilder } from "../schemas/role-schema";
 
 interface RoleFormDialogProps {
   onDelete?: (role: Role) => void;
   onClearFilters?: (() => void) | null;
+  onRefresh?: () => Promise<void>;
 }
 
 /**
@@ -31,6 +33,7 @@ interface RoleFormDialogProps {
 export function RoleFormDialog({
   onDelete,
   onClearFilters,
+  onRefresh,
 }: RoleFormDialogProps) {
   const { t } = useTranslation();
   const {
@@ -39,15 +42,13 @@ export function RoleFormDialog({
     showDialog,
     closeDialog: closeAppDialog,
   } = useApp();
-  const { page, pageSize } = usePaginationStore();
   const {
     isDialogOpen,
-    editingRole,
-    viewingRole,
+    dialogMode,
+    role,
     closeDialog,
     createRole,
     updateRole,
-    refreshRoles,
     loading,
     isEditMode,
     setEditMode,
@@ -55,22 +56,13 @@ export function RoleFormDialog({
 
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Determine mode and role from store state
-  const role = viewingRole || editingRole;
-  const mode: FormDialogMode = useMemo(() => {
-    if (viewingRole) return DIALOG_MODES.VIEW;
-    if (editingRole) return DIALOG_MODES.EDIT;
-    return DIALOG_MODES.CREATE;
-  }, [viewingRole, editingRole]);
-
-  const shouldShow = isDialogOpen;
+  const mode = (dialogMode ||
+    (role ? DIALOG_MODES.VIEW : DIALOG_MODES.CREATE)) as FormDialogMode;
+  const shouldShow = isDialogOpen && !!dialogMode;
 
   const methods = useForm<RoleFormData>({
     resolver: zodResolver(roleSchema(t)),
-    defaultValues: {
-      name: "",
-      description: "",
-    },
+    defaultValues: roleFormBuilder(),
   });
 
   const {
@@ -84,26 +76,17 @@ export function RoleFormDialog({
   // Reset form when role or mode changes
   useEffect(() => {
     if (shouldShow && role) {
-      reset({
-        name: role.name || "",
-        description: role.description || "",
-      });
+      reset(roleFormBuilder(role));
     } else if (shouldShow && mode === DIALOG_MODES.CREATE) {
-      reset({
-        name: "",
-        description: "",
-      });
+      reset(roleFormBuilder());
     }
   }, [shouldShow, role, mode, reset]);
 
-  const currentData = watch();
-  const hasChanges = useMemo(() => {
-    if (!role) return false;
-    return (
-      currentData.name !== role.name ||
-      currentData.description !== (role.description || "")
-    );
-  }, [currentData, role]);
+  const currentValues = watch();
+  const hasChanges = role
+    ? currentValues.name !== role.name ||
+      currentValues.description !== (role.description || "")
+    : false;
 
   const isViewMode = mode === DIALOG_MODES.VIEW;
   const isDisabled = isViewMode && !isEditMode;
@@ -127,47 +110,52 @@ export function RoleFormDialog({
   );
 
   const canSubmit = useMemo(() => {
-    if (mode === DIALOG_MODES.CREATE) return !!currentData.name?.trim();
+    if (mode === DIALOG_MODES.CREATE) return !!currentValues.name?.trim();
     if (mode === DIALOG_MODES.VIEW && isEditMode) return hasChanges;
     if (mode === DIALOG_MODES.EDIT) return true;
     return false;
-  }, [mode, currentData, isEditMode, hasChanges]);
+  }, [mode, currentValues, isEditMode, hasChanges]);
 
-  // Helper to refresh roles after mutation
-  const handleRefresh = useCallback(
-    async (refreshPage: number = page) => {
-      await refreshRoles(refreshPage, pageSize);
-    },
-    [refreshRoles, page, pageSize]
-  );
-
-  const onSubmit = async (data: RoleFormData) => {
-    try {
-      if (mode === DIALOG_MODES.CREATE) {
-        await createRole(data);
-        showSuccess(t("admin.roles.createSuccess"));
-        closeDialog();
-        onClearFilters?.();
-        await handleRefresh(1);
-      } else if (role) {
-        // Handle both VIEW (with edit mode) and EDIT modes
-        await updateRole(role.id, data);
-        showSuccess(t("admin.roles.updateSuccess"));
-
-        if (mode === DIALOG_MODES.VIEW) {
-          setEditMode(false);
-        } else {
+  const onSubmit = useCallback(
+    async (data: RoleFormData) => {
+      try {
+        if (mode === DIALOG_MODES.CREATE) {
+          await createRole(data);
+          showSuccess(t("admin.roles.createSuccess"));
           closeDialog();
-        }
+          onClearFilters?.();
+          onRefresh && (await onRefresh());
+        } else if (role) {
+          await updateRole(role.id, data);
+          showSuccess(t("admin.roles.updateSuccess"));
 
-        await handleRefresh();
+          if (mode === DIALOG_MODES.VIEW) {
+            setEditMode(false);
+          } else {
+            closeDialog();
+          }
+          onRefresh && (await onRefresh());
+        }
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : t("errors.genericError");
+        showError(errorMessage);
       }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : t("errors.genericError");
-      showError(errorMessage);
-    }
-  };
+    },
+    [
+      mode,
+      createRole,
+      showSuccess,
+      t,
+      closeDialog,
+      onClearFilters,
+      onRefresh,
+      role,
+      updateRole,
+      setEditMode,
+      showError,
+    ]
+  );
 
   const handleEdit = useCallback(() => {
     setEditMode(true);

@@ -1,165 +1,175 @@
 {
   "common": {
-    "loading": "Đang tải...",
-    "close": "Đóng",
-    "logout": "Đăng xuất",
-    "welcome": "Chào mừng trở lại, {{name}}!",
+    "loading": "Loading...",
+    "close": "Close",
+    "clickToPreview": "Click to preview",
+    "logout": "Logout",
+    "welcome": "Welcome back, {{name}}!",
     "email": "Email",
     "emailLabel": "Email",
     "emailPlaceholder": "you@example.com",
-    "passwordLabel": "Mật khẩu",
+    "passwordLabel": "Password",
     "passwordPlaceholder": "••••••••",
-    "switchToLightMode": "Chuyển sang chế độ sáng",
-    "switchToDarkMode": "Chuyển sang chế độ tối",
-    "edit": "Sửa",
-    "viewInfo": "Xem thông tin",
-    "cancel": "Hủy",
-    "save": "Lưu",
-    "back": "Quay lại",
-    "take": "Làm bài",
-    "result": "Kết quả",
-    "selected": "đã chọn",
+    "switchToLightMode": "Switch to light mode",
+    "switchToDarkMode": "Switch to dark mode",
+    "edit": "Edit",
+    "viewInfo": "View info",
+    "cancel": "Cancel",
+    "save": "Save",
+    "back": "Back",
+    "take": "Take Test",
+    "result": "Result",
+    "selected": "selected",
     "pagination": {
-      "itemsPerPage": "Số mục mỗi trang:",
-      "all": "Tất cả",
-      "summary": "từ {{start}} đến {{end}} trong tổng số {{total}} mục",
-      "firstPage": "Trang đầu",
-      "previousPage": "Trang trước",
-      "nextPage": "Trang sau",
-      "lastPage": "Trang cuối",
-      "page": "Trang {{page}}"
+      "itemsPerPage": "Items per page:",
+      "all": "All",
+      "summary": "from {{start}} to {{end}} of {{total}} items",
+      "firstPage": "First page",
+      "previousPage": "Previous page",
+      "nextPage": "Next page",
+      "lastPage": "Last page",
+      "page": "Page {{page}}"
     },
-    "search": "Tìm kiếm",
-    "searchPlaceholder": "Tìm kiếm theo tên danh mục...",
-    "selectPlaceholder": "Chọn...",
-    "comboboxSearchPlaceholder": "Tìm kiếm...",
-    "noResultsFound": "Không tìm thấy.",
-    "noDataAvailable": "Không có dữ liệu",
-    "actions": "Thao tác",
-    "seconds": "giây",
-    "minutes": "phút"
+    "search": "Search",
+    "selectPlaceholder": "Select...",
+    "comboboxSearchPlaceholder": "Search...",
+    "noResultsFound": "No results found.",
+    "noDataAvailable": "No data available",
+    "actions": "Actions",
+    "seconds": "seconds",
+    "minutes": "minutes",
+    "preview": "Preview",
+    "editorPlaceholder": "Type your content here...",
+    "searchPlaceholder": "Search by name...",
+    "saving": "Saving...",
+    "clickToShow": "Click to show"
+  },
+  "editor": {
+    "dialog": {
+      "description": "Editor dialog for editing content"
+    }
   },
   "errors": {
-    "networkError": "Lỗi mạng: Không nhận được phản hồi từ máy chủ",
-    "requestError": "Lỗi yêu cầu",
-    "httpError": "Lỗi HTTP! mã trạng thái:",
-    "forbidden": "Truy cập bị từ chối. Bạn không có quyền truy cập tài nguyên này.",
-    "permissionDenied": "Quyền truy cập bị từ chối. Bạn không có quyền truy cập tài nguyên này.",
-    "loginFailed": "Đăng nhập thất bại. Vui lòng kiểm tra email hoặc mật khẩu của bạn.",
-    "registrationFailed": "Đăng ký thất bại. Vui lòng thử lại.",
-    "fetchUserFailed": "Không thể lấy thông tin người dùng:",
-    "sessionExpired": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
-    "fetchQuestionsFailed": "Không thể tải câu hỏi. Vui lòng thử lại.",
-    "fetchDashboardFailed": "Không thể tải dữ liệu bảng điều khiển. Vui lòng thử lại.",
-    "submitResponsesFailed": "Không thể gửi câu trả lời. Vui lòng thử lại.",
-    "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
-    "noRefreshToken": "Không có refresh token",
-    "invalidRefreshResponse": "Phản hồi refresh không hợp lệ: thiếu access token",
-    "tokenRefreshFailed": "Làm mới token thất bại",
-    "failedToGetNewToken": "Không thể lấy token mới",
-    "tokenExpiredNoRefresh": "Token đã hết hạn và không có refresh token"
+    "networkError": "Network error: No response received from server",
+    "requestError": "Request error",
+    "httpError": "HTTP error! status:",
+    "forbidden": "Access forbidden. You don't have permission to access this resource.",
+    "permissionDenied": "Permission denied. You don't have permission to access this resource.",
+    "loginFailed": "Login failed. Please check your email or password.",
+    "registrationFailed": "Registration failed. Please try again.",
+    "fetchUserFailed": "Failed to fetch user:",
+    "sessionExpired": "Session expired. Please login again.",
+    "fetchQuestionsFailed": "Failed to fetch questions. Please try again.",
+    "fetchDashboardFailed": "Failed to fetch dashboard data. Please try again.",
+    "submitResponsesFailed": "Failed to submit responses. Please try again.",
+    "genericError": "Something went wrong. Please try again.",
+    "noRefreshToken": "No refresh token available",
+    "invalidRefreshResponse": "Invalid refresh response: missing access token",
+    "tokenRefreshFailed": "Token refresh failed",
+    "failedToGetNewToken": "Failed to get new token",
+    "tokenExpiredNoRefresh": "Token expired and no refresh token available"
   },
   "success": {
-    "loginSuccess": "Đăng nhập thành công!",
-    "registrationSuccess": "Đăng ký thành công!",
-    "submitSuccess": "Gửi bài kiểm tra thành công!"
+    "loginSuccess": "Login successful!",
+    "registrationSuccess": "Registration successful!",
+    "submitSuccess": "Test submitted successfully!"
   },
   "info": {
-    "noResultData": "Không có dữ liệu kết quả. Vui lòng bắt đầu bài kiểm tra từ trang cá nhân của bạn.",
-    "noQuestions": "Không tìm thấy câu hỏi cho loại bài kiểm tra này."
+    "noResultData": "No result data. Please start a test from your profile.",
+    "noQuestions": "No questions found for this test."
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "tests": "Tests",
+    "profile": "Profile",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "toggleSidebar": "Toggle Sidebar",
+    "userMenu": "User Menu",
+    "adminMenu": "Admin Menu",
+    "admin": {
+      "index": "Admin",
+      "categories": "Categories",
+      "tests": "Tests",
+      "questions": "Questions",
+      "users": "Users",
+      "rolesPermissions": "Roles & Permissions",
+      "roles": "Roles",
+      "permissions": "Permissions",
+      "namespaces": "Namespaces"
+    }
   },
   "breadcrumb": {
-    "home": "Trang chủ"
+    "home": "Home"
   },
   "notFound": {
-    "title": "Không Tìm Thấy Trang",
-    "description": "Ồ! Trang bạn đang tìm kiếm không tồn tại. Trang có thể đã được di chuyển hoặc xóa.",
-    "backToDashboard": "Quay lại Bảng Điều Khiển"
+    "title": "Page Not Found",
+    "description": "Oops! The page you're looking for doesn't exist. It might have been moved or deleted.",
+    "backToDashboard": "Back to Dashboard"
   },
   "dashboard": {
     "stats": {
-      "totalAnswered": "Tổng Số Đã Trả Lời",
-      "correctAnswers": "Câu Trả Lời Đúng",
-      "wrongAnswers": "Câu Trả Lời Sai",
-      "accuracy": "Độ Chính Xác"
+      "totalAnswered": "Total Answered",
+      "correctAnswers": "Correct Answers",
+      "wrongAnswers": "Wrong Answers",
+      "accuracy": "Accuracy"
     },
     "categoryStats": {
-      "title": "Thống Kê Theo Danh Mục",
-      "correct": "đúng",
-      "wrong": "sai"
+      "title": "Stats by Category",
+      "correct": "correct",
+      "wrong": "wrong"
     },
     "testStats": {
-      "title": "Thống Kê Theo Bài Kiểm Tra",
-      "correct": "đúng",
-      "wrong": "sai",
-      "submissions": "lần nộp"
+      "title": "Stats by Test",
+      "correct": "correct",
+      "wrong": "wrong",
+      "submissions": "submissions"
     },
     "recentActivity": {
-      "title": "Hoạt Động Gần Đây",
-      "noActivity": "Chưa có hoạt động nào. Bắt đầu làm bài kiểm tra để xem tiến độ của bạn!",
-      "notAvailable": "Không có",
-      "category": "Danh mục",
-      "test": "Bài kiểm tra"
+      "title": "Recent Activity",
+      "noActivity": "No activity yet. Start a test to see your progress!",
+      "notAvailable": "N/A",
+      "category": "Category",
+      "test": "Test"
     }
   },
   "admin": {
     "common": {
-      "noPermission": "Bạn không có quyền truy cập trang này"
+      "noPermission": "You don't have permission to access this page"
     },
     "roles": {
-      "title": "Quản Lý Vai Trò",
-      "cardTitle": "Danh Sách Vai Trò",
-      "createTitle": "Tạo Vai Trò",
-      "createDescription": "Tạo một vai trò mới trong hệ thống",
-      "editTitle": "Chỉnh Sửa Vai Trò",
-      "editDescription": "Cập nhật thông tin vai trò",
-      "viewTitle": "Thông Tin Vai Trò",
-      "viewDescription": "Xem chi tiết thông tin vai trò",
-      "create": "Tạo",
-      "update": "Cập nhật",
-      "delete": "Xóa",
-      "createSuccess": "Tạo vai trò thành công",
-      "updateSuccess": "Cập nhật vai trò thành công",
-      "deleteSuccess": "Xóa vai trò thành công",
-      "confirmDelete": "Bạn có chắc chắn muốn xóa vai trò {{name}}?",
-      "searchPlaceholder": "Tìm kiếm theo tên vai trò...",
-      "empty": "Không có vai trò nào",
-      "noPermission": "Bạn không có quyền truy cập trang này",
+      "title": "Role Management",
+      "cardTitle": "Roles List",
+      "createTitle": "Create Role",
+      "createDescription": "Create a new role in the system",
+      "editTitle": "Edit Role",
+      "editDescription": "Update role information",
+      "viewTitle": "Role Information",
+      "viewDescription": "View role details",
+      "create": "Create",
+      "update": "Update",
+      "delete": "Delete",
+      "createSuccess": "Role created successfully",
+      "updateSuccess": "Role updated successfully",
+      "deleteSuccess": "Role deleted successfully",
+      "confirmDelete": "Are you sure you want to delete role {{name}}?",
+      "searchPlaceholder": "Search by role name...",
+      "empty": "No roles found",
+      "noPermission": "You don't have permission to access this page",
       "columns": {
         "id": "ID",
-        "name": "Tên Vai Trò",
-        "description": "Mô Tả"
+        "name": "Role Name",
+        "description": "Description"
       },
       "form": {
-        "nameLabel": "Tên Vai Trò",
-        "namePlaceholder": "Nhập tên vai trò",
-        "descriptionLabel": "Mô Tả",
-        "descriptionPlaceholder": "Nhập mô tả vai trò"
+        "nameLabel": "Role Name",
+        "namePlaceholder": "Enter role name",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Enter role description"
       },
       "validation": {
-        "nameRequired": "Tên vai trò là bắt buộc"
+        "nameRequired": "Role name is required"
       }
-    }
-  },
-  "sidebar": {
-    "dashboard": "Bảng Điều Khiển",
-    "tests": "Bài Kiểm Tra",
-    "profile": "Hồ Sơ",
-    "expand": "Mở rộng",
-    "collapse": "Thu gọn",
-    "toggleSidebar": "Bật/Tắt Thanh Bên",
-    "userMenu": "Menu Người dùng",
-    "adminMenu": "Menu Admin",
-    "admin": {
-      "index": "Admin",
-      "categories": "Danh Mục",
-      "tests": "Bài Kiểm Tra",
-      "questions": "Câu Hỏi",
-      "users": "Người Dùng",
-      "rolesPermissions": "Vai Trò & Quyền",
-      "roles": "Vai Trò",
-      "permissions": "Quyền",
-      "namespaces": "Namespace"
     }
   }
 }

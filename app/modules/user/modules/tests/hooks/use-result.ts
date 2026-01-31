@@ -1,8 +1,6 @@
 import { create } from "zustand";
-import type {
-  QuestionProps,
-  AnswerProps,
-} from "@/modules/admin/modules/questions/types";
+import type { QuestionProps } from "@/modules/admin/modules/questions/types";
+import { isQuestionAnsweredCorrectly } from "../utils";
 
 interface ResultSummary {
   total: number;
@@ -14,62 +12,39 @@ interface ResultSummary {
 }
 
 interface ResultState {
-  // Result data
   summary: ResultSummary | null;
-  answers: Record<string, string[]>; // questionId -> array of answer ids
+  answers: Record<string, string[]>;
   questions: QuestionProps[];
-
-  // Set result data
+  flags: Record<string, boolean>;
   setResult: (
     summary: ResultSummary,
     answers: Record<string, string[]>,
-    questions: QuestionProps[]
+    questions: QuestionProps[],
+    flags?: Record<string, boolean>
   ) => void;
-
-  // Calculate stats
   getCorrectCount: () => number;
   getWrongCount: () => number;
   getAccuracyPercentage: () => number;
 }
 
 export const useResultStore = create<ResultState>((set, get) => ({
-  // Initial state
   summary: null,
   answers: {},
   questions: [],
-
-  // Set result
-  setResult: (summary, answers, questions) =>
-    set({ summary, answers, questions }),
-
-  // Calculate correct count
+  flags: {},
+  setResult: (summary, answers, questions, flags = {}) =>
+    set({ summary, answers, questions, flags }),
   getCorrectCount: () => {
     const { questions, answers } = get();
-    return questions.reduce((count, question) => {
-      const userAnswerIds = answers[question.id] || [];
-      if (userAnswerIds.length === 0) return count;
-
-      const correctAnswerIds = question.answers
-        .filter((a: AnswerProps) => a.isCorrect)
-        .map((a: AnswerProps) => a.id);
-
-      // Check if user selected all correct answers and no incorrect ones
-      const isCorrect =
-        correctAnswerIds.length === userAnswerIds.length &&
-        correctAnswerIds.every((id: string) => userAnswerIds.includes(id));
-
-      return isCorrect ? count + 1 : count;
-    }, 0);
+    return questions.filter((q) =>
+      isQuestionAnsweredCorrectly(q, answers[q.id] || [])
+    ).length;
   },
-
-  // Calculate wrong count
   getWrongCount: () => {
     const { summary, getCorrectCount } = get();
     if (!summary) return 0;
     return summary.answered - getCorrectCount();
   },
-
-  // Calculate accuracy percentage
   getAccuracyPercentage: () => {
     const { summary, getCorrectCount } = get();
     if (!summary || summary.answered === 0) return 0;

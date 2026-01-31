@@ -1,15 +1,26 @@
 {
   "test": {
     "question": "Câu hỏi {{current}} / {{total}}",
-    "timeRemaining": "Thời gian còn lại"
+    "filters": {
+      "all": "Tất cả",
+      "answered": "Đã trả lời",
+      "notAnswered": "Chưa trả lời",
+      "flagged": "Đã đánh dấu"
+    }
   },
   "result": {
     "wrong": "Sai",
     "quiz": "Bài Kiểm Tra",
     "review": {
       "correct": "Đúng",
+      "incorrect": "Sai"
+    },
+    "filters": {
+      "all": "Tất cả",
+      "flagged": "Đã đánh dấu",
+      "correct": "Đúng",
       "incorrect": "Sai",
-      "answer": "Câu trả lời"
+      "notAnswered": "Chưa trả lời"
     }
   },
   "tests": {
@@ -18,8 +29,6 @@
     "addQuestionsFirst": "Vui lòng thêm câu hỏi vào cơ sở dữ liệu trước",
     "totalQuestions": "tổng câu hỏi",
     "questions": "câu hỏi",
-    "questionsLabel": "Câu hỏi",
-    "startTest": "Bắt Đầu Bài Kiểm Tra",
     "noTests": "Không có bài kiểm tra nào",
     "timeLimit": "phút"
   },
@@ -32,7 +41,9 @@
       "previous": "Trước",
       "prev": "Trước",
       "next": "Tiếp",
-      "flag": "Đánh Dấu"
+      "flag": "Đánh Dấu",
+      "pause": "Tạm Dừng",
+      "resume": "Tiếp Tục"
     },
     "headers": {
       "testCompleted": "Hoàn Thành Bài Kiểm Tra!",
@@ -47,9 +58,32 @@
       "multipleAnswers": "Nhiều câu trả lời"
     },
     "explanation": {
-      "show": "Hiển thị Giải thích",
-      "hide": "Ẩn Giải thích",
       "title": "Giải thích"
+    },
+    "timerExpired": {
+      "title": "Hết Thời Gian",
+      "description": "Thời gian làm bài của bạn đã hết. Bài kiểm tra sẽ được tự động nộp.",
+      "submit": "Nộp Bài"
+    },
+    "paused": {
+      "title": "Đã Tạm Dừng",
+      "description": "Tiến độ của bạn đã được lưu. Bạn có thể tiếp tục bài kiểm tra này sau.",
+      "ok": "Đồng ý",
+      "resumeTest": "Tiếp tục làm bài"
+    },
+    "closeTest": {
+      "title": "Rời bài kiểm tra?",
+      "description": "Bạn có muốn lưu tiến độ để tiếp tục sau không?",
+      "keepProgress": "Giữ tiến độ",
+      "discardProgress": "Không giữ",
+      "cancel": "Hủy"
+    },
+    "finishTestConfirm": {
+      "title": "Hoàn thành bài kiểm tra?",
+      "withUnanswered": "Bạn còn {{count}} câu hỏi chưa trả lời. Vẫn nộp bài?",
+      "allAnswered": "Bạn có chắc muốn hoàn thành và nộp bài kiểm tra?",
+      "submit": "Nộp bài",
+      "cancel": "Hủy"
     }
   }
 }

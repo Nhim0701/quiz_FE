@@ -1,7 +1,3 @@
-/**
- * Main test store that combines all test-related stores
- * This provides a unified interface for components that need access to multiple stores
- */
 import { useTestQuestionsStore } from "./use-test-questions";
 import { useTestNavigationStore } from "./use-test-navigation";
 import { useTestAnswersStore } from "./use-test-answers";
@@ -9,19 +5,19 @@ import { useTestFlagsStore } from "./use-test-flags";
 import { useTestRevealedStore } from "./use-test-revealed";
 import { useTestTimerStore } from "./use-test-timer";
 import { useTestSubmissionStore } from "./use-test-submission";
+import { useTestPauseStore } from "./use-test-pause";
 
-/**
- * Hook to access all test stores in one place
- * Components can use this for convenience, or import individual stores directly
- */
 export function useTestStore() {
   const questionsStore = useTestQuestionsStore();
   const navigationStore = useTestNavigationStore();
   const answersStore = useTestAnswersStore();
   const flagsStore = useTestFlagsStore();
   const revealedStore = useTestRevealedStore();
-  const timerStore = useTestTimerStore();
+  const timeStarted = useTestTimerStore((s) => s.timeStarted);
+  const startTimer = useTestTimerStore((s) => s.startTimer);
+  const setFinishDialogOpen = useTestTimerStore((s) => s.setFinishDialogOpen);
   const submissionStore = useTestSubmissionStore();
+  const pauseStore = useTestPauseStore();
 
   return {
     // Questions
@@ -51,22 +47,25 @@ export function useTestStore() {
     revealed: revealedStore.revealed,
     toggleRevealed: revealedStore.toggleRevealed,
 
-    // Timer
-    timeRemaining: timerStore.timeRemaining,
-    setTimeRemaining: timerStore.setTimeRemaining,
-    timeStarted: timerStore.timeStarted,
-    setTimeStarted: timerStore.setTimeStarted,
-    startTimer: timerStore.startTimer,
+    // Timer (timeRemaining excluded so only timer UI subscribes and re-renders on tick)
+    timeStarted,
+    startTimer,
+    setFinishDialogOpen,
 
     // Submission
     submitting: submissionStore.submitting,
     setSubmitting: submissionStore.setSubmitting,
     submit: submissionStore.submit,
     finishTest: submissionStore.finishTest,
+
+    // Pause
+    isPaused: pauseStore.isPaused,
+    pauseTest: pauseStore.pauseTest,
+    resumeTest: pauseStore.resumeTest,
+    clearPause: pauseStore.clearPause,
   };
 }
 
-// Export getState for direct access (used in take.tsx)
 export const useTestStoreState = {
   getState: () => {
     const questionsState = useTestQuestionsStore.getState();
@@ -76,6 +75,7 @@ export const useTestStoreState = {
     const revealedState = useTestRevealedStore.getState();
     const timerState = useTestTimerStore.getState();
     const submissionState = useTestSubmissionStore.getState();
+    const pauseState = useTestPauseStore.getState();
 
     return {
       test: questionsState.test,
@@ -88,6 +88,7 @@ export const useTestStoreState = {
       timeRemaining: timerState.timeRemaining,
       timeStarted: timerState.timeStarted,
       submitting: submissionState.submitting,
+      isPaused: pauseState.isPaused,
     };
   },
 };

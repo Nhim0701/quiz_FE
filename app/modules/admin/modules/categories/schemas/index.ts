@@ -1,1 +1,5 @@
-export { categorySchema, type CategoryFormData } from "./category-schema";
+export {
+  categorySchema,
+  type CategoryFormData,
+  categoryFormBuilder,
+} from "./category-schema";

@@ -3,8 +3,12 @@ import { useForm, FormProvider, Form } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation, type TranslationParams } from "@/i18n";
 import { FormField } from "@/components/common/form-field";
-import { useApp, usePaginationStore } from "@/hooks";
-import { categorySchema, type CategoryFormData } from "../schemas";
+import { useApp } from "@/hooks";
+import {
+  categorySchema,
+  categoryFormBuilder,
+  type CategoryFormData,
+} from "../schemas";
 import { useCategoriesStore, type Category } from "../hooks";
 import { FormDialog } from "@/components/common/form-dialog";
 import type { FormDialogMode } from "@/constants";
@@ -19,6 +23,7 @@ import {
 interface CategoryFormDialogProps {
   onDelete?: (category: Category) => void;
   onClearFilters?: (() => void) | null;
+  onRefresh?: () => Promise<void>;
 }
 
 /**
@@ -29,6 +34,7 @@ interface CategoryFormDialogProps {
 export function CategoryFormDialog({
   onDelete,
   onClearFilters,
+  onRefresh,
 }: CategoryFormDialogProps) {
   const { t } = useTranslation();
   const {
@@ -37,7 +43,6 @@ export function CategoryFormDialog({
     showDialog,
     closeDialog: closeAppDialog,
   } = useApp();
-  const { page, pageSize } = usePaginationStore();
   const {
     isDialogOpen,
     dialogMode,
@@ -45,7 +50,6 @@ export function CategoryFormDialog({
     closeDialog,
     createCategory,
     updateCategory,
-    refreshCategories,
     loading,
     isEditMode,
     setEditMode,
@@ -60,9 +64,7 @@ export function CategoryFormDialog({
 
   const methods = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema(t)),
-    defaultValues: {
-      name: "",
-    },
+    defaultValues: categoryFormBuilder(),
   });
 
   const {
@@ -73,17 +75,17 @@ export function CategoryFormDialog({
     watch,
   } = methods;
 
-  // Reset form when category or mode changes
+  const currentValues = watch();
+
   useEffect(() => {
     if (shouldShow && category) {
-      reset({ name: category.name || "" });
+      reset(categoryFormBuilder(category));
     } else if (shouldShow && mode === DIALOG_MODES.CREATE) {
-      reset({ name: "" });
+      reset(categoryFormBuilder());
     }
   }, [shouldShow, category, mode, reset]);
 
-  const currentName = watch("name");
-  const hasChanges = category ? currentName !== category.name : false;
+  const hasChanges = category ? currentValues.name !== category.name : false;
   const isViewMode = mode === DIALOG_MODES.VIEW;
   const isDisabled = isViewMode && !isEditMode;
 
@@ -106,47 +108,52 @@ export function CategoryFormDialog({
   );
 
   const canSubmit = useMemo(() => {
-    if (mode === DIALOG_MODES.CREATE) return !!currentName.trim();
+    if (mode === DIALOG_MODES.CREATE) return !!currentValues.name.trim();
     if (mode === DIALOG_MODES.VIEW && isEditMode) return hasChanges;
     if (mode === DIALOG_MODES.EDIT) return true;
     return false;
-  }, [mode, currentName, isEditMode, hasChanges]);
+  }, [mode, currentValues, isEditMode, hasChanges]);
 
-  // Helper to refresh categories after mutation
-  const handleRefresh = useCallback(
-    async (refreshPage: number = page) => {
-      await refreshCategories(refreshPage, pageSize);
-    },
-    [refreshCategories, page, pageSize]
-  );
-
-  const onSubmit = async (data: CategoryFormData) => {
-    try {
-      if (mode === DIALOG_MODES.CREATE) {
-        await createCategory(data);
-        showSuccess(t("admin.categories.createSuccess"));
-        closeDialog();
-        onClearFilters?.();
-        await handleRefresh(1);
-      } else if (category) {
-        // Handle both VIEW (with edit mode) and EDIT modes
-        await updateCategory(category.id, data);
-        showSuccess(t("admin.categories.updateSuccess"));
-
-        if (mode === DIALOG_MODES.VIEW) {
-          setEditMode(false);
-        } else {
+  const onSubmit = useCallback(
+    async (data: CategoryFormData) => {
+      try {
+        if (mode === DIALOG_MODES.CREATE) {
+          await createCategory(data);
+          showSuccess(t("admin.categories.createSuccess"));
           closeDialog();
-        }
+          onClearFilters?.();
+          onRefresh && (await onRefresh());
+        } else if (category) {
+          await updateCategory(category.id, data);
+          showSuccess(t("admin.categories.updateSuccess"));
 
-        await handleRefresh();
+          if (mode === DIALOG_MODES.VIEW) {
+            setEditMode(false);
+          } else {
+            closeDialog();
+          }
+          onRefresh && (await onRefresh());
+        }
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : t("errors.genericError");
+        showError(errorMessage);
       }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : t("errors.genericError");
-      showError(errorMessage);
-    }
-  };
+    },
+    [
+      mode,
+      createCategory,
+      showSuccess,
+      t,
+      closeDialog,
+      onClearFilters,
+      onRefresh,
+      category,
+      updateCategory,
+      setEditMode,
+      showError,
+    ]
+  );
 
   const handleEdit = useCallback(() => {
     setEditMode(true);
@@ -156,7 +163,7 @@ export function CategoryFormDialog({
     if (isViewMode && isEditMode) {
       setEditMode(false);
       if (category) {
-        reset({ name: category.name || "" });
+        reset(categoryFormBuilder(category));
       }
     }
     closeDialog();

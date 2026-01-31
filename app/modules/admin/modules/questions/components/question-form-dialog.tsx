@@ -1,16 +1,12 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useForm, Controller, FormProvider, Form } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslation, type TranslationParams } from "@/i18n";
-import {
-  TextareaField,
-  ComboboxField,
-  FormField,
-} from "@/components/common/form-field";
+import { useTranslation } from "@/i18n";
+import { TextareaField, ComboboxField } from "@/components/common/form-field";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { CheckCheck, Folder, Pencil } from "lucide-react";
-import { useApp, usePageData } from "@/hooks";
+import { CheckCheck, Eye, Folder, Pencil } from "lucide-react";
+import { useApp, useEditorStore, usePageData } from "@/hooks";
 import { questionSchema, type QuestionFormData } from "../schemas";
 import { useQuestionsStore } from "../hooks";
 import { useTestsStore } from "../../tests/hooks";
@@ -26,12 +22,16 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants/app";
+import { ROUTES } from "../constants";
 import type { QuestionProps } from "../types";
 import { questionFormBuilder } from "../schemas/question-schema";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router";
 
 interface QuestionFormDialogProps {
   onDelete?: (question: QuestionProps) => void;
   onClearFilters?: (() => void) | null;
+  onRefresh?: () => Promise<void>;
 }
 
 /**
@@ -42,8 +42,10 @@ interface QuestionFormDialogProps {
 export function QuestionFormDialog({
   onDelete,
   onClearFilters,
+  onRefresh,
 }: QuestionFormDialogProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const {
     showError,
     showSuccess,
@@ -66,6 +68,7 @@ export function QuestionFormDialog({
 
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedTestId, setSelectedTestId] = useState<string>("");
+  const { open: openEditor } = useEditorStore();
 
   // Fetch tests and categories when dialog opens
   usePageData(
@@ -124,9 +127,10 @@ export function QuestionFormDialog({
     handleSubmit,
     control,
     formState: { errors, isSubmitting },
+    setValue,
+    getValues,
     reset,
     watch,
-    setValue,
   } = methods;
 
   const watchedTestId = watch("testId");
@@ -205,7 +209,8 @@ export function QuestionFormDialog({
   const onSubmit = async (data: QuestionFormData) => {
     try {
       if (mode === DIALOG_MODES.CREATE) {
-        await createQuestion({
+        // Specifically create question logic: will redirect to the question info page
+        const createdQuestion = await createQuestion({
           testId: data.testId,
           content: data.content,
           isMultipleChoice: data.isMultipleChoice || false,
@@ -213,7 +218,9 @@ export function QuestionFormDialog({
         });
         showSuccess(t("admin.questions.createSuccess"));
         closeDialog();
-        onClearFilters?.();
+        return navigate(ROUTES.VIEW(createdQuestion.id));
+        // onClearFilters?.();
+        // onRefresh && (await onRefresh());
       } else if (question) {
         // Handle both VIEW (with edit mode) and EDIT modes
         // Note: updateQuestion requires testId and questionId
@@ -329,6 +336,31 @@ export function QuestionFormDialog({
     showError,
   ]);
 
+  const handleEditContent = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    const value = getValues("content") || "";
+    openEditor({
+      content: value,
+      mode: "editor",
+      title: `${t("common.edit")}: ${t("admin.questions.fields.content")}`,
+      loadingLabel: t("common.saving"),
+      callback: (content) => {
+        setValue("content", content || "");
+      },
+    });
+  };
+
+  const handlePreviewContent = async (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    e.preventDefault();
+    openEditor({
+      content: getValues("content") || "",
+      mode: "html",
+      title: `${t("common.preview")}: ${t("admin.questions.fields.content")}`,
+    });
+  };
+
   if (!shouldShow) return null;
 
   return (
@@ -356,17 +388,30 @@ export function QuestionFormDialog({
     >
       <FormProvider {...methods}>
         <Form className="mt-6 space-y-4">
-          <TextareaField
-            id="content"
-            label={t("admin.questions.fields.content")}
-            rows={4}
-            placeholder={t("admin.questions.form.contentPlaceholder")}
-            register={register("content")}
-            error={errors.content}
-            required
-            disabled={isDisabled || loading || isSubmitting}
-            labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
-          />
+          <div className="space-y-2">
+            <TextareaField
+              id="content"
+              label={t("admin.questions.fields.content")}
+              rows={4}
+              className="hidden"
+              placeholder={t("admin.questions.form.contentPlaceholder")}
+              register={register("content")}
+              error={errors.content}
+              required
+              disabled
+              labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+            />
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={handleEditContent}>
+                <Pencil className="h-4 w-4 text-green-500 dark:text-green-400" />
+                {t("common.edit")}
+              </Button>
+              <Button variant="outline" onClick={handlePreviewContent}>
+                <Eye className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+                {t("common.preview")}
+              </Button>
+            </div>
+          </div>
 
           <ComboboxField
             id="testId"

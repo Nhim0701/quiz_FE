@@ -2,26 +2,22 @@ import { create } from "zustand";
 import { useTestQuestionsStore } from "./use-test-questions";
 
 interface TestTimerState {
-  // Timer
-  timeRemaining: number; // in seconds
+  timeRemaining: number;
   setTimeRemaining: (time: number) => void;
   timeStarted: boolean;
   setTimeStarted: (started: boolean) => void;
-
-  // Timer management
+  finishDialogOpen: boolean;
+  setFinishDialogOpen: (open: boolean) => void;
   startTimer: () => void;
 }
 
 export const useTestTimerStore = create<TestTimerState>((set, get) => ({
-  // Initial state
   timeRemaining: 0,
   timeStarted: false,
-
-  // Timer
+  finishDialogOpen: false,
   setTimeRemaining: (time) => set({ timeRemaining: time }),
   setTimeStarted: (started) => set({ timeStarted: started }),
-
-  // Timer management
+  setFinishDialogOpen: (open) => set({ finishDialogOpen: open }),
   startTimer: () => {
     const { questions, loading } = useTestQuestionsStore.getState();
     const { timeStarted } = get();

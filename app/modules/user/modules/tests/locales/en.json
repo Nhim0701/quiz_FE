@@ -1,15 +1,26 @@
 {
   "test": {
     "question": "Question {{current}} of {{total}}",
-    "timeRemaining": "Time Remaining"
+    "filters": {
+      "all": "All",
+      "answered": "Answered",
+      "notAnswered": "Not answered",
+      "flagged": "Flagged"
+    }
   },
   "result": {
     "wrong": "Wrong",
     "quiz": "Quiz",
     "review": {
       "correct": "Correct",
+      "incorrect": "Incorrect"
+    },
+    "filters": {
+      "all": "All",
+      "flagged": "Flagged",
+      "correct": "Correct",
       "incorrect": "Incorrect",
-      "answer": "Answer"
+      "notAnswered": "Not answered"
     }
   },
   "tests": {
@@ -18,8 +29,6 @@
     "addQuestionsFirst": "Please add questions to the database first",
     "totalQuestions": "total questions",
     "questions": "questions",
-    "questionsLabel": "Questions",
-    "startTest": "Start Test",
     "noTests": "No tests available",
     "timeLimit": "minutes"
   },
@@ -32,7 +41,9 @@
       "previous": "Previous",
       "prev": "Prev",
       "next": "Next",
-      "flag": "Flag"
+      "flag": "Flag",
+      "pause": "Pause",
+      "resume": "Resume"
     },
     "headers": {
       "testCompleted": "Test Completed!",
@@ -47,9 +58,32 @@
       "multipleAnswers": "Multiple Answers"
     },
     "explanation": {
-      "show": "Show Explanation",
-      "hide": "Hide Explanation",
       "title": "Explanation"
+    },
+    "timerExpired": {
+      "title": "Time Expired",
+      "description": "Your test time has run out. The test will be automatically submitted.",
+      "submit": "Submit Test"
+    },
+    "paused": {
+      "title": "Test Paused",
+      "description": "Your progress has been saved. You can resume this test later.",
+      "ok": "OK",
+      "resumeTest": "Resume test"
+    },
+    "closeTest": {
+      "title": "Leave test?",
+      "description": "Do you want to save your progress so you can resume later?",
+      "keepProgress": "Keep progress",
+      "discardProgress": "Don't keep",
+      "cancel": "Cancel"
+    },
+    "finishTestConfirm": {
+      "title": "Finish test?",
+      "withUnanswered": "You have {{count}} unanswered question(s). Submit anyway?",
+      "allAnswered": "Are you sure you want to finish and submit your test?",
+      "submit": "Submit",
+      "cancel": "Cancel"
     }
   }
 }

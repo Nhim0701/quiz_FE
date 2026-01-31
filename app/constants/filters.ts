@@ -18,12 +18,7 @@ export const FILTER_ACTION_CLASSES = {
     "bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 hover:text-indigo-600 dark:hover:text-indigo-400 dark:from-indigo-900/20 dark:to-purple-900/20 dark:hover:from-indigo-800/30 dark:hover:to-purple-800/30 shadow-sm hover:shadow-md transition-all duration-200",
 } as const;
 
-// Filter Query Parameters
-// Always use indexed format (filter-key-1, filter-value-1, ...)
-export const FILTER_QUERY_PARAMS = {
-  FILTER_KEY: (index: number) => `filter-key-${index}`,
-  FILTER_VALUE: (index: number) => `filter-value-${index}`,
-} as const;
+
 
 // Filter Patterns for color matching
 export const FILTER_PATTERNS = {

@@ -2,6 +2,7 @@ import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib";
 import type { QuestionProps } from "@/hooks";
+import Html from "@/components/editor/html";
 
 interface AnswerOptionsProps {
   question: QuestionProps;
@@ -74,7 +75,7 @@ export const AnswerOptions = ({
                 {String.fromCharCode(65 + idx)}
               </div>
               <span className="flex-1 text-sm sm:text-base text-slate-700 dark:text-slate-200 break-words whitespace-normal">
-                {answer.content}
+                <Html content={answer.content} />
               </span>
               {showIndicator && indicatorIcon}
             </div>

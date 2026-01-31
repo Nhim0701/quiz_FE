@@ -10,6 +10,8 @@ import { ENDPOINTS } from "../constants";
 import { useTestQuestionsStore } from "./use-test-questions";
 import { useTestAnswersStore } from "./use-test-answers";
 import { useTestTimerStore } from "./use-test-timer";
+import { useTestPauseStore } from "./use-test-pause";
+import { useTestFlagsStore } from "./use-test-flags";
 import { useTestsStore } from "@/modules/admin/modules/tests/hooks";
 
 interface TestSubmissionState {
@@ -79,12 +81,12 @@ export const useTestSubmissionStore = create<TestSubmissionState>((set) => ({
     const questionsStore = useTestQuestionsStore.getState();
     const answersStore = useTestAnswersStore.getState();
     const timerStore = useTestTimerStore.getState();
+    const pauseStore = useTestPauseStore.getState();
     const { setSubmitting, submit } = useTestSubmissionStore.getState();
 
-    // Stop timer
     timerStore.setTimeStarted(false);
+    pauseStore.clearPause(testId);
 
-    // Get test to get timeLimit
     const getTestById = useTestsStore.getState().getTestById;
     const test = await getTestById(testId);
 
@@ -95,12 +97,12 @@ export const useTestSubmissionStore = create<TestSubmissionState>((set) => ({
 
     const { questions } = questionsStore;
     const { answers } = answersStore;
+    const { flags } = useTestFlagsStore.getState();
     const { timeRemaining } = timerStore;
 
     const submissions = buildSubmissions(answers, questions);
     const timeSpent = calculateTimeSpent(test.timeLimit, timeRemaining);
 
-    // Submit responses to backend
     if (submissions.length > 0) {
       setSubmitting(true);
       try {
@@ -109,7 +111,6 @@ export const useTestSubmissionStore = create<TestSubmissionState>((set) => ({
         const errorMessage =
           error instanceof Error ? error.message : "Failed to submit responses";
         onError?.(errorMessage);
-        // Continue to result page even if submission fails
       } finally {
         setSubmitting(false);
       }
@@ -119,6 +120,7 @@ export const useTestSubmissionStore = create<TestSubmissionState>((set) => ({
       state: {
         answers,
         questions,
+        flags,
         summary: {
           total: questions.length,
           answered: Object.keys(answers).length,

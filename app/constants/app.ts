@@ -4,6 +4,7 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/";
 export const API_CONFIG = {
   CONTENT_TYPE: "application/json",
   AUTHORIZATION_PREFIX: "Bearer",
+  UPLOAD_FILE: "/api/v1/uploads",
 } as const;
 
 // Application Routes

@@ -1,4 +1,4 @@
-export { userSchema, type UserFormData } from "./user-schema";
+export { userSchema, userFormBuilder, type UserFormData } from "./user-schema";
 export {
   changePasswordSchema,
   type ChangePasswordFormData,

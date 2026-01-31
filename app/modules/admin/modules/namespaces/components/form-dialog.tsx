@@ -3,7 +3,7 @@ import { useForm, FormProvider, Form } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation, type TranslationParams } from "@/i18n";
 import { FormField } from "@/components/common/form-field";
-import { useApp, usePaginationStore } from "@/hooks";
+import { useApp } from "@/hooks";
 import { namespaceSchema, type NamespaceFormData } from "../schemas";
 import { useNamespacesStore, type Namespace } from "../hooks";
 import { FormDialog } from "@/components/common/form-dialog";
@@ -15,10 +15,12 @@ import {
   AlertDialogDescription,
   AlertDialogFooter as AlertDialogFooterComponent,
 } from "@/components/ui/alert-dialog";
+import { namespaceFormBuilder } from "../schemas/namespace-schema";
 
 interface NamespaceFormDialogProps {
   onDelete?: (namespace: Namespace) => void;
   onClearFilters?: (() => void) | null;
+  onRefresh?: () => Promise<void>;
 }
 
 /**
@@ -29,6 +31,7 @@ interface NamespaceFormDialogProps {
 export function NamespaceFormDialog({
   onDelete,
   onClearFilters,
+  onRefresh,
 }: NamespaceFormDialogProps) {
   const { t } = useTranslation();
   const {
@@ -37,15 +40,13 @@ export function NamespaceFormDialog({
     showDialog,
     closeDialog: closeAppDialog,
   } = useApp();
-  const { page, pageSize } = usePaginationStore();
   const {
     isDialogOpen,
-    editingNamespace,
-    viewingNamespace,
+    dialogMode,
+    namespace,
     closeDialog,
     createNamespace,
     updateNamespace,
-    refreshNamespaces,
     loading,
     isEditMode,
     setEditMode,
@@ -53,23 +54,13 @@ export function NamespaceFormDialog({
 
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Determine mode and namespace from store state
-  const namespace = viewingNamespace || editingNamespace;
-  const mode: FormDialogMode = useMemo(() => {
-    if (viewingNamespace) return DIALOG_MODES.VIEW;
-    if (editingNamespace) return DIALOG_MODES.EDIT;
-    return DIALOG_MODES.CREATE;
-  }, [viewingNamespace, editingNamespace]);
-
-  const shouldShow = isDialogOpen;
+  const mode = (dialogMode ||
+    (namespace ? DIALOG_MODES.VIEW : DIALOG_MODES.CREATE)) as FormDialogMode;
+  const shouldShow = isDialogOpen && !!dialogMode;
 
   const methods = useForm<NamespaceFormData>({
     resolver: zodResolver(namespaceSchema(t)),
-    defaultValues: {
-      name: "",
-      prefix: "",
-      description: "",
-    },
+    defaultValues: namespaceFormBuilder(),
   });
 
   const {
@@ -83,29 +74,18 @@ export function NamespaceFormDialog({
   // Reset form when namespace or mode changes
   useEffect(() => {
     if (shouldShow && namespace) {
-      reset({
-        name: namespace.name || "",
-        prefix: namespace.prefix || "",
-        description: namespace.description || "",
-      });
+      reset(namespaceFormBuilder(namespace));
     } else if (shouldShow && mode === DIALOG_MODES.CREATE) {
-      reset({
-        name: "",
-        prefix: "",
-        description: "",
-      });
+      reset(namespaceFormBuilder());
     }
   }, [shouldShow, namespace, mode, reset]);
 
-  const currentData = watch();
-  const hasChanges = useMemo(() => {
-    if (!namespace) return false;
-    return (
-      currentData.name !== namespace.name ||
-      currentData.prefix !== namespace.prefix ||
-      currentData.description !== (namespace.description || "")
-    );
-  }, [currentData, namespace]);
+  const currentValues = watch();
+  const hasChanges = namespace
+    ? currentValues.name !== namespace.name ||
+      currentValues.prefix !== namespace.prefix ||
+      currentValues.description !== (namespace.description || "")
+    : false;
 
   const isViewMode = mode === DIALOG_MODES.VIEW;
   const isDisabled = isViewMode && !isEditMode;
@@ -130,48 +110,53 @@ export function NamespaceFormDialog({
 
   const canSubmit = useMemo(() => {
     if (mode === DIALOG_MODES.CREATE) {
-      return !!(currentData.name?.trim() && currentData.prefix?.trim());
+      return !!(currentValues.name?.trim() && currentValues.prefix?.trim());
     }
     if (mode === DIALOG_MODES.VIEW && isEditMode) return hasChanges;
     if (mode === DIALOG_MODES.EDIT) return true;
     return false;
-  }, [mode, currentData, isEditMode, hasChanges]);
+  }, [mode, currentValues, isEditMode, hasChanges]);
 
-  // Helper to refresh namespaces after mutation
-  const handleRefresh = useCallback(
-    async (refreshPage: number = page) => {
-      await refreshNamespaces(refreshPage, pageSize);
-    },
-    [refreshNamespaces, page, pageSize]
-  );
-
-  const onSubmit = async (data: NamespaceFormData) => {
-    try {
-      if (mode === DIALOG_MODES.CREATE) {
-        await createNamespace(data);
-        showSuccess(t("admin.namespaces.createSuccess"));
-        closeDialog();
-        onClearFilters?.();
-        await handleRefresh(1);
-      } else if (namespace) {
-        // Handle both VIEW (with edit mode) and EDIT modes
-        await updateNamespace(namespace.id, data);
-        showSuccess(t("admin.namespaces.updateSuccess"));
-
-        if (mode === DIALOG_MODES.VIEW) {
-          setEditMode(false);
-        } else {
+  const onSubmit = useCallback(
+    async (data: NamespaceFormData) => {
+      try {
+        if (mode === DIALOG_MODES.CREATE) {
+          await createNamespace(data);
+          showSuccess(t("admin.namespaces.createSuccess"));
           closeDialog();
-        }
+          onClearFilters?.();
+          onRefresh && (await onRefresh());
+        } else if (namespace) {
+          await updateNamespace(namespace.id, data);
+          showSuccess(t("admin.namespaces.updateSuccess"));
 
-        await handleRefresh();
+          if (mode === DIALOG_MODES.VIEW) {
+            setEditMode(false);
+          } else {
+            closeDialog();
+          }
+          onRefresh && (await onRefresh());
+        }
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : t("errors.genericError");
+        showError(errorMessage);
       }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : t("errors.genericError");
-      showError(errorMessage);
-    }
-  };
+    },
+    [
+      mode,
+      createNamespace,
+      showSuccess,
+      t,
+      closeDialog,
+      onClearFilters,
+      onRefresh,
+      namespace,
+      updateNamespace,
+      setEditMode,
+      showError,
+    ]
+  );
 
   const handleEdit = useCallback(() => {
     setEditMode(true);

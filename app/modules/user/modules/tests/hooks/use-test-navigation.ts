@@ -9,32 +9,21 @@ interface TestNavigationState {
   goPrev: () => void;
 }
 
-const clampIndex = (index: number, maxIndex: number): number => {
-  return Math.max(0, Math.min(maxIndex, index));
-};
+const clampIndex = (index: number, maxIndex: number) =>
+  Math.max(0, Math.min(maxIndex, index));
+
+const getMaxIndex = () =>
+  Math.max(0, useTestQuestionsStore.getState().questions.length - 1);
 
 export const useTestNavigationStore = create<TestNavigationState>((set) => ({
   currentIndex: 0,
-
   setCurrentIndex: (index) => set({ currentIndex: index }),
-
-  goToQuestion: (index) => {
-    const { questions } = useTestQuestionsStore.getState();
-    const maxIndex = Math.max(0, questions.length - 1);
-    set({ currentIndex: clampIndex(index, maxIndex) });
-  },
-
-  goNext: () => {
-    const { questions } = useTestQuestionsStore.getState();
-    const maxIndex = Math.max(0, questions.length - 1);
+  goToQuestion: (index) =>
+    set({ currentIndex: clampIndex(index, getMaxIndex()) }),
+  goNext: () =>
     set((state) => ({
-      currentIndex: clampIndex(state.currentIndex + 1, maxIndex),
-    }));
-  },
-
-  goPrev: () => {
-    set((state) => ({
-      currentIndex: Math.max(0, state.currentIndex - 1),
-    }));
-  },
+      currentIndex: clampIndex(state.currentIndex + 1, getMaxIndex()),
+    })),
+  goPrev: () =>
+    set((state) => ({ currentIndex: Math.max(0, state.currentIndex - 1) })),
 }));

@@ -7,18 +7,14 @@
       "noPermission": "You don't have permission to access this page",
       "delete": "Delete",
       "create": "Create Test",
-      "update": "Update Test",
       "createTitle": "Create New Test",
       "createDescription": "Fill in the information to create a new test",
       "createSuccess": "Test created successfully",
       "updateSuccess": "Test updated successfully",
       "viewTitle": "Test Information",
       "viewDescription": "View and edit test information",
-      "viewInfo": "View Info",
       "viewQuestions": "View Questions",
-      "deleteSuccess": "Test deleted successfully",
       "confirmDelete": "Are you sure you want to delete test \"{{name}}\"?",
-      "edit": "Edit",
       "editTitle": "Edit Test",
       "editDescription": "Update the test information",
       "form": {
@@ -39,12 +35,6 @@
         "timeLimitRequired": "Time limit is required",
         "timeLimitMin": "Time limit must be at least 1 minute"
       },
-      "errors": {
-        "fetchFailed": "Failed to fetch tests",
-        "createFailed": "Failed to create test",
-        "updateFailed": "Failed to update test",
-        "deleteFailed": "Failed to delete test"
-      },
       "columns": {
         "id": "ID",
         "name": "Name",
@@ -54,30 +44,15 @@
         "timeLimit": "Time Limit"
       },
       "filters": {
-        "searchPlaceholder": "Search by name...",
         "categoryPlaceholder": "Select categories...",
         "categorySearch": "Search categories...",
-        "categoryEmpty": "No categories found.",
-        "createDatePlaceholder": "Select create date",
-        "updateDatePlaceholder": "Select update date"
+        "categoryEmpty": "No categories found."
       },
-      "info": {
-        "title": "Test Information",
-        "cardTitle": "Test Details",
-        "loading": "Loading test information...",
-        "notFound": "Test not found",
-        "backToList": "Back to Tests List",
-        "fields": {
-          "id": "ID",
-          "name": "Name",
-          "category": "Category",
-          "description": "Description",
-          "timeLimit": "Time Limit",
-          "questionCount": "Question Count",
-          "createdAt": "Created At",
-          "updatedAt": "Updated At"
-        },
-        "noDescription": "No description provided"
+      "errors": {
+        "fetchFailed": "Failed to fetch tests",
+        "createFailed": "Failed to create test",
+        "updateFailed": "Failed to update test",
+        "deleteFailed": "Failed to delete test"
       }
     }
   }

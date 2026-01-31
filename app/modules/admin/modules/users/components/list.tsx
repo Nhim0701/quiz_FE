@@ -1,33 +1,33 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useTranslation } from "@/i18n";
-import { DataTable, Pagination } from "@/components/common/data-table";
+import { type Column } from "@/components/common/data-table";
 import {
-  usePaginationStore,
-  useApp,
+
   useFilterActions,
   useFilterHandlers,
   useFilterIdsConfig,
+  useFilterParams,
+  createStringConverter,
+  createArrayConverter,
+
+  useAdminListData,
+  usePageData,
 } from "@/hooks";
-import { useUsersStore, useUsersFilters, type User } from "../hooks";
+import { useAdminListActions } from "@/modules/admin/hooks";
+import { AdminList } from "@/modules/admin/components";
+import { useUsersStore, type User } from "../hooks";
 import { useRolesStore } from "@/modules/admin/modules/roles/hooks";
+import { MAX_PAGE_SIZE_FOR_ALL } from "@/constants/app";
 import { ChangePasswordDialog } from "./change-password-dialog";
 import { AssignRolesDialog } from "./assign-roles-dialog";
 import { UsersListSkeleton } from "./list-skeleton";
-import { DIALOG_MODES } from "@/constants";
 import {
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogDescription,
-  AlertDialogFooter,
-} from "@/components/ui/alert-dialog";
-import {
-  SearchInput,
-  ActiveFilters,
-  FilterActions,
   MultipleSelectCombobox,
   type ActiveFilter,
 } from "@/components/common/filters";
-import { useUsersColumns } from "./list-columns";
+import { Lock, Shield } from "lucide-react";
+import { UserFormDialog } from "../components";
+import { DIALOG_MODES } from "@/constants";
 
 interface UsersListProps {
   roles: {
@@ -36,18 +36,25 @@ interface UsersListProps {
     update: boolean;
     delete: boolean;
   };
-  onClearFiltersReady?: (clearFilters: () => void) => void;
 }
 
-export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
+export function UsersList({ roles }: UsersListProps) {
   const { t } = useTranslation();
-  const { showError, showSuccess, showDialog, closeDialog } = useApp();
-  const { page, pageSize, total, setPage, setPageSize, setTotal } =
-    usePaginationStore();
 
-  const { users, loading, fetchUsers, openDialog, deleteUser, refreshUsers } =
-    useUsersStore();
+  const { getFilter, setFilter } = useFilterParams();
 
+  const [searchInput, setSearchInput] = useState("");
+  const searchValue = getFilter("fullName") || "";
+  const selectedRoleIds = useMemo(() => getFilter("roleId")?.split(",").filter(Boolean) || [], [getFilter]);
+
+  const {
+    users,
+    loading,
+    total: usersTotal,
+    fetchUsers,
+    deleteUser,
+    openDialog,
+  } = useUsersStore();
   const { roles: rolesList, fetchRoles } = useRolesStore();
 
   const [changePasswordUser, setChangePasswordUser] = useState<User | null>(
@@ -55,26 +62,20 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
   );
   const [assignRolesUser, setAssignRolesUser] = useState<User | null>(null);
 
-  const {
-    searchInput,
-    setSearchInput,
-    searchValue,
-    setSearchValue,
-    selectedRoleIds,
-    setSelectedRoleIds,
-    handleSearch: handleSearchBase,
-    apiFilters,
-    hasFilterParams,
-    isApplyingFiltersFromUrl,
-    hasInitialFetch,
-  } = useUsersFilters(onClearFiltersReady);
+  usePageData(
+    async () => {
+      await fetchRoles(1, MAX_PAGE_SIZE_FOR_ALL);
+    },
+    {
+      errorKey: "errors.fetchFilterDataFailed",
+      showLoading: false,
+      showError: false,
+      onError: (error) => {
+        console.error("Failed to fetch filter data:", error);
+      },
+    }
+  );
 
-  // Fetch roles on mount
-  useEffect(() => {
-    fetchRoles(1, 100);
-  }, [fetchRoles]);
-
-  // Create role map for efficient lookup
   const roleMap = useMemo(() => {
     const map = new Map<string, string>();
     rolesList.forEach((role) => {
@@ -83,7 +84,6 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
     return map;
   }, [rolesList]);
 
-  // Role options for combobox
   const roleOptions = useMemo(
     () =>
       rolesList.map((role) => ({
@@ -93,61 +93,104 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
     [rolesList]
   );
 
-  // Filter handlers
   const filterHandlers = useMemo(
     () => [
       {
-        filterId: "name",
+        filterId: "fullName",
         resetValue: () => {
           setSearchInput("");
-          setSearchValue("");
+          setFilter("fullName", null);
         },
       },
       {
         filterId: "roleId",
         resetValue: () => {
-          setSelectedRoleIds([]);
+          setFilter("roleId", null);
         },
       },
     ],
-    [setSearchInput, setSelectedRoleIds]
+    []
   );
+
+  const filterConfig = useMemo(
+    () => [
+      {
+        filterKey: "fullName",
+        value: searchValue,
+        defaultValue: "",
+        converter: createStringConverter(),
+      },
+      {
+        filterKey: "roleId",
+        value: selectedRoleIds,
+        defaultValue: [],
+        converter: createArrayConverter(),
+      },
+    ],
+    [searchValue, selectedRoleIds]
+  );
+
+  const fetchUsersRef = useRef(fetchUsers);
+  useEffect(() => {
+    fetchUsersRef.current = fetchUsers;
+  }, [fetchUsers]);
+
+  const fetchUsersWrapper = useCallback(
+    async (
+      page: number,
+      pageSize: number,
+      filters?: Record<string, string>
+    ) => {
+      await fetchUsersRef.current(page, pageSize, filters);
+      const state = useUsersStore.getState();
+      return {
+        data: state.users,
+        meta: { total: state.total },
+      };
+    },
+    []
+  );
+
+  const {
+    apiFilters,
+    hasInitialFetch,
+    handlePageChange,
+    handlePageSizeChange,
+    page,
+    pageSize,
+    total,
+    setPage,
+  } = useAdminListData({
+
+    filterConfig,
+
+    fetchFunction: fetchUsersWrapper,
+    onFilterAppliedFromUrl: setSearchInput,
+  });
+
+
 
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers({
     handlers: filterHandlers,
-    onFilterChange: () => {
-      setPage(1);
-    },
   });
 
-  // Expose clearFilters function to parent component (only once on mount)
-  useEffect(() => {
-    if (onClearFiltersReady) {
-      onClearFiltersReady(handleClearAllFilters);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
-
-  // Handler to remove a specific role from the array
   const handleRemoveRole = useCallback(
     (roleId: string) => {
-      setSelectedRoleIds((prev) => prev.filter((id) => id !== roleId));
-      setPage(1);
+      const newRoles = selectedRoleIds.filter((id) => id !== roleId);
+      setFilter("roleId", newRoles.length ? newRoles.join(",") : null);
     },
-    [setSelectedRoleIds, setPage]
+    [selectedRoleIds, setFilter]
   );
 
-  // Active filters for display
   const activeFilters = useMemo<ActiveFilter[]>(() => {
     const filters: ActiveFilter[] = [];
     if (searchValue) {
       filters.push({
-        id: "name",
+        id: "fullName",
         label: t("admin.users.columns.fullName"),
         value: searchValue,
       });
     }
-    // Create separate filter for each selected role
     selectedRoleIds.forEach((roleId) => {
       const roleName = roleMap.get(roleId) || roleId;
       filters.push({
@@ -159,15 +202,12 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
     return filters;
   }, [searchValue, selectedRoleIds, roleMap, t]);
 
-  // Custom handler for removing filters that handles array items
   const handleRemoveActiveFilter = useCallback(
     (filterId: string) => {
-      // Check if it's a role filter (format: roleId_<id>)
       if (filterId.startsWith("roleId_")) {
         const roleId = filterId.replace("roleId_", "");
         handleRemoveRole(roleId);
       } else {
-        // Use default handler for other filters
         handleRemoveFilter(filterId);
       }
     },
@@ -177,14 +217,14 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
   const filterIdsConfig = useFilterIdsConfig({
     handlers: filterHandlers,
     colorMap: {
-      name: "blue",
+      fullName: "blue",
       roleId: "green",
     },
   });
 
   const handleSearch = useCallback(() => {
-    handleSearchBase();
-  }, [handleSearchBase]);
+    setFilter("fullName", searchInput);
+  }, [searchInput, setFilter]);
 
   const filterActionButtons = useFilterActions({
     onSearch: handleSearch,
@@ -192,70 +232,29 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
     onClearFilters: handleClearAllFilters,
   });
 
-  // Fetch users when filters or pagination changes
-  useEffect(() => {
-    // Skip initial fetch if filters are being applied from URL
-    if (
-      (hasFilterParams && !hasInitialFetch.current) ||
-      isApplyingFiltersFromUrl.current
-    ) {
-      return;
-    }
 
-    const loadUsers = async () => {
-      try {
-        const result = await fetchUsers(page, pageSize, apiFilters);
-        const totalCount = result?.meta?.total ?? result?.data?.length ?? 0;
-        setTotal(totalCount);
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t("errors.fetchDashboardFailed");
-        showError(errorMessage);
-      } finally {
-        hasInitialFetch.current = true;
-      }
-    };
 
-    loadUsers();
-  }, [
-    page,
-    pageSize,
-    apiFilters,
-    hasFilterParams,
-    fetchUsers,
-    setTotal,
-    showError,
-    t,
-    isApplyingFiltersFromUrl,
-    hasInitialFetch,
-  ]);
-
-  const handlePageChange = useCallback(
-    (newPage: number) => {
-      setPage(newPage);
-    },
-    [setPage]
+  const paginationProps = useMemo(
+    () => ({
+      page,
+      pageSize,
+      total,
+      onPageChange: handlePageChange,
+      onPageSizeChange: handlePageSizeChange,
+    }),
+    [page, pageSize, total, handlePageChange, handlePageSizeChange]
   );
 
-  const handlePageSizeChange = useCallback(
-    (newPageSize: number) => {
-      setPageSize(newPageSize);
+  const handleViewInfo = useCallback(
+    (user: User) => {
+      openDialog(DIALOG_MODES.VIEW, user);
     },
-    [setPageSize]
+    [openDialog]
   );
 
   const handleEdit = useCallback(
     (user: User) => {
       openDialog(DIALOG_MODES.EDIT, user);
-    },
-    [openDialog]
-  );
-
-  const handleView = useCallback(
-    (user: User) => {
-      openDialog(DIALOG_MODES.VIEW, user);
     },
     [openDialog]
   );
@@ -269,146 +268,148 @@ export function UsersList({ roles, onClearFiltersReady }: UsersListProps) {
   }, []);
 
   const handleAssignRolesSuccess = useCallback(async () => {
-    await refreshUsers(page, pageSize, apiFilters);
-  }, [refreshUsers, page, pageSize, apiFilters]);
+    await fetchUsers(page, pageSize, apiFilters);
+  }, [fetchUsers, page, pageSize, apiFilters]);
 
-  const handleDelete = useCallback(
-    (user: User) => {
-      const confirmDelete = async () => {
-        try {
-          await deleteUser(user.id);
-          showSuccess(t("admin.users.deleteSuccess"));
-          await refreshUsers(1, pageSize);
-          closeDialog();
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : t("errors.genericError");
-          showError(errorMessage);
-        }
-      };
-
-      showDialog({
-        title: t("admin.users.delete"),
-        content: (
-          <AlertDialogDescription>
-            {(
-              t as (
-                key: string,
-                params?: Record<string, string | number>
-              ) => string
-            )("admin.users.confirmDelete", { name: user.fullName })}
-          </AlertDialogDescription>
-        ),
-        footer: (
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={closeDialog}>
-              {t("common.cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t("admin.users.delete")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        ),
-      });
-    },
-    [
-      deleteUser,
-      showSuccess,
-      showError,
-      showDialog,
-      closeDialog,
-      refreshUsers,
-      pageSize,
-      t,
-    ]
-  );
-
-  const { columns, actions } = useUsersColumns({
+  const { actions: baseActions } = useAdminListActions<User>({
     roles,
-    rolesList,
+    deleteFunction: async (id: string) => {
+      await deleteUser(id);
+      await fetchUsers(page, pageSize, apiFilters);
+    },
+    refreshFunction: async (refreshPage: number, refreshPageSize: number) => {
+      await fetchUsers(refreshPage, refreshPageSize, apiFilters);
+    },
+    successMessageKey: "admin.users.deleteSuccess",
+    deleteTitleKey: "admin.users.delete",
+    confirmDeleteKey: "admin.users.confirmDelete",
+    deleteButtonKey: "admin.users.delete",
+    onClearFilters: handleClearAllFilters,
+    onView: handleViewInfo,
     onEdit: handleEdit,
-    onView: handleView,
-    onDelete: handleDelete,
-    onChangePassword: handleChangePassword,
-    onAssignRoles: handleAssignRoles,
+    confirmDeleteParams: (user) => ({ name: user.fullName }),
   });
 
-  // Show skeleton on initial load
-  if (loading && users.length === 0 && !hasInitialFetch.current) {
-    return (
-      <>
-        <UsersListSkeleton />
-        <ChangePasswordDialog
-          user={changePasswordUser}
-          open={!!changePasswordUser}
-          onOpenChange={(open) => !open && setChangePasswordUser(null)}
-        />
-        <AssignRolesDialog
-          user={assignRolesUser}
-          open={!!assignRolesUser}
-          onOpenChange={(open) => !open && setAssignRolesUser(null)}
-        />
-      </>
-    );
+  const actions = useMemo(() => {
+    const customActions = [];
+    if (roles.update) {
+      customActions.push(
+        {
+          label: t("admin.users.changePassword.title"),
+          onClick: handleChangePassword,
+          icon: <Lock className="h-4 w-4" />,
+          className:
+            "border-purple-500/50 text-purple-600 hover:bg-gradient-to-br hover:from-purple-500 hover:to-indigo-600 hover:text-white hover:border-purple-600 dark:border-purple-400/50 dark:text-purple-400 dark:hover:from-purple-600 dark:hover:to-indigo-700 dark:hover:border-purple-500",
+          actionType: "default" as const,
+        },
+        {
+          label: t("admin.users.assignRoles.title"),
+          onClick: handleAssignRoles,
+          icon: <Shield className="h-4 w-4" />,
+          className:
+            "border-amber-500/50 text-amber-600 hover:bg-gradient-to-br hover:from-amber-500 hover:to-orange-600 hover:text-white hover:border-amber-600 dark:border-amber-400/50 dark:text-amber-400 dark:hover:from-amber-600 dark:hover:to-orange-700 dark:hover:border-amber-500",
+          actionType: "default" as const,
+        }
+      );
+    }
+    return [...baseActions, ...customActions];
+  }, [baseActions, roles.update, handleChangePassword, handleAssignRoles, t]);
+
+  const columns = useMemo<Column<User>[]>(
+    () => [
+      {
+        key: "id",
+        header: t("admin.users.columns.id"),
+        className: "w-[100px]",
+        render: (user) => (
+          <span className="truncate block max-w-[100px]" title={user.id}>
+            {user.id}
+          </span>
+        ),
+      },
+      {
+        key: "fullName",
+        header: t("admin.users.columns.fullName"),
+        render: (user) => <span className="font-medium">{user.fullName}</span>,
+      },
+      {
+        key: "email",
+        header: t("admin.users.columns.email"),
+        render: (user) => (
+          <span className="text-muted-foreground">{user.email}</span>
+        ),
+      },
+      {
+        key: "phone",
+        header: t("admin.users.columns.phone"),
+        render: (user) => (
+          <span className="text-muted-foreground">{user.phone || "-"}</span>
+        ),
+      },
+      {
+        key: "role",
+        header: t("admin.users.columns.role"),
+        render: (user) => {
+          const role = rolesList.find((r) => r.id === user.roleId);
+          return (
+            <span className="text-muted-foreground">{role?.name || "-"}</span>
+          );
+        },
+      },
+    ],
+    [t, rolesList]
+  );
+
+  const handleRefresh = useCallback(async () => {
+    await fetchUsers(page, pageSize, apiFilters);
+  }, [fetchUsers, page, pageSize, apiFilters]);
+
+  if (loading && users.length === 0 && !hasInitialFetch) {
+    return <UsersListSkeleton />;
   }
+
+  const additionalFilters = (
+    <MultipleSelectCombobox
+      options={roleOptions}
+      selectedValues={selectedRoleIds}
+      onSelect={(values) => {
+        setFilter("roleId", values.length ? values.join(",") : null);
+      }}
+      placeholder={t("admin.users.filters.rolePlaceholder")}
+      searchPlaceholder={t("admin.users.filters.roleSearch")}
+      emptyMessage={t("admin.users.filters.roleEmpty")}
+      className="w-full sm:w-[250px]"
+      filterColor="green"
+    />
+  );
 
   return (
     <>
-      {/* Filter Bar */}
-      <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 flex-wrap items-center gap-2">
-          <SearchInput
-            value={searchInput}
-            onChange={setSearchInput}
-            onSearch={handleSearch}
-            placeholderKey="admin.users.searchPlaceholder"
-            className="flex-1 min-w-[200px]"
-            searchKey="fullName"
-          />
-          <MultipleSelectCombobox
-            options={roleOptions}
-            selectedValues={selectedRoleIds}
-            onSelect={(values) => {
-              setSelectedRoleIds(values);
-              setPage(1);
-            }}
-            placeholder={t("admin.users.filters.rolePlaceholder")}
-            searchPlaceholder={t("admin.users.filters.roleSearch")}
-            emptyMessage={t("admin.users.filters.roleEmpty")}
-            className="w-full sm:w-[250px]"
-            filterColor="green"
-          />
-          <FilterActions buttons={filterActionButtons} />
-        </div>
-      </div>
-
-      {/* Active Filters */}
-      {activeFilters.length > 0 && (
-        <div className="mb-4">
-          <ActiveFilters
-            filters={activeFilters}
-            onRemove={handleRemoveActiveFilter}
-            filterIdsConfig={filterIdsConfig}
-          />
-        </div>
-      )}
-
-      <DataTable
+      <AdminList
         columns={columns}
         data={users}
         actions={actions}
         loading={loading}
         emptyMessage={t("admin.users.empty")}
+        searchInput={{
+          value: searchInput,
+          onChange: setSearchInput,
+          onSearch: handleSearch,
+          placeholderKey: "common.searchPlaceholder",
+          className: "flex-1 min-w-[200px]",
+          searchKey: "fullName",
+        }}
+        additionalFilters={additionalFilters}
+        activeFilters={activeFilters}
+        onRemoveFilter={handleRemoveActiveFilter}
+        filterIdsConfig={filterIdsConfig}
+        filterActionButtons={filterActionButtons}
+        pagination={paginationProps}
+        filterBarClassName="my-4"
       />
-      <Pagination
-        page={page}
-        pageSize={pageSize}
-        total={total}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
+      <UserFormDialog
+        onClearFilters={handleClearAllFilters}
+        onRefresh={handleRefresh}
       />
       <ChangePasswordDialog
         user={changePasswordUser}

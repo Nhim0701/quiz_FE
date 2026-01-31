@@ -99,10 +99,11 @@ export function DataTable<T extends { id: string | number }>({
   // Memoize table content using shadcn/ui pattern
   const tableContent = useMemo(
     () => (
-      <Table>
+      <Table noWrapper={isScrollEnabled}>
         <TableHeader
           className={cn(
-            isScrollEnabled && "sticky top-0 z-10 bg-card shadow-sm"
+            isScrollEnabled &&
+              "sticky top-0 z-10 bg-background backdrop-blur-sm supports-[backdrop-filter]:bg-background/95 shadow-sm"
           )}
         >
           {headerGroups.map((headerGroup) => (
@@ -235,7 +236,7 @@ export function DataTable<T extends { id: string | number }>({
       <div className={containerClasses}>
         <div className="rounded-lg border border-border bg-card shadow-sm">
           <div
-            className="overflow-auto"
+            className="overflow-auto relative"
             style={{ maxHeight: `${maxHeight}px` }}
           >
             {tableContent}

@@ -4,6 +4,7 @@ import { useTestQuestionsStore } from "./use-test-questions";
 interface TestAnswersState {
   answers: Record<string, string[]>; // questionId -> array of answer ids
   toggleAnswer: (questionId: string, answerId: string) => void;
+  setAnswers: (answers: Record<string, string[]>) => void;
   resetAnswers: () => void;
 }
 
@@ -17,8 +18,6 @@ export const useTestAnswersStore = create<TestAnswersState>((set, get) => ({
 
     const existing = get().answers[questionId] || [];
     const isSelected = existing.includes(answerId);
-
-    // Deselect if already selected
     if (isSelected) {
       set((state) => ({
         answers: {
@@ -28,8 +27,6 @@ export const useTestAnswersStore = create<TestAnswersState>((set, get) => ({
       }));
       return;
     }
-
-    // Select answer
     const next = question.isMultipleChoice
       ? [...existing, answerId] // Multiple choice: add to selection
       : [answerId]; // Single choice: replace selection
@@ -42,5 +39,6 @@ export const useTestAnswersStore = create<TestAnswersState>((set, get) => ({
     }));
   },
 
+  setAnswers: (answers) => set({ answers }),
   resetAnswers: () => set({ answers: {} }),
 }));

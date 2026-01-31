@@ -1,184 +1,118 @@
-import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { useMemo, useCallback } from "react";
 import { useParams } from "react-router";
 import { useTranslation } from "@/i18n";
+import { type Column } from "@/components/common/data-table";
 import { useRole } from "@/modules/common/auth/hooks/use-role";
 import { RESOURCES } from "@/modules/admin/constants/permissions";
-import { useApp } from "@/hooks";
+import { usePageData } from "@/hooks";
 import { Button } from "@/components/ui/button";
+import { CheckSquare, Square, Plus } from "lucide-react";
 import {
-  Loader2,
-  Edit,
-  Trash2,
-  FileText,
-  CheckSquare,
-  Square,
-  Plus,
-} from "lucide-react";
-import {
-  DataTable,
-  type Column,
-  type Action,
-} from "@/components/common/data-table";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { AnswerProps } from "../types";
 import { AnswerFormDialog } from "./answer-form-dialog";
 import { useAnswerStore } from "../hooks";
+import { useAdminListActions } from "@/modules/admin/hooks";
+import { AdminList } from "@/modules/admin/components";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-// Helper function to get error message
-const getErrorMessage = (error: unknown, defaultMessage: string): string => {
-  return error instanceof Error ? error.message : defaultMessage;
-};
+import { DIALOG_MODES } from "@/constants";
+import { extractContentFromHtml } from "@/lib/utils";
 
 export function AnswerList() {
   const { t } = useTranslation();
   const { questionId } = useParams<{ questionId: string }>();
   const { getNamespaceRoles } = useRole();
-  const { showError, showSuccess, showDialog, closeDialog } = useApp();
-  const {
-    fetchAnswers,
-    deleteAnswer,
-    answers,
-    loading: answerLoading,
-  } = useAnswerStore();
-  const [isLoadingAnswers, setIsLoadingAnswers] = useState(true);
-  const [selectedAnswer, setSelectedAnswer] = useState<AnswerProps | null>(
-    null
-  );
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const isLoadingRef = useRef(false);
+  const { fetchAnswers, answers, loading, openDialog, refreshAnswers } =
+    useAnswerStore();
 
   const roles = getNamespaceRoles(RESOURCES.QUESTION);
 
-  const reloadAnswers = useCallback(async () => {
-    if (!questionId) return;
-    if (isLoadingRef.current) return; // Prevent multiple simultaneous calls
-
-    isLoadingRef.current = true;
-    try {
-      await fetchAnswers(questionId);
-    } catch (error) {
-      showError(getErrorMessage(error, t("errors.genericError")));
-    } finally {
-      isLoadingRef.current = false;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questionId]);
-
-  // Fetch answers on mount and when questionId changes
-  useEffect(() => {
-    if (!questionId) return;
-    if (isLoadingRef.current) return; // Prevent multiple simultaneous calls
-
-    const loadAnswers = async () => {
-      isLoadingRef.current = true;
-      try {
-        setIsLoadingAnswers(true);
+  usePageData(
+    async () => {
+      if (questionId) {
         await fetchAnswers(questionId);
-      } catch (error) {
-        showError(getErrorMessage(error, t("errors.genericError")));
-      } finally {
-        setIsLoadingAnswers(false);
-        isLoadingRef.current = false;
       }
-    };
-    loadAnswers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questionId]);
+    },
+    {
+      errorKey: "errors.fetchDataFailed",
+      showLoading: false,
+      showError: false,
+      onError: (error) => {
+        console.error("Failed to fetch answers:", error);
+      },
+    }
+  );
 
-  const handleViewInfo = useCallback((answer: AnswerProps) => {
-    setSelectedAnswer(answer);
-    setIsEditMode(false);
-    setIsDialogOpen(true);
-  }, []);
+  const handleViewInfo = useCallback(
+    (answer: AnswerProps) => {
+      if (!questionId) return;
+      openDialog(DIALOG_MODES.VIEW, questionId, answer);
+    },
+    [questionId, openDialog]
+  );
 
-  const handleEdit = useCallback((answer: AnswerProps) => {
-    setSelectedAnswer(answer);
-    setIsEditMode(true);
-    setIsDialogOpen(true);
-  }, []);
-
-  const handleCreate = useCallback(() => {
-    setSelectedAnswer(null);
-    setIsEditMode(true);
-    setIsDialogOpen(true);
-  }, []);
+  const handleEdit = useCallback(
+    (answer: AnswerProps) => {
+      if (!questionId) return;
+      openDialog(DIALOG_MODES.EDIT, questionId, answer);
+    },
+    [questionId, openDialog]
+  );
 
   const handleCreateAnswer = useCallback(() => {
-    handleCreate();
-  }, [handleCreate]);
+    if (!questionId) return;
+    openDialog(DIALOG_MODES.CREATE, questionId);
+  }, [questionId, openDialog]);
 
-  const handleEditFromView = useCallback(() => {
-    if (selectedAnswer) {
-      setIsEditMode(true);
+  const handleRefresh = useCallback(async () => {
+    if (questionId) {
+      await refreshAnswers(questionId);
     }
-  }, [selectedAnswer]);
-
-  const handleDialogClose = useCallback(() => {
-    setIsDialogOpen(false);
-    setSelectedAnswer(null);
-    setIsEditMode(false);
-  }, []);
+  }, [questionId, refreshAnswers]);
 
   const handleDelete = useCallback(
     (answer: AnswerProps) => {
-      const confirmDelete = async () => {
-        try {
-          await deleteAnswer(answer.id);
-          showSuccess(t("admin.questions.answers.deleteSuccess"));
-          closeDialog();
-          await reloadAnswers();
-        } catch (error) {
-          showError(getErrorMessage(error, t("errors.genericError")));
-        }
-      };
-
-      showDialog({
-        title: t("admin.questions.answers.delete"),
-        content: (
-          <div className="py-4">
-            <p>{t("admin.questions.answers.confirmDelete")}</p>
-          </div>
-        ),
-        footer: (
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={closeDialog}>
-              {t("common.cancel")}
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={confirmDelete}
-              disabled={answerLoading}
-            >
-              {answerLoading && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              {t("admin.questions.answers.delete")}
-            </Button>
-          </div>
-        ),
-      });
+      if (!questionId) return;
+      const { deleteAnswer: deleteAnswerFromStore } = useAnswerStore.getState();
+      return deleteAnswerFromStore(answer.id, questionId);
     },
-    [
-      deleteAnswer,
-      showSuccess,
-      t,
-      closeDialog,
-      reloadAnswers,
-      showError,
-      showDialog,
-      answerLoading,
-    ]
+    [questionId]
   );
 
-  const columns: Column<AnswerProps>[] = useMemo(
+  const { actions } = useAdminListActions<AnswerProps>({
+    roles,
+    deleteFunction: async (id: string) => {
+      if (!questionId) return;
+      const { deleteAnswer } = useAnswerStore.getState();
+      await deleteAnswer(id, questionId);
+    },
+    refreshFunction: async () => {
+      if (questionId) {
+        await refreshAnswers(questionId);
+      }
+    },
+    successMessageKey: "admin.questions.answers.deleteSuccess",
+    deleteTitleKey: "admin.questions.answers.delete",
+    confirmDeleteKey: "admin.questions.answers.confirmDelete",
+    deleteButtonKey: "admin.questions.answers.delete",
+    onView: handleViewInfo,
+    onEdit: handleEdit,
+  });
+
+  const columns = useMemo<Column<AnswerProps>[]>(
     () => [
       {
         key: "content",
         header: t("admin.questions.answers.columns.content"),
         className: "w-[400px]",
         render: (answer) => (
-          <span className="font-medium line-clamp-2">{answer.content}</span>
+          <span className="font-medium line-clamp-2">
+            {extractContentFromHtml(answer.content)}
+          </span>
         ),
       },
       {
@@ -186,13 +120,26 @@ export function AnswerList() {
         header: t("admin.questions.answers.columns.isCorrect"),
         meta: { center: true },
         render: (answer) => (
-          <div className="flex items-center justify-center">
-            {answer.isCorrect ? (
-              <CheckSquare className="h-5 w-5 text-green-500 dark:text-green-400" />
-            ) : (
-              <Square className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-            )}
-          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center justify-center">
+                  {answer.isCorrect ? (
+                    <CheckSquare className="h-5 w-5 text-green-500 dark:text-green-400" />
+                  ) : (
+                    <Square className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                  )}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  {answer.isCorrect
+                    ? t("admin.questions.answers.isCorrect")
+                    : t("admin.questions.answers.isIncorrect")}
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         ),
       },
       {
@@ -200,49 +147,18 @@ export function AnswerList() {
         header: t("admin.questions.answers.columns.explanation"),
         render: (answer) => (
           <span className="text-muted-foreground">
-            {answer.explanation || "-"}
+            {extractContentFromHtml(answer.explanation || "-").length > 200
+              ? extractContentFromHtml(answer.explanation || "-").slice(
+                  0,
+                  200
+                ) + "..."
+              : extractContentFromHtml(answer.explanation || "-")}
           </span>
         ),
+        size: 400,
       },
     ],
     [t]
-  );
-
-  const actions: Action<AnswerProps>[] = useMemo(
-    () => [
-      ...(roles.read
-        ? [
-            {
-              label: t("common.viewInfo"),
-              onClick: handleViewInfo,
-              icon: <FileText className="h-4 w-4" />,
-              actionType: "viewInfo" as const,
-            },
-          ]
-        : []),
-      ...(roles.update
-        ? [
-            {
-              label: t("common.edit"),
-              onClick: handleEdit,
-              icon: <Edit className="h-4 w-4" />,
-              actionType: "edit" as const,
-            },
-          ]
-        : []),
-      ...(roles.delete
-        ? [
-            {
-              label: t("admin.questions.answers.delete"),
-              onClick: handleDelete,
-              variant: "destructive" as const,
-              icon: <Trash2 className="h-4 w-4" />,
-              actionType: "delete" as const,
-            },
-          ]
-        : []),
-    ],
-    [roles, t, handleViewInfo, handleEdit, handleDelete]
   );
 
   if (!questionId) {
@@ -265,21 +181,14 @@ export function AnswerList() {
         )}
       </CardHeader>
       <CardContent>
-        <DataTable
+        <AdminList
           columns={columns}
           data={answers}
           actions={actions}
-          loading={isLoadingAnswers || answerLoading}
+          loading={loading}
           emptyMessage={t("admin.questions.answers.empty")}
         />
-        <AnswerFormDialog
-          answer={selectedAnswer}
-          questionId={questionId}
-          isOpen={isDialogOpen}
-          isEditMode={isEditMode}
-          onEdit={handleEditFromView}
-          onClose={handleDialogClose}
-        />
+        <AnswerFormDialog onDelete={handleDelete} onRefresh={handleRefresh} />
       </CardContent>
     </Card>
   );
