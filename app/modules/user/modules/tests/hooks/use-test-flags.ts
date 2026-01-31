@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { toggleRecordKey } from "../utils";
 
 interface TestFlagsState {
   flags: Record<string, boolean>;
@@ -8,20 +9,9 @@ interface TestFlagsState {
 }
 
 export const useTestFlagsStore = create<TestFlagsState>((set, get) => ({
-  // Initial state
   flags: {},
-
-  // Flags
-  toggleFlag: (questionId) => {
-    const { flags } = get();
-    set({
-      flags: {
-        ...flags,
-        [questionId]: !flags[questionId],
-      },
-    });
-  },
-
+  toggleFlag: (questionId) =>
+    set({ flags: toggleRecordKey(get().flags, questionId) }),
   setFlags: (flags) => set({ flags }),
   resetFlags: () => set({ flags: {} }),
 }));

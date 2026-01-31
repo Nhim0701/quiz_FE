@@ -46,6 +46,24 @@
     },
     "explanation": {
       "title": "Explanation"
+    },
+    "timerExpired": {
+      "title": "Time Expired",
+      "description": "Your test time has run out. The test will be automatically submitted.",
+      "submit": "Submit Test"
+    },
+    "paused": {
+      "title": "Test Paused",
+      "description": "Your progress has been saved. You can resume this test later.",
+      "ok": "OK",
+      "resumeTest": "Resume test"
+    },
+    "closeTest": {
+      "title": "Leave test?",
+      "description": "Do you want to save your progress so you can resume later?",
+      "keepProgress": "Keep progress",
+      "discardProgress": "Don't keep",
+      "cancel": "Cancel"
     }
   }
 }

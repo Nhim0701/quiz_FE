@@ -6,6 +6,7 @@ import { useTestFlagsStore } from "./use-test-flags";
 import { useTestRevealedStore } from "./use-test-revealed";
 import { useTestTimerStore } from "./use-test-timer";
 import { useTestSubmissionStore } from "./use-test-submission";
+import { useTestPauseStore } from "./use-test-pause";
 import {
   useTestsStore,
   type TestProps,
@@ -26,23 +27,21 @@ interface TestQuestionsState {
   ) => Promise<void>;
 }
 
-const resetAllStores = () => {
+const resetAllStores = (): void => {
   useTestNavigationStore.getState().setCurrentIndex(0);
   useTestAnswersStore.getState().resetAnswers();
   useTestFlagsStore.getState().resetFlags();
   useTestRevealedStore.getState().resetRevealed();
-  const timerStore = useTestTimerStore.getState();
-  timerStore.setTimeStarted(false);
+  useTestTimerStore.getState().setTimeStarted(false);
   useTestSubmissionStore.getState().setSubmitting(false);
-};
+  useTestPauseStore.getState().clearPause();
+}
 
 export const useTestQuestionsStore = create<TestQuestionsState>((set) => ({
   test: null,
   questions: [],
   loading: false,
-
   setLoading: (loading) => set({ loading }),
-
   initializeTest: (questions, timeLimit) => {
     resetAllStores();
     useTestTimerStore.getState().setTimeRemaining(timeLimit * 60);

@@ -1,4 +1,28 @@
-import type { QuestionProps } from "@/modules/admin/modules/questions/types";
+import type {
+  QuestionProps,
+  AnswerProps,
+} from "@/modules/admin/modules/questions/types";
+
+export function toggleRecordKey(
+  record: Record<string, boolean>,
+  key: string
+): Record<string, boolean> {
+  return { ...record, [key]: !record[key] };
+}
+
+export function isQuestionAnsweredCorrectly(
+  question: QuestionProps,
+  userAnswerIds: string[]
+): boolean {
+  if (userAnswerIds.length === 0) return false;
+  const correctAnswerIds = question.answers
+    .filter((a: AnswerProps) => a.isCorrect)
+    .map((a: AnswerProps) => a.id);
+  return (
+    correctAnswerIds.length === userAnswerIds.length &&
+    correctAnswerIds.every((id: string) => userAnswerIds.includes(id))
+  );
+}
 
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];

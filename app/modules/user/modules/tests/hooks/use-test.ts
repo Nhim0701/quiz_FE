@@ -1,7 +1,3 @@
-/**
- * Main test store that combines all test-related stores
- * This provides a unified interface for components that need access to multiple stores
- */
 import { useTestQuestionsStore } from "./use-test-questions";
 import { useTestNavigationStore } from "./use-test-navigation";
 import { useTestAnswersStore } from "./use-test-answers";
@@ -11,17 +7,14 @@ import { useTestTimerStore } from "./use-test-timer";
 import { useTestSubmissionStore } from "./use-test-submission";
 import { useTestPauseStore } from "./use-test-pause";
 
-/**
- * Hook to access all test stores in one place
- * Components can use this for convenience, or import individual stores directly
- */
 export function useTestStore() {
   const questionsStore = useTestQuestionsStore();
   const navigationStore = useTestNavigationStore();
   const answersStore = useTestAnswersStore();
   const flagsStore = useTestFlagsStore();
   const revealedStore = useTestRevealedStore();
-  const timerStore = useTestTimerStore();
+  const timeStarted = useTestTimerStore((s) => s.timeStarted);
+  const startTimer = useTestTimerStore((s) => s.startTimer);
   const submissionStore = useTestSubmissionStore();
   const pauseStore = useTestPauseStore();
 
@@ -53,12 +46,9 @@ export function useTestStore() {
     revealed: revealedStore.revealed,
     toggleRevealed: revealedStore.toggleRevealed,
 
-    // Timer
-    timeRemaining: timerStore.timeRemaining,
-    setTimeRemaining: timerStore.setTimeRemaining,
-    timeStarted: timerStore.timeStarted,
-    setTimeStarted: timerStore.setTimeStarted,
-    startTimer: timerStore.startTimer,
+    // Timer (timeRemaining excluded so only timer UI subscribes and re-renders on tick)
+    timeStarted,
+    startTimer,
 
     // Submission
     submitting: submissionStore.submitting,
@@ -74,7 +64,6 @@ export function useTestStore() {
   };
 }
 
-// Export getState for direct access (used in take.tsx)
 export const useTestStoreState = {
   getState: () => {
     const questionsState = useTestQuestionsStore.getState();

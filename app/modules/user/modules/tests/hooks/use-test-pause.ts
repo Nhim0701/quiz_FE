@@ -1,66 +1,57 @@
 import { create } from "zustand";
 import { testProgressStorage } from "../utils/test-progress-storage";
-import { useTestQuestionsStore } from "./use-test-questions";
-import { useTestNavigationStore } from "./use-test-navigation";
-import { useTestAnswersStore } from "./use-test-answers";
-import { useTestFlagsStore } from "./use-test-flags";
-import { useTestTimerStore } from "./use-test-timer";
+import { getTestStoresForPause } from "./store-coordinator";
+
+let skipSaveForTestId: string | null = null;
 
 interface TestPauseState {
   isPaused: boolean;
   pauseTest: (testId: string) => void;
   resumeTest: (testId: string) => boolean;
-  clearPause: () => void;
+  clearPause: (testId?: string) => void;
 }
 
 export const useTestPauseStore = create<TestPauseState>((set) => ({
   isPaused: false,
-
-  pauseTest: (testId: string) => {
-    const questionsStore = useTestQuestionsStore.getState();
-    const navigationStore = useTestNavigationStore.getState();
-    const answersStore = useTestAnswersStore.getState();
-    const flagsStore = useTestFlagsStore.getState();
-    const timerStore = useTestTimerStore.getState();
-
-    const progress = {
+  pauseTest: (testId) => {
+    if (skipSaveForTestId === testId) {
+      skipSaveForTestId = null;
+      const { timer } = getTestStoresForPause();
+      timer.setTimeStarted(false);
+      set({ isPaused: true });
+      return;
+    }
+    const { answers, flags, navigation, timer } = getTestStoresForPause();
+    testProgressStorage.save({
       testId,
-      answers: answersStore.answers,
-      flags: flagsStore.flags,
-      currentIndex: navigationStore.currentIndex,
-      timeRemaining: timerStore.timeRemaining,
+      answers: answers.answers,
+      flags: flags.flags,
+      currentIndex: navigation.currentIndex,
+      timeRemaining: timer.timeRemaining,
       timestamp: Date.now(),
-    };
-
-    testProgressStorage.save(progress);
-    timerStore.setTimeStarted(false);
+    });
+    timer.setTimeStarted(false);
     set({ isPaused: true });
   },
-
-  resumeTest: (testId: string): boolean => {
+  resumeTest: (testId): boolean => {
     const progress = testProgressStorage.loadByTestId(testId);
     if (!progress) return false;
-
-    const questionsStore = useTestQuestionsStore.getState();
-    const navigationStore = useTestNavigationStore.getState();
-    const answersStore = useTestAnswersStore.getState();
-    const flagsStore = useTestFlagsStore.getState();
-    const timerStore = useTestTimerStore.getState();
-
-    if (questionsStore.questions.length === 0) return false;
-
-    navigationStore.setCurrentIndex(progress.currentIndex);
-    answersStore.setAnswers(progress.answers);
-    flagsStore.setFlags(progress.flags);
-    timerStore.setTimeRemaining(progress.timeRemaining);
-    timerStore.setTimeStarted(true);
-
+    const { questions, navigation, answers, flags, timer } =
+      getTestStoresForPause();
+    if (questions.questions.length === 0) return false;
+    navigation.setCurrentIndex(progress.currentIndex);
+    answers.setAnswers(progress.answers);
+    flags.setFlags(progress.flags);
+    timer.setTimeRemaining(progress.timeRemaining);
+    timer.setTimeStarted(true);
     set({ isPaused: false });
     return true;
   },
-
-  clearPause: () => {
-    testProgressStorage.clear();
+  clearPause: (testId) => {
+    if (testId) {
+      testProgressStorage.clearByTestId(testId);
+      skipSaveForTestId = testId;
+    }
     set({ isPaused: false });
   },
 }));

@@ -33,6 +33,9 @@ export default function Test() {
     fetchAndInitializeTest,
     setLoading,
     resumeTest,
+    startTimer,
+    pauseTest,
+    isPaused,
   } = useTestStore();
 
   // Memoize breadcrumbs to prevent unnecessary re-renders
@@ -57,19 +60,41 @@ export default function Test() {
 
   // Set breadcrumbs
   useBreadcrumb(breadcrumbs, [test?.id, test?.name, testId, t]);
+
   useEffect(() => {
     if (!testId) {
       navigate(ROUTES.INDEX, { replace: true });
       return;
     }
+    setLoading(true);
     fetchAndInitializeTest(testId, setLoading, (errorMessage) => {
       console.error(errorMessage);
     }).then(() => {
       if (testId) {
-        resumeTest(testId);
+        const hasProgress = resumeTest(testId);
+        if (!hasProgress) {
+          startTimer();
+        }
       }
     });
-  }, [testId, navigate, fetchAndInitializeTest, setLoading, resumeTest]);
+  }, [testId, navigate, fetchAndInitializeTest, setLoading, resumeTest, startTimer]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (testId && questions.length > 0 && !isPaused) {
+        pauseTest(testId);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      if (testId && questions.length > 0 && !isPaused) {
+        pauseTest(testId);
+      }
+    };
+  }, [testId, questions.length, isPaused, pauseTest]);
 
   if (loading) {
     return <TestTakeSkeleton />;

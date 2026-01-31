@@ -1,17 +1,22 @@
-import { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { Clock, X, Pause, Play } from "lucide-react";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { X, Pause, Play } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { useTestStore } from "../hooks";
-import {
-  useTestsStore,
-  type TestProps,
-} from "@/modules/admin/modules/tests/hooks";
 import { useNavigate, useParams } from "react-router";
-import { ROUTES, TIME_CONSTANTS } from "../constants";
+import { ROUTES } from "../constants";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useTestTimerStore } from "../hooks/use-test-timer";
+import { TestTimerBadge } from "./test-timer-badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export function TestHeader() {
   const { t } = useTranslation();
@@ -23,63 +28,57 @@ export function TestHeader() {
     questions,
     loading,
     finishTest,
-    timeRemaining,
     timeStarted,
     startTimer,
-    setTimeRemaining,
     isPaused,
     pauseTest,
     resumeTest,
+    clearPause,
   } = useTestStore();
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const finishTestRef = useRef(finishTest);
-
-  // Update ref when finishTest changes
-  useEffect(() => {
-    finishTestRef.current = finishTest;
-  }, [finishTest]);
+  const [showTimeExpiredDialog, setShowTimeExpiredDialog] = useState(false);
+  const [showPausedDialog, setShowPausedDialog] = useState(false);
+  const [showCloseDialog, setShowCloseDialog] = useState(false);
 
   useEffect(() => {
-    if (test && !loading && questions.length > 0 && !isPaused && timeStarted) {
+    setShowTimeExpiredDialog(false);
+  }, [testId]);
+
+  useEffect(() => {
+    if (
+      test &&
+      !loading &&
+      questions.length > 0 &&
+      !isPaused &&
+      !timeStarted
+    ) {
       startTimer();
-
-      intervalRef.current = setInterval(() => {
-        const currentTime = useTestTimerStore.getState().timeRemaining;
-
-        setTimeRemaining(currentTime - 1);
-        if (currentTime == 0) {
-          intervalRef.current &&
-            clearInterval(intervalRef.current as NodeJS.Timeout);
-          intervalRef.current = null;
-          finishTestRef.current(navigate, testId || "", (errorMessage) => {
-            console.error(errorMessage);
-          });
-        }
-      }, TIME_CONSTANTS.TIMER_INTERVAL);
-    } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current as NodeJS.Timeout);
-        intervalRef.current = null;
-      }
     }
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current as NodeJS.Timeout);
-        intervalRef.current = null;
-      }
-    };
-  }, [test, loading, questions.length, startTimer, navigate, testId, isPaused, timeStarted, setTimeRemaining]);
+  }, [test, loading, questions.length, isPaused, timeStarted, startTimer]);
 
-  const handleClose = useCallback(() => {
+  const handleCloseClick = useCallback(() => {
+    setShowCloseDialog(true);
+  }, []);
+
+  const handleCloseKeepProgress = useCallback(() => {
+    setShowCloseDialog(false);
     if (testId && !isPaused) {
       pauseTest(testId);
     }
     navigate(ROUTES.INDEX);
   }, [navigate, testId, isPaused, pauseTest]);
 
+  const handleCloseDiscardProgress = useCallback(() => {
+    setShowCloseDialog(false);
+    if (testId) {
+      clearPause(testId);
+    }
+    navigate(ROUTES.INDEX);
+  }, [navigate, testId, clearPause]);
+
   const handlePause = useCallback(() => {
     if (testId) {
       pauseTest(testId);
+      setShowPausedDialog(true);
     }
   }, [testId, pauseTest]);
 
@@ -89,25 +88,23 @@ export function TestHeader() {
     }
   }, [testId, resumeTest]);
 
-  const formatTime = useCallback((seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs
-      .toString()
-      .padStart(2, "0")}`;
-  }, []);
+  const handleResumeFromDialog = useCallback(() => {
+    if (testId && resumeTest(testId)) {
+      setShowPausedDialog(false);
+    }
+  }, [testId, resumeTest]);
 
-  const isTimeLow = useMemo(() => timeRemaining <= 5 * 60, [timeRemaining]);
+  const handleTimeExpiredSubmit = useCallback(() => {
+    setShowTimeExpiredDialog(false);
+    finishTest(navigate, testId || "", (errorMessage) => {
+      console.error(errorMessage);
+    });
+  }, [finishTest, navigate, testId]);
 
   const progressValue = useMemo(
     () =>
       questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0,
     [currentIndex, questions.length]
-  );
-
-  const formattedTime = useMemo(
-    () => formatTime(timeRemaining),
-    [formatTime, timeRemaining]
   );
 
   return (
@@ -131,17 +128,7 @@ export function TestHeader() {
             </p>
           </div>
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            <Badge
-              variant="outline"
-              className={`font-mono text-xs sm:text-sm font-semibold whitespace-nowrap ${
-                isTimeLow
-                  ? "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700 animate-pulse"
-                  : "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700"
-              }`}
-            >
-              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mr-1.5" />
-              <span>{formattedTime}</span>
-            </Badge>
+            <TestTimerBadge onExpired={() => setShowTimeExpiredDialog(true)} />
             {isPaused ? (
               <Button
                 onClick={handleResume}
@@ -166,7 +153,7 @@ export function TestHeader() {
               </Button>
             )}
             <Button
-              onClick={handleClose}
+              onClick={handleCloseClick}
               variant="ghost"
               size="icon"
               className="flex-shrink-0"
@@ -185,6 +172,66 @@ export function TestHeader() {
           ></div>
         </div>
       </CardContent>
+
+      <AlertDialog open={showTimeExpiredDialog} onOpenChange={setShowTimeExpiredDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("ui.timerExpired.title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("ui.timerExpired.description")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={handleTimeExpiredSubmit}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("ui.timerExpired.submit")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showPausedDialog} onOpenChange={setShowPausedDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("ui.paused.title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("ui.paused.description")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={handleResumeFromDialog} className="bg-green-500 text-white hover:bg-green-600">
+              {t("ui.paused.resumeTest")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showCloseDialog} onOpenChange={setShowCloseDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("ui.closeTest.title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("ui.closeTest.description")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowCloseDialog(false)}>
+              {t("ui.closeTest.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCloseDiscardProgress}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("ui.closeTest.discardProgress")}
+            </AlertDialogAction>
+            <AlertDialogAction onClick={handleCloseKeepProgress} className="bg-green-500 text-white hover:bg-green-600">
+              {t("ui.closeTest.keepProgress")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }

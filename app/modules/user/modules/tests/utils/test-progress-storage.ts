@@ -1,4 +1,4 @@
-interface TestProgress {
+export interface TestProgress {
   testId: string;
   answers: Record<string, string[]>;
   flags: Record<string, boolean>;
@@ -7,20 +7,24 @@ interface TestProgress {
   timestamp: number;
 }
 
-const STORAGE_KEY = "test_progress";
+const STORAGE_KEY_PREFIX = "test_progress_";
+
+function storageKey(testId: string): string {
+  return `${STORAGE_KEY_PREFIX}${testId}`;
+}
 
 export const testProgressStorage = {
   save: (progress: TestProgress): void => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+      localStorage.setItem(storageKey(progress.testId), JSON.stringify(progress));
     } catch (error) {
       console.error("Failed to save test progress:", error);
     }
   },
 
-  load: (): TestProgress | null => {
+  loadByTestId: (testId: string): TestProgress | null => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = localStorage.getItem(storageKey(testId));
       if (!stored) return null;
       return JSON.parse(stored) as TestProgress;
     } catch (error) {
@@ -29,24 +33,15 @@ export const testProgressStorage = {
     }
   },
 
-  loadByTestId: (testId: string): TestProgress | null => {
-    const progress = testProgressStorage.load();
-    if (!progress || progress.testId !== testId) return null;
-    return progress;
-  },
-
-  clear: (): void => {
+  clearByTestId: (testId: string): void => {
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(storageKey(testId));
     } catch (error) {
       console.error("Failed to clear test progress:", error);
     }
   },
 
-  exists: (testId?: string): boolean => {
-    const progress = testProgressStorage.load();
-    if (!progress) return false;
-    if (testId && progress.testId !== testId) return false;
-    return true;
+  exists: (testId: string): boolean => {
+    return localStorage.getItem(storageKey(testId)) !== null;
   },
 };

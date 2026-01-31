@@ -46,6 +46,24 @@
     },
     "explanation": {
       "title": "Giải thích"
+    },
+    "timerExpired": {
+      "title": "Hết Thời Gian",
+      "description": "Thời gian làm bài của bạn đã hết. Bài kiểm tra sẽ được tự động nộp.",
+      "submit": "Nộp Bài"
+    },
+    "paused": {
+      "title": "Đã Tạm Dừng",
+      "description": "Tiến độ của bạn đã được lưu. Bạn có thể tiếp tục bài kiểm tra này sau.",
+      "ok": "Đồng ý",
+      "resumeTest": "Tiếp tục làm bài"
+    },
+    "closeTest": {
+      "title": "Rời bài kiểm tra?",
+      "description": "Bạn có muốn lưu tiến độ để tiếp tục sau không?",
+      "keepProgress": "Giữ tiến độ",
+      "discardProgress": "Không giữ",
+      "cancel": "Hủy"
     }
   }
 }

@@ -84,9 +84,8 @@ export const useTestSubmissionStore = create<TestSubmissionState>((set) => ({
     const { setSubmitting, submit } = useTestSubmissionStore.getState();
 
     timerStore.setTimeStarted(false);
-    pauseStore.clearPause();
+    pauseStore.clearPause(testId);
 
-    // Get test to get timeLimit
     const getTestById = useTestsStore.getState().getTestById;
     const test = await getTestById(testId);
 
@@ -102,7 +101,6 @@ export const useTestSubmissionStore = create<TestSubmissionState>((set) => ({
     const submissions = buildSubmissions(answers, questions);
     const timeSpent = calculateTimeSpent(test.timeLimit, timeRemaining);
 
-    // Submit responses to backend
     if (submissions.length > 0) {
       setSubmitting(true);
       try {
@@ -111,7 +109,6 @@ export const useTestSubmissionStore = create<TestSubmissionState>((set) => ({
         const errorMessage =
           error instanceof Error ? error.message : "Failed to submit responses";
         onError?.(errorMessage);
-        // Continue to result page even if submission fails
       } finally {
         setSubmitting(false);
       }
