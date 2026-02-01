@@ -16,11 +16,17 @@
     "wrong": "wrong",
     "submissions": "submissions"
   },
-  "recentActivity": {
-    "title": "Recent Activity",
-    "noActivity": "No activity yet. Start a test to see your progress!",
+  "submissionHistory": {
+    "title": "Submission History",
+    "noSubmissions": "No submissions yet. Finish a test to see your history.",
     "notAvailable": "N/A",
-    "category": "Category",
-    "test": "Test"
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "timeFinish": "Time spent",
+    "timeSubmit": "Submitted at",
+    "viewResult": "View result",
+    "submissionsLabel": "submissions",
+    "totalQuestions": "Total questions",
+    "correctRate": "Correct rate"
   }
 }

@@ -6,6 +6,8 @@ export const ENDPOINTS = {
   GET: (testId: string) => `/api/v1/tests/${testId}`,
   QUESTIONS: "/api/v1/questions",
   SUBMIT: (testId: string) => `/api/v1/tests/${testId}/submit`,
+  SUBMISSION_GET: (testId: string, submissionId: string) =>
+    `/api/v1/tests/${testId}/submit/${submissionId}`,
 } as const;
 
 /**
@@ -16,6 +18,8 @@ export const ROUTES = {
   TEST_ID: ":testId",
   TAKE: (testId?: string) => (testId ? `/tests/${testId}/take` : `/take`),
   RESULT: (testId?: string) => (testId ? `/tests/${testId}/result` : `/result`),
+  RESULT_BY_SUBMISSION: (testId?: string, submissionId?: string) =>
+    (testId && submissionId ? `/tests/${testId}/result/${submissionId}` : `/result/:submissionId`),
 } as const;
 
 /**

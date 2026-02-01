@@ -1,7 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
-export function DashboardSkeleton() {
+export const DashboardSkeleton = () => {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Stats Skeleton */}
@@ -82,29 +82,15 @@ export function DashboardSkeleton() {
         </Card>
       </div>
 
-      {/* RecentActivity Skeleton */}
+      {/* SubmissionHistory Skeleton */}
       <Card>
         <CardHeader>
           <Skeleton className="h-6 w-40" />
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg"
-              >
-                <Skeleton className="w-10 h-10 rounded-lg flex-shrink-0" />
-                <div className="flex-1 min-w-0 space-y-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Skeleton className="h-5 w-24 rounded-md" />
-                    <Skeleton className="h-5 w-24 rounded-md" />
-                    <Skeleton className="h-3 w-20" />
-                  </div>
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
-                </div>
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton key={index} className="h-28 rounded-lg" />
             ))}
           </div>
         </CardContent>

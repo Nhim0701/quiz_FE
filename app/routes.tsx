@@ -34,8 +34,12 @@ export default [
           "modules/user/modules/tests/routes/take.tsx"
         ),
         route(
+          TESTS_ROUTES.RESULT_BY_SUBMISSION(),
+          "modules/user/modules/tests/routes/result.tsx", { id: "withSubmissionId" }
+        ),
+        route(
           TESTS_ROUTES.RESULT(),
-          "modules/user/modules/tests/routes/result.tsx"
+          "modules/user/modules/tests/routes/result.tsx", { id: "withoutSubmissionId" }
         ),
       ]),
     ]),

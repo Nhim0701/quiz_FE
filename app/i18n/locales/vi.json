@@ -125,12 +125,10 @@
       "wrong": "wrong",
       "submissions": "submissions"
     },
-    "recentActivity": {
-      "title": "Recent Activity",
-      "noActivity": "No activity yet. Start a test to see your progress!",
-      "notAvailable": "N/A",
-      "category": "Category",
-      "test": "Test"
+    "submissionHistory": {
+      "title": "Lịch Sử Nộp Bài",
+      "noSubmissions": "Chưa có lần nộp nào. Hoàn thành bài kiểm tra để xem lịch sử.",
+      "notAvailable": "N/A"
     }
   },
   "admin": {

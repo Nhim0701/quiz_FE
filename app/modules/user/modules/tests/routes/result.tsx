@@ -10,21 +10,31 @@ import {
   useTestsStore,
   type TestProps,
 } from "@/modules/admin/modules/tests/hooks";
-import { ROUTES } from "../constants";
-import type { TestResultLocationState } from "../types";
-import { pageMeta } from "@/lib";
+import { ROUTES, ENDPOINTS } from "../constants";
+import type {
+  TestResultLocationState,
+  SubmissionDetailResponse,
+} from "../types";
+import { questionsService } from "../services/questions.service";
+import { pageMeta, apiClient } from "@/lib";
+import type { ApiSuccessResponse } from "@/types";
 
 export const meta: Route.MetaFunction = () => {
   return pageMeta(t("common.result"))();
 };
 
-export default function Result() {
+const Result = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { testId } = useParams<{ testId: string }>();
+  const { testId, submissionId } = useParams<{
+    testId: string;
+    submissionId?: string;
+  }>();
   const { t } = useTranslation();
   const { setResult, summary } = useResultStore();
   const getTestById = useTestsStore((state) => state.getTestById);
+  const [loadingSubmission, setLoadingSubmission] = useState(false);
+  const [submissionLoadError, setSubmissionLoadError] = useState<string | null>(null);
 
   // Initialize test from cache immediately if available
   const { testsById } = useTestsStore.getState();
@@ -91,22 +101,90 @@ export default function Result() {
   useBreadcrumb(breadcrumbs, [test?.id, test?.name, testId, t]);
 
   useEffect(() => {
-    const {
-      summary: locationSummary,
-      answers: locationAnswers,
-      questions: locationQuestions = [],
-      flags: locationFlags = {},
-    } = (location.state as TestResultLocationState) || {};
+    const state = location.state as TestResultLocationState | undefined;
+    const locationSummary = state?.summary;
+    const locationAnswers = state?.answers;
+    const locationQuestions = state?.questions ?? [];
+    const locationFlags = state?.flags ?? {};
 
-    if (locationSummary && locationAnswers && locationQuestions) {
+    if (locationSummary && locationAnswers && locationQuestions?.length) {
       setResult(
         locationSummary,
         locationAnswers,
         locationQuestions,
         locationFlags
       );
+      return;
     }
-  }, [location.state, setResult]);
+
+    if (submissionId && testId) {
+      setLoadingSubmission(true);
+      setSubmissionLoadError(null);
+      Promise.all([
+        apiClient.get<ApiSuccessResponse<SubmissionDetailResponse>>(
+          ENDPOINTS.SUBMISSION_GET(testId, submissionId)
+        ),
+        questionsService.fetchAllQuestionsWithAnswers(testId),
+      ])
+        .then(([subRes, questions]) => {
+          const raw = subRes.data?.data ?? subRes.data;
+          const data = raw as SubmissionDetailResponse | undefined;
+          const submissions = data?.submissions ?? [];
+          const submittedAt =
+            data?.submitted_at ?? data?.submittedAt ?? 0;
+
+          const answers: Record<string, string[]> = {};
+          for (const s of submissions) {
+            const qid = s.question_id ?? s.questionId ?? "";
+            const aid = s.answer_id ?? s.answerId ?? "";
+            if (!qid || !aid) continue;
+            if (!answers[qid]) answers[qid] = [];
+            answers[qid].push(aid);
+          }
+
+          if (questions.length === 0) {
+            setSubmissionLoadError("No questions found for this test");
+            return;
+          }
+
+          const summary = {
+            total: questions.length,
+            answered: Object.keys(answers).length,
+            date: new Date(
+              typeof submittedAt === "number"
+                ? submittedAt * 1000
+                : submittedAt
+            ).toISOString(),
+            timeSpent: 0,
+            timeRemaining: 0,
+          };
+          setResult(summary, answers, questions, {});
+        })
+        .catch((err) => {
+          setSubmissionLoadError(
+            err?.message ?? "Failed to load submission"
+          );
+        })
+        .finally(() => setLoadingSubmission(false));
+    }
+  }, [location.state, setResult, submissionId, testId]);
+
+  if (loadingSubmission) {
+    return (
+      <div className="py-6 sm:py-8 px-4 flex items-center justify-center min-h-[200px]">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600" />
+      </div>
+    );
+  }
+
+  if (submissionLoadError) {
+    return (
+      <ResultEmpty
+        onBack={() => navigate(ROUTES.INDEX)}
+        message={submissionLoadError}
+      />
+    );
+  }
 
   if (!summary) {
     return <ResultEmpty onBack={() => navigate(ROUTES.INDEX)} />;
@@ -122,3 +200,5 @@ export default function Result() {
     </div>
   );
 }
+
+export default Result;

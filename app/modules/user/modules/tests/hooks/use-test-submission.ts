@@ -103,32 +103,44 @@ export const useTestSubmissionStore = create<TestSubmissionState>((set) => ({
     const submissions = buildSubmissions(answers, questions);
     const timeSpent = calculateTimeSpent(test.timeLimit, timeRemaining);
 
+    let submissionId: string | undefined;
     if (submissions.length > 0) {
       setSubmitting(true);
       try {
-        await submit<void>(testId, submissions);
+        const response = await submit<{ id?: string; submissionId?: string }>(
+          testId,
+          submissions
+        );
+        const data = response?.data as { id?: string; submissionId?: string } | undefined;
+        submissionId = data?.id ?? data?.submissionId;
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Failed to submit responses";
         onError?.(errorMessage);
+        setSubmitting(false);
+        return;
       } finally {
         setSubmitting(false);
       }
     }
 
-    navigate(`/tests/${testId}/result`, {
-      state: {
-        answers,
-        questions,
-        flags,
-        summary: {
-          total: questions.length,
-          answered: Object.keys(answers).length,
-          date: new Date().toISOString(),
-          timeSpent,
-          timeRemaining,
+    if (submissionId) {
+      navigate(`/tests/${testId}/result/${submissionId}`);
+    } else {
+      navigate(`/tests/${testId}/result`, {
+        state: {
+          answers,
+          questions,
+          flags,
+          summary: {
+            total: questions.length,
+            answered: Object.keys(answers).length,
+            date: new Date().toISOString(),
+            timeSpent,
+            timeRemaining,
+          },
         },
-      },
-    });
+      });
+    }
   },
 }));

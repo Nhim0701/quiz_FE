@@ -3,6 +3,7 @@
  */
 export const ENDPOINTS = {
   INDEX: "/api/v1/me/dashboard",
+  SUBMISSION_HISTORY: "/api/v1/me/submission-history",
 } as const;
 
 export const ROUTES = {

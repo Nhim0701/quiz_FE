@@ -9,7 +9,7 @@ import {
   Stats,
   CategoryStats,
   TestStats,
-  RecentActivity,
+  SubmissionHistory,
   DashboardSkeleton,
 } from "./components";
 import { pageMeta } from "@/lib";
@@ -18,7 +18,7 @@ export const meta: Route.MetaFunction = () => {
   return pageMeta(t("sidebar.dashboard"))();
 };
 
-export default function Dashboard() {
+const Dashboard = () => {
   const { t } = useTranslation();
   const { getDashboard, dashboardData } = useDashboard();
   const { loading } = useApp();
@@ -54,10 +54,12 @@ export default function Dashboard() {
             <TestStats />
           </div>
           <div className="mt-4 sm:mt-6">
-            <RecentActivity />
+            <SubmissionHistory />
           </div>
         </>
       )}
     </Container>
   );
 }
+
+export default Dashboard;
