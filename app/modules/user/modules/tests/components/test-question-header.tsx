@@ -45,6 +45,13 @@ export const QuestionHeader = ({
         <p className="text-base sm:text-lg text-slate-800 dark:text-slate-100 leading-relaxed">
           <Html content={currentQuestion.content} />
         </p>
+        {currentQuestion.imageUrl && (
+          <img
+            src={currentQuestion.imageUrl}
+            alt="Question image"
+            className="mt-4 max-w-full h-auto rounded-lg"
+          />
+        )}
       </div>
     </div>
   );
