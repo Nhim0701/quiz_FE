@@ -21,6 +21,16 @@ export const PERMISSIONS = {
 } as const;
 
 /**
+ * Default permissions for regular users
+ * Read access to categories, tests, questions (includes answers)
+ */
+export const DEFAULT_USER_PERMISSIONS = [
+  "categories::read",
+  "tests::read",
+  "questions::read",
+] as const;
+
+/**
  * Resource names
  */
 export const RESOURCES = {
