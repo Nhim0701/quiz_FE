@@ -15,6 +15,8 @@ import { useNavigate, useLocation, Link } from "react-router";
 import {
   COMMON_PERMISSIONS,
   RESOURCES,
+  USER_PERMISSIONS,
+  USER_RESOURCES,
 } from "@/modules/admin/constants/permissions";
 import { getInitials } from "@/lib";
 import {
@@ -76,18 +78,30 @@ export function AppSidebar() {
       title: t("sidebar.dashboard"),
       icon: LayoutDashboard,
       url: DASHBOARD_ROUTES.INDEX,
+      permission: USER_PERMISSIONS.DASHBOARD_READ,
+      resourcePrefix: USER_RESOURCES.DASHBOARD,
     },
     {
       title: t("sidebar.tests"),
       icon: FileText,
       url: TESTS_ROUTES.INDEX,
+      permission: USER_PERMISSIONS.USER_TESTS_READ,
+      resourcePrefix: USER_RESOURCES.USER_TESTS,
     },
     {
       title: t("sidebar.profile"),
       icon: User,
       url: PROFILE_ROUTES.INDEX,
+      permission: USER_PERMISSIONS.PROFILE_READ,
+      resourcePrefix: USER_RESOURCES.PROFILE,
     },
-  ];
+  ].filter((item) => {
+    // Check if user has the specific permission OR any permission with the resource prefix
+    return (
+      hasPermission(item.permission) ||
+      hasResourcePermission(item.resourcePrefix)
+    );
+  });
 
   // Check if user has roles permission
   const hasRolesPermission =

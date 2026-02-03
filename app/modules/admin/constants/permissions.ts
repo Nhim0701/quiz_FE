@@ -23,15 +23,22 @@ export const PERMISSIONS = {
 /**
  * Default permissions for regular users
  * Read access to categories, tests, questions (includes answers)
+ * Plus access to user menu items (dashboard, user tests, profile)
  */
 export const DEFAULT_USER_PERMISSIONS = [
+  // Admin resource read permissions
   "categories::read",
   "tests::read",
   "questions::read",
+  // User menu permissions
+  "dashboard::read",
+  "user_tests::read",
+  "profile::read",
+  "profile::update",
 ] as const;
 
 /**
- * Resource names
+ * Admin resource names
  */
 export const RESOURCES = {
   CATEGORY: "categories",
@@ -41,6 +48,15 @@ export const RESOURCES = {
   ROLES: "roles",
   PERMISSIONS: "permissions",
   NAMESPACE: "namespaces",
+} as const;
+
+/**
+ * User resource names (for user menu items)
+ */
+export const USER_RESOURCES = {
+  DASHBOARD: "dashboard",
+  USER_TESTS: "user_tests",
+  PROFILE: "profile",
 } as const;
 
 /**
@@ -57,9 +73,12 @@ export const ACTIONS = {
  * Type definitions for better type safety
  */
 export type ResourceName = (typeof RESOURCES)[keyof typeof RESOURCES];
+export type UserResourceName = (typeof USER_RESOURCES)[keyof typeof USER_RESOURCES];
 export type ActionName = (typeof ACTIONS)[keyof typeof ACTIONS];
 export type PermissionString =
   `${ResourceName}${typeof PERMISSION_SEPARATOR}${ActionName}`;
+export type UserPermissionString =
+  `${UserResourceName}${typeof PERMISSION_SEPARATOR}${ActionName}`;
 
 /**
  * Helper function to build permission string
@@ -135,6 +154,22 @@ export const COMMON_PERMISSIONS = {
 
   // Namespace permissions
   ...generateResourcePermissions("NAMESPACE", RESOURCES.NAMESPACE),
+} as const;
+
+/**
+ * User menu permission constants
+ * These are for the user-facing menu items (Dashboard, Tests, Profile)
+ */
+export const USER_PERMISSIONS = {
+  // Dashboard permissions
+  DASHBOARD_READ: buildPermission(USER_RESOURCES.DASHBOARD, ACTIONS.READ),
+
+  // User Tests permissions (for taking tests)
+  USER_TESTS_READ: buildPermission(USER_RESOURCES.USER_TESTS, ACTIONS.READ),
+
+  // Profile permissions
+  PROFILE_READ: buildPermission(USER_RESOURCES.PROFILE, ACTIONS.READ),
+  PROFILE_UPDATE: buildPermission(USER_RESOURCES.PROFILE, ACTIONS.UPDATE),
 } as const;
 
 /**
