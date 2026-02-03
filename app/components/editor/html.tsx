@@ -5,8 +5,11 @@ export default function Html({
   content: string;
   className?: string;
 }) {
-  // Convert \n to <br> for proper line breaks
-  const formattedContent = content?.replace(/\n/g, '<br>') || '';
+  // Convert both literal \n and actual newlines to <br> for proper line breaks
+  const formattedContent = content
+    ?.replace(/\\n/g, '<br>')  // Handle literal \n (backslash + n)
+    .replace(/\n/g, '<br>')    // Handle actual newline characters
+    || '';
 
   return (
     <div
