@@ -172,10 +172,13 @@ export const useAuthStoreInternal = create<AuthState>()(
   )
 );
 
-// Single unified hook
+// Single unified hook - subscribes to store for reactive updates
 export const useAuth = () => {
+  // Subscribe to user state for reactive updates
+  const user = useAuthStoreInternal((state) => state.user);
+
+  // Get actions from store (these don't need subscription)
   const {
-    user,
     getCurrentUser,
     register,
     login,
