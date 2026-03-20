@@ -14,10 +14,10 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: ["harinezumi-dev.myddns.me"],
+    allowedHosts: ["harinezumi.myddns.me"],
     proxy: {
       "/api/v1/": {
-        target: "https://harinezumi-dev.myddns.me",
+        target: "https://harinezumi.myddns.me",
         changeOrigin: true,
         secure: false,
       },
