@@ -10,6 +10,7 @@ export const userFormBuilder = (user?: User) => ({
   address: user?.address || "",
   jobTitle: user?.jobTitle || "",
   company: user?.company || "",
+  roleId: user?.roleId || "",
 });
 
 export const userSchema = createZodSchema((t) =>
@@ -27,6 +28,7 @@ export const userSchema = createZodSchema((t) =>
     address: z.string().optional(),
     jobTitle: z.string().optional(),
     company: z.string().optional(),
+    roleId: z.string().optional(),
   })
 );
 

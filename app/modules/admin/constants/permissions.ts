@@ -48,6 +48,7 @@ export const RESOURCES = {
   ROLES: "roles",
   PERMISSIONS: "permissions",
   NAMESPACE: "namespaces",
+  TEST_ASSIGNMENT: "test_assignments",
 } as const;
 
 /**
@@ -108,6 +109,7 @@ const RESOURCE_PREFIX_MAP: Record<keyof typeof RESOURCES, string> = {
   ROLES: "ROLE",
   PERMISSIONS: "PERMISSION",
   NAMESPACE: "NAMESPACE",
+  TEST_ASSIGNMENT: "TEST_ASSIGNMENT",
 } as const;
 
 /**
@@ -154,6 +156,9 @@ export const COMMON_PERMISSIONS = {
 
   // Namespace permissions
   ...generateResourcePermissions("NAMESPACE", RESOURCES.NAMESPACE),
+
+  // Test assignment permissions
+  ...generateResourcePermissions("TEST_ASSIGNMENT", RESOURCES.TEST_ASSIGNMENT),
 } as const;
 
 /**

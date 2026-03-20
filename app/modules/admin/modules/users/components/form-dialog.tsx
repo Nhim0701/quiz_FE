@@ -2,19 +2,23 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useForm, FormProvider, Form } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation, type TranslationParams } from "@/i18n";
-import { FormField, DatePickerField } from "@/components/common/form-field";
+import { FormField, DatePickerField, ComboboxField } from "@/components/common/form-field";
 import { useApp } from "@/hooks";
 import { userSchema, userFormBuilder, type UserFormData } from "../schemas";
 import { useUsersStore, type User } from "../hooks";
 import { FormDialog } from "@/components/common/form-dialog";
 import type { FormDialogMode } from "@/constants";
 import { DIALOG_MODES } from "@/constants";
+import { apiClient } from "@/lib";
+import type { ApiSuccessResponse } from "@/types";
 import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogDescription,
   AlertDialogFooter as AlertDialogFooterComponent,
 } from "@/components/ui/alert-dialog";
+import { useRole } from "@/modules/common/auth/hooks/use-role";
+import { CategoryAccessPanel } from "./category-access-panel";
 
 interface UserFormDialogProps {
   onDelete?: (user: User) => void;
@@ -39,6 +43,7 @@ export function UserFormDialog({
     showDialog,
     closeDialog: closeAppDialog,
   } = useApp();
+  const { isAdmin } = useRole();
   const {
     isDialogOpen,
     dialogMode,
@@ -52,6 +57,8 @@ export function UserFormDialog({
   } = useUsersStore();
 
   const [isDeleting, setIsDeleting] = useState(false);
+  const [roles, setRoles] = useState<{ id: string; name: string }[]>([]);
+  const [rolesLoading, setRolesLoading] = useState(false);
 
   // Mode is always available when dialog is open
   const mode = (dialogMode ||
@@ -80,6 +87,24 @@ export function UserFormDialog({
       reset(userFormBuilder());
     }
   }, [shouldShow, user, mode, reset]);
+
+  // Fetch roles when dialog opens
+  useEffect(() => {
+    if (!shouldShow) return;
+    setRolesLoading(true);
+    apiClient
+      .get<ApiSuccessResponse<{ id: string; name: string }[]>>("/api/v1/roles", {
+        params: { page: 1, pageSize: 100 },
+      })
+      .then((res) => setRoles(res.data.data || []))
+      .catch(() => {})
+      .finally(() => setRolesLoading(false));
+  }, [shouldShow]);
+
+  const roleOptions = useMemo(
+    () => roles.map((r) => ({ value: r.id, label: r.name })),
+    [roles]
+  );
 
   const currentData = watch();
   const hasChanges = user
@@ -317,8 +342,24 @@ export function UserFormDialog({
             disabled={isDisabled || loading || isSubmitting}
             labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
           />
+          <ComboboxField
+            id="roleId"
+            label={t("admin.users.form.roleLabel")}
+            name="roleId"
+            control={control}
+            options={roleOptions}
+            error={errors.roleId}
+            disabled={isDisabled || loading || isSubmitting || rolesLoading}
+            placeholder={t("admin.users.form.rolePlaceholder")}
+            searchPlaceholder={t("admin.users.filters.roleSearch")}
+            emptyMessage={t("admin.users.filters.roleEmpty")}
+            labelClassName="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+          />
         </Form>
       </FormProvider>
+      {isAdmin() && user && (mode === DIALOG_MODES.VIEW || mode === DIALOG_MODES.EDIT) && (
+        <CategoryAccessPanel userId={user.id} />
+      )}
     </FormDialog>
   );
 }

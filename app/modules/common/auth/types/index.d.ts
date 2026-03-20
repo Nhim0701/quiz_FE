@@ -75,6 +75,7 @@ export interface User {
   email: string;
   permissions?: string[];
   roleId?: string; // Only present in admin context
+  roleName?: string; // Role name (e.g., "admin", "editor", "user")
   phone?: string;
   birthday?: string;
   address?: string;

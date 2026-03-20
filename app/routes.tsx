@@ -10,6 +10,7 @@ import { ROUTES as ADMIN_ROLES_ROUTES } from "./modules/admin/modules/roles/cons
 import { ROUTES as ADMIN_PERMISSIONS_ROUTES } from "./modules/admin/modules/permissions/constants";
 import { ROUTES as ADMIN_USERS_ROUTES } from "./modules/admin/modules/users/constants";
 import { ROUTES as ADMIN_NAMESPACES_ROUTES } from "./modules/admin/modules/namespaces/constants";
+import { ROUTES as ADMIN_TEST_ASSIGNMENTS_ROUTES } from "./modules/admin/modules/test-assignments/constants";
 
 export default [
   index("modules/home.tsx"),
@@ -83,6 +84,12 @@ export default [
       route(
         ADMIN_NAMESPACES_ROUTES.INDEX,
         "modules/admin/modules/namespaces/index.tsx"
+      ),
+
+      // Test Assignments routes
+      route(
+        ADMIN_TEST_ASSIGNMENTS_ROUTES.INDEX,
+        "modules/admin/modules/test-assignments/index.tsx"
       ),
 
       // Edit routes

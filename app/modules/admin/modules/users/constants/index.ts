@@ -10,6 +10,9 @@ export const ENDPOINTS = {
   DELETE: (id: string) => `/api/v1/users/${id}`,
   CHANGE_PASSWORD: (id: string) => `/api/v1/users/${id}/change-password`,
   ASSIGN_ROLES: (id: string) => `/api/v1/users/${id}/roles`,
+  CATEGORY_ACCESS: (id: string) => `/api/v1/user/${id}/category-access`,
+  CATEGORY_ACCESS_DELETE: (userId: string, categoryId: string) =>
+    `/api/v1/user/${userId}/category-access/${categoryId}`,
 };
 
 export const ERROR_MESSAGES = {

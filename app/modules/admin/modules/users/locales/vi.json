@@ -35,7 +35,9 @@
         "jobTitleLabel": "Chức vụ",
         "jobTitlePlaceholder": "Nhập chức vụ",
         "companyLabel": "Công ty",
-        "companyPlaceholder": "Nhập tên công ty"
+        "companyPlaceholder": "Nhập tên công ty",
+        "roleLabel": "Vai trò",
+        "rolePlaceholder": "Chọn vai trò"
       },
       "validation": {
         "emailRequired": "Email là bắt buộc",
@@ -71,6 +73,18 @@
         "submit": "Lưu",
         "noRoles": "Không có vai trò nào",
         "roleLabel": "Vai trò"
+      },
+      "categoryAccess": {
+        "title": "Quyền truy cập danh mục",
+        "description": "Quản lý quyền truy cập danh mục cho người dùng này",
+        "empty": "Chưa có danh mục nào được cấp quyền",
+        "grant": "Cấp quyền",
+        "revoke": "Thu hồi",
+        "grantSuccess": "Đã cấp quyền truy cập danh mục",
+        "revokeSuccess": "Đã thu hồi quyền truy cập danh mục",
+        "selectCategory": "Chọn danh mục",
+        "searchCategory": "Tìm kiếm danh mục...",
+        "noCategories": "Không có danh mục nào"
       }
     }
   }

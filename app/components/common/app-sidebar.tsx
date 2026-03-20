@@ -7,6 +7,7 @@ import {
   HelpCircle,
   Shield,
   ChevronDown,
+  ClipboardList,
 } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { useAuth } from "@/modules/common/auth/hooks/use-auth";
@@ -51,6 +52,7 @@ import { ROUTES as ADMIN_USERS_ROUTES } from "@/modules/admin/modules/users/cons
 import { ROUTES as ADMIN_ROLES_ROUTES } from "@/modules/admin/modules/roles/constants";
 import { ROUTES as ADMIN_PERMISSIONS_ROUTES } from "@/modules/admin/modules/permissions/constants";
 import { ROUTES as ADMIN_NAMESPACES_ROUTES } from "@/modules/admin/modules/namespaces/constants";
+import { ROUTES as ADMIN_TEST_ASSIGNMENTS_ROUTES } from "@/modules/admin/modules/test-assignments/constants";
 
 export function AppSidebar() {
   const { t } = useTranslation();
@@ -91,13 +93,19 @@ export function AppSidebar() {
     },
   ];
 
+  // Users with the "user" role never see the admin menu
+  const isUserRole = user?.roleName === "user";
+
   // Check if user has roles permission
   const hasRolesPermission =
-    hasPermission(COMMON_PERMISSIONS.ROLE_READ) ||
-    hasResourcePermission(RESOURCES.ROLES);
+    !isUserRole &&
+    (hasPermission(COMMON_PERMISSIONS.ROLE_READ) ||
+      hasResourcePermission(RESOURCES.ROLES));
 
   // Admin-only menu items with permission checks
-  const adminMenuItems = [
+  const adminMenuItems = isUserRole
+    ? []
+    : [
     {
       title: t("sidebar.admin.categories"),
       icon: FolderTree,
@@ -125,6 +133,13 @@ export function AppSidebar() {
       url: ADMIN_USERS_ROUTES.INDEX,
       permission: COMMON_PERMISSIONS.USER_READ,
       resourcePrefix: RESOURCES.USER,
+    },
+    {
+      title: t("sidebar.admin.testAssignments"),
+      icon: ClipboardList,
+      url: ADMIN_TEST_ASSIGNMENTS_ROUTES.INDEX,
+      permission: COMMON_PERMISSIONS.TEST_ASSIGNMENT_READ,
+      resourcePrefix: RESOURCES.TEST_ASSIGNMENT,
     },
   ].filter((item) => {
     if (item.permission === null) {

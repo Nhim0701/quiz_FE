@@ -96,7 +96,8 @@
       "rolesPermissions": "Roles & Permissions",
       "roles": "Roles",
       "permissions": "Permissions",
-      "namespaces": "Namespaces"
+      "namespaces": "Namespaces",
+      "testAssignments": "Phân công bài kiểm tra"
     }
   },
   "breadcrumb": {

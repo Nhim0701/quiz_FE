@@ -40,6 +40,7 @@ interface UsersState {
     address?: string;
     jobTitle?: string;
     company?: string;
+    roleId?: string;
   }) => Promise<User>;
   updateUser: (
     id: string,
@@ -51,6 +52,7 @@ interface UsersState {
       address?: string;
       jobTitle?: string;
       company?: string;
+      roleId?: string;
     }
   ) => Promise<User>;
   deleteUser: (id: string) => Promise<void>;
@@ -150,9 +152,10 @@ export const useUsersStore = create<UsersState>((set, get) => ({
   createUser: async (data) => {
     set({ loading: true, error: null });
     try {
+      const payload = { ...data, roleId: data.roleId || undefined };
       const response = await apiClient.post<ApiSuccessResponse<User>>(
         ENDPOINTS.CREATE,
-        data
+        payload
       );
       set({ loading: false });
       return response.data.data;
@@ -169,9 +172,10 @@ export const useUsersStore = create<UsersState>((set, get) => ({
   updateUser: async (id, data) => {
     set({ loading: true, error: null });
     try {
+      const payload = { ...data, roleId: data.roleId || undefined };
       const response = await apiClient.put<ApiSuccessResponse<User>>(
         ENDPOINTS.UPDATE(id),
-        data
+        payload
       );
       set({ loading: false });
       return response.data.data;

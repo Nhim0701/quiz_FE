@@ -35,7 +35,9 @@
         "jobTitleLabel": "Job Title",
         "jobTitlePlaceholder": "Enter job title",
         "companyLabel": "Company",
-        "companyPlaceholder": "Enter company name"
+        "companyPlaceholder": "Enter company name",
+        "roleLabel": "Role",
+        "rolePlaceholder": "Select role"
       },
       "validation": {
         "emailRequired": "Email is required",
@@ -71,6 +73,18 @@
         "submit": "Save",
         "noRoles": "No roles available",
         "roleLabel": "Role"
+      },
+      "categoryAccess": {
+        "title": "Category Access",
+        "description": "Manage category access for this user",
+        "empty": "No categories granted",
+        "grant": "Grant Access",
+        "revoke": "Revoke",
+        "grantSuccess": "Category access granted",
+        "revokeSuccess": "Category access revoked",
+        "selectCategory": "Select a category",
+        "searchCategory": "Search categories...",
+        "noCategories": "No categories available"
       }
     }
   }
