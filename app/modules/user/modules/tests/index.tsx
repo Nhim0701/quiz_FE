@@ -6,7 +6,7 @@ import { useTranslation, t } from "@/i18n";
 import { ROUTES } from "./constants";
 import { PageHeader } from "@/components/common/page-header";
 import { Container } from "@/components/ui/container";
-import { TestList, TestListSkeleton } from "./components";
+import { TestList, TestListSkeleton, ShuffleControls } from "./components";
 import { pageMeta } from "@/lib";
 
 export const meta: Route.MetaFunction = () => {
@@ -52,6 +52,7 @@ export default function Tests() {
   return (
     <Container>
       <PageHeader title={t("sidebar.tests")} />
+      <ShuffleControls />
       {loading ? <TestListSkeleton /> : <TestList />}
     </Container>
   );

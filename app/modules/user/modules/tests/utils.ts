@@ -2,6 +2,7 @@ import type {
   QuestionProps,
   AnswerProps,
 } from "@/modules/admin/modules/questions/types";
+import type { ShuffleMode } from "./hooks/use-shuffle-settings";
 
 export function toggleRecordKey(
   record: Record<string, boolean>,
@@ -49,4 +50,20 @@ export function shuffleQuestionsAndAnswers(
 ): QuestionProps[] {
   const shuffledQuestions = shuffleQuestions(questions);
   return shuffleAnswers(shuffledQuestions);
+}
+
+export function applyShuffleMode(
+  questions: QuestionProps[],
+  mode: ShuffleMode
+): QuestionProps[] {
+  switch (mode) {
+    case "questions":
+      return shuffleQuestions(questions);
+    case "answers":
+      return shuffleAnswers(questions);
+    case "both":
+      return shuffleQuestionsAndAnswers(questions);
+    default:
+      return questions;
+  }
 }

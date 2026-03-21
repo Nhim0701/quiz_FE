@@ -9,3 +9,5 @@ export { useTestSubmissionStore } from "./use-test-submission";
 export { useTestPauseStore } from "./use-test-pause";
 export { useResultStore } from "./use-result";
 export { useTestStore, useTestStoreState } from "./use-test";
+export { useShuffleSettingsStore } from "./use-shuffle-settings";
+export type { ShuffleMode } from "./use-shuffle-settings";

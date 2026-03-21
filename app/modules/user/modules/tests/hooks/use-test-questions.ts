@@ -11,8 +11,10 @@ import {
   useTestsStore,
   type TestProps,
 } from "@/modules/admin/modules/tests/hooks";
-import { shuffleQuestionsAndAnswers } from "../utils";
+import { applyShuffleMode } from "../utils";
 import { questionsService } from "../services/questions.service";
+import { useShuffleSettingsStore } from "./use-shuffle-settings";
+import type { ShuffleMode } from "./use-shuffle-settings";
 
 interface TestQuestionsState {
   test: TestProps | null;
@@ -20,6 +22,7 @@ interface TestQuestionsState {
   loading: boolean;
   setLoading: (loading: boolean) => void;
   initializeTest: (questions: QuestionProps[], timeLimit: number) => void;
+  reshuffleQuestions: (mode: ShuffleMode) => void;
   fetchAndInitializeTest: (
     testId: string,
     setLoading?: (loading: boolean) => void,
@@ -48,13 +51,20 @@ export const useTestQuestionsStore = create<TestQuestionsState>((set) => ({
     set({ questions, loading: false });
   },
 
+  reshuffleQuestions: (mode) => {
+    const { questions } = useTestQuestionsStore.getState();
+    const shuffled = applyShuffleMode([...questions], mode);
+    set({ questions: shuffled });
+  },
+
   fetchAndInitializeTest: async (testId: string, setLoading, onError) => {
     setLoading?.(true);
     set({ loading: true });
 
     try {
       const allQuestions = await questionsService.fetchAllQuestionsWithAnswers(testId);
-      const shuffledQuestions = shuffleQuestionsAndAnswers(allQuestions);
+      const mode = useShuffleSettingsStore.getState().mode;
+      const shuffledQuestions = applyShuffleMode(allQuestions, mode);
       const getTestById = useTestsStore.getState().getTestById;
       const test = await getTestById(testId);
 
