@@ -1,14 +1,8 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, CheckCircle, XCircle, Clock, Calendar } from "lucide-react";
+import { FileText } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { apiClient } from "@/lib";
 import type { ApiSuccessResponse } from "@/types";
 import { ROUTES } from "@/modules/user/modules/tests/constants";
@@ -27,10 +21,16 @@ interface SubmissionsWithTest {
   submissions: SubmissionListItem[];
 }
 
+interface FlatSubmissionRow {
+  testId: string;
+  testName: string;
+  submission: SubmissionListItem;
+}
+
 const isCorrect = (record: SubmissionAnswerRecord): boolean => {
   const v = record.is_correct ?? record.isCorrect;
   return v === true;
-}
+};
 
 const historyToListItem = (entry: SubmissionHistoryEntry): SubmissionListItem => {
   const records = entry.submissions ?? [];
@@ -51,13 +51,16 @@ const historyToListItem = (entry: SubmissionHistoryEntry): SubmissionListItem =>
     totalQuestions: total,
     correctRate: total > 0 ? Math.round((correct / total) * 100) : 0,
   };
-}
+};
 
-const formatTimeSpent = (seconds?: number): string => {
-  if (seconds == null || seconds < 0) return "—";
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, "0")}`;
+function scoreBadgeClass(rate: number): string {
+  if (rate >= 80) {
+    return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
+  }
+  if (rate >= 60) {
+    return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
+  }
+  return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
 }
 
 export const SubmissionHistory = () => {
@@ -108,6 +111,11 @@ export const SubmissionHistory = () => {
     navigate(ROUTES.RESULT_BY_SUBMISSION(testId, submissionId));
   };
 
+  const flatRows: FlatSubmissionRow[] = submissionsByTest.flatMap(
+    ({ testId, testName, submissions }) =>
+      submissions.map((submission) => ({ testId, testName, submission }))
+  );
+
   if (loading) {
     return (
       <Card>
@@ -128,7 +136,7 @@ export const SubmissionHistory = () => {
     );
   }
 
-  if (submissionsByTest.length === 0) {
+  if (flatRows.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -154,96 +162,73 @@ export const SubmissionHistory = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <Accordion type="single" collapsible className="w-full">
-          {submissionsByTest.map(({ testId, testName, submissions }) => (
-            <AccordionItem
-              key={testId}
-              value={testId}
-              className="border-b border-slate-200 dark:border-slate-700 last:border-0"
-            >
-              <AccordionTrigger className="hover:no-underline py-4 sm:py-5 px-4 sm:px-6">
-                <div className="flex items-center justify-between w-full text-left pr-4">
-                  <div>
-                    <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">
-                      {testName}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                      {submissions.length}{" "}
-                      {t("dashboard.submissionHistory.submissionsLabel")}
-                    </p>
-                  </div>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="pt-0 pb-4 sm:pb-6 px-4 sm:px-6">
-                <div className="space-y-3">
-                  {submissions.map((sub) => {
-                    const submittedAt =
-                      sub.submittedAt ?? sub.createdAt ?? "";
-                    const ts =
-                      typeof submittedAt === "string" &&
-                        /^\d+$/.test(submittedAt)
-                        ? parseInt(submittedAt, 10)
-                        : submittedAt;
-                    const timeLabel =
-                      typeof ts === "number"
-                        ? formatUnixTimestamp(ts) ||
-                        t("dashboard.submissionHistory.notAvailable")
-                        : ts || t("dashboard.submissionHistory.notAvailable");
-                    const timeSpent =
-                      sub.timeSpent ?? sub.timeFinish ?? undefined;
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                <th className="text-left px-4 sm:px-6 py-3 font-medium text-slate-500 dark:text-slate-400">
+                  {t("dashboard.submissionHistory.testName")}
+                </th>
+                <th className="text-left px-4 sm:px-6 py-3 font-medium text-slate-500 dark:text-slate-400">
+                  {t("dashboard.submissionHistory.score")}
+                </th>
+                <th className="text-left px-4 sm:px-6 py-3 font-medium text-slate-500 dark:text-slate-400 hidden sm:table-cell">
+                  {t("dashboard.submissionHistory.date")}
+                </th>
+                <th className="text-right px-4 sm:px-6 py-3 font-medium text-slate-500 dark:text-slate-400">
+                  {t("dashboard.submissionHistory.action")}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {flatRows.map(({ testId, testName, submission: sub }) => {
+                const submittedAt = sub.submittedAt ?? sub.createdAt ?? "";
+                const ts =
+                  typeof submittedAt === "string" && /^\d+$/.test(submittedAt)
+                    ? parseInt(submittedAt, 10)
+                    : submittedAt;
+                const timeLabel =
+                  typeof ts === "number"
+                    ? formatUnixTimestamp(ts) ||
+                      t("dashboard.submissionHistory.notAvailable")
+                    : ts || t("dashboard.submissionHistory.notAvailable");
 
-                    return (
+                return (
+                  <tr
+                    key={sub.id}
+                    className="border-b border-slate-100 dark:border-slate-700/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
+                  >
+                    <td className="px-4 sm:px-6 py-4">
+                      <span className="font-medium text-slate-800 dark:text-slate-100">
+                        {testName}
+                      </span>
+                    </td>
+                    <td className="px-4 sm:px-6 py-4">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${scoreBadgeClass(sub.correctRate)}`}
+                      >
+                        {sub.correctRate}%
+                      </span>
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 text-slate-500 dark:text-slate-400 hidden sm:table-cell">
+                      {timeLabel}
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 text-right">
                       <button
-                        key={sub.id}
                         type="button"
                         onClick={() => handleCardClick(testId, sub.id)}
-                        className="w-full text-left p-4 rounded-lg border-2 border-slate-200 dark:border-slate-600 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700/80 hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 group"
+                        className="text-xs font-medium text-[var(--brand)] hover:underline"
                       >
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-                          <span className="inline-flex items-center gap-1.5 text-slate-700 dark:text-slate-300 font-medium">
-                            <FileText className="w-4 h-4 flex-shrink-0" />
-                            {t("dashboard.submissionHistory.totalQuestions")}:{" "}
-                            {sub.totalQuestions}
-                          </span>
-                          <span className="inline-flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 font-medium">
-                            {t("dashboard.submissionHistory.correctRate")}:{" "}
-                            {sub.correctRate}%
-                          </span>
-                          <span className="inline-flex items-center gap-1.5 text-green-600 dark:text-green-400 font-medium">
-                            <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                            {sub.correctCount}{" "}
-                            {t("dashboard.submissionHistory.correct")}
-                          </span>
-                          <span className="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400 font-medium">
-                            <XCircle className="w-4 h-4 flex-shrink-0" />
-                            {sub.incorrectCount}{" "}
-                            {t("dashboard.submissionHistory.incorrect")}
-                          </span>
-                          {timeSpent != null && (
-                            <span className="inline-flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
-                              <Clock className="w-4 h-4 flex-shrink-0" />
-                              {t("dashboard.submissionHistory.timeFinish")}:{" "}
-                              {formatTimeSpent(timeSpent)}
-                            </span>
-                          )}
-                          <span className="inline-flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
-                            <Calendar className="w-4 h-4 flex-shrink-0" />
-                            {t("dashboard.submissionHistory.timeSubmit")}:{" "}
-                            {timeLabel}
-                          </span>
-                        </div>
-                        <p className="mt-2 text-xs font-medium text-blue-600 dark:text-blue-400 group-hover:underline">
-                          {t("dashboard.submissionHistory.viewResult")} →
-                        </p>
+                        {t("dashboard.submissionHistory.viewResult")} →
                       </button>
-                    );
-                  })}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </CardContent>
     </Card>
   );
-}
+};

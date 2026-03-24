@@ -42,7 +42,7 @@ export function CategoryStats() {
               </div>
               <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 mt-2">
                 <div
-                  className="bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500 h-2 rounded-full transition-all duration-300"
+                  className="bg-[var(--brand)] h-2 rounded-full transition-all duration-300"
                   style={{ width: `${stat.accuracy}%` }}
                 ></div>
               </div>

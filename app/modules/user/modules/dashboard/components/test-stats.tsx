@@ -3,6 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDashboard } from "../hooks";
 import type { ByTestStatsProps } from "../types";
 
+function scoreBadgeClass(accuracy: number): string {
+  if (accuracy >= 80) {
+    return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
+  }
+  if (accuracy >= 60) {
+    return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
+  }
+  return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+}
+
 export function TestStats() {
   const { t } = useTranslation();
   const { dashboardData } = useDashboard();
@@ -38,7 +48,9 @@ export function TestStats() {
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   {stat.testName}
                 </span>
-                <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                <span
+                  className={`text-xs font-semibold px-2 py-0.5 rounded-full ${scoreBadgeClass(stat.accuracy)}`}
+                >
                   {stat.accuracy}%
                 </span>
               </div>
@@ -59,12 +71,6 @@ export function TestStats() {
                     </span>
                   </>
                 )}
-              </div>
-              <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 mt-2">
-                <div
-                  className="bg-gradient-to-r from-green-500 to-green-600 dark:from-green-400 dark:to-green-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${stat.accuracy}%` }}
-                ></div>
               </div>
             </div>
           ))}

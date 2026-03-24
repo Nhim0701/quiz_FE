@@ -27,6 +27,10 @@
     "viewResult": "View result",
     "submissionsLabel": "submissions",
     "totalQuestions": "Total questions",
-    "correctRate": "Correct rate"
+    "correctRate": "Correct rate",
+    "testName": "Test Name",
+    "score": "Score",
+    "date": "Date",
+    "action": "Action"
   }
 }

@@ -27,6 +27,10 @@
     "viewResult": "Xem kết quả",
     "submissionsLabel": "lần nộp",
     "totalQuestions": "Tổng câu hỏi",
-    "correctRate": "Tỷ lệ đúng"
+    "correctRate": "Tỷ lệ đúng",
+    "testName": "Tên Bài Kiểm Tra",
+    "score": "Điểm",
+    "date": "Ngày",
+    "action": "Hành Động"
   }
 }

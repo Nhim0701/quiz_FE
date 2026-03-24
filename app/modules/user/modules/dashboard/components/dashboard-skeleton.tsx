@@ -83,15 +83,44 @@ export const DashboardSkeleton = () => {
       </div>
 
       {/* SubmissionHistory Skeleton */}
-      <Card>
+      <Card className="overflow-hidden">
         <CardHeader>
           <Skeleton className="h-6 w-40" />
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <Skeleton key={index} className="h-28 rounded-lg" />
-            ))}
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                  {[48, 20, 32, 20].map((w, i) => (
+                    <th key={i} className="px-4 sm:px-6 py-3">
+                      <Skeleton className={`h-4 w-${w}`} />
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <tr
+                    key={index}
+                    className="border-b border-slate-100 dark:border-slate-700/50 last:border-0"
+                  >
+                    <td className="px-4 sm:px-6 py-4">
+                      <Skeleton className="h-4 w-40" />
+                    </td>
+                    <td className="px-4 sm:px-6 py-4">
+                      <Skeleton className="h-5 w-16 rounded-full" />
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 hidden sm:table-cell">
+                      <Skeleton className="h-4 w-28" />
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 flex justify-end">
+                      <Skeleton className="h-4 w-20" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </CardContent>
       </Card>
