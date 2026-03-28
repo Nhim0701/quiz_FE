@@ -19,6 +19,7 @@ export interface TestResultLocationState {
   answers?: Record<string, string[]>;
   questions?: QuestionProps[];
   flags?: Record<string, boolean>;
+  submissionId?: string;
 }
 
 /**

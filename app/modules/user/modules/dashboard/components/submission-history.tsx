@@ -108,7 +108,7 @@ export const SubmissionHistory = () => {
   }, [Object.keys(testIdByName).length]);
 
   const handleRowClick = (testId: string, submissionId: string) => {
-    navigate(ROUTES.RESULT_BY_SUBMISSION(testId, submissionId));
+    navigate(ROUTES.RESULT(testId), { state: { submissionId } });
   };
 
   if (loading) {

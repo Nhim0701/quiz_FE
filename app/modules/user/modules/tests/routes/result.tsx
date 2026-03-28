@@ -26,14 +26,19 @@ export const meta: Route.MetaFunction = () => {
 const Result = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { testId, submissionId } = useParams<{
+  const { testId, submissionId: submissionIdParam } = useParams<{
     testId: string;
     submissionId?: string;
   }>();
   const { t } = useTranslation();
   const { setResult, clearResult, summary } = useResultStore();
   const getTestById = useTestsStore((state) => state.getTestById);
-  // Start in loading state when a submissionId is in the URL to avoid
+
+  // submissionId may come from URL param or from navigation state (dashboard → result)
+  const stateSubmissionId = (location.state as TestResultLocationState | undefined)?.submissionId;
+  const submissionId = submissionIdParam ?? stateSubmissionId;
+
+  // Start in loading state when a submissionId is present to avoid
   // flashing "No result data" before the fetch effect fires.
   const [loadingSubmission, setLoadingSubmission] = useState(!!submissionId);
   const [submissionLoadError, setSubmissionLoadError] = useState<string | null>(null);
