@@ -81,6 +81,7 @@ export const SubmissionHistory = () => {
           ApiSuccessResponse<SubmissionHistoryTestItem[]>
         >(ENDPOINTS.SUBMISSION_HISTORY);
         const raw = res.data?.data ?? res.data;
+        console.log("[SubmissionHistory] raw API response:", raw);
         const items = Array.isArray(raw) ? raw : [];
         const data: SubmissionsWithTest[] = items
           .map((item) => {
@@ -94,7 +95,8 @@ export const SubmissionHistory = () => {
           })
           .filter((x) => x.submissions.length > 0);
         if (!cancelled) setSubmissionsByTest(data);
-      } catch {
+      } catch (err) {
+        console.error("[SubmissionHistory] fetch error:", err);
         if (!cancelled) setSubmissionsByTest([]);
       } finally {
         if (!cancelled) setLoading(false);
@@ -195,7 +197,7 @@ export const SubmissionHistory = () => {
 
                 return (
                   <tr
-                    key={sub.id}
+                    key={`${testId}-${sub.id}`}
                     className="border-b border-slate-100 dark:border-slate-700/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
                   >
                     <td className="px-4 sm:px-6 py-4">

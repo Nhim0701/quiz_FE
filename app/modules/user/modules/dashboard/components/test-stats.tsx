@@ -1,7 +1,11 @@
+import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDashboard } from "../hooks";
 import type { ByTestStatsProps } from "../types";
+
+const PAGE_SIZE = 10;
 
 function scoreBadgeClass(accuracy: number): string {
   if (accuracy >= 80) {
@@ -16,6 +20,7 @@ function scoreBadgeClass(accuracy: number): string {
 export function TestStats() {
   const { t } = useTranslation();
   const { dashboardData } = useDashboard();
+  const [page, setPage] = useState(1);
   const byTest = dashboardData?.byTest;
 
   if (
@@ -32,6 +37,10 @@ export function TestStats() {
     return null;
   }
 
+  const totalPages = Math.ceil(testStats.length / PAGE_SIZE);
+  const safePage = Math.min(page, totalPages);
+  const pageItems = testStats.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
   return (
     <Card>
       <CardHeader>
@@ -39,7 +48,7 @@ export function TestStats() {
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {testStats.map((stat) => (
+          {pageItems.map((stat) => (
             <div
               key={stat.testId}
               className="border-b border-slate-100 dark:border-slate-700 last:border-0 pb-3 last:pb-0"
@@ -75,6 +84,32 @@ export function TestStats() {
             </div>
           ))}
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100 dark:border-slate-700">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              {safePage} / {totalPages}
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={safePage <= 1}
+                className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={safePage >= totalPages}
+                className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
