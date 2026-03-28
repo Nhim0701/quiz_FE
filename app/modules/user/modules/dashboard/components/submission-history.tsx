@@ -4,54 +4,35 @@ import { FileText } from "lucide-react";
 import { useTranslation } from "@/i18n";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiClient } from "@/lib";
-import type { ApiSuccessResponse } from "@/types";
 import { ROUTES } from "@/modules/user/modules/tests/constants";
 import { ENDPOINTS } from "../constants";
-import type {
-  SubmissionListItem,
-  SubmissionAnswerRecord,
-  SubmissionHistoryTestItem,
-  SubmissionHistoryEntry,
-} from "../types";
 import { formatUnixTimestamp } from "@/lib";
 
-interface SubmissionsWithTest {
-  testId: string;
-  testName: string;
-  submissions: SubmissionListItem[];
+/**
+ * Raw shape from GET /api/v1/me/submission-history
+ * Each item is one submission session.
+ */
+interface RawSubmissionEntry {
+  id: string;
+  submittedAt?: number;
+  submissionCount?: number;
+  correctCount?: number;
+  wrongCount?: number;
+  submissions?: Array<{
+    id?: string;
+    testName?: string;
+    testId?: string;
+    category?: string;
+  }>;
 }
 
-interface FlatSubmissionRow {
-  testId: string;
+interface FlatRow {
+  submissionId: string;
+  testId: string | undefined;
   testName: string;
-  submission: SubmissionListItem;
+  correctRate: number;
+  submittedAt: number;
 }
-
-const isCorrect = (record: SubmissionAnswerRecord): boolean => {
-  const v = record.is_correct ?? record.isCorrect;
-  return v === true;
-};
-
-const historyToListItem = (entry: SubmissionHistoryEntry): SubmissionListItem => {
-  const records = entry.submissions ?? [];
-  const correct = records.filter(isCorrect).length;
-  const total = records.length;
-  const incorrect = total - correct;
-  const submittedAt = entry.submitted_at ?? entry.submittedAt ?? 0;
-  const id =
-    entry.submission_history_id ??
-    entry.submissionHistoryId ??
-    `sub-${submittedAt}`;
-  return {
-    id,
-    createdAt: submittedAt,
-    submittedAt: String(submittedAt),
-    correctCount: correct,
-    incorrectCount: incorrect,
-    totalQuestions: total,
-    correctRate: total > 0 ? Math.round((correct / total) * 100) : 0,
-  };
-};
 
 function scoreBadgeClass(rate: number): string {
   if (rate >= 80) {
@@ -66,9 +47,7 @@ function scoreBadgeClass(rate: number): string {
 export const SubmissionHistory = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [submissionsByTest, setSubmissionsByTest] = useState<
-    SubmissionsWithTest[]
-  >([]);
+  const [rows, setRows] = useState<FlatRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -77,27 +56,33 @@ export const SubmissionHistory = () => {
     const fetchHistory = async () => {
       setLoading(true);
       try {
-        const res = await apiClient.get<
-          ApiSuccessResponse<SubmissionHistoryTestItem[]>
-        >(ENDPOINTS.SUBMISSION_HISTORY);
+        const res = await apiClient.get(ENDPOINTS.SUBMISSION_HISTORY);
         const raw = res.data?.data ?? res.data;
-        console.log("[SubmissionHistory] raw API response:", raw);
-        const items = Array.isArray(raw) ? raw : [];
-        const data: SubmissionsWithTest[] = items
-          .map((item) => {
-            const testId = item.test_id ?? item.testId ?? "";
-            const testName = item.test_name ?? item.testName ?? "";
-            const histories = item.histories ?? [];
-            const submissions = histories
-              .map(historyToListItem)
-              .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
-            return { testId, testName, submissions };
+        const items: RawSubmissionEntry[] = Array.isArray(raw) ? raw : [];
+
+        const data: FlatRow[] = items
+          .map((entry) => {
+            const correct = entry.correctCount ?? 0;
+            const total = entry.submissionCount ?? (correct + (entry.wrongCount ?? 0));
+            const correctRate = total > 0 ? Math.round((correct / total) * 100) : 0;
+            const firstAnswer = entry.submissions?.[0];
+            const testName = firstAnswer?.testName ?? "";
+            const testId = firstAnswer?.testId;
+            return {
+              submissionId: entry.id,
+              testId,
+              testName,
+              correctRate,
+              submittedAt: entry.submittedAt ?? 0,
+            };
           })
-          .filter((x) => x.submissions.length > 0);
-        if (!cancelled) setSubmissionsByTest(data);
+          .filter((r) => r.testName !== "")
+          .sort((a, b) => b.submittedAt - a.submittedAt);
+
+        if (!cancelled) setRows(data);
       } catch (err) {
         console.error("[SubmissionHistory] fetch error:", err);
-        if (!cancelled) setSubmissionsByTest([]);
+        if (!cancelled) setRows([]);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -109,14 +94,9 @@ export const SubmissionHistory = () => {
     };
   }, []);
 
-  const handleCardClick = (testId: string, submissionId: string) => {
+  const handleRowClick = (testId: string | undefined, submissionId: string) => {
     navigate(ROUTES.RESULT_BY_SUBMISSION(testId, submissionId));
   };
-
-  const flatRows: FlatSubmissionRow[] = submissionsByTest.flatMap(
-    ({ testId, testName, submissions }) =>
-      submissions.map((submission) => ({ testId, testName, submission }))
-  );
 
   if (loading) {
     return (
@@ -138,7 +118,7 @@ export const SubmissionHistory = () => {
     );
   }
 
-  if (flatRows.length === 0) {
+  if (rows.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -183,33 +163,26 @@ export const SubmissionHistory = () => {
               </tr>
             </thead>
             <tbody>
-              {flatRows.map(({ testId, testName, submission: sub }) => {
-                const submittedAt = sub.submittedAt ?? sub.createdAt ?? "";
-                const ts =
-                  typeof submittedAt === "string" && /^\d+$/.test(submittedAt)
-                    ? parseInt(submittedAt, 10)
-                    : submittedAt;
+              {rows.map((row) => {
                 const timeLabel =
-                  typeof ts === "number"
-                    ? formatUnixTimestamp(ts) ||
-                      t("dashboard.submissionHistory.notAvailable")
-                    : ts || t("dashboard.submissionHistory.notAvailable");
+                  formatUnixTimestamp(row.submittedAt) ??
+                  t("dashboard.submissionHistory.notAvailable");
 
                 return (
                   <tr
-                    key={`${testId}-${sub.id}`}
+                    key={row.submissionId}
                     className="border-b border-slate-100 dark:border-slate-700/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
                   >
                     <td className="px-4 sm:px-6 py-4">
                       <span className="font-medium text-slate-800 dark:text-slate-100">
-                        {testName}
+                        {row.testName}
                       </span>
                     </td>
                     <td className="px-4 sm:px-6 py-4">
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${scoreBadgeClass(sub.correctRate)}`}
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${scoreBadgeClass(row.correctRate)}`}
                       >
-                        {sub.correctRate}%
+                        {row.correctRate}%
                       </span>
                     </td>
                     <td className="px-4 sm:px-6 py-4 text-slate-500 dark:text-slate-400 hidden sm:table-cell">
@@ -218,7 +191,7 @@ export const SubmissionHistory = () => {
                     <td className="px-4 sm:px-6 py-4 text-right">
                       <button
                         type="button"
-                        onClick={() => handleCardClick(testId, sub.id)}
+                        onClick={() => handleRowClick(row.testId, row.submissionId)}
                         className="text-xs font-medium text-[var(--brand)] hover:underline"
                       >
                         {t("dashboard.submissionHistory.viewResult")} →
