@@ -22,6 +22,7 @@ interface ResultState {
     questions: QuestionProps[],
     flags?: Record<string, boolean>
   ) => void;
+  clearResult: () => void;
   getCorrectCount: () => number;
   getWrongCount: () => number;
   getAccuracyPercentage: () => number;
@@ -34,6 +35,7 @@ export const useResultStore = create<ResultState>((set, get) => ({
   flags: {},
   setResult: (summary, answers, questions, flags = {}) =>
     set({ summary, answers, questions, flags }),
+  clearResult: () => set({ summary: null, answers: {}, questions: [], flags: {} }),
   getCorrectCount: () => {
     const { questions, answers } = get();
     return questions.filter((q) =>

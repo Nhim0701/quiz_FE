@@ -31,9 +31,11 @@ const Result = () => {
     submissionId?: string;
   }>();
   const { t } = useTranslation();
-  const { setResult, summary } = useResultStore();
+  const { setResult, clearResult, summary } = useResultStore();
   const getTestById = useTestsStore((state) => state.getTestById);
-  const [loadingSubmission, setLoadingSubmission] = useState(false);
+  // Start in loading state when a submissionId is in the URL to avoid
+  // flashing "No result data" before the fetch effect fires.
+  const [loadingSubmission, setLoadingSubmission] = useState(!!submissionId);
   const [submissionLoadError, setSubmissionLoadError] = useState<string | null>(null);
 
   // Initialize test from cache immediately if available
@@ -120,6 +122,7 @@ const Result = () => {
     if (submissionId && testId) {
       setLoadingSubmission(true);
       setSubmissionLoadError(null);
+      clearResult();
       Promise.all([
         apiClient.get<ApiSuccessResponse<SubmissionDetailResponse>>(
           ENDPOINTS.SUBMISSION_GET(testId, submissionId)
@@ -167,7 +170,7 @@ const Result = () => {
         })
         .finally(() => setLoadingSubmission(false));
     }
-  }, [location.state, setResult, submissionId, testId]);
+  }, [location.state, setResult, clearResult, submissionId, testId]);
 
   if (loadingSubmission) {
     return (
