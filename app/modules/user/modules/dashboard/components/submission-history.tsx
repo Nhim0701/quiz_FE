@@ -7,6 +7,7 @@ import { apiClient } from "@/lib";
 import { ROUTES } from "@/modules/user/modules/tests/constants";
 import { ENDPOINTS } from "../constants";
 import { formatUnixTimestamp } from "@/lib";
+import { useDashboard } from "../hooks";
 
 /**
  * Raw shape from GET /api/v1/me/submission-history
@@ -19,16 +20,14 @@ interface RawSubmissionEntry {
   correctCount?: number;
   wrongCount?: number;
   submissions?: Array<{
-    id?: string;
     testName?: string;
-    testId?: string;
     category?: string;
   }>;
 }
 
 interface FlatRow {
   submissionId: string;
-  testId: string | undefined;
+  testId: string;
   testName: string;
   correctRate: number;
   submittedAt: number;
@@ -47,8 +46,19 @@ function scoreBadgeClass(rate: number): string {
 export const SubmissionHistory = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { dashboardData } = useDashboard();
   const [rows, setRows] = useState<FlatRow[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Build testName → testId lookup from already-loaded dashboard data
+  const testIdByName: Record<string, string> = {};
+  if (dashboardData?.byTest) {
+    for (const stats of Object.values(dashboardData.byTest).flat()) {
+      if (stats.testName && stats.testId) {
+        testIdByName[stats.testName] = stats.testId;
+      }
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -63,20 +73,21 @@ export const SubmissionHistory = () => {
         const data: FlatRow[] = items
           .map((entry) => {
             const correct = entry.correctCount ?? 0;
-            const total = entry.submissionCount ?? (correct + (entry.wrongCount ?? 0));
-            const correctRate = total > 0 ? Math.round((correct / total) * 100) : 0;
-            const firstAnswer = entry.submissions?.[0];
-            const testName = firstAnswer?.testName ?? "";
-            const testId = firstAnswer?.testId;
+            const total =
+              entry.submissionCount ?? correct + (entry.wrongCount ?? 0);
+            const correctRate =
+              total > 0 ? Math.round((correct / total) * 100) : 0;
+            const testName = entry.submissions?.[0]?.testName ?? "";
             return {
               submissionId: entry.id,
-              testId,
               testName,
               correctRate,
               submittedAt: entry.submittedAt ?? 0,
             };
           })
           .filter((r) => r.testName !== "")
+          .map((r) => ({ ...r, testId: testIdByName[r.testName] ?? "" }))
+          .filter((r) => r.testId !== "")
           .sort((a, b) => b.submittedAt - a.submittedAt);
 
         if (!cancelled) setRows(data);
@@ -92,9 +103,11 @@ export const SubmissionHistory = () => {
     return () => {
       cancelled = true;
     };
-  }, []);
+  // Re-run when the testIdByName lookup becomes available (dashboard loaded)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [Object.keys(testIdByName).length]);
 
-  const handleRowClick = (testId: string | undefined, submissionId: string) => {
+  const handleRowClick = (testId: string, submissionId: string) => {
     navigate(ROUTES.RESULT_BY_SUBMISSION(testId, submissionId));
   };
 
@@ -191,7 +204,9 @@ export const SubmissionHistory = () => {
                     <td className="px-4 sm:px-6 py-4 text-right">
                       <button
                         type="button"
-                        onClick={() => handleRowClick(row.testId, row.submissionId)}
+                        onClick={() =>
+                          handleRowClick(row.testId, row.submissionId)
+                        }
                         className="text-xs font-medium text-[var(--brand)] hover:underline"
                       >
                         {t("dashboard.submissionHistory.viewResult")} →
