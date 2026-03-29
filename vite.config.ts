@@ -14,10 +14,10 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: ["harinezumi.myddns.me"],
+    allowedHosts: ["quiz-harinezumi.uk"],
     proxy: {
       "/api/v1/": {
-        target: "https://harinezumi.myddns.me",
+        target: "https://quiz-harinezumi.uk",
         changeOrigin: true,
         secure: false,
       },
