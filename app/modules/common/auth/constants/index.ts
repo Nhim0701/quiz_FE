@@ -4,6 +4,7 @@
 export const ENDPOINTS = {
   LOGIN: "/api/v1/auth/login",
   REGISTER: "/api/v1/auth/register",
+  ACTIVATE: "/api/v1/auth/activate",
   REFRESH: "/api/v1/auth/token/refresh",
   REVOKE: "/api/v1/auth/token/revoke",
 } as const;
@@ -33,4 +34,6 @@ export const STORAGE_KEYS = {
 export const ROUTES = {
   LOGIN: "/login",
   REGISTER: "/register",
+  CHECK_EMAIL: "/check-email",
+  ACTIVATE: "/activate",
 } as const;

@@ -96,8 +96,7 @@
       "rolesPermissions": "Roles & Permissions",
       "roles": "Roles",
       "permissions": "Permissions",
-      "namespaces": "Namespaces",
-      "testAssignments": "Test Assignments"
+      "namespaces": "Namespaces"
     }
   },
   "breadcrumb": {

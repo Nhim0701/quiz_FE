@@ -21,6 +21,20 @@
     "alreadyHaveAccount": "Đã có tài khoản?",
     "signInInstead": "Đăng Nhập"
   },
+  "checkEmail": {
+    "title": "Kiểm Tra Email Của Bạn",
+    "subtitle": "Chúng tôi đã gửi liên kết kích hoạt đến địa chỉ email của bạn. Vui lòng kiểm tra hộp thư đến và nhấp vào liên kết để kích hoạt tài khoản. Liên kết có hiệu lực trong 2 giờ.",
+    "backToLogin": "Quay Lại Đăng Nhập"
+  },
+  "activate": {
+    "title": "Kích Hoạt Tài Khoản",
+    "loading": "Đang kích hoạt tài khoản của bạn...",
+    "success": "Tài khoản của bạn đã được kích hoạt! Bạn có thể đăng nhập ngay bây giờ.",
+    "goToLogin": "Đến Trang Đăng Nhập",
+    "noToken": "Liên kết kích hoạt không hợp lệ. Vui lòng kiểm tra email của bạn.",
+    "backToLogin": "Quay Lại Đăng Nhập",
+    "genericError": "Đã xảy ra lỗi. Vui lòng thử lại."
+  },
   "validation": {
     "emailRequired": "Email là bắt buộc",
     "emailInvalid": "Vui lòng nhập địa chỉ email hợp lệ",

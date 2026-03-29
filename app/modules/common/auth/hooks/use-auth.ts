@@ -74,21 +74,15 @@ export const useAuthStoreInternal = create<AuthState>()(
         set({ user: null });
         tokenManager.removeToken();
       },
-      register: async (formData, setLoading) => {
+      register: async (formData, _setLoading) => {
         // Convert UI form data to API payload using mapper
         const payload = AuthMapper.toRegisterPayload(formData);
 
-        const response = await apiClient.post<ApiSuccessResponse<AuthResponse>>(
+        // BE returns { data: { message: string }, meta: {} } — no token
+        await apiClient.post<ApiSuccessResponse<{ message: string }>>(
           ENDPOINTS.REGISTER,
           payload
         );
-
-        // Store token on successful registration
-        // Response data is already converted to camelCase by interceptor
-        if (response.data.data) {
-          tokenManager.setToken(response.data.data.accessToken);
-          await fetchUserData(set, setLoading);
-        }
       },
       login: async (formData, setLoading) => {
         // Convert UI form data to API payload using mapper

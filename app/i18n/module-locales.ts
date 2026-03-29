@@ -16,7 +16,6 @@ import adminUsersEnLocales from "../modules/admin/modules/users/locales/en.json"
 import adminRolesEnLocales from "../modules/admin/modules/roles/locales/en.json";
 import adminPermissionsEnLocales from "../modules/admin/modules/permissions/locales/en.json";
 import adminNamespacesEnLocales from "../modules/admin/modules/namespaces/locales/en.json";
-import adminTestAssignmentsEnLocales from "../modules/admin/modules/test-assignments/locales/en.json";
 
 /**
  * Type definition for all module locales
@@ -42,7 +41,6 @@ export type ModuleLocales = {
     roles: typeof adminRolesEnLocales.admin.roles;
     permissions: typeof adminPermissionsEnLocales.admin.permissions;
     namespaces: typeof adminNamespacesEnLocales.admin.namespaces;
-    testAssignments: typeof adminTestAssignmentsEnLocales.admin.testAssignments;
   };
 };
 

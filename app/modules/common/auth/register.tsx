@@ -7,7 +7,7 @@ import {
 } from "@/modules/common/auth/hooks/use-auth";
 import { useApp } from "@/hooks";
 import { useTranslation, t } from "@/i18n";
-import { ROUTES as DASHBOARD_ROUTES } from "@/modules/user/modules/dashboard/constants";
+import { ROUTES as AUTH_ROUTES } from "@/modules/common/auth/constants";
 import {
   RegisterHeader,
   RegisterForm,
@@ -34,8 +34,8 @@ export default function Register() {
     try {
       // Pass form data directly - useAuth will handle mapping to API payload
       await register(formData, setLoading);
-      // Navigate to dashboard after successful registration (user is already logged in with token)
-      navigate(DASHBOARD_ROUTES.INDEX, { replace: true });
+      // Navigate to check-email page — account requires activation before login
+      navigate(AUTH_ROUTES.CHECK_EMAIL, { replace: true });
     } catch (err) {
       const error = err as Error;
       const errorMessage = error.message || t("errors.registrationFailed");

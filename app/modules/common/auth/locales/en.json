@@ -21,6 +21,20 @@
     "alreadyHaveAccount": "Already have an account?",
     "signInInstead": "Sign In"
   },
+  "checkEmail": {
+    "title": "Check Your Email",
+    "subtitle": "We've sent an activation link to your email address. Please check your inbox and click the link to activate your account. The link expires in 2 hours.",
+    "backToLogin": "Back to Login"
+  },
+  "activate": {
+    "title": "Activating Account",
+    "loading": "Activating your account...",
+    "success": "Your account has been activated! You can now log in.",
+    "goToLogin": "Go to Login",
+    "noToken": "Invalid activation link. Please check your email.",
+    "backToLogin": "Back to Login",
+    "genericError": "Something went wrong. Please try again."
+  },
   "validation": {
     "emailRequired": "Email is required",
     "emailInvalid": "Please enter a valid email address",
