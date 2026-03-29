@@ -1,12 +1,16 @@
 node_modules
 dist
+build
 .git
 .gitignore
 *.md
 .env*
+!.env.example
+.react-router/
 .vscode
 .idea
 *.log
 npm-debug.log*
 .DS_Store
 coverage
+.nyc_output/

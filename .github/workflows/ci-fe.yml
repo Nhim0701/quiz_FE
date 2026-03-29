@@ -1,0 +1,49 @@
+name: CI — Frontend
+
+on:
+  push:
+    branches:
+      - "feature/**"
+
+jobs:
+  ci:
+    name: Lint, Typecheck, Build & Docker Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+        env:
+          # Safe default for CI — not deployed, used only to verify the build succeeds
+          VITE_API_BASE_URL: /
+          VITE_QUESTION_ASSET_PREFIX: questions/uploads
+          VITE_QUESTION_ASSET_EXPIRES_IN: "3600"
+
+      - name: Validate Docker build (no push)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ci/docker/Dockerfile
+          push: false
+          build-args: |
+            VITE_API_BASE_URL=/
+            VITE_QUESTION_ASSET_PREFIX=questions/uploads
+            VITE_QUESTION_ASSET_EXPIRES_IN=3600

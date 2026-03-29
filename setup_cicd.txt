@@ -1,0 +1,107 @@
+Nhim0701/quiz_FE with a production branch. Here's your complete next-steps guide:
+
+Step-by-Step: Configure GitHub CI/CD
+STEP 1 — Push this branch to GitHub
+You're currently on feature/setting-cicd. Push it:
+
+
+git add .
+git commit -m "feat: add CI/CD pipeline (ci-fe.yml, cd-fe.yml, Dockerfile SSR refactor)"
+git push origin feature/setting-cicd
+STEP 2 — Create a GitHub Personal Access Token (PAT) for GHCR
+This token lets the CD workflow push Docker images to GitHub Container Registry.
+
+Go to github.com → Settings → Developer settings → Personal access tokens → Tokens (classic)
+Click Generate new token (classic)
+Set a name: quiz-fe-ghcr
+Set expiration: No expiration (or 1 year)
+Check these scopes:
+write:packages
+read:packages
+delete:packages (optional, for cleanup)
+Click Generate token
+Copy the token immediately — you won't see it again
+STEP 3 — Create the production Environment on GitHub
+Go to your repo: https://github.com/Nhim0701/quiz_FE
+Click Settings tab
+In the left sidebar, click Environments
+Click New environment
+Name it exactly: production → click Configure environment
+Under Deployment branches and tags, click Add deployment branch or tag rule
+Select Branch → type production → click Add rule
+This ensures only the production branch can trigger a deploy
+(Optional but recommended) Under Required reviewers, add yourself — this creates a manual approval gate before every production deploy
+STEP 4 — Add Secrets to the production Environment
+Still on the environment configuration page, scroll down to Environment secrets → click Add secret for each:
+
+Secret Name	Value
+GHCR_TOKEN	The PAT you copied in Step 2
+SSH_HOST	Your server IP or hostname (e.g. harinezumi.myddns.me)
+SSH_USER	SSH login username (e.g. ubuntu, root)
+SSH_PORT	SSH port (usually 22)
+SSH_PRIVATE_KEY	Your private SSH key content (the full text of ~/.ssh/id_rsa or equivalent, starting with -----BEGIN...)
+VITE_API_BASE_URL	Production API URL (e.g. https://quiz-harinezumi.uk)
+VITE_QUESTION_ASSET_PREFIX	e.g. questions/uploads
+VITE_QUESTION_ASSET_EXPIRES_IN	e.g. 3600
+STEP 5 — Verify the Server Has the Public SSH Key
+The CD workflow SSHs into your server. Make sure the public key (matching the private key from Step 4) is in the server's authorized keys:
+
+
+# On your server:
+cat ~/.ssh/authorized_keys
+# The public key should be listed there.
+# If not, add it:
+echo "YOUR_PUBLIC_KEY" >> ~/.ssh/authorized_keys
+STEP 6 — Ensure Docker Compose Path is Correct on the Server
+The CD workflow runs this on your server:
+
+
+cd ~/quiz && docker compose -f ci/docker-compose.yml up -d --no-deps fe
+Make sure:
+
+The repo is cloned at ~/quiz on the server (or update the path in cd-fe.yml)
+Docker and Docker Compose are installed on the server
+To verify:
+
+
+# On your server:
+docker --version
+docker compose version
+ls ~/quiz/ci/docker-compose.yml
+STEP 7 — Test the CI Pipeline
+Open a pull request from feature/setting-cicd into main (or just push any commit to feature/setting-cicd):
+
+
+# Make a small change to trigger CI, e.g. add a space to a comment, then:
+git push origin feature/setting-cicd
+Go to your repo → Actions tab → you should see CI — Frontend running.
+
+It must pass all 5 steps: install → typecheck → lint → build → docker validate.
+
+STEP 8 — Merge to production to Test the Full CD Pipeline
+Once CI is green:
+
+
+git checkout production
+git merge feature/setting-cicd
+git push origin production
+Go to Actions → CD — Frontend → watch it:
+
+Install / typecheck / lint / build
+Push image to GHCR with 3 tags (sha, production, YYYYMMDD)
+SSH into your server and run docker compose up
+Health check polls http://localhost:5000/ — must return HTTP 200
+STEP 9 — Verify the Deployed Image on GHCR
+Go to https://github.com/Nhim0701?tab=packages — you should see quiz-fe with 3 tags.
+
+Quick Checklist
+
+[ ] Step 1 — feature/setting-cicd pushed
+[ ] Step 2 — GHCR PAT created
+[ ] Step 3 — production environment created with branch rule
+[ ] Step 4 — all 8 secrets added
+[ ] Step 5 — server has public SSH key
+[ ] Step 6 — ~/quiz/ci/docker-compose.yml exists on server
+[ ] Step 7 — CI passes on feature branch
+[ ] Step 8 — CD passes on production branch
+[ ] Step 9 — image visible in GHCR
