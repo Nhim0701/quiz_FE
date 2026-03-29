@@ -5,7 +5,7 @@ import type {
   QuestionProps,
   AnswerProps,
 } from "@/modules/admin/modules/questions/types";
-import { apiClient } from "@/lib";
+import { apiClient, tokenManager } from "@/lib";
 import { ENDPOINTS } from "../constants";
 import { useTestQuestionsStore } from "./use-test-questions";
 import { useTestAnswersStore } from "./use-test-answers";
@@ -114,10 +114,16 @@ export const useTestSubmissionStore = create<TestSubmissionState>((set) => ({
         const data = response?.data as { id?: string; submissionId?: string } | undefined;
         submissionId = data?.id ?? data?.submissionId;
       } catch (error) {
+        setSubmitting(false);
+        // If the token was cleared during the catch it means the session expired
+        // and the axios/tokenManager layer already redirected to login + showed a
+        // toast. Calling onError on top of that would show a duplicate/confusing message.
+        if (!tokenManager.getToken()) {
+          return;
+        }
         const errorMessage =
           error instanceof Error ? error.message : "Failed to submit responses";
         onError?.(errorMessage);
-        setSubmitting(false);
         return;
       } finally {
         setSubmitting(false);

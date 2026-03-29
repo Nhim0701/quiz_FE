@@ -31,6 +31,18 @@
     "testName": "Test Name",
     "score": "Score",
     "date": "Date",
-    "action": "Action"
+    "action": "Action",
+    "searchPlaceholder": "Search tests...",
+    "filterByDate": "Filter by Date",
+    "today": "Today",
+    "thisWeek": "This Week",
+    "thisMonth": "This Month",
+    "sortDateNewest": "Date (Newest)",
+    "sortDateOldest": "Date (Oldest)",
+    "sortScoreHigh": "Score (Highest)",
+    "sortScoreLow": "Score (Lowest)",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {{page}} of {{total}}"
   }
 }

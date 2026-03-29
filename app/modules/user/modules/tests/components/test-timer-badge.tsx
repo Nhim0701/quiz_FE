@@ -4,6 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { useTestTimerStore } from "../hooks/use-test-timer";
 import { useTestPauseStore } from "../hooks/use-test-pause";
 import { TIME_CONSTANTS } from "../constants";
+import { tokenManager } from "@/lib";
+
+// Refresh the access token proactively every 15 minutes while the test is active.
+const TOKEN_REFRESH_INTERVAL_MS = 15 * 60 * 1000;
 
 const formatTime = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
@@ -52,6 +56,22 @@ export const TestTimerBadge = ({ onExpired }: TestTimerBadgeProps) => {
       }
     };
   }, [timeStarted, isPaused, finishDialogOpen, setTimeRemaining]);
+
+  // Proactively refresh the JWT token while the test is running to prevent
+  // session expiry on long tests (e.g. 60-min exams).
+  useEffect(() => {
+    if (!timeStarted || isPaused) return;
+
+    const refreshInterval = setInterval(() => {
+      if (tokenManager.isTokenExpired(TOKEN_REFRESH_INTERVAL_MS / 1000)) {
+        tokenManager.attemptRefresh().catch(() => {
+          // Refresh failed silently; the axios interceptor will handle it on submit.
+        });
+      }
+    }, TOKEN_REFRESH_INTERVAL_MS);
+
+    return () => clearInterval(refreshInterval);
+  }, [timeStarted, isPaused]);
 
   const isTimeLow = timeRemaining <= 5 * 60;
   const formattedTime = formatTime(timeRemaining);

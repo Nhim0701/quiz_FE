@@ -31,6 +31,18 @@
     "testName": "Tên Bài Kiểm Tra",
     "score": "Điểm",
     "date": "Ngày",
-    "action": "Hành Động"
+    "action": "Hành Động",
+    "searchPlaceholder": "Tìm bài kiểm tra...",
+    "filterByDate": "Lọc theo ngày",
+    "today": "Hôm nay",
+    "thisWeek": "Tuần này",
+    "thisMonth": "Tháng này",
+    "sortDateNewest": "Ngày (Mới nhất)",
+    "sortDateOldest": "Ngày (Cũ nhất)",
+    "sortScoreHigh": "Điểm (Cao nhất)",
+    "sortScoreLow": "Điểm (Thấp nhất)",
+    "previous": "Trước",
+    "next": "Tiếp",
+    "pageOf": "Trang {{page}} / {{total}}"
   }
 }
