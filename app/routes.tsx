@@ -12,8 +12,7 @@ import { ROUTES as ADMIN_USERS_ROUTES } from "./modules/admin/modules/users/cons
 import { ROUTES as ADMIN_NAMESPACES_ROUTES } from "./modules/admin/modules/namespaces/constants";
 
 export default [
-  index("modules/home.tsx"),
-
+  index("modules/home.tsx"), 
   // Auth modules
   layout("modules/common/auth/_layout.tsx", [
     route(AUTH_ROUTES.LOGIN, "modules/common/auth/login.tsx"),
