@@ -29,5 +29,5 @@ jobs:
           allowed_users: |
             hieunguyen
           allowed_branches: |
-            master
+            main
             feature/*
