@@ -145,10 +145,11 @@ apiClient.interceptors.response.use(
 
         const { code, message, traceId, details } = convertedError;
 
-        // Get i18n message from error code
-        const errorMessage = t(
-          ERROR[code as keyof typeof ERROR].MESSAGE_KEY as TranslationKey
-        );
+        // Get i18n message from error code, fall back to the backend message
+        const knownError = ERROR[code as keyof typeof ERROR];
+        const errorMessage = knownError
+          ? t(knownError.MESSAGE_KEY as TranslationKey)
+          : message || t("errors.requestError");
 
         // Create error object with standard structure
         const apiError = new Error(errorMessage) as Error & {
