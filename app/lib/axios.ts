@@ -200,9 +200,25 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Detect HTML responses returned instead of JSON (e.g. CDN/SPA routing misconfiguration)
+const assertNotHtmlResponse = (response: AxiosResponse): void => {
+  const contentType = response.headers["content-type"] ?? "";
+  if (contentType.includes("text/html")) {
+    const method = (response.config.method ?? "").toUpperCase();
+    const url = response.config.url ?? "";
+    console.error(
+      `[API Guard] Expected JSON, received HTML at ${method} ${url}`
+    );
+    throw new Error(t("errors.serviceUnavailable"));
+  }
+};
+
 // Response interceptor for handling standard response structure and converting to camelCase
 apiClient.interceptors.response.use(
   (response: AxiosResponse<ApiSuccessResponse | unknown>) => {
+    // Guard: reject HTML responses (SPA/CDN routing misconfiguration)
+    assertNotHtmlResponse(response);
+
     // For success responses (2xx), check if response follows standard structure
     if (
       response.data &&

@@ -67,7 +67,8 @@
     "invalidRefreshResponse": "Invalid refresh response: missing access token",
     "tokenRefreshFailed": "Token refresh failed",
     "failedToGetNewToken": "Failed to get new token",
-    "tokenExpiredNoRefresh": "Token expired and no refresh token available"
+    "tokenExpiredNoRefresh": "Token expired and no refresh token available",
+    "serviceUnavailable": "Dịch vụ không khả dụng — vui lòng thử lại sau."
   },
   "success": {
     "loginSuccess": "Login successful!",

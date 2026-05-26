@@ -1,4 +1,10 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/";
+const rawApiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+if (!rawApiBaseUrl && import.meta.env.PROD) {
+  console.error(
+    "[Config] VITE_API_BASE_URL is not set. API calls will use relative paths and may be served as HTML by the CDN. Set VITE_API_BASE_URL to the backend origin in your production build environment."
+  );
+}
+export const API_BASE_URL = rawApiBaseUrl || "/";
 
 // API Configuration
 export const API_CONFIG = {
