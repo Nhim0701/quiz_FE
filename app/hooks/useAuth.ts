@@ -98,17 +98,20 @@ export const useAuthStoreInternal = create<AuthState>()(
 
         // Store token on successful login
         // Response data is already converted to camelCase by interceptor
-        if (response.data.data) {
-          const rememberMe = formData.rememberMe ?? false;
-          tokenManager.setToken(response.data.data.accessToken, rememberMe);
-
-          // Store refresh token if available and rememberMe is true
-          if (response.data.data.refreshToken && rememberMe) {
-            tokenManager.setRefreshToken(response.data.data.refreshToken);
-          }
-
-          await fetchUserData(set, setLoading);
+        const accessToken = response.data.data?.accessToken;
+        if (!accessToken) {
+          throw new Error("Login failed: no access token in response");
         }
+
+        const rememberMe = formData.rememberMe ?? false;
+        tokenManager.setToken(accessToken, rememberMe);
+
+        // Store refresh token if available and rememberMe is true
+        if (response.data.data.refreshToken && rememberMe) {
+          tokenManager.setRefreshToken(response.data.data.refreshToken);
+        }
+
+        await fetchUserData(set, setLoading);
       },
       logout: async () => {
         // Revoke refresh token if exists
@@ -169,10 +172,10 @@ export const useAuthStoreInternal = create<AuthState>()(
   )
 );
 
-// Single unified hook
+// Single unified hook — uses reactive selector for `user` so components re-render on login/logout
 export const useAuth = () => {
+  const user = useAuthStoreInternal((state) => state.user);
   const {
-    user,
     getCurrentUser,
     register,
     login,
